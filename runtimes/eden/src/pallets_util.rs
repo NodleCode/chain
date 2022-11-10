@@ -42,6 +42,9 @@ impl pallet_grants::Config for Runtime {
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
+
+	// type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
+
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
 
@@ -66,7 +69,7 @@ impl pallet_multisig::Config for Runtime {
 	type DepositBase = DepositBase;
 	type DepositFactor = DepositFactor;
 	type MaxSignatories = MaxSignatories;
-	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
+	 type WeightInfo = crate::weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
 impl pallet_randomness_collective_flip::Config for Runtime {}
