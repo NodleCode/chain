@@ -10,3 +10,4 @@ pub mod pallet_uniques;
 pub mod pallet_utility;
 pub mod pallet_membership;
 pub mod pallet_grants;
+pub mod pallet_reserve;

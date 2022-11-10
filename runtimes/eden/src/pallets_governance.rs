@@ -32,7 +32,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
 	type ExternalOrigin = MoreThanHalfOfTechComm;
 	type Call = Call;
 	type PalletId = CompanyReservePalletId;
-	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_reserve::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -45,7 +45,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
 	type ExternalOrigin = MoreThanHalfOfTechComm;
 	type Call = Call;
 	type PalletId = InternationalReservePalletId;
-	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_reserve::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -58,7 +58,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
 	type ExternalOrigin = MoreThanHalfOfTechComm;
 	type Call = Call;
 	type PalletId = UsaReservePalletId;
-	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_reserve::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -73,7 +73,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
 	type ExternalOrigin = EnsureNever<AccountId>;
 	type Call = Call;
 	type PalletId = DaoReservePalletId;
-	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_reserve::WeightInfo<Runtime>;
 }
 
 parameter_types! {
