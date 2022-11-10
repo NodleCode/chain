@@ -1229,7 +1229,7 @@ fn payout_distribution_to_solo_validators() {
 				Error::<Test>::RewardsDNE,
 			);
 
-			<NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+			<NodleStaking as Store>::StakeRewards::mutate(6, |rewards| {
 				rewards.push(StakeReward {
 					session_idx: 7,
 					value: 1,
@@ -1237,7 +1237,7 @@ fn payout_distribution_to_solo_validators() {
 			});
 
 			assert_eq!(
-				NodleStaking::stake_rewards(&6),
+				NodleStaking::stake_rewards(6),
 				[StakeReward {
 					session_idx: 7,
 					value: 1,
@@ -1260,7 +1260,7 @@ fn payout_distribution_to_solo_validators() {
 
 			mock::start_active_session(8);
 
-			<NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+			<NodleStaking as Store>::StakeRewards::mutate(6, |rewards| {
 				rewards.push(StakeReward {
 					session_idx: 8,
 					value: 2,
@@ -1289,7 +1289,7 @@ fn payout_distribution_to_solo_validators() {
 
 			mock::start_active_session(9);
 
-			<NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+			<NodleStaking as Store>::StakeRewards::mutate(6, |rewards| {
 				rewards.push(StakeReward {
 					session_idx: 9,
 					value: 1,
@@ -4598,10 +4598,10 @@ fn garbage_collection_after_slashing() {
 
 			assert_eq!(NodleStaking::total(), 602600);
 
-			assert!(<SlashingSpans<Test>>::get(&11).is_some());
+			assert!(<SlashingSpans<Test>>::get(11).is_some());
 
-			assert_eq!(<SpanSlash<Test>>::get(&(11, 0)).amount_slashed(), &(256000 / 10));
-			assert_eq!(<SpanSlash<Test>>::get(&(101, 0)).amount_slashed(), &(128000 / 10));
+			assert_eq!(<SpanSlash<Test>>::get((11, 0)).amount_slashed(), &(256000 / 10));
+			assert_eq!(<SpanSlash<Test>>::get((101, 0)).amount_slashed(), &(128000 / 10));
 
 			on_offence_now(
 				&[OffenceDetails {
@@ -4625,7 +4625,7 @@ fn garbage_collection_after_slashing() {
 			assert_eq!(mock::balances(&101), (384002, 2));
 			assert_eq!(NodleStaking::total(), 257004);
 
-			let slashing_spans = <SlashingSpans<Test>>::get(&11).unwrap();
+			let slashing_spans = <SlashingSpans<Test>>::get(11).unwrap();
 			assert_eq!(slashing_spans.iter().count(), 2);
 
 			// TODO :: Validation of DB instance Clean-off pending
@@ -4676,10 +4676,10 @@ fn garbage_collection_after_slashing_ed_1() {
 
 		assert_eq!(NodleStaking::total(), 3350);
 
-		assert!(<SlashingSpans<Test>>::get(&11).is_some());
+		assert!(<SlashingSpans<Test>>::get(11).is_some());
 
-		assert_eq!(<SpanSlash<Test>>::get(&(11, 0)).amount_slashed(), &(100));
-		assert_eq!(<SpanSlash<Test>>::get(&(101, 0)).amount_slashed(), &(50));
+		assert_eq!(<SpanSlash<Test>>::get((11, 0)).amount_slashed(), &(100));
+		assert_eq!(<SpanSlash<Test>>::get((101, 0)).amount_slashed(), &(50));
 
 		on_offence_now(
 			&[OffenceDetails {
@@ -4703,7 +4703,7 @@ fn garbage_collection_after_slashing_ed_1() {
 		assert_eq!(mock::balances(&101), (1501, 1));
 		assert_eq!(NodleStaking::total(), 2002);
 
-		let slashing_spans = <SlashingSpans<Test>>::get(&11).unwrap();
+		let slashing_spans = <SlashingSpans<Test>>::get(11).unwrap();
 		assert_eq!(slashing_spans.iter().count(), 2);
 
 		// TODO :: Validation of DB instance Clean-off pending
@@ -4846,7 +4846,7 @@ fn slashing_nominators_by_span_max() {
 		assert_eq!(mock::balances(&101), (2000, 1000));
 		assert_eq!(NodleStaking::total(), 4000);
 
-		let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
+		let get_span = |account| <SlashingSpans<Test>>::get(account).unwrap();
 
 		let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), 11);
 		let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), 21);
@@ -4989,7 +4989,7 @@ fn slashes_are_summed_across_spans() {
 		assert_eq!(mock::balances(&101), (2000, 1000));
 		assert_eq!(NodleStaking::total(), 4000);
 
-		let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
+		let get_span = |account| <SlashingSpans<Test>>::get(account).unwrap();
 
 		on_offence_now(
 			&[OffenceDetails {
@@ -5375,7 +5375,7 @@ fn remove_multi_deferred() {
 
 			let apply_at = NodleStaking::active_session() + mock::SLASH_DEFER_DURATION.with(|l| *l.borrow());
 
-			assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 5);
+			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 5);
 
 			assert_noop!(
 				NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![]),
@@ -5389,14 +5389,14 @@ fn remove_multi_deferred() {
 
 			assert_ok!(NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![11]),);
 
-			assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 3);
+			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 3);
 
 			assert_ok!(NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![69]),);
 
-			assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 2);
+			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 2);
 
-			assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[0].validator, 21);
-			assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[1].validator, 41);
+			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at)[0].validator, 21);
+			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at)[1].validator, 41);
 
 			mock::start_active_session(4);
 

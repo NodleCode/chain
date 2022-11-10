@@ -298,7 +298,7 @@ fn cancel_clears_storage() {
 		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB::get()));
 	});
 }
-
+#[allow(clippy::assertions_on_constants)]
 #[test]
 fn cancel_tolerates_corrupted_state() {
 	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
@@ -594,9 +594,9 @@ fn renounce_privileges() {
 			schedule
 		));
 
-		assert_eq!(Vesting::renounced(BOB::get()), false);
+		assert!(!Vesting::renounced(BOB::get()));
 		assert_ok!(Vesting::renounce(Origin::signed(CancelOrigin::get()), BOB::get()));
-		assert_eq!(Vesting::renounced(BOB::get()), true);
+		assert!(Vesting::renounced(BOB::get()));
 		assert_noop!(
 			Vesting::cancel_all_vesting_schedules(Origin::signed(CancelOrigin::get()), BOB::get(), CancelOrigin::get()),
 			Error::<Runtime>::Renounced

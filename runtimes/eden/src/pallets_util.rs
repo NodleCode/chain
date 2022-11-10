@@ -66,7 +66,7 @@ impl pallet_multisig::Config for Runtime {
 	type DepositBase = DepositBase;
 	type DepositFactor = DepositFactor;
 	type MaxSignatories = MaxSignatories;
-	 type WeightInfo = crate::weights::pallet_multisig::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_multisig::WeightInfo<Runtime>;
 }
 
 impl pallet_randomness_collective_flip::Config for Runtime {}

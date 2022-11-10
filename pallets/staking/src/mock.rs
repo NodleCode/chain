@@ -394,7 +394,6 @@ impl ExtBuilder {
 		let _ = nodle_staking::GenesisConfig::<Test> {
 			stakers,
 			invulnerables: self.invulnerables,
-			..Default::default()
 		}
 		.assimilate_storage(&mut storage);
 
@@ -407,7 +406,7 @@ impl ExtBuilder {
 						x.0,
 						x.0,
 						SessionKeys {
-							other: UintAuthorityId(x.0 as u64),
+							other: UintAuthorityId(x.0),
 						},
 					)
 				})
@@ -428,6 +427,7 @@ impl ExtBuilder {
 		});
 		ext
 	}
+	#[allow(clippy::needless_update)]
 	pub fn build(self) -> sp_io::TestExternalities {
 		sp_tracing::try_init_simple();
 		let mut storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
@@ -653,11 +653,13 @@ pub(crate) fn on_offence_in_session(
 ) {
 	let bonded_session = NodleStaking::bonded_sessions();
 	for bond_session in bonded_session.iter() {
-		if *bond_session == session_idx {
-			let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
-			return;
-		} else if *bond_session > session_idx {
-			break;
+		match (*bond_session).cmp(&session_idx) {
+			std::cmp::Ordering::Equal => {
+				let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
+				return;
+			}
+			std::cmp::Ordering::Greater => break,
+			std::cmp::Ordering::Less => {}
 		}
 	}
 
