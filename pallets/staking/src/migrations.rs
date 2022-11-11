@@ -88,7 +88,7 @@ pub mod v1 {
 			}
 
 			weight = validator_members.iter().fold(weight, |mut weight, valid_acc| {
-				if <ValidatorState<T>>::contains_key(&valid_acc) {
+				if <ValidatorState<T>>::contains_key(valid_acc) {
 					weight = weight.saturating_add(T::DbWeight::get().reads_writes(1, 0));
 					log::trace!(
 						"on_runtime_upgrade>[{:#?}]=> - Already staker Ignoring Address -[{:#?}]",
@@ -103,14 +103,14 @@ pub mod v1 {
 					);
 
 					<ValidatorState<T>>::insert(
-						&valid_acc,
+						valid_acc,
 						Validator::<T::AccountId, BalanceOf<T>>::new(valid_acc.clone(), Zero::zero()),
 					);
 
 					log::trace!(
 						"on_runtime_upgrade>[{:#?}]=> - Address Added-[{:#?}]",
 						line!(),
-						<ValidatorState<T>>::contains_key(&valid_acc),
+						<ValidatorState<T>>::contains_key(valid_acc),
 					);
 
 					weight = weight.saturating_add(T::DbWeight::get().reads_writes(0, 1));

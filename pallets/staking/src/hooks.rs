@@ -156,7 +156,7 @@ impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
 			let payout = Self::session_accumulated_balance(end_index);
 
 			// Set ending session reward.
-			<SessionValidatorReward<T>>::insert(&end_index, payout);
+			<SessionValidatorReward<T>>::insert(end_index, payout);
 
 			// pay all stakers for T::BondedDuration rounds ago
 			Self::pay_stakers(end_index);

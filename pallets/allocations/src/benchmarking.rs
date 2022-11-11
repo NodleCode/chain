@@ -58,7 +58,7 @@ benchmarks! {
 		let batch_arg = make_batch::<T>(b);
 		let oracle: T::AccountId = account("oracle", 0, SEED);
 		let mut members = <BenchmarkOracles<T>>::get();
-		assert!(members.try_push(oracle.clone()).is_ok());
+		assert!(members.try_push(oracle).is_ok());
 		<BenchmarkOracles<T>>::put(&members);
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}:{

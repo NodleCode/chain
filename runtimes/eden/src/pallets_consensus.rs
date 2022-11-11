@@ -91,5 +91,5 @@ impl pallet_collator_selection::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
 	type ValidatorRegistration = Session;
-	type WeightInfo = pallet_collator_selection::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_collator_selection::WeightInfo<Runtime>;
 }

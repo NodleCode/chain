@@ -215,13 +215,13 @@ pub(crate) fn compute_slash<T: Config>(params: SlashParams<T>) -> Option<Unappli
 		return None;
 	}
 
-	let (prior_slash_p, _era_slash) = <Pallet<T> as Store>::ValidatorSlashInSession::get(&slash_session, controller)
+	let (prior_slash_p, _era_slash) = <Pallet<T> as Store>::ValidatorSlashInSession::get(slash_session, controller)
 		.unwrap_or((Perbill::zero(), Zero::zero()));
 
 	// compare slash proportions rather than slash values to avoid issues due to rounding
 	// error.
 	if slash.deconstruct() > prior_slash_p.deconstruct() {
-		<Pallet<T> as Store>::ValidatorSlashInSession::insert(&slash_session, controller, &(slash, own_slash));
+		<Pallet<T> as Store>::ValidatorSlashInSession::insert(slash_session, controller, (slash, own_slash));
 	} else {
 		// we slash based on the max in era - this new event is not the max,
 		// so neither the validator or any nominators will need an update.
@@ -333,12 +333,12 @@ fn slash_nominators<T: Config>(
 			let own_slash_by_validator = slash * nominator.amount;
 			let own_slash_difference = own_slash_by_validator.saturating_sub(own_slash_prior);
 
-			let mut era_slash = <Pallet<T> as Store>::NominatorSlashInSession::get(&slash_session, controller)
+			let mut era_slash = <Pallet<T> as Store>::NominatorSlashInSession::get(slash_session, controller)
 				.unwrap_or_else(Zero::zero);
 
 			era_slash = era_slash.saturating_add(own_slash_difference);
 
-			<Pallet<T> as Store>::NominatorSlashInSession::insert(&slash_session, controller, &era_slash);
+			<Pallet<T> as Store>::NominatorSlashInSession::insert(slash_session, controller, era_slash);
 
 			era_slash
 		};
@@ -507,8 +507,8 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 pub(crate) fn clear_session_metadata<T: Config>(obsolete_session: SessionIndex) {
 	// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
 	// not used for weight computation
-	let _ = <Pallet<T> as Store>::ValidatorSlashInSession::clear_prefix(&obsolete_session, u32::max_value(), None);
-	let _ = <Pallet<T> as Store>::NominatorSlashInSession::clear_prefix(&obsolete_session, u32::max_value(), None);
+	let _ = <Pallet<T> as Store>::ValidatorSlashInSession::clear_prefix(obsolete_session, u32::max_value(), None);
+	let _ = <Pallet<T> as Store>::NominatorSlashInSession::clear_prefix(obsolete_session, u32::max_value(), None);
 }
 
 /// Clear slashing metadata for a dead account.
@@ -541,7 +541,7 @@ fn do_slash_validator<T: Config>(
 	reward_payout: &mut BalanceOf<T>,
 	slashed_imbalance: &mut NegativeImbalanceOf<T>,
 ) {
-	<Pallet<T> as Store>::ValidatorState::mutate(&controller, |validator_state| {
+	<Pallet<T> as Store>::ValidatorState::mutate(controller, |validator_state| {
 		if let Some(validator_state) = validator_state {
 			let old_active_bond = validator_state.bond;
 			let valid_pre_total = validator_state.total.saturating_sub(validator_state.nomi_bond_total);
@@ -606,7 +606,7 @@ fn do_slash_nominator<T: Config>(
 	reward_payout: &mut BalanceOf<T>,
 	slashed_imbalance: &mut NegativeImbalanceOf<T>,
 ) {
-	<Pallet<T> as Store>::NominatorState::mutate(&controller, |nominator_state| {
+	<Pallet<T> as Store>::NominatorState::mutate(controller, |nominator_state| {
 		if let Some(nominator_state) = nominator_state {
 			let old_active_bond = nominator_state.active_bond;
 
@@ -624,7 +624,7 @@ fn do_slash_nominator<T: Config>(
 			if !slashed_value.is_zero() {
 				let pre_balance_stat = T::Currency::free_balance(controller);
 
-				<Pallet<T> as Store>::ValidatorState::mutate(&validator, |validator_state| {
+				<Pallet<T> as Store>::ValidatorState::mutate(validator, |validator_state| {
 					if let Some(validator_state) = validator_state {
 						validator_state.dec_nominator(controller.clone(), slashed_value);
 						if validator_state.is_active() {
