@@ -5,7 +5,6 @@ pub mod pallet_contracts;
 pub mod pallet_membership;
 pub mod pallet_multisig;
 pub mod pallet_preimage;
-pub mod pallet_reserve;
 pub mod pallet_scheduler;
 pub mod pallet_timestamp;
 pub mod pallet_uniques;
