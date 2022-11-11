@@ -356,7 +356,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
-			list_benchmark!(list, extra, pallet_membership,TechnicalMembership );
+			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -394,7 +394,6 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
-			// add_benchmark!(params, batches, pallet_grants, );
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
