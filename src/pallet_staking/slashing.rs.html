@@ -948,13 +948,13 @@
 		<span class="kw">return </span><span class="prelude-val">None</span>;
 	}
 
-	<span class="kw">let </span>(prior_slash_p, _era_slash) = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::get(<span class="kw-2">&amp;</span>slash_session, controller)
+	<span class="kw">let </span>(prior_slash_p, _era_slash) = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::get(slash_session, controller)
 		.unwrap_or((Perbill::zero(), Zero::zero()));
 
 	<span class="comment">// compare slash proportions rather than slash values to avoid issues due to rounding
 	// error.
 	</span><span class="kw">if </span>slash.deconstruct() &gt; prior_slash_p.deconstruct() {
-		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::insert(<span class="kw-2">&amp;</span>slash_session, controller, <span class="kw-2">&amp;</span>(slash, own_slash));
+		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::insert(slash_session, controller, (slash, own_slash));
 	} <span class="kw">else </span>{
 		<span class="comment">// we slash based on the max in era - this new event is not the max,
 		// so neither the validator or any nominators will need an update.
@@ -1066,12 +1066,12 @@
 			<span class="kw">let </span>own_slash_by_validator = slash * nominator.amount;
 			<span class="kw">let </span>own_slash_difference = own_slash_by_validator.saturating_sub(own_slash_prior);
 
-			<span class="kw">let </span><span class="kw-2">mut </span>era_slash = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::get(<span class="kw-2">&amp;</span>slash_session, controller)
+			<span class="kw">let </span><span class="kw-2">mut </span>era_slash = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::get(slash_session, controller)
 				.unwrap_or_else(Zero::zero);
 
 			era_slash = era_slash.saturating_add(own_slash_difference);
 
-			&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::insert(<span class="kw-2">&amp;</span>slash_session, controller, <span class="kw-2">&amp;</span>era_slash);
+			&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::insert(slash_session, controller, era_slash);
 
 			era_slash
 		};
@@ -1240,8 +1240,8 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_session_metadata&lt;T: Config&gt;(obsolete_session: SessionIndex) {
 	<span class="comment">// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
 	// not used for weight computation
-	</span><span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::clear_prefix(<span class="kw-2">&amp;</span>obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
-	<span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::clear_prefix(<span class="kw-2">&amp;</span>obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
+	</span><span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::clear_prefix(obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
+	<span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::clear_prefix(obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
 }
 
 <span class="doccomment">/// Clear slashing metadata for a dead account.
@@ -1274,7 +1274,7 @@
 	reward_payout: <span class="kw-2">&amp;mut </span>BalanceOf&lt;T&gt;,
 	slashed_imbalance: <span class="kw-2">&amp;mut </span>NegativeImbalanceOf&lt;T&gt;,
 ) {
-	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(<span class="kw-2">&amp;</span>controller, |validator_state| {
+	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(controller, |validator_state| {
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(validator_state) = validator_state {
 			<span class="kw">let </span>old_active_bond = validator_state.bond;
 			<span class="kw">let </span>valid_pre_total = validator_state.total.saturating_sub(validator_state.nomi_bond_total);
@@ -1339,7 +1339,7 @@
 	reward_payout: <span class="kw-2">&amp;mut </span>BalanceOf&lt;T&gt;,
 	slashed_imbalance: <span class="kw-2">&amp;mut </span>NegativeImbalanceOf&lt;T&gt;,
 ) {
-	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorState::mutate(<span class="kw-2">&amp;</span>controller, |nominator_state| {
+	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorState::mutate(controller, |nominator_state| {
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(nominator_state) = nominator_state {
 			<span class="kw">let </span>old_active_bond = nominator_state.active_bond;
 
@@ -1357,7 +1357,7 @@
 			<span class="kw">if </span>!slashed_value.is_zero() {
 				<span class="kw">let </span>pre_balance_stat = T::Currency::free_balance(controller);
 
-				&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(<span class="kw-2">&amp;</span>validator, |validator_state| {
+				&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(validator, |validator_state| {
 					<span class="kw">if let </span><span class="prelude-val">Some</span>(validator_state) = validator_state {
 						validator_state.dec_nominator(controller.clone(), slashed_value);
 						<span class="kw">if </span>validator_state.is_active() {

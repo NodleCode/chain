@@ -2798,7 +2798,7 @@
 		/// Can be called by the `T::SlashCancelOrigin`.
 		///
 		/// Parameters: session index and validator list of the slashes for that session to kill.
-		</span><span class="attribute">#[pallet::weight(T::WeightInfo::slash_cancel_deferred(<span class="kw-2">*</span>session_idx <span class="kw">as </span>u32, controllers.len() <span class="kw">as </span>u32))]
+		</span><span class="attribute">#[pallet::weight(T::WeightInfo::slash_cancel_deferred(<span class="kw-2">*</span>session_idx, controllers.len() <span class="kw">as </span>u32))]
 		</span><span class="kw">pub fn </span>slash_cancel_deferred(
 			origin: OriginFor&lt;T&gt;,
 			session_idx: SessionIndex,
@@ -2814,7 +2814,7 @@
 				&lt;Error&lt;T&gt;&gt;::InvalidSessionIndex
 			);
 
-			&lt;UnappliedSlashes&lt;T&gt;&gt;::mutate(<span class="kw-2">&amp;</span>apply_at, |unapplied| {
+			&lt;UnappliedSlashes&lt;T&gt;&gt;::mutate(apply_at, |unapplied| {
 				<span class="kw">for </span>controller_acc <span class="kw">in </span>controllers {
 					unapplied.retain(|ustat| ustat.validator != controller_acc);
 				}
@@ -3312,7 +3312,7 @@
 		}
 		<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>validator_deactivate(controller: <span class="kw-2">&amp;</span>T::AccountId) {
 			<span class="macro">log::trace!</span>(<span class="string">&quot;validator_deactivate:[{:#?}] - Acc[{:#?}]&quot;</span>, <span class="macro">line!</span>(), controller);
-			&lt;ValidatorState&lt;T&gt;&gt;::mutate(<span class="kw-2">&amp;</span>controller, |maybe_validator| {
+			&lt;ValidatorState&lt;T&gt;&gt;::mutate(controller, |maybe_validator| {
 				<span class="kw">if let </span><span class="prelude-val">Some</span>(valid_state) = maybe_validator {
 					valid_state.go_offline();
 					<span class="self">Self</span>::remove_from_validators_pool(controller.clone());
@@ -3579,7 +3579,7 @@
 		}
 
 		<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>validator_stake_reconciliation(controller: <span class="kw-2">&amp;</span>T::AccountId) {
-			&lt;ValidatorState&lt;T&gt;&gt;::mutate(<span class="kw-2">&amp;</span>controller, |maybe_validator| {
+			&lt;ValidatorState&lt;T&gt;&gt;::mutate(controller, |maybe_validator| {
 				<span class="kw">if let </span><span class="prelude-val">Some</span>(valid_state) = maybe_validator {
 					<span class="kw">let </span>noms = valid_state
 						.clone()
@@ -3642,7 +3642,7 @@
 
 			<span class="comment">// snapshot exposure for round for weighting reward distribution
 			</span><span class="kw">for </span>account <span class="kw">in </span>top_validators.iter() {
-				<span class="kw">let </span>state = &lt;ValidatorState&lt;T&gt;&gt;::get(<span class="kw-2">&amp;</span>account).expect(<span class="string">&quot;all members of ValidatorQ must be validators&quot;</span>);
+				<span class="kw">let </span>state = &lt;ValidatorState&lt;T&gt;&gt;::get(account).expect(<span class="string">&quot;all members of ValidatorQ must be validators&quot;</span>);
 				<span class="kw">let </span>amount = state.bond.saturating_add(state.nomi_bond_total);
 				<span class="kw">let </span>exposure: ValidatorSnapshot&lt;T::AccountId, BalanceOf&lt;T&gt;&gt; = state.into();
 				&lt;AtStake&lt;T&gt;&gt;::insert(next, account, exposure);
@@ -3738,7 +3738,7 @@
 		<span class="doccomment">/// Apply previously-unapplied slashes on the beginning of a new session, after a delay.
 		</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_unapplied_slashes(active_session: SessionIndex) {
 			<span class="kw">if </span>&lt;UnappliedSlashes&lt;T&gt;&gt;::contains_key(active_session) {
-				<span class="kw">let </span>session_slashes = &lt;UnappliedSlashes&lt;T&gt;&gt;::take(<span class="kw-2">&amp;</span>active_session);
+				<span class="kw">let </span>session_slashes = &lt;UnappliedSlashes&lt;T&gt;&gt;::take(active_session);
 				<span class="kw">for </span>unapplied_slash <span class="kw">in </span>session_slashes {
 					slashing::apply_slash::&lt;T&gt;(unapplied_slash);
 				}
