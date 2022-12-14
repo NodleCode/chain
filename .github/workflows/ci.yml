@@ -85,3 +85,30 @@ jobs:
         uses: codecov/codecov-action@v3.0.0
         with:
           fail_ci_if_error: false
+
+
+  try-runtime:
+    runs-on: ubuntu-latest-16-cores
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install latest stable Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ env.target }}
+
+      - name: Install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.nightly }}
+          target: ${{ env.target }}
+          default: true
+
+      - name: Try Runtime
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} --no-spec-name-check  on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
