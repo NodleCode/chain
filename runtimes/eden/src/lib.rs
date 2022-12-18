@@ -34,7 +34,11 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 	)
 }
 
-use frame_support::{construct_runtime, weights::Weight};
+use frame_support::{
+	construct_runtime, parameter_types,
+	traits::{Everything, Nothing},
+	weights::Weight,
+};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
 pub use primitives::{AuraId, ParaId};
@@ -49,6 +53,8 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
+
+use xcm_builder::FixedWeightBounds;
 
 pub mod constants;
 mod implementations;
@@ -123,6 +129,38 @@ construct_runtime! {
 		// Smart Contracts.
 		Contracts: pallet_contracts = 62,
 	}
+}
+parameter_types! {
+	pub const MaxInstructions: u32 = 100;
+	pub UnitWeightCost: Weight = 1_000_000; // arbitrary value ToDo: replace with more specific value
+}
+
+pub struct XcmConfig;
+impl Config for XcmConfig {
+	type Call = Call;
+	type XcmSender = XcmRouter;
+	// How to withdraw and deposit an asset.
+	type AssetTransactor = LocalAssetTransactor;
+	type OriginConverter = XcmOriginToTransactDispatchOrigin;
+	type IsReserve = NativeAsset;
+	type IsTeleporter = NativeAsset; // <- should be enough to allow teleportation of DOT
+	type LocationInverter = LocationInverter<Ancestry>;
+	type Barrier = Barrier;
+	type Weigher = FixedWeightBounds<UnitWeightCost, Call>;
+	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, ()>;
+	type ResponseHandler = (); // Don't handle responses for now.
+}
+
+impl pallet_xcm::Config for Runtime {
+	type Event = Event;
+	type SendXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
+	type XcmRouter = XcmRouter;
+	type ExecuteXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
+	type XcmExecuteFilter = All<(MultiLocation, Xcm<Call>)>;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type XcmTeleportFilter = Nothing;
+	type XcmReserveTransferFilter = Everything;
+	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 }
 
 /// The address format for describing accounts.
