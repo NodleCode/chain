@@ -124,4 +124,12 @@ mod tests {
 		assert_eq!(100 * MICRO_NODL, CENTS);
 		assert_eq!(100 * NANO_NODL, MILLICENTS);
 	}
+
+	#[test]
+	fn test_deposit() {
+		assert_eq!(deposit(0, 0), 0 as Balance);
+		assert_eq!(deposit(1000, 0), 150000000000 as Balance);
+		assert_eq!(deposit(0, 1000), 60000000000 as Balance);
+		assert_eq!(deposit(0xFFFF_FFFF, 0xFFFF_FFFF), 901943131950000000 as Balance);
+	}
 }

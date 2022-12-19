@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest-16-cores
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -28,7 +28,7 @@ jobs:
           components: rustfmt,clippy
 
       - name: Cache cargo registry
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
@@ -36,12 +36,20 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       - name: Cache cargo index
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-index-
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-
 
       - name: Fmt
         uses: actions-rs/cargo@v1
@@ -57,7 +65,6 @@ jobs:
           toolchain: ${{ env.nightly }}
 
       - name: Build
-        if: steps.cache-cargo-build.outputs.cache-hit != 'true'
         uses: actions-rs/cargo@v1
         with:
           command: build
@@ -69,11 +76,22 @@ jobs:
           docker run --net=host jacogr/polkadot-js-tools metadata ${{ env.try-runtime-uri }} ws://localhost:9944 > output.txt
 
       - name: Save output as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: metadata-comparison
           path: |
             output.txt
+
+  tarpaulin:
+    runs-on: ubuntu-latest-16-cores
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.nightly }}
+          override: true
+          target: ${{ env.target }}
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
@@ -86,11 +104,11 @@ jobs:
         with:
           fail_ci_if_error: false
 
-
   try-runtime:
     runs-on: ubuntu-latest-16-cores
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install latest stable Rust
         uses: actions-rs/toolchain@v1
