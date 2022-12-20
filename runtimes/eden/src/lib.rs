@@ -90,7 +90,7 @@ construct_runtime! {
 		TechnicalCommittee: pallet_collective::<Instance1> = 16,
 		TechnicalMembership: pallet_membership::<Instance3> = 17,
 
-		// Consensus
+	// Consensus
 		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 19,
 		Authorship: pallet_authorship = 20,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
