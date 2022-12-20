@@ -24,7 +24,7 @@ use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
 	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
-	SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
+	SystemConfig, TechnicalMembershipConfig, WASM_BINARY, PolkadotXcmConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -161,6 +161,10 @@ fn eden_testnet_genesis(
 
 		// DAO
 		dao_reserve: Default::default(),
+
+		polkadot_xcm: PolkadotXcmConfig {
+			safe_xcm_version: Some(2),
+		},
 	}
 }
 

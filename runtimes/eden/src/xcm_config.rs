@@ -1,12 +1,13 @@
-use super::{AccountId, Balance, Call, Event, Origin, ParachainSystem, PolkadotXcm, Runtime, ParachainInfo, XcmpQueue};
+use super::{AccountId, Balance, Call, Event, Origin, ParachainSystem, PolkadotXcm, Runtime, ParachainInfo, XcmpQueue, Balances};
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing},
-	weights::{IdentityFee,Weight},
+	weights::{IdentityFee},
 };
+use frame_system::EnsureRoot;
 use polkadot_parachain::primitives::Sibling;
 use pallet_xcm::XcmPassthrough;
-use xcm::{latest::NetworkId, prelude::*};
+use xcm::{latest::Weight as XcmWeight,latest::NetworkId, prelude::*};
 use xcm_builder::{
 	AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom, EnsureXcmOrigin,
 	FixedWeightBounds, LocationInverter, NativeAsset, RelayChainAsNative, SiblingParachainAsNative,
@@ -48,7 +49,7 @@ pub type XcmRouter = (
 );
 parameter_types! {
 	pub DotLocation: MultiLocation = MultiLocation::parent();
-	pub const RelayNetwork: NetworkId = NetworkId::Rococo;
+	pub const RelayNetwork: NetworkId = NetworkId::Any;
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
@@ -75,7 +76,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 parameter_types! {
 	pub const MaxInstructions: u32 = 100;
-	pub UnitWeightCost: Weight = 1_000_000; // arbitrary value ToDo: replace with more specific value
+	pub UnitWeightCost: XcmWeight = 1_000_000; // arbitrary value ToDo: replace with more specific value
 }
 
 pub struct XcmConfig;
@@ -83,18 +84,18 @@ impl Config for XcmConfig {
 	type Call = Call;
 	type XcmSender = XcmRouter;
 	// How to withdraw and deposit an asset.
-	type AssetTransactor = Nothing; // ToDo: TBD
+	type AssetTransactor = (); // ToDo: TBD orm token 
 	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = NativeAsset;
 	type IsTeleporter = NativeAsset; // <- should be enough to allow teleportation of DOT
 	type LocationInverter = LocationInverter<Ancestry>;
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balance, ()>;
+	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, ()>;
 	type ResponseHandler = (); // Don't handle responses for now.
-	type AssetTrap= Nothing; //TBD
-	type AssetClaims= Nothing; //TBD
-	type SubscriptionService= Nothing; //TBD
+	type AssetTrap= PolkadotXcm; //TBD
+	type AssetClaims= PolkadotXcm; //TBD
+	type SubscriptionService= PolkadotXcm; //TBD
 }
 
 impl pallet_xcm::Config for Runtime {
@@ -112,4 +113,16 @@ impl pallet_xcm::Config for Runtime {
 	type Call = Call;
 	const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 	type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
+}
+
+
+impl cumulus_pallet_xcmp_queue::Config for Runtime {
+	type Event = Event;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type ChannelInfo = ParachainSystem;
+	type VersionWrapper = PolkadotXcm;
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>; // TBD if we need the council/root to send overweight messages
+	type ControllerOrigin =  EnsureRoot<AccountId>; // TBD define who is allowed to suspend/resume the queue
+	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin; 
+	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
 }
