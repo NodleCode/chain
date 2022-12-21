@@ -14,26 +14,35 @@ env:
   try-runtime-uri: wss://eden-rpc.dwellir.com:443
 
 jobs:
-  linters:
+  clippy:
     runs-on: ubuntu-latest-8-cores
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}
-          components: rustfmt,clippy
+          components: clippy
       - name: Clippy
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
           toolchain: ${{ env.nightly }}
+  rustfmt:
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.nightly }}
+          target: ${{ env.target }}
+          components: rustfmt
+
       - name: Rustfmt Check
         uses: actions-rust-lang/rustfmt@v1
 
-  test:
+  tests:
     runs-on: ubuntu-latest-16-cores
 
     steps:
@@ -42,7 +51,6 @@ jobs:
         with:
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}
-          components: rustfmt,clippy
 
       - name: Cache cargo registry
         uses: actions/cache@v3
