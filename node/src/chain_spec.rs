@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clippy complains about ChainSpecGroup which we cannot modify
-#![allow(clippy::derive_partial_eq_without_eq)]
 
 use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
