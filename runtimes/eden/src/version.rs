@@ -59,7 +59,6 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	let unused = 100;
 	NativeVersion {
 		runtime_version: VERSION,
 		can_author_with: Default::default(),
