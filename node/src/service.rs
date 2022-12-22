@@ -388,6 +388,7 @@ where
 }
 
 /// Build the import queue for the parachain runtime.
+#[allow(clippy::type_complexity)]
 pub fn parachain_build_import_queue(
 	client: Arc<TFullClient<Block, runtime_eden::RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>>,
 	config: &Configuration,
