@@ -1,17 +1,21 @@
-use super::{AccountId, Balance, Call, Event, Origin, ParachainSystem, PolkadotXcm, Runtime, ParachainInfo, XcmpQueue, Balances};
+use super::{
+	AccountId, Balance, Balances, Call, Event, Origin, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, XcmpQueue,
+};
+use crate::implementations::DealWithFees;
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing},
-	weights::{IdentityFee},
+	weights::IdentityFee,
 };
 use frame_system::EnsureRoot;
-use polkadot_parachain::primitives::Sibling;
 use pallet_xcm::XcmPassthrough;
-use xcm::{latest::Weight as XcmWeight,latest::NetworkId, prelude::*};
+use polkadot_parachain::primitives::Sibling;
+use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
 use xcm_builder::{
-	AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom, EnsureXcmOrigin,
-	FixedWeightBounds, LocationInverter, NativeAsset, RelayChainAsNative, SiblingParachainAsNative,
-	SignedAccountId32AsNative, SignedToAccountId32, TakeWeightCredit, UsingComponents, SovereignSignedViaLocation, AccountId32Aliases, SiblingParachainConvertsVia, ParentIsPreset,
+	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
+	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentIsPreset,
+	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
 
@@ -49,10 +53,12 @@ pub type XcmRouter = (
 );
 parameter_types! {
 	pub DotLocation: MultiLocation = MultiLocation::parent();
-	pub const RelayNetwork: NetworkId = NetworkId::Any;
+	pub const NodlLocation: MultiLocation = Here.into();
+	pub const RelayNetwork: NetworkId = NetworkId::Any; // To DO: TBD check if work with rococo
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
+
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
 /// biases the kind of local `Origin` it will become.
@@ -73,29 +79,44 @@ pub type XcmOriginToTransactDispatchOrigin = (
 	// Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
 	XcmPassthrough<Origin>,
 );
+/// Means for transacting assets on this chain.
+pub type AssetTransactors = CurrencyTransactor;
 
+/// Means for transacting the native currency on this chain.
+pub type CurrencyTransactor = CurrencyAdapter<
+	// Use this currency:
+	Balances,
+	// Use this currency when it is a fungible asset matching the given location or name:
+	IsConcrete<NodlLocation>,
+	// Convert an XCM MultiLocation into a local account id:
+	LocationToAccountId,
+	// Our chain's account ID type (we can't get away without mentioning it explicitly):
+	AccountId,
+	// We don't track any teleports of `Balances`.
+	(),
+>;
 parameter_types! {
 	pub const MaxInstructions: u32 = 100;
 	pub UnitWeightCost: XcmWeight = 1_000_000; // arbitrary value ToDo: replace with more specific value
 }
-
+// TODO :: Weigher
 pub struct XcmConfig;
 impl Config for XcmConfig {
 	type Call = Call;
 	type XcmSender = XcmRouter;
 	// How to withdraw and deposit an asset.
-	type AssetTransactor = (); // ToDo: TBD orm token 
+	type AssetTransactor = AssetTransactors; // ToDo: TBD orm token TODO
 	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = NativeAsset;
-	type IsTeleporter = NativeAsset; // <- should be enough to allow teleportation of DOT
-	type LocationInverter = LocationInverter<Ancestry>;
+	type IsTeleporter = ();
+	type LocationInverter = LocationInverter<Ancestry>; //Check
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, ()>;
+	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, DealWithFees>;
 	type ResponseHandler = (); // Don't handle responses for now.
-	type AssetTrap= PolkadotXcm; //TBD
-	type AssetClaims= PolkadotXcm; //TBD
-	type SubscriptionService= PolkadotXcm; //TBD
+	type AssetTrap = PolkadotXcm; //TBD
+	type AssetClaims = PolkadotXcm; //TBD
+	type SubscriptionService = PolkadotXcm; //TBD
 }
 
 impl pallet_xcm::Config for Runtime {
@@ -115,14 +136,13 @@ impl pallet_xcm::Config for Runtime {
 	type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
 }
 
-
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
 	type VersionWrapper = PolkadotXcm;
 	type ExecuteOverweightOrigin = EnsureRoot<AccountId>; // TBD if we need the council/root to send overweight messages
-	type ControllerOrigin =  EnsureRoot<AccountId>; // TBD define who is allowed to suspend/resume the queue
-	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin; 
+	type ControllerOrigin = EnsureRoot<AccountId>; // TBD define who is allowed to suspend/resume the queue
+	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
 }
