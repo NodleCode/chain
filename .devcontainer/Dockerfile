@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
-    curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
     apt-get -y install --no-install-recommends cmake pkg-config libssl-dev git clang build-essential curl ca-certificates nodejs && \
     npm i polkadot-launch -g
 
