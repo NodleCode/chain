@@ -52,7 +52,7 @@ pub type XcmRouter = (
 	XcmpQueue,
 );
 parameter_types! {
-	pub DotLocation: MultiLocation = MultiLocation::parent();
+	pub RelayLocation: MultiLocation = MultiLocation::parent();
 	pub const NodlLocation: MultiLocation = Here.into();
 	pub const RelayNetwork: NetworkId = NetworkId::Any; // To DO: TBD check if work with rococo
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
@@ -112,8 +112,8 @@ impl xcm_executor::Config for XcmConfig {
 	type LocationInverter = LocationInverter<Ancestry>; //Check
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, DealWithFees>;
-	type ResponseHandler = PolkadotXcm;
+	type Trader = UsingComponents<IdentityFee<Balance>, RelayLocation, AccountId, Balances, DealWithFees>;
+	type ResponseHandler = (); // Don't handle responses for now.
 	type AssetTrap = PolkadotXcm; //TBD
 	type AssetClaims = PolkadotXcm; //TBD
 	type SubscriptionService = PolkadotXcm; //TBD
