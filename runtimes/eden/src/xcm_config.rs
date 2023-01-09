@@ -113,7 +113,7 @@ impl xcm_executor::Config for XcmConfig {
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, DealWithFees>;
-	type ResponseHandler = (); // Don't handle responses for now.
+	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm; //TBD
 	type AssetClaims = PolkadotXcm; //TBD
 	type SubscriptionService = PolkadotXcm; //TBD
