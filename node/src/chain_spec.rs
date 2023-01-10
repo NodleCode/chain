@@ -34,6 +34,7 @@ use sp_runtime::{
 	bounded_vec,
 	traits::{IdentifyAccount, Verify},
 };
+const SAFE_XCM_VERSION: u32 = xcm::v2::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -163,7 +164,7 @@ fn eden_testnet_genesis(
 		dao_reserve: Default::default(),
 
 		polkadot_xcm: PolkadotXcmConfig {
-			safe_xcm_version: Some(2),
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
 	}
 }
