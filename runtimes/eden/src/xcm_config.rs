@@ -33,7 +33,7 @@ pub type LocationToAccountId = (
 
 pub type Barrier = (
 	TakeWeightCredit,
-	// If the message is one that immediately attemps to pay for execution, then allow it.
+	// If the message is one that immediately attempts to pay for execution, then allow it.
 	AllowTopLevelPaidExecutionFrom<Everything>,
 	// Expected responses are OK.
 	AllowKnownQueryResponses<PolkadotXcm>,
@@ -54,7 +54,7 @@ pub type XcmRouter = (
 parameter_types! {
 	pub RelayLocation: MultiLocation = MultiLocation::parent();
 	pub const NodlLocation: MultiLocation = Here.into();
-	pub const RelayNetwork: NetworkId = NetworkId::Any; // To DO: TBD check if work with rococo
+	pub const RelayNetwork: NetworkId = NetworkId::Any;
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
