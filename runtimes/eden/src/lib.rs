@@ -106,6 +106,7 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
+		XcmSovereign: orml_xcm::{Pallet, Call, Event<T>} = 36,
 
 		// Neat things
 		Utility: pallet_utility = 40,

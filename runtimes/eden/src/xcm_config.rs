@@ -1,7 +1,7 @@
 use super::{
 	AccountId, Balance, Balances, Call, Event, Origin, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, XcmpQueue,
 };
-use crate::implementations::DealWithFees;
+use crate::{implementations::DealWithFees, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm};
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing},
@@ -10,12 +10,12 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
-use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
+use xcm::{latest::NetworkId, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentIsPreset,
-	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
+	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentAsSuperuser,
+	ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::XcmExecutor;
 
@@ -47,7 +47,7 @@ pub type LocalOriginToLocation = SignedToAccountId32<Origin, AccountId, RelayNet
 /// queues.
 pub type XcmRouter = (
 	// Two routers - use UMP to communicate with the relay chain:
-	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, PolkadotXcm>,
+	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, ()>,
 	// ..and XCMP to communicate with the sibling chains.
 	XcmpQueue,
 );
@@ -67,6 +67,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 	// using `LocationToAccountId` and then turn that into the usual `Signed` origin. Useful for
 	// foreign chains who want to have a local sovereign account on this chain which they control.
 	SovereignSignedViaLocation<LocationToAccountId, Origin>,
+	ParentAsSuperuser<Origin>, //ToDO: Check if we keep it this way
 	// Native converter for Relay-chain (Parent) location; will converts to a `Relay` origin when
 	// recognised.
 	RelayChainAsNative<RelayChainOrigin, Origin>,
@@ -96,8 +97,9 @@ pub type CurrencyTransactor = CurrencyAdapter<
 	(),
 >;
 parameter_types! {
-	pub const MaxInstructions: u32 = 100;
-	pub UnitWeightCost: XcmWeight = 1_000_000; // arbitrary value ToDo: replace with more specific value
+		// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
+		pub UnitWeightCost: u64 = 1_000_000_000;
+		pub const MaxInstructions: u32 = 100;
 }
 // TODO :: Weigher
 pub struct XcmConfig;
@@ -145,4 +147,13 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type ControllerOrigin = EnsureRoot<AccountId>; // TBD define who is allowed to suspend/resume the queue
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
+}
+impl cumulus_pallet_xcm::Config for Runtime {
+	type Event = Event;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+}
+
+impl orml_xcm::Config for Runtime {
+	type Event = Event;
+	type SovereignOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 }
