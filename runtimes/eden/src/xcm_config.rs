@@ -13,7 +13,7 @@ use polkadot_parachain::primitives::Sibling;
 use xcm::{latest::NetworkId, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentAsSuperuser,
+	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset,
 	ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
 	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
@@ -142,8 +142,8 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
 	type VersionWrapper = PolkadotXcm;
-	type ExecuteOverweightOrigin = EnsureRoot<AccountId>; // TBD if we need the council/root to send overweight messages
-	type ControllerOrigin = EnsureRoot<AccountId>; // TBD define who is allowed to suspend/resume the queue
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
+	type ControllerOrigin = EnsureRoot<AccountId>; 
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
 }
@@ -152,7 +152,3 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
 
-impl orml_xcm::Config for Runtime {
-	type Event = Event;
-	type SovereignOrigin = EnsureRootOrMoreThanHalfOfTechComm;
-}
