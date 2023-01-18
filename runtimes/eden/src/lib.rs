@@ -61,6 +61,7 @@ mod pallets_system;
 mod pallets_util;
 mod version;
 mod weights;
+mod xcm_config;
 
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
@@ -103,8 +104,8 @@ construct_runtime! {
 		ParachainInfo: parachain_info = 31,
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
-		// XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
-		// PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
+		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
+		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
 
 		// Neat things
 		Utility: pallet_utility = 40,
@@ -124,7 +125,6 @@ construct_runtime! {
 		Contracts: pallet_contracts = 62,
 	}
 }
-
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 /// Block header type as expected by this runtime.

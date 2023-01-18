@@ -23,8 +23,8 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
-	SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
+	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, PolkadotXcmConfig,
+	SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -34,6 +34,7 @@ use sp_runtime::{
 	bounded_vec,
 	traits::{IdentifyAccount, Verify},
 };
+const SAFE_XCM_VERSION: u32 = xcm::v2::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -161,6 +162,10 @@ fn eden_testnet_genesis(
 
 		// DAO
 		dao_reserve: Default::default(),
+
+		polkadot_xcm: PolkadotXcmConfig {
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		},
 	}
 }
 
