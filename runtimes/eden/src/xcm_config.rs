@@ -100,7 +100,7 @@ parameter_types! {
 		pub UnitWeightCost: u64 = 1_000_000_000;
 		pub const MaxInstructions: u32 = 100;
 }
-// TODO :: Weigher
+
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
 	type Call = Call;
@@ -109,7 +109,7 @@ impl xcm_executor::Config for XcmConfig {
 	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = NativeAsset;
 	type IsTeleporter = ();
-	type LocationInverter = LocationInverter<Ancestry>; //Check
+	type LocationInverter = LocationInverter<Ancestry>;
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 	type Trader = UsingComponents<IdentityFee<Balance>, RelayLocation, AccountId, Balances, DealWithFees>;
