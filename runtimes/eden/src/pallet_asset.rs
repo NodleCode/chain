@@ -16,26 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{Event, Runtime};
-use frame_support::{parameter_types, traits::EnsureRoot, PalletId};
+use crate::{constants::deposit, Balances, Event, Runtime};
+use frame_support::{parameter_types, traits::ConstU128};
+use frame_system::EnsureRoot;
+use primitives::{AccountId, Balance};
+
+pub const UNITS: Balance = 100_000_000_000;
+type AssetId = u32;
 
 parameter_types! {
-    pub const AssetDeposit: Balance = 1 * DOLLARS;
-    pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
-    pub const StringLimit: u32 = 50;
-    pub const MetadataDepositBase: Balance = 1 * DOLLARS;
-    pub const MetadataDepositPerByte: Balance = 1 * CENTS;
+	pub const AssetDeposit: Balance = 1 * UNITS;
+	pub const ApprovalDeposit: Balance = 0;
+	pub const StringLimit: u32 = 50;
+	pub const MetadataDepositBase: Balance =  deposit(1, 68);
+	pub const MetadataDepositPerByte: Balance =  deposit(0, 1);
 }
-impl pallet_assets::Config<pallet_assets::Instance1> for Runtime{
-    type Event = Event;
-    type Balance = Balance;
-    type AssetId = AssetId;
-    type Currency = Balances;
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type AssetDeposit = AssetDeposit;
-    type ApprovalDeposit = ApprovalDeposit;
-    type StringLimit = StringLimit;
-    type MetadataDepositBase = MetadataDepositBase;
-    type MetadataDepositPerByte = MetadataDepositPerByte;
-    type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+
+impl pallet_assets::Config<pallet_assets::Instance1> for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type AssetId = AssetId;
+	type Currency = Balances;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = StringLimit;
+	type Freezer = ();
+	type Extra = ();
+	type AssetAccountDeposit = ConstU128<{ deposit(1, 18) }>; // TODO: check this
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 }

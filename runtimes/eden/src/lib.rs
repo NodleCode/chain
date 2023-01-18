@@ -53,6 +53,7 @@ use sp_version::RuntimeVersion;
 pub mod constants;
 mod implementations;
 mod migrations;
+mod pallet_asset;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -62,7 +63,6 @@ mod pallets_util;
 mod version;
 mod weights;
 mod xcm_config;
-mod pallet_asset;
 
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
@@ -126,7 +126,7 @@ construct_runtime! {
 		Contracts: pallet_contracts = 62,
 
 		// Foreign Assets
-		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 70,
+		Assets: pallet_assets::<Instance1>::{Pallet, Call, Storage, Event<T>} = 70,
 	}
 }
 /// The address format for describing accounts.
