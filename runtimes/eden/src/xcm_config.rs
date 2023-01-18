@@ -115,9 +115,9 @@ impl xcm_executor::Config for XcmConfig {
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
 	type Trader = UsingComponents<IdentityFee<Balance>, RelayLocation, AccountId, Balances, DealWithFees>;
 	type ResponseHandler = (); // Don't handle responses for now.
-	type AssetTrap = PolkadotXcm; //TBD
-	type AssetClaims = PolkadotXcm; //TBD
-	type SubscriptionService = PolkadotXcm; //TBD
+	type AssetTrap = PolkadotXcm;
+	type AssetClaims = PolkadotXcm;
+	type SubscriptionService = PolkadotXcm;
 }
 
 impl pallet_xcm::Config for Runtime {
