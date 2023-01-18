@@ -1,7 +1,7 @@
 use super::{
 	AccountId, Balance, Balances, Call, Event, Origin, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, XcmpQueue,
 };
-use crate::{implementations::DealWithFees, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm};
+use crate::implementations::DealWithFees;
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing},
