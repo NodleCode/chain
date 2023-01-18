@@ -62,6 +62,7 @@ mod pallets_util;
 mod version;
 mod weights;
 mod xcm_config;
+mod pallet_asset;
 
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
@@ -123,6 +124,9 @@ construct_runtime! {
 
 		// Smart Contracts.
 		Contracts: pallet_contracts = 62,
+
+		// Foreign Assets
+		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 70,
 	}
 }
 /// The address format for describing accounts.
