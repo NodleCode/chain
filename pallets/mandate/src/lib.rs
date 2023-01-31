@@ -28,7 +28,7 @@ pub mod pallet {
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{EnsureOrigin, UnfilteredDispatchable},
-		weights::GetDispatchInfo,
+		dispatch::GetDispatchInfo,
 		Parameter,
 	};
 	use frame_system::pallet_prelude::*;
@@ -56,7 +56,13 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Let the configured origin dispatch a call as root
-		#[pallet::weight(call.get_dispatch_info().weight.saturating_add(Weight::from_ref_time(10_000)))]
+		#[pallet::weight({
+			let dispatch_info = call.get_dispatch_info();
+			(
+				dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
+				dispatch_info.class,
+			)
+		})]
 		pub fn apply(origin: OriginFor<T>, call: Box<<T as Config>::RuntimeCall>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::ensure_origin(origin)?;
 

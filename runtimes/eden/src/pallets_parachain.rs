@@ -17,7 +17,7 @@
  */
 
 use crate::{
-	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, xcm_config::XcmConfig, DmpQueue, Event, Runtime,
+	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, xcm_config::XcmConfig, DmpQueue, RuntimeEvent, Runtime,
 	XcmpQueue,
 };
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
@@ -31,7 +31,7 @@ match_types! {
 }
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ExecuteOverweightOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 }
@@ -41,7 +41,7 @@ parameter_types! {
 }
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type OnSystemEvent = ();
 	type SelfParaId = parachain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = XcmpQueue;

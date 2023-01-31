@@ -19,7 +19,7 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, implementations::DealWithFees, version::VERSION, Balances, Call, CompanyReserve, Event, Origin,
+	constants, implementations::DealWithFees, version::VERSION, Balances, RuntimeCall, CompanyReserve, RuntimeEvent, RuntimeOrigin,
 	PalletInfo, Runtime, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
@@ -52,8 +52,8 @@ impl frame_system::Config for Runtime {
 	type BlockWeights = constants::RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
 	type DbWeight = RocksDbWeight;
-	type Origin = Origin;
-	type Call = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
 	type Index = Index;
 	type BlockNumber = BlockNumber;
 	type Hash = Hash;
@@ -61,7 +61,7 @@ impl frame_system::Config for Runtime {
 	type AccountId = AccountId;
 	type Lookup = AccountIdLookup<AccountId, ()>;
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = Version;
 	type PalletInfo = PalletInfo;
@@ -97,7 +97,7 @@ impl pallet_balances::Config for Runtime {
 	type ReserveIdentifier = [u8; 8];
 	type Balance = Balance;
 	type DustRemoval = CompanyReserve;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = frame_system::Pallet<Runtime>;
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
@@ -112,7 +112,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;

@@ -27,7 +27,7 @@ mod tests;
 
 use frame_support::{
 	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
-	weights::GetDispatchInfo,
+	dispatch::GetDispatchInfo,
 	PalletId,
 };
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};

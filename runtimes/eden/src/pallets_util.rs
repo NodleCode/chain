@@ -19,7 +19,7 @@
 
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	Call, Event, Origin, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, Timestamp,
+	RuntimeCall, RuntimeEvent, RuntimeOrigin, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, Timestamp,
 };
 use frame_support::{
 	parameter_types,
@@ -37,7 +37,7 @@ parameter_types! {
 }
 
 impl pallet_grants::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
@@ -46,8 +46,8 @@ impl pallet_grants::Config for Runtime {
 }
 
 impl pallet_utility::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	type PalletsOrigin = OriginCaller;
 	type WeightInfo = crate::weights::pallet_utility::WeightInfo<Runtime>;
 }
@@ -60,8 +60,8 @@ parameter_types! {
 	pub const MaxSignatories: u16 = 100;
 }
 impl pallet_multisig::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type DepositBase = DepositBase;
 	type DepositFactor = DepositFactor;
@@ -79,10 +79,10 @@ parameter_types! {
 }
 
 impl pallet_scheduler::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeOrigin = RuntimeOrigin;
 	type PalletsOrigin = OriginCaller;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type MaximumWeight = MaximumSchedulerWeight;
 	type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxScheduledPerBlock = MaxScheduledPerBlock;
@@ -101,7 +101,7 @@ parameter_types! {
 #[allow(clippy::identity_op)]
 impl pallet_preimage::Config for Runtime {
 	type WeightInfo = crate::weights::pallet_preimage::WeightInfo<Runtime>;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type ManagerOrigin = EnsureRoot<AccountId>;
 	type MaxSize = PreimageMaxSize;
@@ -120,7 +120,7 @@ parameter_types! {
 }
 
 impl pallet_uniques::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type CollectionId = u32;
 	type ItemId = u32;
 	type Currency = Balances;
@@ -159,8 +159,8 @@ impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Currency = Balances;
-	type Runtime = Event;
-	type Call = Call;
+	type Runtime = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	/// The safest default is to allow no calls at all.
 	///
 	/// Runtimes should whitelist dispatchables that are allowed to be called from contracts
