@@ -159,7 +159,7 @@ impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
 	type Currency = Balances;
-	type Event = Event;
+	type Runtime = Event;
 	type Call = Call;
 	/// The safest default is to allow no calls at all.
 	///
@@ -182,4 +182,5 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeLen = ConstU32<{ 128 * 1024 }>;
 	type RelaxedMaxCodeLen = ConstU32<{ 256 * 1024 }>;
 	type MaxStorageKeyLen = ConstU32<128>;
+	type UnsafeUnstableInterface = ConstBool<true>;
 }
