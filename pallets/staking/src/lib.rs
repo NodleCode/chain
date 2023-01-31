@@ -100,7 +100,7 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// The staking balance.
 		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 		/// Handler for the unbalanced reduction when slashing a staker.
@@ -146,7 +146,7 @@ pub mod pallet {
 		/// Max number of unbond request supported by queue
 		type MaxChunkUnlock: Get<usize>;
 		/// The origin which can cancel a deferred slash. Root can always do this.
-		type CancelOrigin: EnsureOrigin<Self::Origin>;
+		type CancelOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -1353,13 +1353,13 @@ pub mod pallet {
 
 				let _ = if let Some(nominated_val) = opt_val {
 					<Pallet<T>>::nominator_nominate(
-						T::Origin::from(Some(actor.clone()).into()),
+						T::RuntimeOrigin::from(Some(actor.clone()).into()),
 						nominated_val.clone(),
 						balance,
 						false,
 					)
 				} else {
-					<Pallet<T>>::validator_join_pool(T::Origin::from(Some(actor.clone()).into()), balance)
+					<Pallet<T>>::validator_join_pool(T::RuntimeOrigin::from(Some(actor.clone()).into()), balance)
 				};
 			}
 

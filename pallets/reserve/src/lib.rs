@@ -54,10 +54,10 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {
-		type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
-		type ExternalOrigin: EnsureOrigin<Self::Origin>;
+		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type ExternalOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type Currency: Currency<Self::AccountId>;
-		type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+		type RuntimeCall: Parameter + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin> + GetDispatchInfo;
 		type PalletId: Get<PalletId>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -105,7 +105,7 @@ pub mod pallet {
                 dispatch_info.class,
             )
         })]
-		pub fn apply_as(origin: OriginFor<T>, call: Box<<T as Config<I>>::Call>) -> DispatchResultWithPostInfo {
+		pub fn apply_as(origin: OriginFor<T>, call: Box<<T as Config<I>>::RuntimeCall>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
 			let res = call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into());

@@ -170,7 +170,7 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		type Currency: Currency<Self::AccountId>;
 
@@ -311,7 +311,7 @@ impl<T: Config> Pallet<T> {
 		return T::OracleMembers::contains(&who);
 	}
 
-	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
+	fn ensure_oracle(origin: T::RuntimeOrigin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
 		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 		Ok(())
