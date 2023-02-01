@@ -19,8 +19,8 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, implementations::DealWithFees, version::VERSION, Balances, RuntimeCall, CompanyReserve, RuntimeEvent, RuntimeOrigin,
-	PalletInfo, Runtime, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+	constants, implementations::DealWithFees, version::VERSION, Balances, CompanyReserve, PalletInfo, Runtime,
+	RuntimeCall, RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
 use frame_support::{

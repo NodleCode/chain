@@ -19,7 +19,7 @@
 
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	RuntimeCall, RuntimeEvent, RuntimeOrigin, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, Timestamp,
+	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use frame_support::{
 	parameter_types,
