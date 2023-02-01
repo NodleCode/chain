@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Aura, Balances, CollatorSelection, Event, Runtime, Session};
+use crate::{constants, Aura, Balances, CollatorSelection, RuntimeEvent, Runtime, Session};
 use frame_support::{parameter_types, PalletId};
 use frame_system::EnsureRoot;
 use primitives::{AccountId, AuraId};

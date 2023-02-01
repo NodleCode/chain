@@ -17,7 +17,7 @@
  */
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
-	AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
+	AllocationsOracles, Balances, CompanyReserve, RuntimeEvent, Runtime,
 };
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
