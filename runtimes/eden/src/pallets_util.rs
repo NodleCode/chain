@@ -181,5 +181,5 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeLen = ConstU32<{ 128 * 1024 }>;
 	type RelaxedMaxCodeLen = ConstU32<{ 256 * 1024 }>;
 	type MaxStorageKeyLen = ConstU32<128>;
-	type UnsafeUnstableInterface = ConstBool<true>;
+	type UnsafeUnstableInterface = ConstBool<false>;
 }
