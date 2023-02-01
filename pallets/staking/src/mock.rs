@@ -123,7 +123,7 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub BlockWeights: frame_system::limits::BlockWeights =
 		frame_system::limits::BlockWeights::simple_max(
-			frame_support::weights::constants::WEIGHT_PER_SECOND * 2
+			frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND * 2
 		);
 	pub const MaxLocks: u32 = 1024;
 	// pub static SessionsPerEra: SessionIndex = 3;
