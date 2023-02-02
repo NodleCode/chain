@@ -173,7 +173,7 @@ impl frame_system::offchain::SigningTypes for Runtime {
 
 impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
 where
-RuntimeCall: From<C>,
+	RuntimeCall: From<C>,
 {
 	type OverarchingCall = RuntimeCall;
 	type Extrinsic = UncheckedExtrinsic;

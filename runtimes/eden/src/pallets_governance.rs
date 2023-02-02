@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, RuntimeOrigin, Runtime, RuntimeCall, RuntimeEvent, TechnicalCommittee};
+use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
 use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
