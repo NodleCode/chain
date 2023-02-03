@@ -212,6 +212,7 @@ pub mod pallet {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
+		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::allocate(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())).saturating_add(T::WeightInfo::checked_update_session_quota()))]
 		pub fn batch(
 			origin: OriginFor<T>,
@@ -227,7 +228,7 @@ pub mod pallet {
 			));
 			Ok(dispatch_info)
 		}
-
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
 		pub fn set_curve_starting_block(
 			origin: OriginFor<T>,

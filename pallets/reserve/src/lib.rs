@@ -73,6 +73,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		/// Spend `amount` funds from the reserve account to `to`.
+		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::spend())]
 		pub fn spend(origin: OriginFor<T>, to: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
@@ -85,6 +86,7 @@ pub mod pallet {
 		}
 
 		/// Deposit `amount` tokens in the treasure account
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::tip())]
 		pub fn tip(origin: OriginFor<T>, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			let tipper = ensure_signed(origin)?;
@@ -98,6 +100,7 @@ pub mod pallet {
 
 		#[allow(clippy::boxed_local)]
 		/// Dispatch a call as coming from the reserve account
+		#[pallet::call_index(2)]
 		#[pallet::weight({
             let dispatch_info = call.get_dispatch_info();
             (
