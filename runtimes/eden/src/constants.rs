@@ -17,8 +17,8 @@
  */
 
 use frame_support::{
-	parameter_types,
 	frame_support::dispatch::DispatchClass,
+	parameter_types,
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_SECOND},
 		Weight,
