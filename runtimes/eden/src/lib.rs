@@ -267,7 +267,7 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash>
+	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash>
 		for Runtime
 	{
 		fn call(
