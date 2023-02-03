@@ -23,7 +23,7 @@ use crate::{
 };
 use frame_support::{
 	parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU32, EqualPrivilegeOnly, Nothing},
+	traits::{AsEnsureOriginWithArg, ConstU32, ConstBool, EqualPrivilegeOnly, Nothing},
 	weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSigned};
