@@ -274,7 +274,7 @@ sp_api::impl_runtime_apis! {
 			origin: AccountId,
 			dest: AccountId,
 			value: Balance,
-			gas_limit: u64,
+			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
@@ -282,17 +282,18 @@ sp_api::impl_runtime_apis! {
 				origin,
 				dest,
 				value,
-				Weight::from_ref_time(gas_limit),
+				gas_limit,
 				storage_deposit_limit,
 				input_data,
 				constants::CONTRACTS_DEBUG_OUTPUT,
+				pallet_contracts::Determinism::Deterministic,
 			)
 		}
 
 		fn instantiate(
 			origin: AccountId,
 			value: Balance,
-			gas_limit: u64,
+			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
@@ -301,7 +302,7 @@ sp_api::impl_runtime_apis! {
 			Contracts::bare_instantiate(
 				origin,
 				value,
-				Weight::from_ref_time(gas_limit),
+				gas_limit,
 				storage_deposit_limit,
 				code,
 				data,
@@ -314,8 +315,9 @@ sp_api::impl_runtime_apis! {
 			origin: AccountId,
 			code: Vec<u8>,
 			storage_deposit_limit: Option<Balance>,
+			determinism: pallet_contracts::Determinism,
 		) -> pallet_contracts_primitives::CodeUploadResult<Hash, Balance> {
-			Contracts::bare_upload_code(origin, code, storage_deposit_limit)
+			Contracts::bare_upload_code(origin, code, storage_deposit_limit, determinism)
 		}
 
 		fn get_storage(
