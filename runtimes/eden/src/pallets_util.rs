@@ -92,7 +92,6 @@ impl pallet_scheduler::Config for Runtime {
 }
 
 parameter_types! {
-	pub const PreimageMaxSize: u32 = 4096 * 1024;
 	pub const PreimageBaseDeposit: Balance = constants::deposit(2, 64);
 	pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
 }
@@ -103,7 +102,6 @@ impl pallet_preimage::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxSize = PreimageMaxSize;
 	type BaseDeposit = PreimageBaseDeposit;
 	type ByteDeposit = PreimageByteDeposit;
 }
