@@ -49,8 +49,8 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 }
 impl frame_system::Config for Test {
-	type Origin = Origin;
-	type Call = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
@@ -61,7 +61,7 @@ impl frame_system::Config for Test {
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type RuntimeEvent = ();
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -79,7 +79,7 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
 	type Balance = u64;
-	type Event = ();
+	type RuntimeEvent = ();
 	type DustRemoval = ();
 	type MaxLocks = MaxLocks;
 	type ExistentialDeposit = ();
@@ -96,10 +96,10 @@ parameter_types! {
 	pub const ReserveModuleId: PalletId = PalletId(*b"py/resrv");
 }
 impl Config for Test {
-	type Event = ();
+	type RuntimeEvent = ();
 	type Currency = pallet_balances::Pallet<Self>;
 	type ExternalOrigin = EnsureSignedBy<Admin, u64>;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type PalletId = ReserveModuleId;
 	type WeightInfo = ();
 }
@@ -117,7 +117,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn spend_error_if_bad_origin() {
 	new_test_ext().execute_with(|| {
-		assert_noop!(TestModule::spend(Origin::signed(0), 1, 1), BadOrigin);
+		assert_noop!(TestModule::spend(RuntimeOrigin::signed(0), 1, 1), BadOrigin);
 	})
 }
 
@@ -128,7 +128,7 @@ fn spend_funds_to_target() {
 
 		assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
 		assert_eq!(Balances::free_balance(3), 0);
-		assert_ok!(TestModule::spend(Origin::signed(Admin::get()), 3, 100));
+		assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
 		assert_eq!(Balances::free_balance(3), 100);
 		assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
 	})
@@ -139,27 +139,29 @@ fn tip() {
 	new_test_ext().execute_with(|| {
 		TestCurrency::make_free_balance_be(&999, 100);
 
-		assert_ok!(TestModule::tip(Origin::signed(999), 50));
+		assert_ok!(TestModule::tip(RuntimeOrigin::signed(999), 50));
 		assert_eq!(Balances::free_balance(999), 50);
 		assert_eq!(Balances::free_balance(TestModule::account_id()), 50);
 	})
 }
 
-fn make_call(value: u8) -> Box<Call> {
-	Box::new(Call::System(frame_system::Call::<Test>::remark { remark: vec![value] }))
+fn make_call(value: u8) -> Box<RuntimeCall> {
+	Box::new(RuntimeCall::System(frame_system::Call::<Test>::remark {
+		remark: vec![value],
+	}))
 }
 
 #[test]
 fn apply_as_error_if_bad_origin() {
 	new_test_ext().execute_with(|| {
-		assert_noop!(TestModule::apply_as(Origin::signed(0), make_call(1)), BadOrigin);
+		assert_noop!(TestModule::apply_as(RuntimeOrigin::signed(0), make_call(1)), BadOrigin);
 	})
 }
 
 #[test]
 fn apply_as_works() {
 	new_test_ext().execute_with(|| {
-		assert_ok!(TestModule::apply_as(Origin::signed(Admin::get()), make_call(1)));
+		assert_ok!(TestModule::apply_as(RuntimeOrigin::signed(Admin::get()), make_call(1)));
 	})
 }
 

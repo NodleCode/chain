@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 use super::{
 	AccountId, Balance, Balances, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent,
 	RuntimeOrigin, XcmpQueue,

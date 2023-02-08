@@ -208,7 +208,7 @@ mod tests {
 	use super::*;
 	use crate::migrations;
 	use crate::mock;
-	use crate::mock::{events, AccountId, Admin, ExtBuilder, NodleStaking, Origin, Test, ValidatorsSet};
+	use crate::mock::{events, AccountId, Admin, ExtBuilder, NodleStaking, RuntimeOrigin, Test, ValidatorsSet};
 	use crate::types;
 	use frame_support::{assert_ok, traits::SortedMembers};
 
@@ -259,7 +259,10 @@ mod tests {
 			let poa_validators: Vec<AccountId> = vec![11, 21, 31, 61, 71, 81];
 
 			poa_validators.iter().for_each(|account_id| {
-				assert_ok!(ValidatorsSet::add_member(Origin::signed(Admin::get()), *account_id,));
+				assert_ok!(ValidatorsSet::add_member(
+					RuntimeOrigin::signed(Admin::get()),
+					*account_id,
+				));
 			});
 
 			assert_eq!(ValidatorsSet::sorted_members(), [11, 21, 31, 61, 71, 81].to_vec());
@@ -323,10 +326,10 @@ mod tests {
 			expected.append(&mut new1);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(31), 500));
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(61), 500));
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(71), 500));
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(81), 500));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(31), 500));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(61), 500));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(71), 500));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(81), 500));
 
 			mock::start_active_session(3);
 
