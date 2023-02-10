@@ -162,7 +162,7 @@ pub type Executive = frame_executive::Executive<
 	migrations::MoveValidatorsSetToInvulnerables,
 >;
 
-impl_runtime_apis! {
+sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
 			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
@@ -274,7 +274,7 @@ impl_runtime_apis! {
 			origin: AccountId,
 			dest: AccountId,
 			value: Balance,
-			gas_limit: Weight,
+			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
@@ -282,7 +282,7 @@ impl_runtime_apis! {
 				origin,
 				dest,
 				value,
-				gas_limit,
+			    gas_limit,
 				storage_deposit_limit,
 				input_data,
 				constants::CONTRACTS_DEBUG_OUTPUT,
@@ -293,7 +293,7 @@ impl_runtime_apis! {
 		fn instantiate(
 			origin: AccountId,
 			value: Balance,
-			gas_limit: Weight,
+			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
