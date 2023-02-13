@@ -34,6 +34,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 	)
 }
 
+use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
@@ -49,7 +50,6 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
-use constants::RuntimeBlockWeights;
 
 pub mod constants;
 mod implementations;
