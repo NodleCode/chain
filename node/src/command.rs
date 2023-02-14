@@ -40,7 +40,7 @@ use crate::{
 };
 
 // default to the Statemint/Statemine/Westmint id
-const DEFAULT_PARA_ID: u32 = 1000;
+const DEFAULT_PARA_ID: u32 = 2026;
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
