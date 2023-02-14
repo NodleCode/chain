@@ -3,6 +3,9 @@ use frame_support::{migration, parameter_types, traits::OnRuntimeUpgrade, weight
 use primitives::{AccountId, Balance};
 use sp_std::prelude::*;
 
+#[cfg(feature = "try-runtime")]
+use codec::{Decode, Encode};
+
 // MaxMembers is chosen based on what used to be the MaxMembers param for the pallet ValidaorsSet
 // We have intentionally used the same number for MaxInvulnerables for the pallet CollatorSelection
 // So the BoundedVec storage in these two pallets remain compatible.
@@ -84,15 +87,14 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			MEMBERS_ITEM,
 			EMPTY_HASH,
 		) {
-			Self::set_temp_storage(validators, "ValidatorsSet::Members");
-			Ok(Vec::new())
+			Ok(validators.encode())
 		} else {
 			Err("Remove the runtime upgrade code")
 		}
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+	fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
 		if migration::have_storage_value(VALIDATORS_SET_MODULE, MEMBERS_ITEM, EMPTY_HASH)
 			|| migration::have_storage_value(VALIDATORS_SET_MODULE, PRIME_ITEM, EMPTY_HASH)
 			|| migration::have_storage_value(POA_MODULE, STORAGE_VERSION_ITEM, EMPTY_HASH)
@@ -111,8 +113,7 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 				"CollatorSelection::candidacy_bond is {:?}",
 				candidacy_bond
 			);
-			let validators =
-				Self::get_temp_storage::<BoundedVec<AccountId, MaxMembers>>("ValidatorsSet::Members").unwrap();
+			let validators: BoundedVec<AccountId, MaxMembers> = Decode::decode(&mut state.as_slice()).unwrap();
 			if invulnerables == validators && candidacy_bond == CANDIDACY_BOND {
 				log::info!(target: TRY_RUNTIME, "MoveValidatorsSetToInvulnerables was successful");
 				Ok(())
