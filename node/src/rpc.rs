@@ -20,7 +20,7 @@
 
 use std::sync::Arc;
 
-use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index as Nonce};
+use primitives::{AccountId, Balance, Block, Index as Nonce};
 
 use sc_client_api::AuxStore;
 pub use sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};

@@ -23,15 +23,12 @@ use std::{sync::Arc, time::Duration};
 
 // rpc
 use jsonrpsee::RpcModule;
-use polkadot_service::CollatorPair;
 
 pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index as Nonce};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
-use cumulus_client_consensus_common::{
-	ParachainBlockImport as TParachainBlockImport, ParachainCandidate, ParachainConsensus,
-};
+use cumulus_client_consensus_common::{ParachainBlockImport as TParachainBlockImport, ParachainConsensus};
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
 	build_relay_chain_interface, prepare_node_config, start_collator, start_full_node, StartCollatorParams,
@@ -40,12 +37,10 @@ use cumulus_client_service::{
 use cumulus_primitives_core::ParaId;
 
 use cumulus_client_cli::CollatorOptions;
-use cumulus_relay_chain_inprocess_interface::build_inprocess_relay_chain;
-use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
+use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface};
 
 // Substrate Imports
-use sc_client_api::ExecutorProvider;
+use sc_consensus::ImportQueue;
 use sc_executor::WasmExecutor;
 use sc_network::NetworkService;
 use sc_network_common::service::NetworkBlock;
