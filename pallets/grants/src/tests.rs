@@ -375,7 +375,7 @@ fn cancel_tolerates_corrupted_state() {
 		let ans = <VestingSchedules<Runtime>>::try_mutate(BOB::get(), |s| -> Result<(), VestingSchedule<u64, u64>> {
 			s.try_push(bob_modified_vesting_schedule.clone())
 		});
-		
+
 		assert_ok!(ans);
 
 		assert!(<VestingSchedules<Runtime>>::contains_key(BOB::get()));
