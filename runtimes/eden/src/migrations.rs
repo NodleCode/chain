@@ -1,10 +1,11 @@
 use crate::Runtime;
 use frame_support::{migration, parameter_types, traits::OnRuntimeUpgrade, weights::Weight, BoundedVec};
 use primitives::{AccountId, Balance};
-use sp_std::prelude::*;
 
 #[cfg(feature = "try-runtime")]
 use codec::{Decode, Encode};
+#[cfg(feature = "try-runtime")]
+use sp_std::prelude::*;
 
 // MaxMembers is chosen based on what used to be the MaxMembers param for the pallet ValidaorsSet
 // We have intentionally used the same number for MaxInvulnerables for the pallet CollatorSelection
