@@ -145,18 +145,17 @@ jobs:
         run: cargo build --release --features=try-runtime --bin nodle-parachain
       - name: Fetch snapshot
         if: steps.cachedir.outputs.cache-hit != 'true'
-        OnError: continue
+        continue-on-error: true
         run: |
             install -d snapshots
             date > snapshots/created_at
             ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/paradis-snapshot-full" -u ${{ env.try-runtime-uri}}
       - name: Run Migration on new snapshot
         if: steps.cachedir.outputs.cache-hit != 'true'
+        run: |
             ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm -lruntime=debug --chain ${{ env.try-runtime-chain }} on-runtime-upgrade snap -s snapshots/paradis-snapshot-full
       - name: Try runtime reuse snap
         if: steps.cachedir.outputs.cache-hit == 'true'
         run: |
             cat snapshots/created_at
             ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm --chain ${{ env.try-runtime-chain }} on-runtime-upgrade snap --snapshot-path="snapshots/paradis-snapshot-full"
-
-./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm  -lruntime=debug --chain dev  on-runtime-upgrade snap -s snapshots/paradis-snapshot-full
