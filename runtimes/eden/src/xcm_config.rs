@@ -3,17 +3,20 @@ use super::{
 	RuntimeOrigin, XcmpQueue,
 };
 use crate::implementations::DealWithFees;
-use sp_runtime::traits::Convert;
+use codec::{Decode, Encode};
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing},
 	weights::IdentityFee,
+	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
+use orml_traits::{location::AbsoluteReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
-use orml_traits::{parameter_type_with_key, location::AbsoluteReserveProvider};
-use xcm::{latest::NetworkId, prelude::*};
+use scale_info::TypeInfo;
+use sp_runtime::traits::Convert;
+use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentIsPreset,
@@ -168,18 +171,18 @@ parameter_types! {
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
-	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::get().into())));
+	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::parachain_id().into())));
 }
 parameter_type_with_key! {
 	pub ParachainMinFee: |location: MultiLocation| -> Option<u128> {
 		#[allow(clippy::match_ref_pats)] // false positive
 		match (location.parents, location.first_interior()) {
-			//(1, Some(Parachain(parachains::statemint::ID))) => Some(XcmInterface::get_parachain_fee(location.clone())), //TODO : add parachain fees
+			(1, Some(Parachain(parachains::statemint::ID))) => Some(XcmInterface::get_parachain_fee(location.clone())), //TODO : add parachain fees
 			_ => None,
 		}
 	};
 }
-#[derive(Clone, Eq, Debug, PartialEq, Ord, PartialOrd, TypeInfo)]
+#[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
 pub enum CurrencyId {
 	// Our native token
 	SelfReserve,
@@ -188,15 +191,40 @@ pub enum CurrencyId {
 	// Our local assets
 	LocalAssetReserve(AssetId),
 }
-impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
-	fn convert(asset: MultiAsset) -> Option<CurrencyId> {
-		if let MultiAsset {
-			id: Concrete(location), ..
-		} = asset
-		{
-			Self::convert(location)
-		} else {
-			None
+pub struct CurrencyIdConvert;
+impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
+	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+		match id {
+			CurrencyId::SelfReserve => Some(MultiLocation {
+				parents: 1,
+				interior: X2(Parachain(200), PalletInstance(2)),
+			}), //test
+			_ => None,
+		}
+	}
+}
+impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
+	fn convert(location: MultiLocation) -> Option<CurrencyId> {
+		if location == MultiLocation::parent() {
+			return None;
+		}
+		match location {
+			MultiLocation {
+				parents,
+				interior: X2(Parachain(para_id), PalletInstance(key)),
+			} if parents == 1 => {
+				match (para_id, key) {
+					(id, 2) => {
+						if id == u32::from(ParachainInfo::parachain_id()) {
+							Some(CurrencyId::SelfReserve)
+						} else {
+							None
+						}
+					} // Pallet instance 2 for balances pallet : TODO: refactor
+					_ => None,
+				}
+			}
+			_ => None,
 		}
 	}
 }
