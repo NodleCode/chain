@@ -123,7 +123,7 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub BlockWeights: frame_system::limits::BlockWeights =
 		frame_system::limits::BlockWeights::simple_max(
-			frame_support::weights::constants::WEIGHT_PER_SECOND * 2
+			frame_support::weights::Weight::from_ref_time(frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND.saturating_mul(2))
 		);
 	pub const MaxLocks: u32 = 1024;
 	// pub static SessionsPerEra: SessionIndex = 3;
@@ -139,16 +139,16 @@ impl frame_system::Config for Test {
 	type BlockWeights = ();
 	type BlockLength = ();
 	type DbWeight = RocksDbWeight;
-	type Origin = Origin;
+	type RuntimeOrigin = RuntimeOrigin;
 	type Index = AccountIndex;
 	type BlockNumber = BlockNumber;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type Hash = H256;
 	type Hashing = ::sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -164,7 +164,7 @@ impl frame_system::Config for Test {
 impl pallet_balances::Config for Test {
 	type MaxLocks = MaxLocks;
 	type Balance = Balance;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
@@ -194,7 +194,7 @@ impl pallet_session::Config for Test {
 	type Keys = SessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type SessionHandler = (OtherSessionHandler,);
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = hooks::StashOf<Test>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
@@ -225,7 +225,7 @@ ord_parameter_types! {
 	pub const Admin: u64 = 4;
 }
 impl pallet_membership::Config for Test {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type AddOrigin = EnsureSignedBy<Admin, u64>;
 	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
 	type SwapOrigin = EnsureSignedBy<Admin, u64>;
@@ -257,7 +257,7 @@ parameter_types! {
 	pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 impl Config for Test {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BondedDuration = BondedDuration;
 	type MinSelectedValidators = MinSelectedValidators;
@@ -541,7 +541,7 @@ pub fn is_disabled(controller: AccountId) -> bool {
 	SESSION.with(|d| d.borrow().1.contains(&controller))
 }
 
-pub(crate) fn last_event() -> Event {
+pub(crate) fn last_event() -> RuntimeEvent {
 	System::events().pop().expect("Event expected").event
 }
 
@@ -550,7 +550,7 @@ pub(crate) fn events() -> Vec<pallet::Event<Test>> {
 		.into_iter()
 		.map(|r| r.event)
 		.filter_map(|e| {
-			if let Event::NodleStaking(inner) = e {
+			if let RuntimeEvent::NodleStaking(inner) = e {
 				Some(inner)
 			} else {
 				None
@@ -615,13 +615,13 @@ pub(crate) fn start_active_session(session_index: SessionIndex) {
 
 pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
 	let _ = Balances::make_free_balance_be(&ctrl, val);
-	assert_ok!(NodleStaking::validator_join_pool(Origin::signed(ctrl), val));
+	assert_ok!(NodleStaking::validator_join_pool(RuntimeOrigin::signed(ctrl), val));
 }
 
 pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
 	let _ = Balances::make_free_balance_be(&ctrl, val);
 	assert_ok!(NodleStaking::nominator_nominate(
-		Origin::signed(ctrl),
+		RuntimeOrigin::signed(ctrl),
 		target,
 		val,
 		false,

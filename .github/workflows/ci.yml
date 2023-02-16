@@ -14,31 +14,26 @@ env:
   try-runtime-uri: wss://eden-rpc.dwellir.com:443
 
 jobs:
-  clippy_lint:
+  lints:
     runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.nightly }}
+          components: rustfmt, clippy
           target: ${{ env.target }}
-          components: clippy
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
+      - name: Install protobuf-compiler
+        run: |
+          sudo apt-get install protobuf-compiler
       - name: Clippy
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
           toolchain: ${{ env.nightly }}
-  rustfmt:
-    runs-on: ubuntu-latest-8-cores
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: ${{ env.nightly }}
-          components: rustfmt
-      - name: Rustfmt Check
-        uses: actions-rust-lang/rustfmt@v1
 
   tests:
     runs-on: ubuntu-latest-16-cores
@@ -49,7 +44,9 @@ jobs:
         with:
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}
-
+      - name: Install protobuf-compiler
+        run: |
+         sudo apt-get install protobuf-compiler
       - name: Cache cargo registry
         uses: actions/cache@v3
         with:
@@ -100,7 +97,9 @@ jobs:
         with:
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}  
-
+      - name: Install protobuf-compiler
+        run: |
+         sudo apt-get install protobuf-compiler
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
@@ -128,7 +127,9 @@ jobs:
             }' | jq '{"result"}[]' >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
         id: get_version
-
+      - name: Install protobuf-compiler
+        run: |
+         sudo apt-get install protobuf-compiler
       - name: Install Rust nightly
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -140,17 +141,21 @@ jobs:
         with:
           path: snapshots
           key: ${{steps.get_version.outputs.eden_rev}}
-
-      - name: Try runtime update snap
+      - name: Cargo build
+        run: cargo build --release --features=try-runtime --bin nodle-parachain
+      - name: Fetch snapshot
         if: steps.cachedir.outputs.cache-hit != 'true'
+        continue-on-error: true
         run: |
             install -d snapshots
             date > snapshots/created_at
-            cargo run --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} --no-spec-name-check  on-runtime-upgrade  live --snapshot-path="snapshots/paradis-snapshot-full" -u ${{ env.try-runtime-uri}}
+            ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/eden-snapshot-full" -u ${{ env.try-runtime-uri}}
+      - name: Run Migration on new snapshot
+        if: steps.cachedir.outputs.cache-hit != 'true'
+        run: |
+            ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm -lruntime=debug --chain ${{ env.try-runtime-chain }} on-runtime-upgrade snap -s snapshots/eden-snapshot-full
       - name: Try runtime reuse snap
         if: steps.cachedir.outputs.cache-hit == 'true'
         run: |
             cat snapshots/created_at
-            cargo run --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} --no-spec-name-check  on-runtime-upgrade  snap --snapshot-path="snapshots/paradis-snapshot-full"
-
-
+            ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm --chain ${{ env.try-runtime-chain }} on-runtime-upgrade snap --snapshot-path="snapshots/eden-snapshot-full"

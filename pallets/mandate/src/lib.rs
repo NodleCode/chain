@@ -26,9 +26,9 @@ pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::{
+		dispatch::GetDispatchInfo,
 		pallet_prelude::*,
 		traits::{EnsureOrigin, UnfilteredDispatchable},
-		weights::GetDispatchInfo,
 		Parameter,
 	};
 	use frame_system::pallet_prelude::*;
@@ -37,12 +37,12 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type RuntimeCall: Parameter + UnfilteredDispatchable<RuntimeOrigin = Self::RuntimeOrigin> + GetDispatchInfo;
 
 		/// Origin that can call this module and execute sudo actions. Typically
 		/// the `collective` module.
-		type ExternalOrigin: EnsureOrigin<Self::Origin>;
+		type ExternalOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
 
 	#[pallet::pallet]
@@ -56,8 +56,15 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Let the configured origin dispatch a call as root
-		#[pallet::weight(call.get_dispatch_info().weight.saturating_add(Weight::from_ref_time(10_000)))]
-		pub fn apply(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+		#[pallet::call_index(0)]
+		#[pallet::weight({
+			let dispatch_info = call.get_dispatch_info();
+			(
+				dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
+				dispatch_info.class,
+			)
+		})]
+		pub fn apply(origin: OriginFor<T>, call: Box<<T as Config>::RuntimeCall>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::ensure_origin(origin)?;
 
 			// Shamelessly stollen from the `sudo` module

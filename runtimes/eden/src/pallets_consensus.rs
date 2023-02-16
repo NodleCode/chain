@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Aura, Balances, CollatorSelection, Event, Runtime, Session};
+use crate::{constants, Aura, Balances, CollatorSelection, Runtime, RuntimeEvent, Session};
 use frame_support::{parameter_types, PalletId};
 use frame_system::EnsureRoot;
 use primitives::{AccountId, AuraId};
@@ -49,7 +49,7 @@ impl pallet_session::Config for Runtime {
 	type SessionManager = CollatorSelection;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type ValidatorId = AccountId;
@@ -80,7 +80,7 @@ parameter_types! {
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
 impl pallet_collator_selection::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type UpdateOrigin = CollatorSelectionUpdateOrigin;
 	type PotId = PotId;

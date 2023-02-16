@@ -125,9 +125,9 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
-		type CancelOrigin: EnsureOrigin<Self::Origin>;
+		type CancelOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The maximum number of vesting schedule.
 		#[pallet::constant]
 		type MaxSchedule: Get<u32>;
@@ -144,6 +144,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Claim funds that have been vested so far
+		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::claim())]
 		pub fn claim(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
@@ -159,6 +160,7 @@ pub mod pallet {
 		}
 
 		/// Wire funds to be vested by the receiver
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::add_vesting_schedule())]
 		pub fn add_vesting_schedule(
 			origin: OriginFor<T>,
@@ -177,6 +179,7 @@ pub mod pallet {
 		/// claimed they will be auto claimed for the given user. If `limit_to_free_balance`
 		/// is set to true we will not error if the free balance of `who` has less coins
 		/// than what was granted and is being revoked (useful if the state was corrupted).
+		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::cancel_all_vesting_schedules())]
 		pub fn cancel_all_vesting_schedules(
 			origin: OriginFor<T>,
@@ -211,6 +214,7 @@ pub mod pallet {
 
 		/// Allows the `CancelOrigin` to renounce to its privileges of being able to cancel
 		/// `who`'s vesting schedules.
+		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::renounce())]
 		pub fn renounce(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source) -> DispatchResultWithPostInfo {
 			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;

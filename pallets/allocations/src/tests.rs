@@ -21,9 +21,10 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-	assert_noop, assert_ok, bounded_vec, ord_parameter_types, parameter_types,
+	assert_noop, assert_ok, bounded_vec,
+	dispatch::Pays,
+	ord_parameter_types, parameter_types,
 	traits::{ConstU32, GenesisBuild},
-	weights::Pays,
 	PalletId,
 };
 use frame_system::EnsureSignedBy;
@@ -57,8 +58,8 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 }
 impl frame_system::Config for Test {
-	type Origin = Origin;
-	type Call = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
@@ -69,7 +70,7 @@ impl frame_system::Config for Test {
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -88,7 +89,7 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
 	type Balance = u64;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type MaxLocks = MaxLocks;
@@ -131,7 +132,7 @@ impl WithAccountId<u64> for Receiver {
 }
 
 impl pallet_membership::Config for Test {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type AddOrigin = EnsureSignedBy<Admin, u64>;
 	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
 	type SwapOrigin = EnsureSignedBy<Admin, u64>;
@@ -144,7 +145,7 @@ impl pallet_membership::Config for Test {
 }
 
 impl Config for Test {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
@@ -365,8 +366,8 @@ fn both_session_events_are_emitted_on_the_very_first_on_initialize_after_upgrade
 		assert_eq!(
 			events,
 			vec![
-				Event::Allocations(crate::Event::SessionQuotaCalculated(session_quota)),
-				Event::Allocations(crate::Event::SessionQuotaRenewed)
+				RuntimeEvent::Allocations(crate::Event::SessionQuotaCalculated(session_quota)),
+				RuntimeEvent::Allocations(crate::Event::SessionQuotaRenewed)
 			]
 		);
 	})
@@ -396,7 +397,10 @@ fn emit_session_quota_renewed_at_the_beginning_of_a_session() {
 			.into_iter()
 			.map(|event_record| event_record.event)
 			.collect();
-		assert_eq!(events, vec![Event::Allocations(crate::Event::SessionQuotaRenewed)]);
+		assert_eq!(
+			events,
+			vec![RuntimeEvent::Allocations(crate::Event::SessionQuotaRenewed)]
+		);
 	})
 }
 
@@ -421,7 +425,9 @@ fn emit_session_quota_calculated_at_the_beginning_of_a_fiscal_period() {
 			.collect();
 		assert_eq!(
 			events,
-			vec![Event::Allocations(crate::Event::SessionQuotaCalculated(session_quota))]
+			vec![RuntimeEvent::Allocations(crate::Event::SessionQuotaCalculated(
+				session_quota
+			))]
 		);
 	})
 }
@@ -527,7 +533,7 @@ fn non_oracle_is_rejected() {
 		let total_issuance = 100000u64;
 		let _issuance = Balances::issue(total_issuance);
 		assert_noop!(
-			Allocations::batch(Origin::signed(Hacker::get()), bounded_vec![(Grantee::get(), 50)]),
+			Allocations::batch(RuntimeOrigin::signed(Hacker::get()), bounded_vec![(Grantee::get(), 50)]),
 			Errors::OracleAccessDenied
 		);
 	})
@@ -538,7 +544,7 @@ fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		let total_issuance = 100000u64;
 		let _issuance = Balances::issue(total_issuance);
-		let result = Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)])
+		let result = Allocations::batch(RuntimeOrigin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)])
 			.expect("batch call failed");
 		assert_eq!(result.pays_fee, Pays::No);
 	})
@@ -549,12 +555,12 @@ fn only_root_can_set_curve_starting_block() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(<MintCurveStartingBlock<Test>>::get(), None);
 		assert_eq!(
-			Allocations::set_curve_starting_block(Origin::root(), 13),
+			Allocations::set_curve_starting_block(RuntimeOrigin::root(), 13),
 			Ok(Pays::No.into())
 		);
 		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(13));
 		assert_noop!(
-			Allocations::set_curve_starting_block(Origin::signed(Oracle::get()), 17),
+			Allocations::set_curve_starting_block(RuntimeOrigin::signed(Oracle::get()), 17),
 			BadOrigin
 		);
 	})
@@ -567,7 +573,7 @@ fn very_first_batch_call_sets_curve_starting_block() {
 		System::set_block_number(5);
 		let _issuance = Balances::issue(100000u64);
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50)]
 		));
 		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(5));
@@ -575,7 +581,7 @@ fn very_first_batch_call_sets_curve_starting_block() {
 		assert_eq!(<SessionQuotaRenewSchedule<Test>>::get(), 8);
 		System::set_block_number(6);
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50)]
 		));
 		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(5));
@@ -590,7 +596,7 @@ fn simple_allocation_works() {
 		let total_issuance = 100000u64;
 		let _issuance = Balances::issue(total_issuance);
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50)]
 		));
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
@@ -607,7 +613,7 @@ fn batched_allocation_works() {
 		let total_issuance = 100000u64;
 		let _issuance = Balances::issue(total_issuance);
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
 		));
 		assert_eq!(Allocations::session_quota(), 200);
@@ -626,11 +632,11 @@ fn use_session_quota_in_multiple_calls() {
 		let total_issuance = 50000u64;
 		let _issuance = Balances::issue(total_issuance);
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 30), (OtherGrantee::get(), 50)]
 		));
 		assert_ok!(Allocations::batch(
-			Origin::signed(Oracle::get()),
+			RuntimeOrigin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 70)]
 		));
 		assert_eq!(Allocations::session_quota(), 0);
@@ -646,7 +652,7 @@ fn exceeding_session_quota_fails() {
 		<SessionQuota<Test>>::put(79);
 		assert_noop!(
 			Allocations::batch(
-				Origin::signed(Oracle::get()),
+				RuntimeOrigin::signed(Oracle::get()),
 				bounded_vec![(Grantee::get(), 30), (OtherGrantee::get(), 50)]
 			),
 			Errors::AllocationExceedsSessionQuota
@@ -667,7 +673,7 @@ fn ensure_issuance_checks() {
 		];
 		for input in inputs.iter().cloned() {
 			assert_noop!(
-				Allocations::batch(Origin::signed(Oracle::get()), input),
+				Allocations::batch(RuntimeOrigin::signed(Oracle::get()), input),
 				Errors::AllocationExceedsSessionQuota
 			);
 		}
@@ -678,7 +684,7 @@ fn ensure_issuance_checks() {
 fn ensure_existential_deposit_checks() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
-			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
+			Allocations::batch(RuntimeOrigin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
 			Errors::DoesNotSatisfyExistentialDeposit
 		);
 	})
@@ -688,7 +694,7 @@ fn ensure_existential_deposit_checks() {
 fn no_issuance() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
-			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![]),
+			Allocations::batch(RuntimeOrigin::signed(Oracle::get()), bounded_vec![]),
 			Errors::BatchEmpty
 		);
 	})

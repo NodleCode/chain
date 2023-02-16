@@ -17,7 +17,7 @@
  */
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
-	AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
+	AllocationsOracles, Balances, CompanyReserve, Runtime, RuntimeEvent,
 };
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
@@ -87,7 +87,7 @@ parameter_types! {
 }
 
 impl pallet_allocations::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = ProtocolFee;
@@ -105,7 +105,7 @@ parameter_types! {
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type AddOrigin = MoreThanHalfOfTechComm;
 	type RemoveOrigin = MoreThanHalfOfTechComm;
 	type SwapOrigin = MoreThanHalfOfTechComm;

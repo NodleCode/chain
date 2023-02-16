@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
+use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
 use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
@@ -27,10 +27,10 @@ parameter_types! {
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = pallet_balances::Pallet<Runtime>;
 	type ExternalOrigin = MoreThanHalfOfTechComm;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type PalletId = CompanyReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
@@ -40,10 +40,10 @@ parameter_types! {
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = pallet_balances::Pallet<Runtime>;
 	type ExternalOrigin = MoreThanHalfOfTechComm;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type PalletId = InternationalReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
@@ -53,10 +53,10 @@ parameter_types! {
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = pallet_balances::Pallet<Runtime>;
 	type ExternalOrigin = MoreThanHalfOfTechComm;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type PalletId = UsaReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
@@ -66,12 +66,12 @@ parameter_types! {
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = pallet_balances::Pallet<Runtime>;
 	// as of now nobody can spend this, later, we need to map this to the
 	// correct governance origin.
 	type ExternalOrigin = EnsureNever<AccountId>;
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	type PalletId = DaoReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
@@ -86,9 +86,9 @@ pub type MoreThanHalfOfTechComm =
 	pallet_collective::EnsureProportionMoreThan<AccountId, pallet_collective::Instance1, 1, 2>;
 pub type EnsureRootOrMoreThanHalfOfTechComm = EitherOfDiverse<EnsureRoot<AccountId>, MoreThanHalfOfTechComm>;
 impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
-	type Origin = Origin;
-	type Proposal = Call;
-	type Event = Event;
+	type RuntimeOrigin = RuntimeOrigin;
+	type Proposal = RuntimeCall;
+	type RuntimeEvent = RuntimeEvent;
 	type MotionDuration = MotionDuration;
 	type MaxProposals = MaxProposals;
 	type WeightInfo = ();
@@ -97,7 +97,7 @@ impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
 }
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type AddOrigin = MoreThanHalfOfTechComm;
 	type RemoveOrigin = MoreThanHalfOfTechComm;
 	type SwapOrigin = MoreThanHalfOfTechComm;
@@ -110,7 +110,7 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
 }
 
 impl pallet_mandate::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
 	type ExternalOrigin = MoreThanHalfOfTechComm;
 }

@@ -49,8 +49,8 @@ parameter_types! {
 
 pub type AccountId = u128;
 impl frame_system::Config for Test {
-	type Origin = Origin;
-	type Call = Call;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
@@ -61,7 +61,7 @@ impl frame_system::Config for Test {
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -85,7 +85,7 @@ parameter_types! {
 impl pallet_balances::Config for Test {
 	type Balance = Balance;
 	type DustRemoval = ();
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposit = ExistentialDeposit;
 	type MaxLocks = MaxLocks;
 	type AccountStore = frame_system::Pallet<Test>;
@@ -105,7 +105,7 @@ parameter_types! {
 }
 
 impl Config for Test {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Currency = PalletBalances;
 	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 	type MaxSchedule = MaxSchedule;
@@ -124,7 +124,7 @@ pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
 	System::events()
 		.into_iter()
 		.filter_map(|r| {
-			if let Event::Vesting(inner) = r.event {
+			if let RuntimeEvent::Vesting(inner) = r.event {
 				Some(inner)
 			} else {
 				None

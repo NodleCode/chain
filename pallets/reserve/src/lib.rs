@@ -26,8 +26,8 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
+	dispatch::GetDispatchInfo,
 	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
-	weights::GetDispatchInfo,
 	PalletId,
 };
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};
@@ -54,10 +54,10 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {
-		type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
-		type ExternalOrigin: EnsureOrigin<Self::Origin>;
+		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type ExternalOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type Currency: Currency<Self::AccountId>;
-		type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+		type RuntimeCall: Parameter + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin> + GetDispatchInfo;
 		type PalletId: Get<PalletId>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -73,6 +73,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		/// Spend `amount` funds from the reserve account to `to`.
+		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::spend())]
 		pub fn spend(origin: OriginFor<T>, to: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
@@ -85,6 +86,7 @@ pub mod pallet {
 		}
 
 		/// Deposit `amount` tokens in the treasure account
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::tip())]
 		pub fn tip(origin: OriginFor<T>, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			let tipper = ensure_signed(origin)?;
@@ -98,6 +100,7 @@ pub mod pallet {
 
 		#[allow(clippy::boxed_local)]
 		/// Dispatch a call as coming from the reserve account
+		#[pallet::call_index(2)]
 		#[pallet::weight({
             let dispatch_info = call.get_dispatch_info();
             (
@@ -105,7 +108,7 @@ pub mod pallet {
                 dispatch_info.class,
             )
         })]
-		pub fn apply_as(origin: OriginFor<T>, call: Box<<T as Config<I>>::Call>) -> DispatchResultWithPostInfo {
+		pub fn apply_as(origin: OriginFor<T>, call: Box<<T as Config<I>>::RuntimeCall>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
 			let res = call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into());

@@ -20,8 +20,8 @@
 use super::*;
 use crate::mock::{
 	balances, bond_nominator, bond_validator, events, is_disabled, last_event, on_offence_in_session, on_offence_now,
-	set_author, start_session, Balance, Balances, CancelOrigin, Event as MetaEvent, ExtBuilder, NodleStaking, Origin,
-	Session, System, Test,
+	set_author, start_session, Balance, Balances, CancelOrigin, ExtBuilder, NodleStaking, RuntimeEvent as MetaEvent,
+	RuntimeOrigin, Session, System, Test,
 };
 use crate::set::OrderedSet;
 use crate::types::{Bond, StakeReward, ValidatorSnapshot, ValidatorStatus};
@@ -52,20 +52,20 @@ fn join_validator_pool_works() {
 		.tst_staking_build()
 		.execute_with(|| {
 			assert_noop!(
-				NodleStaking::validator_join_pool(Origin::signed(1), 11u128,),
+				NodleStaking::validator_join_pool(RuntimeOrigin::signed(1), 11u128,),
 				Error::<Test>::ValidatorExists,
 			);
 			assert_noop!(
-				NodleStaking::validator_join_pool(Origin::signed(7), 9u128,),
+				NodleStaking::validator_join_pool(RuntimeOrigin::signed(7), 9u128,),
 				Error::<Test>::ValidatorBondBelowMin,
 			);
 			assert_noop!(
-				NodleStaking::validator_join_pool(Origin::signed(8), 10u128,),
+				NodleStaking::validator_join_pool(RuntimeOrigin::signed(8), 10u128,),
 				Error::<Test>::InsufficientBalance,
 			);
 			assert!(System::events().is_empty());
-			assert_ok!(NodleStaking::validator_join_pool(Origin::signed(3), 11u128,),);
-			assert_ok!(NodleStaking::validator_join_pool(Origin::signed(7), 10u128,));
+			assert_ok!(NodleStaking::validator_join_pool(RuntimeOrigin::signed(3), 11u128,),);
+			assert_ok!(NodleStaking::validator_join_pool(RuntimeOrigin::signed(7), 10u128,));
 			assert_eq!(
 				last_event(),
 				MetaEvent::NodleStaking(Event::JoinedValidatorPool(7, 10u128, 1121u128))
@@ -121,11 +121,11 @@ fn validator_activate_works() {
 		assert_eq!(NodleStaking::validator_state(11).unwrap().state, ValidatorStatus::Idle);
 
 		assert_noop!(
-			NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+			NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 2000),
 			Error::<Test>::InsufficientBalance,
 		);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
 
@@ -207,11 +207,11 @@ fn disablestrategy_whenslashed_works() {
 		assert_eq!(events(), expected);
 
 		assert_noop!(
-			NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+			NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 2000),
 			Error::<Test>::InsufficientBalance,
 		);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		let mut new1 = vec![Event::ValidatorBondedMore(11, 750, 760)];
 
@@ -294,11 +294,11 @@ fn kick_out_if_recent_disablestrategy_whenslashed_works() {
 		assert!(!is_disabled(11));
 
 		assert_noop!(
-			NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+			NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 2000),
 			Error::<Test>::InsufficientBalance,
 		);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
 
@@ -386,11 +386,11 @@ fn disablestrategy_never_works() {
 		assert_eq!(events(), expected);
 
 		assert_noop!(
-			NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+			NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 2000),
 			Error::<Test>::InsufficientBalance,
 		);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		let mut new1 = vec![Event::ValidatorBondedMore(11, 750, 760)];
 
@@ -473,11 +473,11 @@ fn kick_out_if_recent_disablestrategy_never_works() {
 		assert!(!is_disabled(11));
 
 		assert_noop!(
-			NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+			NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 2000),
 			Error::<Test>::InsufficientBalance,
 		);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
 
@@ -559,11 +559,11 @@ fn validator_exit_executes_after_delay() {
 			assert_eq!(NodleStaking::total(), 1100);
 
 			assert_noop!(
-				NodleStaking::validator_exit_pool(Origin::signed(3)),
+				NodleStaking::validator_exit_pool(RuntimeOrigin::signed(3)),
 				Error::<Test>::ValidatorDNE,
 			);
 			mock::start_active_session(6);
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(2)));
 			assert_eq!(
 				last_event(),
 				MetaEvent::NodleStaking(Event::ValidatorScheduledExit(6, 2, 8)),
@@ -621,9 +621,9 @@ fn validator_exit_executes_after_delay() {
 
 			assert_eq!(NodleStaking::total(), 700);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(5)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(5)));
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
 
 			let mut new3 = vec![
 				Event::Withdrawn(5, 100),
@@ -714,7 +714,7 @@ fn validator_selection_chooses_top_candidates() {
 
 			assert_eq!(NodleStaking::total(), 450);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(6)));
 			assert_eq!(
 				last_event(),
 				MetaEvent::NodleStaking(Event::ValidatorScheduledExit(4, 6, 6)),
@@ -749,7 +749,7 @@ fn validator_selection_chooses_top_candidates() {
 
 			assert_eq!(NodleStaking::total(), 400);
 
-			assert_ok!(NodleStaking::validator_join_pool(Origin::signed(6), 69u128));
+			assert_ok!(NodleStaking::validator_join_pool(RuntimeOrigin::signed(6), 69u128));
 
 			assert_eq!(
 				mock::last_event(),
@@ -781,12 +781,12 @@ fn validator_selection_chooses_top_candidates() {
 
 			assert_eq!(NodleStaking::total(), 469);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(3)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(4)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(5)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(1)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(2)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(3)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(4)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(5)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(6)));
 
 			let mut new3 = vec![
 				Event::ValidatorScheduledExit(8, 1, 10),
@@ -908,7 +908,7 @@ fn exit_queue() {
 
 			mock::start_active_session(5);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(6)));
 
 			let mut new1 = vec![
 				Event::ValidatorChosen(6, 1, 100),
@@ -925,7 +925,7 @@ fn exit_queue() {
 
 			mock::start_active_session(6);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(5)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(5)));
 
 			let mut new2 = vec![
 				Event::ValidatorChosen(7, 1, 100),
@@ -941,7 +941,7 @@ fn exit_queue() {
 			assert_eq!(events(), expected);
 
 			mock::start_active_session(7);
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(4)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(4)));
 
 			let mut new3 = vec![
 				Event::ValidatorLeft(6, 50, 400),
@@ -959,13 +959,13 @@ fn exit_queue() {
 			mock::start_active_session(8);
 
 			assert_noop!(
-				NodleStaking::validator_exit_pool(Origin::signed(4)),
+				NodleStaking::validator_exit_pool(RuntimeOrigin::signed(4)),
 				Error::<Test>::AlreadyLeaving,
 			);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(3)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(3)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(2)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(1)));
 
 			let mut new4 = vec![
 				Event::ValidatorLeft(5, 60, 340),
@@ -1167,7 +1167,7 @@ fn payout_distribution_to_solo_validators() {
 			assert!(NodleStaking::awarded_pts(4, 4).is_zero());
 			assert!(NodleStaking::awarded_pts(4, 5).is_zero());
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(1)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(1)));
 
 			let mut new4 = vec![Event::Rewarded(1, 1800000)];
 			expected.append(&mut new4);
@@ -1176,7 +1176,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(mock::balances(&1), (1801000, 100));
 			assert_eq!(Balances::total_balance(&1), 1801000);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(2)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(2)));
 
 			let mut new5 = vec![Event::Rewarded(2, 600000)];
 			expected.append(&mut new5);
@@ -1185,7 +1185,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(mock::balances(&2), (601000, 90));
 			assert_eq!(Balances::total_balance(&2), 601000);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(3)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(3)));
 
 			let mut new6 = vec![Event::Rewarded(3, 200000)];
 			expected.append(&mut new6);
@@ -1194,7 +1194,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(mock::balances(&3), (201000, 80));
 			assert_eq!(Balances::total_balance(&3), 201000);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(4)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(4)));
 
 			let mut new7 = vec![Event::Rewarded(4, 200000)];
 			expected.append(&mut new7);
@@ -1211,7 +1211,7 @@ fn payout_distribution_to_solo_validators() {
 				}]
 			);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(5)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(5)));
 
 			assert_eq!(NodleStaking::stake_rewards(&5), []);
 
@@ -1225,7 +1225,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(NodleStaking::stake_rewards(&6), []);
 
 			assert_noop!(
-				NodleStaking::withdraw_staking_rewards(Origin::signed(6)),
+				NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)),
 				Error::<Test>::RewardsDNE,
 			);
 
@@ -1244,7 +1244,7 @@ fn payout_distribution_to_solo_validators() {
 				}]
 			);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)),);
 
 			let mut new9 = vec![Event::Rewarded(6, 0)];
 			expected.append(&mut new9);
@@ -1267,7 +1267,7 @@ fn payout_distribution_to_solo_validators() {
 				})
 			});
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)),);
 
 			let mut new10 = vec![Event::Rewarded(6, 0)];
 			expected.append(&mut new10);
@@ -1296,7 +1296,7 @@ fn payout_distribution_to_solo_validators() {
 				})
 			});
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)),);
 
 			let mut new11 = vec![
 				Event::ValidatorChosen(10, 1, 100),
@@ -1363,13 +1363,17 @@ fn validator_commission() {
 
 			assert_eq!(NodleStaking::total(), 40);
 
-			assert_ok!(NodleStaking::validator_join_pool(Origin::signed(4), 20u128));
+			assert_ok!(NodleStaking::validator_join_pool(RuntimeOrigin::signed(4), 20u128));
 			assert_eq!(
 				last_event(),
 				MetaEvent::NodleStaking(Event::JoinedValidatorPool(4, 20u128, 60u128))
 			);
 
-			assert_ok!(Session::set_keys(Origin::signed(4), UintAuthorityId(4).into(), vec![]));
+			assert_ok!(Session::set_keys(
+				RuntimeOrigin::signed(4),
+				UintAuthorityId(4).into(),
+				vec![]
+			));
 
 			mock::start_active_session(5);
 
@@ -1382,8 +1386,8 @@ fn validator_commission() {
 			expected.append(&mut new1);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10, false));
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(5), 4, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 4, 10, false));
 
 			let mut new2 = vec![Event::Nomination(5, 10, 4, 30), Event::Nomination(6, 10, 4, 40)];
 			expected.append(&mut new2);
@@ -1424,7 +1428,7 @@ fn validator_commission() {
 			expected.append(&mut new4);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(1)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(1)));
 
 			let mut new5 = vec![Event::Rewarded(1, 300000)];
 			expected.append(&mut new5);
@@ -1433,7 +1437,7 @@ fn validator_commission() {
 			assert_eq!(mock::balances(&1), (300100, 20));
 			assert_eq!(Balances::total_balance(&1), 300100);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(2)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(2)));
 
 			let mut new6 = vec![Event::Rewarded(2, 100000)];
 			expected.append(&mut new6);
@@ -1442,7 +1446,7 @@ fn validator_commission() {
 			assert_eq!(mock::balances(&2), (100100, 10));
 			assert_eq!(Balances::total_balance(&2), 100100);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(3)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(3)));
 
 			let mut new7 = vec![Event::Rewarded(3, 100000)];
 			expected.append(&mut new7);
@@ -1451,7 +1455,7 @@ fn validator_commission() {
 			assert_eq!(mock::balances(&3), (100100, 10));
 			assert_eq!(Balances::total_balance(&3), 100100);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(4)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(4)));
 
 			let mut new8 = vec![Event::Rewarded(4, 300000)];
 			expected.append(&mut new8);
@@ -1460,7 +1464,7 @@ fn validator_commission() {
 			assert_eq!(mock::balances(&4), (300100, 20));
 			assert_eq!(Balances::total_balance(&4), 300100);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(5)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(5)));
 
 			let mut new9 = vec![Event::Rewarded(5, 100000)];
 			expected.append(&mut new9);
@@ -1469,7 +1473,7 @@ fn validator_commission() {
 			assert_eq!(mock::balances(&5), (100100, 10));
 			assert_eq!(Balances::total_balance(&5), 100100);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)));
 
 			let mut new10 = vec![Event::Rewarded(6, 100000)];
 			expected.append(&mut new10);
@@ -1578,21 +1582,21 @@ fn multiple_nominations() {
 			assert_eq!(System::consumers(&10), 1);
 
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(6), 1, 10, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 1, 10, false),
 				Error::<Test>::AlreadyNominatedValidator,
 			);
 
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(6), 2, 2, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 2, false),
 				Error::<Test>::NominationBelowMin,
 			);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10, false));
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10, false));
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 3, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 4, 10, false));
 
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(6), 5, 10, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 5, 10, false),
 				Error::<Test>::ExceedMaxValidatorPerNom,
 			);
 
@@ -1619,14 +1623,14 @@ fn multiple_nominations() {
 			expected.append(&mut new2);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(7), 2, 80, false));
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(7), 3, 11, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(7), 3, 11, false),
 				Error::<Test>::InsufficientBalance
 			);
 
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(10), 2, 10, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(10), 2, 10, false),
 				Error::<Test>::TooManyNominators
 			);
 
@@ -1645,7 +1649,7 @@ fn multiple_nominations() {
 			expected.append(&mut new3);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(2)));
 
 			assert_eq!(
 				last_event(),
@@ -1716,10 +1720,10 @@ fn multiple_nominations() {
 			assert_eq!(System::consumers(&9), 1);
 			assert_eq!(System::consumers(&10), 1);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(7)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(8)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(9)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(7)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(8)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(9)));
 
 			let mut new6 = vec![
 				Event::Withdrawn(6, 10),
@@ -1887,7 +1891,7 @@ fn switch_nomination_works() {
 			assert_eq!(System::consumers(&9), 1);
 			assert_eq!(System::consumers(&10), 1);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 10, false));
 
 			let mut new1 = vec![Event::Nomination(6, 10, 2, 50)];
 
@@ -1904,27 +1908,27 @@ fn switch_nomination_works() {
 
 			// Check with invalid arguments
 			assert_noop!(
-				NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 2, 5, false),
+				NodleStaking::nominator_move_nomination(RuntimeOrigin::signed(6), 2, 2, 5, false),
 				Error::<Test>::ValidatorDNE,
 			);
 
 			assert_noop!(
-				NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 7, 5, false),
+				NodleStaking::nominator_move_nomination(RuntimeOrigin::signed(6), 2, 7, 5, false),
 				Error::<Test>::ValidatorDNE,
 			);
 
 			assert_noop!(
-				NodleStaking::nominator_move_nomination(Origin::signed(6), 7, 2, 5, false),
+				NodleStaking::nominator_move_nomination(RuntimeOrigin::signed(6), 7, 2, 5, false),
 				Error::<Test>::ValidatorDNE,
 			);
 
 			assert_noop!(
-				NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
+				NodleStaking::nominator_move_nomination(RuntimeOrigin::signed(1), 2, 1, 5, false),
 				Error::<Test>::NominatorDNE,
 			);
 
 			assert_ok!(NodleStaking::nominator_move_nomination(
-				Origin::signed(6),
+				RuntimeOrigin::signed(6),
 				2,
 				1,
 				0,
@@ -1948,12 +1952,12 @@ fn switch_nomination_works() {
 			assert_eq!(NodleStaking::total(), 150);
 
 			assert_noop!(
-				NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
+				NodleStaking::nominator_move_nomination(RuntimeOrigin::signed(1), 2, 1, 5, false),
 				Error::<Test>::NominatorDNE,
 			);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10, false));
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 3, 10, false));
 
 			let mut new3 = vec![Event::Nomination(6, 10, 2, 50), Event::Nomination(6, 10, 3, 30)];
 
@@ -1976,7 +1980,7 @@ fn switch_nomination_works() {
 			assert_eq!(NodleStaking::total(), 170);
 
 			assert_ok!(NodleStaking::nominator_move_nomination(
-				Origin::signed(6),
+				RuntimeOrigin::signed(6),
 				3,
 				4,
 				5,
@@ -1985,10 +1989,10 @@ fn switch_nomination_works() {
 
 			assert_eq!(NodleStaking::total(), 175);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 5, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 5, 10, false));
 
 			assert_ok!(NodleStaking::nominator_move_nomination(
-				Origin::signed(6),
+				RuntimeOrigin::signed(6),
 				2,
 				5,
 				0,
@@ -2145,7 +2149,7 @@ fn reconciliation_basics_works() {
 			assert_eq!(System::consumers(&9), 1);
 			assert_eq!(System::consumers(&10), 1);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 40, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 40, false));
 
 			assert_eq!(mock::balances(&6), (100, 50));
 			assert_eq!(Balances::total_balance(&6), 100);
@@ -2174,7 +2178,7 @@ fn reconciliation_basics_works() {
 
 			assert_noop!(
 				NodleStaking::set_staking_limits(
-					Origin::signed(CancelOrigin::get()),
+					RuntimeOrigin::signed(CancelOrigin::get()),
 					0,
 					s1_min_stake,
 					s1_min_validator_bond,
@@ -2186,7 +2190,7 @@ fn reconciliation_basics_works() {
 
 			assert_noop!(
 				NodleStaking::set_staking_limits(
-					Origin::signed(CancelOrigin::get()),
+					RuntimeOrigin::signed(CancelOrigin::get()),
 					s1_max_validators,
 					Zero::zero(),
 					s1_min_validator_bond,
@@ -2198,7 +2202,7 @@ fn reconciliation_basics_works() {
 
 			assert_noop!(
 				NodleStaking::set_staking_limits(
-					Origin::signed(CancelOrigin::get()),
+					RuntimeOrigin::signed(CancelOrigin::get()),
 					s1_max_validators,
 					s1_min_stake,
 					Zero::zero(),
@@ -2210,7 +2214,7 @@ fn reconciliation_basics_works() {
 
 			assert_noop!(
 				NodleStaking::set_staking_limits(
-					Origin::signed(CancelOrigin::get()),
+					RuntimeOrigin::signed(CancelOrigin::get()),
 					s1_max_validators,
 					s1_min_stake,
 					s1_min_validator_bond,
@@ -2222,7 +2226,7 @@ fn reconciliation_basics_works() {
 
 			assert_noop!(
 				NodleStaking::set_staking_limits(
-					Origin::signed(CancelOrigin::get()),
+					RuntimeOrigin::signed(CancelOrigin::get()),
 					s1_max_validators,
 					s1_min_stake,
 					s1_min_validator_bond,
@@ -2233,7 +2237,7 @@ fn reconciliation_basics_works() {
 			);
 
 			assert_ok!(NodleStaking::set_staking_limits(
-				Origin::signed(CancelOrigin::get()),
+				RuntimeOrigin::signed(CancelOrigin::get()),
 				s1_max_validators,
 				s1_min_stake,
 				s1_min_validator_bond,
@@ -2305,7 +2309,7 @@ fn reconciliation_basics_works() {
 			assert_eq!(NodleStaking::nominator_state(9).unwrap().active_bond, 0);
 			assert_eq!(NodleStaking::nominator_state(9).unwrap().frozen_bond, 10);
 
-			assert_ok!(NodleStaking::unbond_frozen(Origin::signed(6)));
+			assert_ok!(NodleStaking::unbond_frozen(RuntimeOrigin::signed(6)));
 
 			let mut new1 = vec![Event::NominationUnbondFrozen(6, 10, 40, 40)];
 			expected.append(&mut new1);
@@ -2316,7 +2320,7 @@ fn reconciliation_basics_works() {
 
 			assert_eq!(System::consumers(&6), 1);
 
-			assert_ok!(NodleStaking::unbond_frozen(Origin::signed(7)));
+			assert_ok!(NodleStaking::unbond_frozen(RuntimeOrigin::signed(7)));
 
 			let mut new1 = vec![Event::NominationUnbondFrozen(7, 10, 0, 0), Event::NominatorLeft(7, 10)];
 			expected.append(&mut new1);
@@ -2328,11 +2332,11 @@ fn reconciliation_basics_works() {
 			assert_eq!(System::consumers(&7), 0);
 
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(7), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(7), 2, 50, false),
 				Error::<Test>::NominatorDNE,
 			);
 
-			assert_ok!(NodleStaking::unbond_frozen(Origin::signed(10)));
+			assert_ok!(NodleStaking::unbond_frozen(RuntimeOrigin::signed(10)));
 
 			let mut new1 = vec![
 				Event::NominationUnbondFrozen(10, 10, 0, 0),
@@ -2347,11 +2351,11 @@ fn reconciliation_basics_works() {
 			assert_eq!(System::consumers(&10), 0);
 
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(10), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(10), 2, 50, false),
 				Error::<Test>::NominatorDNE,
 			);
 
-			assert_ok!(NodleStaking::unbond_frozen(Origin::signed(8)));
+			assert_ok!(NodleStaking::unbond_frozen(RuntimeOrigin::signed(8)));
 
 			let mut new1 = vec![Event::NominationUnbondFrozen(8, 10, 0, 0), Event::NominatorLeft(8, 10)];
 			expected.append(&mut new1);
@@ -2363,11 +2367,11 @@ fn reconciliation_basics_works() {
 			assert_eq!(System::consumers(&8), 0);
 
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(8), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(8), 2, 50, false),
 				Error::<Test>::NominatorDNE,
 			);
 
-			assert_ok!(NodleStaking::unbond_frozen(Origin::signed(9)));
+			assert_ok!(NodleStaking::unbond_frozen(RuntimeOrigin::signed(9)));
 
 			let mut new1 = vec![Event::NominationUnbondFrozen(9, 10, 0, 0), Event::NominatorLeft(9, 10)];
 			expected.append(&mut new1);
@@ -2379,7 +2383,7 @@ fn reconciliation_basics_works() {
 			assert_eq!(System::consumers(&9), 0);
 
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(9), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(9), 2, 50, false),
 				Error::<Test>::NominatorDNE,
 			);
 		});
@@ -2490,7 +2494,7 @@ fn unfreeze_bond_arg_flag_works() {
 				),
 			);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 20, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 3, 20, false));
 
 			assert_eq!(mock::balances(&6), (100, 30));
 			assert_eq!(Balances::total_balance(&6), 100);
@@ -2513,7 +2517,7 @@ fn unfreeze_bond_arg_flag_works() {
 			assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 30);
 			assert_eq!(NodleStaking::total(), 175);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 3, 20, true,));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(7), 3, 20, true,));
 
 			assert_eq!(mock::balances(&7), (100, 30));
 			assert_eq!(Balances::total_balance(&7), 100);
@@ -2531,7 +2535,7 @@ fn unfreeze_bond_arg_flag_works() {
 			assert_eq!(NodleStaking::nominator_state(7).unwrap().active_bond, 30);
 			assert_eq!(NodleStaking::total(), 195);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 4, 20, true,));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(8), 4, 20, true,));
 
 			assert_eq!(mock::balances(&8), (100, 30));
 			assert_eq!(Balances::total_balance(&8), 100);
@@ -2559,7 +2563,7 @@ fn unfreeze_bond_arg_flag_works() {
 			let s1_new_min_nomination_chill_threshold = 15;
 
 			assert_ok!(NodleStaking::set_staking_limits(
-				Origin::signed(CancelOrigin::get()),
+				RuntimeOrigin::signed(CancelOrigin::get()),
 				s1_max_validators,
 				s1_min_stake,
 				s1_min_validator_bond,
@@ -2618,18 +2622,18 @@ fn unfreeze_bond_arg_flag_works() {
 			assert_eq!(NodleStaking::nominator_state(8).unwrap().frozen_bond, 10);
 
 			assert_noop!(
-				NodleStaking::nominator_nominate(Origin::signed(6), 1, 14, false),
+				NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 1, 14, false),
 				Error::<Test>::NominationBelowMin,
 			);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 1, 14, true));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 1, 14, true));
 
 			let mut new1 = vec![Event::Nomination(6, 24, 1, 69)];
 
 			expected.append(&mut new1);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::nominator_bond_more(Origin::signed(6), 1, 6, true),);
+			assert_ok!(NodleStaking::nominator_bond_more(RuntimeOrigin::signed(6), 1, 6, true),);
 
 			let mut new1 = vec![Event::NominationIncreased(6, 30, 1, 69, 75)];
 			expected.append(&mut new1);
@@ -2769,18 +2773,18 @@ fn validators_bond() {
 			assert_eq!(NodleStaking::total(), 140);
 
 			assert_noop!(
-				NodleStaking::validator_bond_more(Origin::signed(6), 50),
+				NodleStaking::validator_bond_more(RuntimeOrigin::signed(6), 50),
 				Error::<Test>::ValidatorDNE
 			);
 
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(1), 50));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(1), 50));
 
 			assert_noop!(
-				NodleStaking::validator_bond_more(Origin::signed(1), 40),
+				NodleStaking::validator_bond_more(RuntimeOrigin::signed(1), 40),
 				Error::<Test>::InsufficientBalance
 			);
 
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(1)));
 
 			let mut new1 = vec![
 				Event::ValidatorBondedMore(1, 20, 70),
@@ -2793,7 +2797,7 @@ fn validators_bond() {
 			mock::start_active_session(5);
 
 			assert_noop!(
-				NodleStaking::validator_bond_more(Origin::signed(1), 30),
+				NodleStaking::validator_bond_more(RuntimeOrigin::signed(1), 30),
 				Error::<Test>::CannotActivateIfLeaving,
 			);
 
@@ -2819,15 +2823,15 @@ fn validators_bond() {
 			assert_eq!(events(), expected);
 
 			assert_noop!(
-				NodleStaking::validator_bond_more(Origin::signed(1), 40),
+				NodleStaking::validator_bond_more(RuntimeOrigin::signed(1), 40),
 				Error::<Test>::ValidatorDNE,
 			);
 
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(2), 80));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(2), 80));
 
-			assert_ok!(NodleStaking::validator_bond_less(Origin::signed(2), 90));
+			assert_ok!(NodleStaking::validator_bond_less(RuntimeOrigin::signed(2), 90));
 
-			assert_ok!(NodleStaking::validator_bond_less(Origin::signed(3), 10));
+			assert_ok!(NodleStaking::validator_bond_less(RuntimeOrigin::signed(3), 10));
 
 			let mut new3 = vec![
 				Event::ValidatorBondedMore(2, 20, 100),
@@ -2839,27 +2843,27 @@ fn validators_bond() {
 			assert_eq!(events(), expected);
 
 			assert_noop!(
-				NodleStaking::validator_bond_less(Origin::signed(2), 11),
+				NodleStaking::validator_bond_less(RuntimeOrigin::signed(2), 11),
 				Error::<Test>::Underflow
 			);
 			assert_noop!(
-				NodleStaking::validator_bond_less(Origin::signed(2), 1),
+				NodleStaking::validator_bond_less(RuntimeOrigin::signed(2), 1),
 				Error::<Test>::ValidatorBondBelowMin
 			);
 			assert_noop!(
-				NodleStaking::validator_bond_less(Origin::signed(3), 1),
+				NodleStaking::validator_bond_less(RuntimeOrigin::signed(3), 1),
 				Error::<Test>::ValidatorBondBelowMin
 			);
 			assert_noop!(
-				NodleStaking::validator_bond_less(Origin::signed(4), 11),
+				NodleStaking::validator_bond_less(RuntimeOrigin::signed(4), 11),
 				Error::<Test>::ValidatorBondBelowMin
 			);
 
-			assert_ok!(NodleStaking::validator_bond_less(Origin::signed(4), 10));
+			assert_ok!(NodleStaking::validator_bond_less(RuntimeOrigin::signed(4), 10));
 
 			mock::start_active_session(9);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(2)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(2)));
 			assert_eq!(mock::balances(&2), (100, 10));
 
 			let mut new4 = vec![
@@ -2968,38 +2972,43 @@ fn nominators_bond() {
 			assert_eq!(NodleStaking::total(), 140);
 
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(1), 2, 50, false),
 				Error::<Test>::NominatorDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(6), 2, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(6), 2, 50, false),
 				Error::<Test>::NominationDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(7), 6, 50, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(7), 6, 50, false),
 				Error::<Test>::ValidatorDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_less(Origin::signed(6), 1, 11),
+				NodleStaking::nominator_bond_less(RuntimeOrigin::signed(6), 1, 11),
 				Error::<Test>::Underflow,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_less(Origin::signed(6), 1, 8),
+				NodleStaking::nominator_bond_less(RuntimeOrigin::signed(6), 1, 8),
 				Error::<Test>::NominationBelowMin,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_less(Origin::signed(6), 1, 6),
+				NodleStaking::nominator_bond_less(RuntimeOrigin::signed(6), 1, 6),
 				Error::<Test>::NominatorBondBelowMin,
 			);
 
-			assert_ok!(NodleStaking::nominator_bond_more(Origin::signed(6), 1, 10, false));
+			assert_ok!(NodleStaking::nominator_bond_more(
+				RuntimeOrigin::signed(6),
+				1,
+				10,
+				false
+			));
 
 			assert_noop!(
-				NodleStaking::nominator_bond_less(Origin::signed(6), 2, 5),
+				NodleStaking::nominator_bond_less(RuntimeOrigin::signed(6), 2, 5),
 				Error::<Test>::NominationDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81, false),
+				NodleStaking::nominator_bond_more(RuntimeOrigin::signed(6), 1, 81, false),
 				Error::<Test>::InsufficientBalance,
 			);
 
@@ -3007,7 +3016,7 @@ fn nominators_bond() {
 
 			assert_eq!(mock::balances(&6), (100, 20));
 			assert_eq!(NodleStaking::total(), 150);
-			assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+			assert_ok!(NodleStaking::validator_exit_pool(RuntimeOrigin::signed(1)));
 
 			let mut new1 = vec![
 				Event::NominationIncreased(6, 20, 1, 50, 60),
@@ -3047,9 +3056,9 @@ fn nominators_bond() {
 
 			mock::start_active_session(8);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(7)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(10)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(7)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(10)));
 
 			let mut new3 = vec![
 				Event::ValidatorChosen(9, 2, 40),
@@ -3167,20 +3176,20 @@ fn revoke_nomination_or_leave_nominators() {
 			assert_eq!(NodleStaking::total(), 140);
 
 			assert_noop!(
-				NodleStaking::nominator_denominate(Origin::signed(1), 2),
+				NodleStaking::nominator_denominate(RuntimeOrigin::signed(1), 2),
 				Error::<Test>::NominatorDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_denominate(Origin::signed(6), 2),
+				NodleStaking::nominator_denominate(RuntimeOrigin::signed(6), 2),
 				Error::<Test>::NominationDNE,
 			);
 			assert_noop!(
-				NodleStaking::nominator_denominate_all(Origin::signed(1)),
+				NodleStaking::nominator_denominate_all(RuntimeOrigin::signed(1)),
 				Error::<Test>::NominatorDNE,
 			);
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 3, false));
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 3, false));
-			assert_ok!(NodleStaking::nominator_denominate(Origin::signed(6), 1));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 2, 3, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(6), 3, 3, false));
+			assert_ok!(NodleStaking::nominator_denominate(RuntimeOrigin::signed(6), 1));
 
 			let mut new1 = vec![
 				Event::Nomination(6, 3, 2, 43),
@@ -3193,7 +3202,7 @@ fn revoke_nomination_or_leave_nominators() {
 
 			mock::start_active_session(6);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
 
 			let mut new2 = vec![
 				Event::ValidatorChosen(6, 1, 40),
@@ -3215,18 +3224,18 @@ fn revoke_nomination_or_leave_nominators() {
 			assert_eq!(events(), expected);
 
 			assert_noop!(
-				NodleStaking::nominator_denominate(Origin::signed(6), 2),
+				NodleStaking::nominator_denominate(RuntimeOrigin::signed(6), 2),
 				Error::<Test>::NominatorBondBelowMin,
 			);
 			assert_noop!(
-				NodleStaking::nominator_denominate(Origin::signed(6), 3),
+				NodleStaking::nominator_denominate(RuntimeOrigin::signed(6), 3),
 				Error::<Test>::NominatorBondBelowMin,
 			);
 			// can revoke both remaining by calling leave nominators
-			assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
+			assert_ok!(NodleStaking::nominator_denominate_all(RuntimeOrigin::signed(6)));
 			// this leads to 8 leaving set of nominators
-			assert_ok!(NodleStaking::nominator_denominate(Origin::signed(8), 2));
-			assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(8)));
+			assert_ok!(NodleStaking::nominator_denominate(RuntimeOrigin::signed(8), 2));
+			assert_ok!(NodleStaking::nominator_denominate_all(RuntimeOrigin::signed(8)));
 
 			let mut new3 = vec![
 				Event::NominatorLeftValidator(6, 2, 3, 40),
@@ -3239,8 +3248,8 @@ fn revoke_nomination_or_leave_nominators() {
 
 			mock::start_active_session(8);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(8)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(8)));
 
 			let mut new4 = vec![
 				Event::ValidatorChosen(8, 1, 40),
@@ -3381,11 +3390,11 @@ fn payouts_follow_nomination_changes() {
 
 			// 1. ensure nominators are paid for 2 rounds after they leave
 			assert_noop!(
-				NodleStaking::nominator_denominate_all(Origin::signed(66)),
+				NodleStaking::nominator_denominate_all(RuntimeOrigin::signed(66)),
 				Error::<Test>::NominatorDNE
 			);
 
-			assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
+			assert_ok!(NodleStaking::nominator_denominate_all(RuntimeOrigin::signed(6)));
 
 			mock::start_active_session(6);
 
@@ -3425,7 +3434,7 @@ fn payouts_follow_nomination_changes() {
 			expected.append(&mut new3);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10, false));
+			assert_ok!(NodleStaking::nominator_nominate(RuntimeOrigin::signed(8), 1, 10, false));
 
 			mock::start_active_session(8);
 
@@ -3486,14 +3495,14 @@ fn payouts_follow_nomination_changes() {
 			expected.append(&mut new6);
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_unbonded(RuntimeOrigin::signed(6)));
 
 			let mut new7 = vec![Event::Withdrawn(6, 10), Event::NominatorLeft(6, 10)];
 			expected.append(&mut new7);
 
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)));
 
 			let mut new8 = vec![Event::Rewarded(6, 480000)];
 			expected.append(&mut new8);
@@ -3511,7 +3520,7 @@ fn set_invulnerables_works() {
 	ExtBuilder::default().build_and_execute(|| {
 		let new_set1 = vec![1, 2];
 
-		assert_ok!(NodleStaking::set_invulnerables(Origin::root(), new_set1.clone()));
+		assert_ok!(NodleStaking::set_invulnerables(RuntimeOrigin::root(), new_set1.clone()));
 		assert_eq!(NodleStaking::invulnerables(), new_set1);
 
 		let mut expected = vec![Event::NewInvulnerables([1, 2].to_vec())];
@@ -3520,7 +3529,7 @@ fn set_invulnerables_works() {
 		let new_set2 = vec![3, 4];
 
 		assert_ok!(NodleStaking::set_invulnerables(
-			Origin::signed(CancelOrigin::get()),
+			RuntimeOrigin::signed(CancelOrigin::get()),
 			new_set2.clone()
 		));
 		assert_eq!(NodleStaking::invulnerables(), new_set2);
@@ -3530,7 +3539,10 @@ fn set_invulnerables_works() {
 		assert_eq!(events(), expected);
 
 		// cannot set with non-root.
-		assert_noop!(NodleStaking::set_invulnerables(Origin::signed(1), new_set2), BadOrigin);
+		assert_noop!(
+			NodleStaking::set_invulnerables(RuntimeOrigin::signed(1), new_set2),
+			BadOrigin
+		);
 	});
 }
 
@@ -3541,12 +3553,12 @@ fn set_total_validator_per_round_works() {
 		let new_total_selected = old_total_selected * 4u32;
 
 		assert_noop!(
-			NodleStaking::set_total_validator_per_round(Origin::signed(1), new_total_selected),
+			NodleStaking::set_total_validator_per_round(RuntimeOrigin::signed(1), new_total_selected),
 			BadOrigin
 		);
 
 		assert_ok!(NodleStaking::set_total_validator_per_round(
-			Origin::signed(CancelOrigin::get()),
+			RuntimeOrigin::signed(CancelOrigin::get()),
 			new_total_selected
 		));
 
@@ -3558,7 +3570,7 @@ fn set_total_validator_per_round_works() {
 		let new_total_selected = old_total_selected * 2u32;
 
 		assert_ok!(NodleStaking::set_total_validator_per_round(
-			Origin::root(),
+			RuntimeOrigin::root(),
 			new_total_selected
 		));
 
@@ -3587,7 +3599,7 @@ fn set_staking_limits_works() {
 
 		assert_noop!(
 			NodleStaking::set_staking_limits(
-				Origin::signed(1),
+				RuntimeOrigin::signed(1),
 				new_max_validators,
 				new_min_stake,
 				new_min_validator_bond,
@@ -3598,7 +3610,7 @@ fn set_staking_limits_works() {
 		);
 
 		assert_ok!(NodleStaking::set_staking_limits(
-			Origin::signed(CancelOrigin::get()),
+			RuntimeOrigin::signed(CancelOrigin::get()),
 			new_max_validators,
 			new_min_stake,
 			new_min_validator_bond,
@@ -3639,7 +3651,7 @@ fn set_staking_limits_works() {
 		let new2_min_nomination_chill_threshold = old_min_nomination_chill_threshold.saturating_mul(2u32.into());
 
 		assert_ok!(NodleStaking::set_staking_limits(
-			Origin::root(),
+			RuntimeOrigin::root(),
 			new2_max_validators,
 			new2_min_stake,
 			new2_min_validator_bond,
@@ -3710,7 +3722,7 @@ fn payout_creates_controller() {
 		// 	mock::events()
 		// );
 
-		// assert_ok!(NodleStaking::payout_stakers(Origin::signed(1337), 11, 1));
+		// assert_ok!(NodleStaking::payout_stakers(RuntimeOrigin::signed(1337), 11, 1));
 
 		// // Controller is created
 		// assert!(Balances::free_balance(1337) > 0);
@@ -3779,7 +3791,7 @@ fn reward_validator_slashing_validator_does_not_overflow() {
 			bond_validator(81, stake);
 
 			assert_ok!(Session::set_keys(
-				Origin::signed(81),
+				RuntimeOrigin::signed(81),
 				UintAuthorityId(81).into(),
 				vec![]
 			));
@@ -3824,7 +3836,7 @@ fn reward_validator_slashing_validator_does_not_overflow() {
 			];
 			assert_eq!(events(), expected);
 
-			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(81)));
+			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(81)));
 
 			let mut new1 = vec![Event::Rewarded(81, 36893488147419103230)];
 			expected.append(&mut new1);
@@ -4110,7 +4122,7 @@ fn slash_in_old_span_does_not_deselect() {
 
 			assert_eq!(NodleStaking::total(), 3200);
 
-			assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+			assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 			assert_eq!(
 				NodleStaking::validator_state(11).unwrap().state,
 				ValidatorStatus::Active
@@ -4365,7 +4377,12 @@ fn invulnerables_are_not_slashed() {
 
 			Balances::make_free_balance_be(&201, 1000);
 
-			assert_ok!(NodleStaking::nominator_nominate(Origin::signed(201), 21, 500, false,));
+			assert_ok!(NodleStaking::nominator_nominate(
+				RuntimeOrigin::signed(201),
+				21,
+				500,
+				false,
+			));
 
 			mock::start_active_session(3);
 
@@ -4630,9 +4647,9 @@ fn garbage_collection_after_slashing() {
 
 			// TODO :: Validation of DB instance Clean-off pending
 			// // reap_stash respects num_slashing_spans so that weight is accurate
-			// assert_noop!(Staking::reap_stash(Origin::none(), 11, 0),
+			// assert_noop!(Staking::reap_stash(RuntimeOrigin::none(), 11, 0),
 			// Error::<Test>::IncorrectSlashingSpans);
-			// assert_ok!(Staking::reap_stash(Origin::none(), 11, 2));
+			// assert_ok!(Staking::reap_stash(RuntimeOrigin::none(), 11, 2));
 
 			// assert!(<Staking as crate::Store>::SlashingSpans::get(&11).is_none());
 			// assert_eq!(<Staking as crate::Store>::SpanSlash::get(&(11, 0)).amount_slashed(), &0);
@@ -4708,9 +4725,9 @@ fn garbage_collection_after_slashing_ed_1() {
 
 		// TODO :: Validation of DB instance Clean-off pending
 		// // reap_stash respects num_slashing_spans so that weight is accurate
-		// assert_noop!(Staking::reap_stash(Origin::none(), 11, 0),
-		// Error::<Test>::IncorrectSlashingSpans); assert_ok!(Staking::reap_stash(Origin::none(),
-		// 11, 2));
+		// assert_noop!(Staking::reap_stash(RuntimeOrigin::none(), 11, 0),
+		// Error::<Test>::IncorrectSlashingSpans);
+		// assert_ok!(Staking::reap_stash(RuntimeOrigin::none(), 11, 2));
 
 		// assert!(<Staking as crate::Store>::SlashingSpans::get(&11).is_none());
 		// assert_eq!(<Staking as crate::Store>::SpanSlash::get(&(11, 0)).amount_slashed(), &0);
@@ -4781,7 +4798,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 		assert_eq!(events(), expected);
 
 		// activate validator 11 in session 3
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(11), 10));
 
 		mock::start_active_session(4);
 
@@ -4817,7 +4834,12 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 #[test]
 fn slashing_nominators_by_span_max() {
 	ExtBuilder::default().num_validators(4).build_and_execute(|| {
-		assert_ok!(NodleStaking::nominator_nominate(Origin::signed(101), 21, 500, false,));
+		assert_ok!(NodleStaking::nominator_nominate(
+			RuntimeOrigin::signed(101),
+			21,
+			500,
+			false,
+		));
 
 		mock::start_active_session(1);
 		mock::start_active_session(2);
@@ -4961,7 +4983,12 @@ fn slashing_nominators_by_span_max() {
 #[test]
 fn slashes_are_summed_across_spans() {
 	ExtBuilder::default().num_validators(4).build_and_execute(|| {
-		assert_ok!(NodleStaking::nominator_nominate(Origin::signed(101), 21, 500, false,));
+		assert_ok!(NodleStaking::nominator_nominate(
+			RuntimeOrigin::signed(101),
+			21,
+			500,
+			false,
+		));
 		mock::start_active_session(1);
 		mock::start_active_session(2);
 		mock::start_active_session(3);
@@ -5024,7 +5051,7 @@ fn slashes_are_summed_across_spans() {
 
 		assert_eq!(get_span(21).iter().collect::<Vec<_>>(), expected_spans,);
 
-		assert_ok!(NodleStaking::validator_bond_more(Origin::signed(21), 10));
+		assert_ok!(NodleStaking::validator_bond_more(RuntimeOrigin::signed(21), 10));
 
 		mock::start_active_session(5);
 
@@ -5221,11 +5248,11 @@ fn remove_deferred() {
 
 			// fails if empty
 			assert_noop!(
-				NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![]),
+				NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), 1, vec![]),
 				Error::<Test>::EmptyTargets
 			);
 
-			assert_ok!(NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![11],));
+			assert_ok!(NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), 1, vec![11],));
 
 			mock::start_active_session(3);
 
@@ -5378,20 +5405,20 @@ fn remove_multi_deferred() {
 			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 5);
 
 			assert_noop!(
-				NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![]),
+				NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), 1, vec![]),
 				Error::<Test>::EmptyTargets
 			);
 
 			assert_noop!(
-				NodleStaking::slash_cancel_deferred(Origin::root(), apply_at, vec![11]),
+				NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), apply_at, vec![11]),
 				Error::<Test>::InvalidSessionIndex
 			);
 
-			assert_ok!(NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![11]),);
+			assert_ok!(NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), 1, vec![11]),);
 
 			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 3);
 
-			assert_ok!(NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![69]),);
+			assert_ok!(NodleStaking::slash_cancel_deferred(RuntimeOrigin::root(), 1, vec![69]),);
 
 			assert_eq!(<UnappliedSlashes<Test>>::get(apply_at).len(), 2);
 
