@@ -25,12 +25,10 @@ mv weights/pallet_allocations.rs pallets/allocations/src/weights.rs
 mv weights/pallet_grants.rs pallets/grants/src/weights.rs 
 mv weights/pallet_reserve.rs pallets/reserve/src/weights.rs
 
-exit
 
 for PALLET in $external
 do
-echo ./target/release/nodle-parachain    benchmark pallet \
-    benchmark pallet \
+./target/release/nodle-parachain    benchmark pallet \
     --chain=dev \
     --steps=50 \
     --repeat=20 \
@@ -42,7 +40,6 @@ echo ./target/release/nodle-parachain    benchmark pallet \
     --output=runtimes/eden/src/weights
 
 done
-exit
 
 
 
