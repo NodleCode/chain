@@ -11,7 +11,7 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
-use xcm::{latest::NetworkId, prelude::*};
+use xcm::{v2::NetworkId, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, NativeAsset, ParentIsPreset,
@@ -48,13 +48,13 @@ pub type LocalOriginToLocation = SignedToAccountId32<RuntimeOrigin, AccountId, R
 /// queues.
 pub type XcmRouter = (
 	// Two routers - use UMP to communicate with the relay chain:
-	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, ()>,
+	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, (), ()>,
 	// ..and XCMP to communicate with the sibling chains.
 	XcmpQueue,
 );
 parameter_types! {
 	pub RelayLocation: MultiLocation = MultiLocation::parent();
-	pub const NodlLocation: MultiLocation = Here.into();
+	pub const NodlLocation: MultiLocation = MultiLocation{parents: 0, interior: Here.into()};
 	pub const RelayNetwork: NetworkId = NetworkId::Any;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
