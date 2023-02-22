@@ -203,20 +203,16 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 		if location == MultiLocation::parent() {
 			return None;
 		}
-		match location {
-			MultiLocation {
-				parents,
-				interior: X2(Parachain(ParachainInfo::parachain_id()), PalletInstance(key)),
-			} if parents == 1 => {
-				match (para_id, key) {
-					(id, 2) => {
-						if id == u32::from(ParachainInfo::parachain_id()) {
-							Some(CurrencyId::SelfReserve)
-						} else {
-							None
-						}
-					} // Pallet instance 2 for balances pallet : TODO: refactor
-					_ => None,
+		match location.first_interior() {
+			Junctions::X2(Parachain(para_id), PalletInstance(key)) => {
+				if (
+					ParachainInfo::parachain_id(),
+					<Balances as PalletInfoAccess>::index() as u8,
+				) == (para_id, key)
+				{
+					Some(CurrencyId::NodleNative)
+				} else {
+					None
 				}
 			}
 			_ => None,
