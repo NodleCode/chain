@@ -177,7 +177,7 @@ parameter_types! {
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
-	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::parachain_id().into())));
+	pub SelfLocation: MultiLocation = MultiLocation::here();
 }
 parameter_type_with_key! {
 	pub ParachainMinFee: |location: MultiLocation| -> Option<u128> {
