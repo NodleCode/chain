@@ -16,6 +16,7 @@ use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_runtime::traits::Convert;
+use orml_traits::location::RelativeReserveProvider;
 use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
@@ -243,5 +244,5 @@ impl orml_xtokens::Config for Runtime {
 	type MaxAssetsForTransfer = MaxAssetsForTransfer;
 	type MinXcmFee = ParachainMinFee;
 	type MultiLocationsFilter = Everything;
-	type ReserveProvider = AbsoluteReserveProvider; //check this
+	type ReserveProvider = RelativeReserveProvider; 
 }
