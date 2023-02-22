@@ -5,9 +5,10 @@ use super::{
 use crate::implementations::DealWithFees;
 use frame_support::{
 	parameter_types,
-	traits::{Everything, Nothing},
-	weights::IdentityFee,
+	traits::{ConstU32, Everything, Nothing},
+	weights::Weight,weights::IdentityFee,
 };
+use crate::AllPalletsWithSystem;
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
@@ -58,6 +59,8 @@ parameter_types! {
 	pub const RelayNetwork: NetworkId = NetworkId::Any;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+	pub UniversalLocation: InteriorMultiLocation =
+	X2(GlobalConsensus(RelayNetwork::get().unwrap()), Parachain(ParachainInfo::parachain_id().into()));
 }
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
@@ -97,11 +100,13 @@ pub type CurrencyTransactor = CurrencyAdapter<
 	(),
 >;
 parameter_types! {
-		// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-		pub UnitWeightCost: u64 = 1_000_000_000;
-		pub const MaxInstructions: u32 = 100;
+	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
+	pub UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
+	pub const MaxInstructions: u32 = 100;
+	pub const MaxAssetsIntoHolding: u32 = 64;
 }
-
+use polkadot_runtime_common::ToAuthor;
+use frame_support::weights::WeightToFee;
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
 	type RuntimeCall = RuntimeCall;
@@ -109,14 +114,24 @@ impl xcm_executor::Config for XcmConfig {
 	type AssetTransactor = AssetTransactors;
 	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = NativeAsset;
-	type IsTeleporter = ();
+	type IsTeleporter = (); // Teleporting is disabled.
+	type UniversalLocation = UniversalLocation;
 	type Barrier = Barrier;
 	type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, RelayLocation, AccountId, Balances, DealWithFees>;
-	type ResponseHandler = (); // Don't handle responses for now.
+	type Trader = UsingComponents<WeightToFee, RelayLocation, AccountId, Balances, ToAuthor<Runtime>>;
+	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;
 	type SubscriptionService = PolkadotXcm;
+	type PalletInstancesInfo = AllPalletsWithSystem;
+	type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
+	type AssetLocker = ();
+	type AssetExchanger = ();
+	type FeeManager = ();
+	type MessageExporter = ();
+	type UniversalAliases = Nothing;
+	type CallDispatcher = RuntimeCall;
+	type SafeCallFilter = Everything;
 }
 
 impl pallet_xcm::Config for Runtime {
@@ -129,10 +144,20 @@ impl pallet_xcm::Config for Runtime {
 	type XcmTeleportFilter = Nothing;
 	type XcmReserveTransferFilter = Everything;
 	type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
+	type UniversalLocation = UniversalLocation;
 	type RuntimeOrigin = RuntimeOrigin;
 	type RuntimeCall = RuntimeCall;
 	const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
 	type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
+	type Currency = Balances;
+	type CurrencyMatcher = ();
+	type TrustedLockers = ();
+	type SovereignAccountOf = LocationToAccountId;
+	type MaxLockers = ConstU32<8>;
+	type WeightInfo = pallet_xcm::TestWeightInfo;
+	#[cfg(feature = "runtime-benchmarks")]
+	type ReachableDest = ReachableDest;
+
 }
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
@@ -144,6 +169,11 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
+	type PriceForSiblingDelivery = ();
+	// type Currency = Balance;
+	// // type CurrencyMatcher = ();
+	// type UniversalLocation = UniversalLocation;
+
 }
 impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
