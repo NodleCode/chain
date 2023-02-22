@@ -11,12 +11,12 @@ use frame_support::{
 	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
+use orml_traits::location::RelativeReserveProvider;
 use orml_traits::{location::AbsoluteReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_runtime::traits::Convert;
-use orml_traits::location::RelativeReserveProvider;
 use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
@@ -60,7 +60,12 @@ pub type XcmRouter = (
 );
 parameter_types! {
 	pub RelayLocation: MultiLocation = MultiLocation::parent();
-	pub const NodlLocation: MultiLocation = Here.into();
+	pub const NodlLocation: MultiLocation = MultiLocation {
+		parents:0,
+		interior: Junctions::X1(
+			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
+		)
+	};
 	pub const RelayNetwork: NetworkId = NetworkId::Any;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
@@ -185,21 +190,14 @@ parameter_type_with_key! {
 }
 #[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
 pub enum CurrencyId {
-	// Our native token
-	SelfReserve,
-	// Assets representing other chains native tokens
-	ForeignAsset(AssetId),
-	// Our local assets
-	LocalAssetReserve(AssetId),
+	// NODL native token
+	NodleNative,
 }
 pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		match id {
-			CurrencyId::SelfReserve => Some(MultiLocation {
-				parents: 1,
-				interior: X2(Parachain(200), PalletInstance(2)),
-			}), //test
+			CurrencyId::NodleNative => Some(NodlLocation),
 			_ => None,
 		}
 	}
@@ -212,7 +210,7 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 		match location {
 			MultiLocation {
 				parents,
-				interior: X2(Parachain(para_id), PalletInstance(key)),
+				interior: X2(Parachain(ParachainInfo::parachain_id()), PalletInstance(key)),
 			} if parents == 1 => {
 				match (para_id, key) {
 					(id, 2) => {
@@ -244,5 +242,5 @@ impl orml_xtokens::Config for Runtime {
 	type MaxAssetsForTransfer = MaxAssetsForTransfer;
 	type MinXcmFee = ParachainMinFee;
 	type MultiLocationsFilter = Everything;
-	type ReserveProvider = RelativeReserveProvider; 
+	type ReserveProvider = RelativeReserveProvider;
 }
