@@ -6,13 +6,13 @@ use crate::implementations::DealWithFees;
 use codec::{Decode, Encode};
 use frame_support::{
 	parameter_types,
-	traits::{Everything, Nothing},
+	traits::{Everything, Nothing, PalletInfoAccess},
 	weights::IdentityFee,
 	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
 use orml_traits::location::RelativeReserveProvider;
-use orml_traits::{location::AbsoluteReserveProvider, parameter_type_with_key};
+use orml_traits::parameter_type_with_key;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
@@ -60,7 +60,7 @@ pub type XcmRouter = (
 );
 parameter_types! {
 	pub RelayLocation: MultiLocation = MultiLocation::parent();
-	pub const NodlLocation: MultiLocation = MultiLocation {
+	pub NodlLocation: MultiLocation = MultiLocation {
 		parents:0,
 		interior: Junctions::X1(
 			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
@@ -193,8 +193,7 @@ pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	fn convert(id: CurrencyId) -> Option<MultiLocation> {
 		match id {
-			CurrencyId::NodleNative => Some(NodlLocation),
-			_ => None,
+			CurrencyId::NodleNative => Some(NodlLocation::get()),
 		}
 	}
 }
@@ -203,10 +202,10 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 		if location == MultiLocation::parent() {
 			return None;
 		}
-		match location.first_interior() {
-			Junctions::X2(Parachain(para_id), PalletInstance(key)) => {
+		match location.interior() {
+			&Junctions::X2(Parachain(para_id), PalletInstance(key)) => {
 				if (
-					ParachainInfo::parachain_id(),
+					u32::from(ParachainInfo::parachain_id()),
 					<Balances as PalletInfoAccess>::index() as u8,
 				) == (para_id, key)
 				{
@@ -221,14 +220,14 @@ impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
 }
 
 impl orml_xtokens::Config for Runtime {
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type CurrencyId = CurrencyId;
 	type CurrencyIdConvert = CurrencyIdConvert;
 	type AccountIdToMultiLocation = AccountIdToMultiLocation;
 	type SelfLocation = SelfLocation;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
+	type Weigher = FixedWeightBounds<UnitWeightCost, RuntimeCall, MaxInstructions>;
 	type BaseXcmWeight = BaseXcmWeight;
 	type LocationInverter = LocationInverter<Ancestry>;
 	type MaxAssetsForTransfer = MaxAssetsForTransfer;
