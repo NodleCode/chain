@@ -145,6 +145,26 @@ where
 	)?;
 	let client = Arc::new(client);
 
+	// Set the block number until which ed25519-dalek should be used for signature verification
+	// Check out https://github.com/paritytech/substrate/pull/12661
+	// TODO https://github.com/NodleCode/chain/issues/703
+	const EDEN_BLOCK_NUMBER_UNTIL_DALEK_SHOULD_BE_USED: u32 = 2_500_000;
+	const PARADIS_BLOCK_NUMBER_UNTIL_DALEK_SHOULD_BE_USED: u32 = 2_000_000;
+	use sc_client_api::ExecutorProvider;
+	match config.chain_spec.id() {
+		"para_eden" => client.execution_extensions().set_extensions_factory(
+			sc_client_api::execution_extensions::ExtensionBeforeBlock::<Block, sp_io::UseDalekExt>::new(
+				EDEN_BLOCK_NUMBER_UNTIL_DALEK_SHOULD_BE_USED,
+			),
+		),
+		"para_eden_testing_0510" => client.execution_extensions().set_extensions_factory(
+			sc_client_api::execution_extensions::ExtensionBeforeBlock::<Block, sp_io::UseDalekExt>::new(
+				PARADIS_BLOCK_NUMBER_UNTIL_DALEK_SHOULD_BE_USED,
+			),
+		),
+		_ => (),
+	};
+
 	let telemetry_worker_handle = telemetry.as_ref().map(|(worker, _)| worker.handle());
 
 	let telemetry = telemetry.map(|(worker, telemetry)| {
