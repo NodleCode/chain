@@ -11,8 +11,7 @@ use frame_support::{
 	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
-use orml_traits::location::RelativeReserveProvider;
-use orml_traits::parameter_type_with_key;
+use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
