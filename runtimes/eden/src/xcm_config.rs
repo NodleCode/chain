@@ -197,27 +197,6 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 		}
 	}
 }
-impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
-	fn convert(location: MultiLocation) -> Option<CurrencyId> {
-		if location == MultiLocation::parent() {
-			return None;
-		}
-		match location.interior() {
-			&Junctions::X2(Parachain(para_id), PalletInstance(key)) => {
-				if (
-					u32::from(ParachainInfo::parachain_id()),
-					<Balances as PalletInfoAccess>::index() as u8,
-				) == (para_id, key)
-				{
-					Some(CurrencyId::NodleNative)
-				} else {
-					None
-				}
-			}
-			_ => None,
-		}
-	}
-}
 
 impl orml_xtokens::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;

@@ -67,8 +67,7 @@ impl pallet_balances::Config for Test {
 }
 
 #[derive(Default)]
-pub struct ExtBuilder {
-}
+pub struct ExtBuilder {}
 
 impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
