@@ -173,7 +173,7 @@ impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
 	}
 }
 parameter_types! {
-	pub const BaseXcmWeight: XcmWeight = 100_000_000; // TODO: recheck this
+	pub const BaseXcmWeight: XcmWeight = 100_000_000; // TODO: update based on the results of https://github.com/NodleCode/chain-workspace/issues/259
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
