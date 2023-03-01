@@ -213,3 +213,20 @@ impl orml_xtokens::Config for Runtime {
 	type MultiLocationsFilter = Everything;
 	type ReserveProvider = RelativeReserveProvider;
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	#[test]
+	fn test_convert_currency_id_to_multi_location() {
+		let pallet_balance_index = <Balances as PalletInfoAccess>::index() as u8; //using same index as the built runtime
+		let expected_nodl_location = MultiLocation {
+			parents: 0,
+			interior: Junctions::X1(PalletInstance(pallet_balance_index)), // Index of the pallet balance in the runtime
+		};
+		assert_eq!(
+			CurrencyIdConvert::convert(CurrencyId::NodleNative),
+			Some(expected_nodl_location)
+		);
+	}
+}
