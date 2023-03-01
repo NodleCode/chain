@@ -108,8 +108,8 @@ pub type CurrencyTransactor = CurrencyAdapter<
 	(),
 >;
 parameter_types! {
-		// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-		pub UnitWeightCost: u64 = 1_000_000_000;
+		// One XCM operation is 200_000_000 weight - almost certainly a conservative estimate.
+		pub UnitWeightCost: u64 = 200_000_000;
 		pub const MaxInstructions: u32 = 100;
 }
 
