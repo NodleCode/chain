@@ -33,6 +33,8 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
         production chains. Please rebuild with the flag disabled.",
 	)
 }
+#[cfg(test)]
+mod xcm_tests;
 
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
