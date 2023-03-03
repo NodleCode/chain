@@ -151,20 +151,104 @@
 <span id="151">151</span>
 <span id="152">152</span>
 <span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
 	AccountId, Balance, Balances, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent,
 	RuntimeOrigin, XcmpQueue,
 };
 <span class="kw">use </span><span class="kw">crate</span>::implementations::DealWithFees;
+<span class="kw">use </span>codec::{Decode, Encode};
 <span class="kw">use </span>frame_support::{
 	parameter_types,
-	traits::{Everything, Nothing},
+	traits::{Everything, Nothing, PalletInfoAccess},
 	weights::IdentityFee,
+	RuntimeDebug,
 };
 <span class="kw">use </span>frame_system::EnsureRoot;
+<span class="kw">use </span>orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 <span class="kw">use </span>pallet_xcm::XcmPassthrough;
 <span class="kw">use </span>polkadot_parachain::primitives::Sibling;
-<span class="kw">use </span>xcm::{latest::NetworkId, prelude::<span class="kw-2">*</span>};
+<span class="kw">use </span>scale_info::TypeInfo;
+<span class="kw">use </span>sp_runtime::traits::Convert;
+<span class="kw">use </span>xcm::{latest::NetworkId, latest::Weight <span class="kw">as </span>XcmWeight, prelude::<span class="kw-2">*</span>};
 <span class="kw">use </span>xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentIsPreset,
@@ -207,7 +291,12 @@
 );
 <span class="macro">parameter_types! </span>{
 	<span class="kw">pub </span>RelayLocation: MultiLocation = MultiLocation::parent();
-	<span class="kw">pub const </span>NodlLocation: MultiLocation = Here.into();
+	<span class="kw">pub </span>NodlLocation: MultiLocation = MultiLocation {
+		parents:<span class="number">0</span>,
+		interior: Junctions::X1(
+			PalletInstance(&lt;Balances <span class="kw">as </span>PalletInfoAccess&gt;::index() <span class="kw">as </span>u8)
+		)
+	};
 	<span class="kw">pub const </span>RelayNetwork: NetworkId = NetworkId::Any;
 	<span class="kw">pub </span>RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	<span class="kw">pub </span>Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
@@ -250,8 +339,8 @@
 	</span>(),
 &gt;;
 <span class="macro">parameter_types! </span>{
-		<span class="comment">// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-		</span><span class="kw">pub </span>UnitWeightCost: u64 = <span class="number">1_000_000_000</span>;
+		<span class="comment">// One XCM operation is 200_000_000 weight - almost certainly a conservative estimate.
+		</span><span class="kw">pub </span>UnitWeightCost: u64 = <span class="number">200_000_000</span>;
 		<span class="kw">pub const </span>MaxInstructions: u32 = <span class="number">100</span>;
 }
 
@@ -266,7 +355,7 @@
 	<span class="kw">type </span>LocationInverter = LocationInverter&lt;Ancestry&gt;;
 	<span class="kw">type </span>Barrier = Barrier;
 	<span class="kw">type </span>Weigher = FixedWeightBounds&lt;UnitWeightCost, RuntimeCall, MaxInstructions&gt;;
-	<span class="kw">type </span>Trader = UsingComponents&lt;IdentityFee&lt;Balance&gt;, RelayLocation, AccountId, Balances, DealWithFees&gt;;
+	<span class="kw">type </span>Trader = UsingComponents&lt;IdentityFee&lt;Balance&gt;, NodlLocation, AccountId, Balances, DealWithFees&gt;;
 	<span class="kw">type </span>ResponseHandler = (); <span class="comment">// Don&#39;t handle responses for now.
 	</span><span class="kw">type </span>AssetTrap = PolkadotXcm;
 	<span class="kw">type </span>AssetClaims = PolkadotXcm;
@@ -303,6 +392,75 @@
 <span class="kw">impl </span>cumulus_pallet_xcm::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
 	<span class="kw">type </span>XcmExecutor = XcmExecutor&lt;XcmConfig&gt;;
+}
+<span class="kw">pub struct </span>AccountIdToMultiLocation;
+<span class="kw">impl </span>Convert&lt;AccountId, MultiLocation&gt; <span class="kw">for </span>AccountIdToMultiLocation {
+	<span class="kw">fn </span>convert(account: AccountId) -&gt; MultiLocation {
+		X1(AccountId32 {
+			network: NetworkId::Any,
+			id: account.into(),
+		})
+		.into()
+	}
+}
+<span class="macro">parameter_types! </span>{
+	<span class="kw">pub const </span>BaseXcmWeight: XcmWeight = <span class="number">100_000_000</span>; <span class="comment">// TODO: update based on the results of https://github.com/NodleCode/chain-workspace/issues/259
+	</span><span class="kw">pub const </span>MaxAssetsForTransfer: usize = <span class="number">2</span>;
+}
+<span class="macro">parameter_types! </span>{
+	<span class="kw">pub </span>SelfLocation: MultiLocation = MultiLocation::here();
+}
+<span class="macro">parameter_type_with_key! </span>{
+	<span class="kw">pub </span>ParachainMinFee: |_location: MultiLocation| -&gt; <span class="prelude-ty">Option</span>&lt;u128&gt; {
+		<span class="prelude-val">None
+	</span>};
+}
+<span class="attribute">#[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
+</span><span class="kw">pub enum </span>CurrencyId {
+	<span class="comment">// NODL native token
+	</span>NodleNative,
+}
+<span class="kw">pub struct </span>CurrencyIdConvert;
+<span class="kw">impl </span>Convert&lt;CurrencyId, <span class="prelude-ty">Option</span>&lt;MultiLocation&gt;&gt; <span class="kw">for </span>CurrencyIdConvert {
+	<span class="kw">fn </span>convert(id: CurrencyId) -&gt; <span class="prelude-ty">Option</span>&lt;MultiLocation&gt; {
+		<span class="kw">match </span>id {
+			CurrencyId::NodleNative =&gt; <span class="prelude-val">Some</span>(NodlLocation::get()),
+		}
+	}
+}
+
+<span class="kw">impl </span>orml_xtokens::Config <span class="kw">for </span>Runtime {
+	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
+	<span class="kw">type </span>Balance = Balance;
+	<span class="kw">type </span>CurrencyId = CurrencyId;
+	<span class="kw">type </span>CurrencyIdConvert = CurrencyIdConvert;
+	<span class="kw">type </span>AccountIdToMultiLocation = AccountIdToMultiLocation;
+	<span class="kw">type </span>SelfLocation = SelfLocation;
+	<span class="kw">type </span>XcmExecutor = XcmExecutor&lt;XcmConfig&gt;;
+	<span class="kw">type </span>Weigher = FixedWeightBounds&lt;UnitWeightCost, RuntimeCall, MaxInstructions&gt;;
+	<span class="kw">type </span>BaseXcmWeight = BaseXcmWeight;
+	<span class="kw">type </span>LocationInverter = LocationInverter&lt;Ancestry&gt;;
+	<span class="kw">type </span>MaxAssetsForTransfer = MaxAssetsForTransfer;
+	<span class="kw">type </span>MinXcmFee = ParachainMinFee;
+	<span class="kw">type </span>MultiLocationsFilter = Everything;
+	<span class="kw">type </span>ReserveProvider = RelativeReserveProvider;
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+	<span class="kw">use super</span>::<span class="kw-2">*</span>;
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_convert_currency_id_to_multi_location() {
+		<span class="kw">let </span>pallet_balance_index = &lt;Balances <span class="kw">as </span>PalletInfoAccess&gt;::index() <span class="kw">as </span>u8; <span class="comment">//using same index as the built runtime
+		</span><span class="kw">let </span>expected_nodl_location = MultiLocation {
+			parents: <span class="number">0</span>,
+			interior: Junctions::X1(PalletInstance(pallet_balance_index)), <span class="comment">// Index of the pallet balance in the runtime
+		</span>};
+		<span class="macro">assert_eq!</span>(
+			CurrencyIdConvert::convert(CurrencyId::NodleNative),
+			<span class="prelude-val">Some</span>(expected_nodl_location)
+		);
+	}
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="runtime_eden" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0-nightly (2019147c5 2022-09-19)" ></div></body></html>
