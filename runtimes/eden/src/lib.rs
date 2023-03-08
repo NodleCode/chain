@@ -403,7 +403,7 @@ sp_api::impl_runtime_apis! {
 							id: Concrete(location),
 							fun: Fungible(fungibles_amount * i as u128),
 						}
-						.into()
+
 					})
 					.chain(
 						core::iter::once(
