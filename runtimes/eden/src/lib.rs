@@ -339,6 +339,8 @@ sp_api::impl_runtime_apis! {
 		) {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
+			use pallet_xcm_benchmarks::generic::Pallet as XcmBenchmarks;
+
 
 			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
 			// issues. To get around that, we separated the Session benchmarks into its own crate,
@@ -362,6 +364,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
+			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmBenchmarks::<Runtime>);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -381,6 +384,65 @@ sp_api::impl_runtime_apis! {
 
 			impl frame_system_benchmarking::Config for Runtime {}
 
+			use xcm::latest::prelude::*;
+			use frame_benchmarking::BenchmarkError;
+			use pallet_xcm_benchmarks::generic::Pallet as XcmBenchmarks;
+			impl pallet_xcm_benchmarks::Config for Runtime {
+				type XcmConfig = xcm_config::XcmConfig;
+				type AccountIdConverter = xcm_config::LocationToAccountId;
+				fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
+					Ok(MultiLocation::parent())
+				}
+				fn worst_case_holding() -> MultiAssets {
+				// 1 fungibles can be traded in the worst case
+					const HOLDING_FUNGIBLES: u32 = 1;
+					let fungibles_amount: u128 = 100;
+					let assets = (0..HOLDING_FUNGIBLES).map(|i| {
+						let location: MultiLocation = GeneralIndex(i as u128).into();
+						MultiAsset {
+							id: Concrete(location),
+							fun: Fungible(fungibles_amount * i as u128),
+						}
+						.into()
+					})
+					.chain(
+						core::iter::once(
+							MultiAsset {
+								id: Concrete(MultiLocation::parent()),
+								fun: Fungible(u128::MAX)
+							}
+						)
+					)
+					.collect::<Vec<_>>();
+					assets.into()
+				}
+
+			}
+
+			impl pallet_xcm_benchmarks::generic::Config for Runtime {
+				type RuntimeCall = RuntimeCall;
+
+				fn worst_case_response() -> (u64, Response) {
+					(0u64, Response::Version(Default::default()))
+				}
+
+				fn transact_origin() -> Result<MultiLocation, BenchmarkError> {
+					Ok(MultiLocation::parent())
+				}
+
+				fn subscribe_origin() -> Result<MultiLocation, BenchmarkError> {
+					Ok(MultiLocation::parent())
+				}
+
+				fn claimable_asset() -> Result<(MultiLocation, MultiLocation, MultiAssets), BenchmarkError> {
+					let origin = MultiLocation::parent();
+					let assets: MultiAssets = (Concrete(MultiLocation::parent()), 1_000u128).into();
+					let ticket = MultiLocation { parents: 0, interior: Here };
+					Ok((origin, ticket, assets))
+				}
+			}
+
+
 			let whitelist: Vec<TrackedStorageKey> = vec![];
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
@@ -399,7 +461,8 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
-
+			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmBenchmarks::<Runtime>);
+			
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}
