@@ -462,7 +462,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmBenchmarks::<Runtime>);
-			
+
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
 		}
