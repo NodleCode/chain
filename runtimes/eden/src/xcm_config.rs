@@ -4,6 +4,8 @@ use super::{
 };
 use crate::implementations::DealWithFees;
 use codec::{Decode, Encode};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_benchmarking::BenchmarkError;
 use frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing, PalletInfoAccess},
@@ -24,7 +26,6 @@ use xcm_builder::{
 	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::XcmExecutor;
-
 /// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
 /// `Transact` in order to determine the dispatch RuntimeOrigin.
@@ -213,12 +214,75 @@ impl orml_xtokens::Config for Runtime {
 	type MultiLocationsFilter = Everything;
 	type ReserveProvider = RelativeReserveProvider;
 }
+
+#[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
 	pub const TrustedReserve: Option<(MultiLocation, MultiAsset)> = Some((
 		MultiLocation::here(),
 		MultiAsset{ id: Concrete(Here.into()), fun: Fungible(100) }
 	));
+
 }
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_xcm_benchmarks::generic::Config for Runtime {
+	type RuntimeCall = RuntimeCall;
+
+	fn worst_case_response() -> (u64, Response) {
+		(0u64, Response::Version(Default::default()))
+	}
+
+	fn transact_origin() -> Result<MultiLocation, BenchmarkError> {
+		Ok(MultiLocation::parent())
+	}
+
+	fn subscribe_origin() -> Result<MultiLocation, BenchmarkError> {
+		Ok(MultiLocation::parent())
+	}
+
+	fn claimable_asset() -> Result<(MultiLocation, MultiLocation, MultiAssets), BenchmarkError> {
+		let origin = MultiLocation::parent();
+		let assets: MultiAssets = (Concrete(MultiLocation::parent()), 1_000u128).into();
+		let ticket = MultiLocation {
+			parents: 0,
+			interior: Here,
+		};
+		Ok((origin, ticket, assets))
+	}
+}
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_xcm_benchmarks::fungible::Config for Runtime {
+	type TransactAsset = Balances;
+	type CheckedAccount = ();
+	type TrustedTeleporter = ();
+	type TrustedReserve = TrustedReserve;
+	fn get_multi_asset() -> MultiAsset {
+		MultiAsset {
+			id: Concrete(MultiLocation::here()),
+			fun: Fungible(u128::MAX),
+		}
+	}
+}
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_xcm_benchmarks::Config for Runtime {
+	type XcmConfig = XcmConfig;
+	type AccountIdConverter = LocationToAccountId;
+	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
+		Ok(MultiLocation {
+			parents: 0,
+			interior: Junctions::X1(Parachain(1000)),
+		})
+	}
+	fn worst_case_holding() -> MultiAssets {
+		// 1 fungibles can be traded in the worst case: TODO: https://github.com/NodleCode/chain/issues/717
+		let location: MultiLocation = GeneralIndex(0).into();
+		let assets = MultiAsset {
+			id: Concrete(location),
+			fun: Fungible(u128::MAX),
+		};
+		assets.into()
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;

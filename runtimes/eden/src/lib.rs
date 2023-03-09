@@ -385,79 +385,8 @@ sp_api::impl_runtime_apis! {
 
 			impl frame_system_benchmarking::Config for Runtime {}
 
-			use xcm::latest::prelude::*;
-			use frame_benchmarking::BenchmarkError;
 			use pallet_xcm_benchmarks::generic::Pallet as XcmGenericBenchmarks;
 			use pallet_xcm_benchmarks::fungible::Pallet as XcmFungibleBenchmarks;
-			impl pallet_xcm_benchmarks::Config for Runtime {
-				type XcmConfig = xcm_config::XcmConfig;
-				type AccountIdConverter = xcm_config::LocationToAccountId;
-				fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
-					Ok(MultiLocation::parent())
-				}
-				fn worst_case_holding() -> MultiAssets {
-				// 1 fungibles can be traded in the worst case
-					const HOLDING_FUNGIBLES: u32 = 1;
-					let fungibles_amount: u128 = 100;
-					let assets = (0..HOLDING_FUNGIBLES).map(|i| {
-						let location: MultiLocation = GeneralIndex(i as u128).into();
-						MultiAsset {
-							id: Concrete(location),
-							fun: Fungible(fungibles_amount * i as u128),
-						}
-
-					})
-					.chain(
-						core::iter::once(
-							MultiAsset {
-								id: Concrete(MultiLocation::parent()),
-								fun: Fungible(u128::MAX)
-							}
-						)
-					)
-					.collect::<Vec<_>>();
-					assets.into()
-				}
-
-			}
-
-			impl pallet_xcm_benchmarks::generic::Config for Runtime {
-				type RuntimeCall = RuntimeCall;
-
-				fn worst_case_response() -> (u64, Response) {
-					(0u64, Response::Version(Default::default()))
-				}
-
-				fn transact_origin() -> Result<MultiLocation, BenchmarkError> {
-					Ok(MultiLocation::parent())
-				}
-
-				fn subscribe_origin() -> Result<MultiLocation, BenchmarkError> {
-					Ok(MultiLocation::parent())
-				}
-
-				fn claimable_asset() -> Result<(MultiLocation, MultiLocation, MultiAssets), BenchmarkError> {
-					let origin = MultiLocation::parent();
-					let assets: MultiAssets = (Concrete(MultiLocation::parent()), 1_000u128).into();
-					let ticket = MultiLocation { parents: 0, interior: Here };
-					Ok((origin, ticket, assets))
-				}
-			}
-
-			impl pallet_xcm_benchmarks::fungible::Config for Runtime {
-
-				type TransactAsset= Balances;
-				type CheckedAccount = ();
-				type TrustedTeleporter = ();
-				type TrustedReserve = xcm_config::TrustedReserve;
-				fn get_multi_asset() -> MultiAsset {
-					MultiAsset {
-						id: Concrete(MultiLocation::here()),
-						fun: Fungible(u128::MAX),
-					}
-				}
-			}
-
 
 			let whitelist: Vec<TrackedStorageKey> = vec![];
 			let mut batches = Vec::<BenchmarkBatch>::new();
