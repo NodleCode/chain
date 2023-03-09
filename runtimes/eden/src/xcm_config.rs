@@ -213,7 +213,12 @@ impl orml_xtokens::Config for Runtime {
 	type MultiLocationsFilter = Everything;
 	type ReserveProvider = RelativeReserveProvider;
 }
-
+parameter_types! {
+	pub const TrustedReserve: Option<(MultiLocation, MultiAsset)> = Some((
+		MultiLocation::here(),
+		MultiAsset{ id: Concrete(Here.into()), fun: Fungible(100) }
+	));
+}
 #[cfg(test)]
 mod tests {
 	use super::*;

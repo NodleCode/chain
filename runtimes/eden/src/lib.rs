@@ -35,7 +35,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 }
 
 use constants::RuntimeBlockWeights;
-use frame_support::{construct_runtime, weights::Weight};
+use frame_support::{construct_runtime, traits::Nothing, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
 pub use primitives::{AuraId, ParaId};
@@ -339,8 +339,8 @@ sp_api::impl_runtime_apis! {
 		) {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
-			use pallet_xcm_benchmarks::generic::Pallet as XcmBenchmarks;
-
+			use pallet_xcm_benchmarks::generic::Pallet as XcmGenericBenchmarks;
+			use pallet_xcm_benchmarks::fungible::Pallet as XcmFungibleBenchmarks;
 
 			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
 			// issues. To get around that, we separated the Session benchmarks into its own crate,
@@ -364,7 +364,8 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
-			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmBenchmarks::<Runtime>);
+			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks::<Runtime>);
+			list_benchmark!(list, extra, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks::<Runtime>);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -386,7 +387,8 @@ sp_api::impl_runtime_apis! {
 
 			use xcm::latest::prelude::*;
 			use frame_benchmarking::BenchmarkError;
-			use pallet_xcm_benchmarks::generic::Pallet as XcmBenchmarks;
+			use pallet_xcm_benchmarks::generic::Pallet as XcmGenericBenchmarks;
+			use pallet_xcm_benchmarks::fungible::Pallet as XcmFungibleBenchmarks;
 			impl pallet_xcm_benchmarks::Config for Runtime {
 				type XcmConfig = xcm_config::XcmConfig;
 				type AccountIdConverter = xcm_config::LocationToAccountId;
@@ -442,6 +444,20 @@ sp_api::impl_runtime_apis! {
 				}
 			}
 
+			impl pallet_xcm_benchmarks::fungible::Config for Runtime {
+
+				type TransactAsset= Balances;
+				type CheckedAccount = ();
+				type TrustedTeleporter = ();
+				type TrustedReserve = xcm_config::TrustedReserve;
+				fn get_multi_asset() -> MultiAsset {
+					MultiAsset {
+						id: Concrete(MultiLocation::here()),
+						fun: Fungible(u128::MAX),
+					}
+				}
+			}
+
 
 			let whitelist: Vec<TrackedStorageKey> = vec![];
 			let mut batches = Vec::<BenchmarkBatch>::new();
@@ -461,7 +477,8 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
-			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmBenchmarks::<Runtime>);
+			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks::<Runtime>);
+			add_benchmark!(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks::<Runtime>);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
