@@ -224,6 +224,13 @@ parameter_types! {
 
 }
 #[cfg(feature = "runtime-benchmarks")]
+parameter_types! {
+	pub const TrustedTeleporter: Option<(MultiLocation, MultiAsset)> = Some((
+		MultiLocation::parent(),
+		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(100) }
+	));
+}
+#[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 
@@ -253,11 +260,11 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type TransactAsset = Balances;
 	type CheckedAccount = ();
-	type TrustedTeleporter = ();
+	type TrustedTeleporter = TrustedTeleporter;
 	type TrustedReserve = TrustedReserve;
 	fn get_multi_asset() -> MultiAsset {
 		MultiAsset {
-			id: Concrete(MultiLocation::here()),
+			id: Concrete(NodlLocation::get()),
 			fun: Fungible(u128::MAX),
 		}
 	}
@@ -267,10 +274,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
 	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
-		Ok(MultiLocation {
-			parents: 0,
-			interior: Junctions::X1(Parachain(1000)),
-		})
+		Ok(MultiLocation::parent())
 	}
 	fn worst_case_holding() -> MultiAssets {
 		// 1 fungibles can be traded in the worst case: TODO: https://github.com/NodleCode/chain/issues/717
