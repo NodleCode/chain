@@ -113,7 +113,7 @@ parameter_types! {
 	pub const MetadataDepositPerByte: Balance = 10 * constants::MILLI_NODL;
 	pub const KeyLimit: u32 = 32;
 	pub const ValueLimit: u32 = 256;
-	pub const StringLimit: u32 = 50;
+	pub const StringLimit: u32 = 128;
 }
 
 impl pallet_uniques::Config for Runtime {
