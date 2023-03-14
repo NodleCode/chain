@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export external="frame_system pallet  pallet_balances pallet_collator_selection pallet_contracts  pallet_membership pallet_multisig pallet_preimage  pallet_scheduler pallet_timestamp pallet_uniques pallet_utility"
+export external="frame_system pallet  pallet_balances pallet_collator_selection pallet_contracts  pallet_membership pallet_multisig pallet_preimage  pallet_scheduler pallet_timestamp pallet_uniques pallet_utility pallet_xcm_benchmarks::generic  pallet_xcm_benchmarks::fungible"
 export internal="pallet_allocations pallet_grants pallet_reserve"
 cargo build --profile release \
     --features=runtime-benchmarks \
