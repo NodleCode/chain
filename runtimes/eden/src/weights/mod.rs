@@ -59,7 +59,7 @@ impl WeighMultiAssets for MultiAssetFilter {
 		let weight = match self {
 			Self::Definite(assets) => assets
 				.inner()
-				.into_iter()
+				.iter()
 				.map(From::from)
 				.map(|t| match t {
 					AssetTypes::Balances => balances_weight,
@@ -77,8 +77,8 @@ impl WeighMultiAssets for MultiAssets {
 	fn weigh_multi_assets(&self, balances_weight: Weight) -> XCMWeight {
 		let weight = self
 			.inner()
-			.into_iter()
-			.map(|m| <AssetTypes as From<&MultiAsset>>::from(m))
+			.iter()
+			.map(|m| AssetTypes::from(m))
 			.map(|t| match t {
 				AssetTypes::Balances => balances_weight,
 				AssetTypes::Unknown => Weight::MAX,
