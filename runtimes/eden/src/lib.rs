@@ -162,6 +162,10 @@ pub type Executive = frame_executive::Executive<
 	AllPalletsWithSystem,
 	migrations::MoveValidatorsSetToInvulnerables,
 >;
+#[cfg(feature = "runtime-benchmarks")]
+pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
+#[cfg(feature = "runtime-benchmarks")]
+pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime>;
 
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
@@ -339,8 +343,6 @@ sp_api::impl_runtime_apis! {
 		) {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
-			use pallet_xcm_benchmarks::generic::Pallet as XcmGenericBenchmarks;
-			use pallet_xcm_benchmarks::fungible::Pallet as XcmFungibleBenchmarks;
 
 			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
 			// issues. To get around that, we separated the Session benchmarks into its own crate,
@@ -364,8 +366,8 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
-			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks::<Runtime>);
-			list_benchmark!(list, extra, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks::<Runtime>);
+			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
+			list_benchmark!(list, extra, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -385,8 +387,6 @@ sp_api::impl_runtime_apis! {
 
 			impl frame_system_benchmarking::Config for Runtime {}
 
-			use pallet_xcm_benchmarks::generic::Pallet as XcmGenericBenchmarks;
-			use pallet_xcm_benchmarks::fungible::Pallet as XcmFungibleBenchmarks;
 
 			let whitelist: Vec<TrackedStorageKey> = vec![];
 			let mut batches = Vec::<BenchmarkBatch>::new();
@@ -406,8 +406,8 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
-			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks::<Runtime>);
-			add_benchmark!(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks::<Runtime>);
+			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
+			add_benchmark!(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
