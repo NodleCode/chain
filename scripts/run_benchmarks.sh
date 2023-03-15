@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export external="frame_system pallet  pallet_balances pallet_collator_selection pallet_contracts  pallet_membership pallet_multisig pallet_preimage  pallet_scheduler pallet_timestamp pallet_uniques pallet_utility"
+export xcm_bench=" pallet_xcm_benchmarks::generic  pallet_xcm_benchmarks::fungible"
 export internal="pallet_allocations pallet_grants pallet_reserve"
 cargo build --profile release \
     --features=runtime-benchmarks \
@@ -41,7 +42,20 @@ do
 
 done
 
+for PALLET in $xcm_bench
+do
+./target/release/nodle-parachain    benchmark pallet \
+    --chain=dev \
+    --steps=50 \
+    --repeat=20 \
+    --pallet=$PALLET \
+    '--extrinsic=*' \
+    --execution=wasm \
+    --wasm-execution=compiled \
+    --template=./.maintain/xcm.hbs \
+    --output=runtimes/eden/src/weights
 
+done
 
 echo "Running on gcloud server? Run:"
 echo "    git commit -v -a -m Benchmarks ; git format-patch HEAD~"
