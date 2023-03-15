@@ -230,12 +230,87 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::{
 	AccountId, Balance, Balances, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent,
 	RuntimeOrigin, XcmpQueue,
 };
 <span class="kw">use </span><span class="kw">crate</span>::implementations::DealWithFees;
 <span class="kw">use </span>codec::{Decode, Encode};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="kw">use </span>frame_benchmarking::BenchmarkError;
 <span class="kw">use </span>frame_support::{
 	parameter_types,
 	traits::{Everything, Nothing, PalletInfoAccess},
@@ -253,10 +328,9 @@
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset, ParentIsPreset,
 	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
+	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
 };
 <span class="kw">use </span>xcm_executor::XcmExecutor;
-
 <span class="doccomment">/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
 /// `Transact` in order to determine the dispatch RuntimeOrigin.
@@ -354,7 +428,7 @@
 	<span class="kw">type </span>IsTeleporter = ();
 	<span class="kw">type </span>LocationInverter = LocationInverter&lt;Ancestry&gt;;
 	<span class="kw">type </span>Barrier = Barrier;
-	<span class="kw">type </span>Weigher = FixedWeightBounds&lt;UnitWeightCost, RuntimeCall, MaxInstructions&gt;;
+	<span class="kw">type </span>Weigher = WeightInfoBounds&lt;<span class="kw">crate</span>::weights::NodleXcmWeight&lt;RuntimeCall&gt;, RuntimeCall, MaxInstructions&gt;;
 	<span class="kw">type </span>Trader = UsingComponents&lt;IdentityFee&lt;Balance&gt;, NodlLocation, AccountId, Balances, DealWithFees&gt;;
 	<span class="kw">type </span>ResponseHandler = (); <span class="comment">// Don&#39;t handle responses for now.
 	</span><span class="kw">type </span>AssetTrap = PolkadotXcm;
@@ -371,7 +445,7 @@
 	<span class="kw">type </span>XcmExecutor = XcmExecutor&lt;XcmConfig&gt;;
 	<span class="kw">type </span>XcmTeleportFilter = Nothing;
 	<span class="kw">type </span>XcmReserveTransferFilter = Everything;
-	<span class="kw">type </span>Weigher = FixedWeightBounds&lt;UnitWeightCost, RuntimeCall, MaxInstructions&gt;;
+	<span class="kw">type </span>Weigher = WeightInfoBounds&lt;<span class="kw">crate</span>::weights::NodleXcmWeight&lt;RuntimeCall&gt;, RuntimeCall, MaxInstructions&gt;;
 	<span class="kw">type </span>LocationInverter = LocationInverter&lt;Ancestry&gt;;
 	<span class="kw">type </span>RuntimeOrigin = RuntimeOrigin;
 	<span class="kw">type </span>RuntimeCall = RuntimeCall;
@@ -444,6 +518,78 @@
 	<span class="kw">type </span>MinXcmFee = ParachainMinFee;
 	<span class="kw">type </span>MultiLocationsFilter = Everything;
 	<span class="kw">type </span>ReserveProvider = RelativeReserveProvider;
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="macro">parameter_types! </span>{
+	<span class="kw">pub const </span>TrustedReserve: <span class="prelude-ty">Option</span>&lt;(MultiLocation, MultiAsset)&gt; = <span class="prelude-val">Some</span>((
+		MultiLocation::here(),
+		MultiAsset{ id: Concrete(Here.into()), fun: Fungible(<span class="number">100</span>) }
+	));
+
+}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="macro">parameter_types! </span>{
+	<span class="kw">pub const </span>TrustedTeleporter: <span class="prelude-ty">Option</span>&lt;(MultiLocation, MultiAsset)&gt; = <span class="prelude-val">Some</span>((
+		MultiLocation::parent(),
+		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(<span class="number">100</span>) }
+	));
+}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="kw">impl </span>pallet_xcm_benchmarks::generic::Config <span class="kw">for </span>Runtime {
+	<span class="kw">type </span>RuntimeCall = RuntimeCall;
+
+	<span class="kw">fn </span>worst_case_response() -&gt; (u64, Response) {
+		(<span class="number">0u64</span>, Response::Version(Default::default()))
+	}
+
+	<span class="kw">fn </span>transact_origin() -&gt; <span class="prelude-ty">Result</span>&lt;MultiLocation, BenchmarkError&gt; {
+		<span class="prelude-val">Ok</span>(MultiLocation::parent())
+	}
+
+	<span class="kw">fn </span>subscribe_origin() -&gt; <span class="prelude-ty">Result</span>&lt;MultiLocation, BenchmarkError&gt; {
+		<span class="prelude-val">Ok</span>(MultiLocation::parent())
+	}
+
+	<span class="kw">fn </span>claimable_asset() -&gt; <span class="prelude-ty">Result</span>&lt;(MultiLocation, MultiLocation, MultiAssets), BenchmarkError&gt; {
+		<span class="kw">let </span>origin = MultiLocation::parent();
+		<span class="kw">let </span>assets: MultiAssets = (Concrete(MultiLocation::parent()), <span class="number">1_000u128</span>).into();
+		<span class="kw">let </span>ticket = MultiLocation {
+			parents: <span class="number">0</span>,
+			interior: Here,
+		};
+		<span class="prelude-val">Ok</span>((origin, ticket, assets))
+	}
+}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="kw">impl </span>pallet_xcm_benchmarks::fungible::Config <span class="kw">for </span>Runtime {
+	<span class="kw">type </span>TransactAsset = Balances;
+	<span class="kw">type </span>CheckedAccount = ();
+	<span class="kw">type </span>TrustedTeleporter = TrustedTeleporter;
+	<span class="kw">type </span>TrustedReserve = TrustedReserve;
+	<span class="kw">fn </span>get_multi_asset() -&gt; MultiAsset {
+		MultiAsset {
+			id: Concrete(NodlLocation::get()),
+			fun: Fungible(u128::MAX),
+		}
+	}
+}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
+</span><span class="kw">impl </span>pallet_xcm_benchmarks::Config <span class="kw">for </span>Runtime {
+	<span class="kw">type </span>XcmConfig = XcmConfig;
+	<span class="kw">type </span>AccountIdConverter = LocationToAccountId;
+	<span class="kw">fn </span>valid_destination() -&gt; <span class="prelude-ty">Result</span>&lt;MultiLocation, BenchmarkError&gt; {
+		<span class="prelude-val">Ok</span>(MultiLocation::parent())
+	}
+	<span class="kw">fn </span>worst_case_holding() -&gt; MultiAssets {
+		<span class="comment">// 1 fungibles can be traded in the worst case: TODO: https://github.com/NodleCode/chain/issues/717
+		</span><span class="kw">let </span>location: MultiLocation = GeneralIndex(<span class="number">0</span>).into();
+		<span class="kw">let </span>assets = MultiAsset {
+			id: Concrete(location),
+			fun: Fungible(u128::MAX),
+		};
+		assets.into()
+	}
 }
 
 <span class="attribute">#[cfg(test)]
