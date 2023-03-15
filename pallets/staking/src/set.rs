@@ -97,3 +97,11 @@ impl<T: Ord> From<Vec<T>> for OrderedSet<T> {
 		Self::from(v)
 	}
 }
+
+#[test]
+fn basic_operations() {
+	let mut myset: OrderedSet<u128> = vec![1, 2, 3, 4].into();
+	assert_eq!(myset.contains(&3), Some(2));
+	myset.clear();
+	assert_eq!(myset.contains(&3), None);
+}

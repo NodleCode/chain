@@ -158,23 +158,6 @@ pub mod pallet {
 	}
 }
 
-#[cfg(feature = "std")]
-impl<T: Config<I>, I: 'static> GenesisConfig<T, I> {
-	/// Direct implementation of `GenesisBuild::build_storage`.
-	///
-	/// Kept in order not to break dependency.
-	pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
-		<Self as GenesisBuild<T, I>>::build_storage(self)
-	}
-
-	/// Direct implementation of `GenesisBuild::assimilate_storage`.
-	///
-	/// Kept in order not to break dependency.
-	pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
-		<Self as GenesisBuild<T, I>>::assimilate_storage(self, storage)
-	}
-}
-
 impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
 	fn account_id() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
