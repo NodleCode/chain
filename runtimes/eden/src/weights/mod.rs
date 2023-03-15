@@ -15,7 +15,7 @@ mod pallet_xcm_benchmarks_generic;
 
 use crate::Runtime;
 use frame_support::weights::Weight;
-use sp_std::prelude::*;
+
 use xcm::{
 	v2::{prelude::*, Weight as XCMWeight},
 	DoubleEncoded,
@@ -78,7 +78,7 @@ impl WeighMultiAssets for MultiAssets {
 		let weight = self
 			.inner()
 			.iter()
-			.map(|m| AssetTypes::from(m))
+			.map(AssetTypes::from)
 			.map(|t| match t {
 				AssetTypes::Balances => balances_weight,
 				AssetTypes::Unknown => Weight::MAX,

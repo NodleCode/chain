@@ -51,9 +51,9 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn withdraw_asset() -> Weight {
-		Weight::from_ref_time(39_546_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(6 as u64))
-			.saturating_add(T::DbWeight::get().writes(4 as u64))
+		Weight::from_ref_time(39_546_000_u64)
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	// Storage: System Account (r:2 w:2)
 	// Storage: System Number (r:1 w:0)
@@ -62,9 +62,9 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn transfer_asset() -> Weight {
-		Weight::from_ref_time(54_371_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(7 as u64))
-			.saturating_add(T::DbWeight::get().writes(5 as u64))
+		Weight::from_ref_time(54_371_000_u64)
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
 	// Storage: System Account (r:2 w:2)
 	// Storage: System Number (r:1 w:0)
@@ -76,19 +76,19 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn transfer_reserve_asset() -> Weight {
-		Weight::from_ref_time(70_492_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(10 as u64))
-			.saturating_add(T::DbWeight::get().writes(6 as u64))
+		Weight::from_ref_time(70_492_000_u64)
+			.saturating_add(T::DbWeight::get().reads(10_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn reserve_asset_deposited() -> Weight {
-		Weight::from_ref_time(8_807_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(1 as u64))
-			.saturating_add(T::DbWeight::get().writes(1 as u64))
+		Weight::from_ref_time(8_807_000_u64)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Benchmark Override (r:0 w:0)
 	pub(crate) fn receive_teleported_asset() -> Weight {
-		Weight::from_ref_time(500_000_000_000 as u64)
+		Weight::from_ref_time(500_000_000_000_u64)
 	}
 	// Storage: System Account (r:1 w:1)
 	// Storage: System Number (r:1 w:0)
@@ -97,9 +97,9 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn deposit_asset() -> Weight {
-		Weight::from_ref_time(43_548_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(6 as u64))
-			.saturating_add(T::DbWeight::get().writes(4 as u64))
+		Weight::from_ref_time(43_548_000_u64)
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	// Storage: System Account (r:1 w:1)
 	// Storage: System Number (r:1 w:0)
@@ -111,17 +111,17 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	pub(crate) fn deposit_reserve_asset() -> Weight {
-		Weight::from_ref_time(59_486_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(9 as u64))
-			.saturating_add(T::DbWeight::get().writes(5 as u64))
+		Weight::from_ref_time(59_486_000_u64)
+			.saturating_add(T::DbWeight::get().reads(9_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
 	// Storage: ParachainInfo ParachainId (r:1 w:0)
 	// Storage: ParachainSystem HostConfiguration (r:1 w:0)
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn initiate_teleport() -> Weight {
-		Weight::from_ref_time(25_930_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(4 as u64))
-			.saturating_add(T::DbWeight::get().writes(2 as u64))
+		Weight::from_ref_time(25_930_000_u64)
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
 }
