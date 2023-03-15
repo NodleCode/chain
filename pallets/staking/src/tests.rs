@@ -581,7 +581,7 @@ fn validator_exit_executes_after_delay() {
 			expected.append(&mut new1);
 			assert_eq!(events(), expected);
 
-			let info = NodleStaking::validator_state(&2).unwrap();
+			let info = NodleStaking::validator_state(2).unwrap();
 			assert_eq!(info.state, ValidatorStatus::Leaving(8));
 			mock::start_active_session(9);
 			// we must exclude leaving collators from rewards while
@@ -719,7 +719,7 @@ fn validator_selection_chooses_top_candidates() {
 				last_event(),
 				MetaEvent::NodleStaking(Event::ValidatorScheduledExit(4, 6, 6)),
 			);
-			let info = NodleStaking::validator_state(&6).unwrap();
+			let info = NodleStaking::validator_state(6).unwrap();
 			assert_eq!(info.state, ValidatorStatus::Leaving(6));
 
 			mock::start_active_session(6);
@@ -1204,7 +1204,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(Balances::total_balance(&4), 201000);
 
 			assert_eq!(
-				NodleStaking::stake_rewards(&5),
+				NodleStaking::stake_rewards(5),
 				[StakeReward {
 					session_idx: 7,
 					value: 200000,
@@ -1213,7 +1213,7 @@ fn payout_distribution_to_solo_validators() {
 
 			assert_ok!(NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(5)));
 
-			assert_eq!(NodleStaking::stake_rewards(&5), []);
+			assert_eq!(NodleStaking::stake_rewards(5), []);
 
 			let mut new8 = vec![Event::Rewarded(5, 200000)];
 			expected.append(&mut new8);
@@ -1222,7 +1222,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(mock::balances(&5), (201000, 60));
 			assert_eq!(Balances::total_balance(&5), 201000);
 
-			assert_eq!(NodleStaking::stake_rewards(&6), []);
+			assert_eq!(NodleStaking::stake_rewards(6), []);
 
 			assert_noop!(
 				NodleStaking::withdraw_staking_rewards(RuntimeOrigin::signed(6)),
@@ -1251,7 +1251,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(events(), expected);
 
 			assert_eq!(
-				NodleStaking::stake_rewards(&6),
+				NodleStaking::stake_rewards(6),
 				[StakeReward {
 					session_idx: 7,
 					value: 1,
@@ -1274,7 +1274,7 @@ fn payout_distribution_to_solo_validators() {
 			assert_eq!(events(), expected);
 
 			assert_eq!(
-				NodleStaking::stake_rewards(&6),
+				NodleStaking::stake_rewards(6),
 				[
 					StakeReward {
 						session_idx: 7,
@@ -1310,7 +1310,7 @@ fn payout_distribution_to_solo_validators() {
 			expected.append(&mut new11);
 			assert_eq!(events(), expected);
 
-			assert_eq!(NodleStaking::stake_rewards(&6), []);
+			assert_eq!(NodleStaking::stake_rewards(6), []);
 
 			assert_eq!(mock::balances(&6), (1004, 50));
 			assert_eq!(Balances::total_balance(&6), 1004);
@@ -1678,7 +1678,7 @@ fn multiple_nominations() {
 			assert_eq!(NodleStaking::nominator_state(6).unwrap().nominations.0.len(), 4usize);
 
 			assert_eq!(
-				NodleStaking::validator_state(&2).unwrap().nominators.0,
+				NodleStaking::validator_state(2).unwrap().nominators.0,
 				vec![
 					Bond { owner: 6, amount: 10 },
 					Bond { owner: 7, amount: 80 },
@@ -4754,8 +4754,8 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 
 		assert_eq!(Session::validators(), vec![11, 21, 41]);
 
-		let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), &11);
-		let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), &21);
+		let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+		let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), 21);
 
 		assert_eq!(exposure_11.total, 1500);
 		assert_eq!(exposure_21.total, 1000);
@@ -4780,7 +4780,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 		assert_eq!(NodleStaking::total(), 3350);
 
 		// Validator-11 is deactivated
-		assert_eq!(NodleStaking::validator_state(&11).unwrap().state, ValidatorStatus::Idle);
+		assert_eq!(NodleStaking::validator_state(11).unwrap().state, ValidatorStatus::Idle);
 
 		mock::start_active_session(3);
 

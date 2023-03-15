@@ -7,9 +7,8 @@ on:
   pull_request:
 
 env:
-  nightly: nightly-2022-09-20
+  nightly: nightly-2023-03-08
   target: wasm32-unknown-unknown
-  tarpaulin-vers: "0.20.0"
   try-runtime-chain: dev
   try-runtime-uri: wss://eden-rpc.dwellir.com:443
 
@@ -76,7 +75,7 @@ jobs:
       - name: Unit tests
         run: cargo test --all-features
 
-  tarpaulin:
+  linecoverage:
     runs-on: ubuntu-latest-4-cores
     steps:
       - uses: actions/checkout@v3
@@ -87,16 +86,15 @@ jobs:
       - name: Install protobuf-compiler
         run: |
          sudo apt-get install protobuf-compiler
-      - name: Run cargo-tarpaulin
-        uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: ${{ env.tarpaulin-vers }}
-          args: "--avoid-cfg-tarpaulin --all-features --workspace --timeout 120 --exclude runtimes-eden nodle-parachain --exclude-files **/mock.rs **/weights.rs **/migrations.rs"
-
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Test and gather coverage
+        run: cargo llvm-cov --lcov --output-path lcov.info --all-features --workspace --exclude runtimes-eden --exclude nodle-parachain  
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3.0.0
         with:
           fail_ci_if_error: false
+          files: lcov.info
 
   try-runtime:
     runs-on: ubuntu-latest-8-cores

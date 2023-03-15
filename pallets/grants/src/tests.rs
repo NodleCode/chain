@@ -53,7 +53,7 @@ fn add_vesting_schedule_works() {
 			BOB::get(),
 			schedule.clone()
 		));
-		assert_eq!(Vesting::vesting_schedules(&BOB::get()), vec![schedule.clone()]);
+		assert_eq!(Vesting::vesting_schedules(BOB::get()), vec![schedule.clone()]);
 
 		let vested_event = TestEvent::Vesting(Event::VestingScheduleAdded(ALICE::get(), BOB::get(), schedule));
 		assert!(System::events().iter().any(|record| record.event == vested_event));
@@ -90,7 +90,7 @@ fn add_new_vesting_schedule_merges_with_current_locked_balance_and_until() {
 		));
 
 		assert_eq!(
-			PalletBalances::locks(&BOB::get()).to_vec().pop(),
+			PalletBalances::locks(BOB::get()).to_vec().pop(),
 			Some(BalanceLock {
 				id: VESTING_LOCK_ID,
 				amount: 17u64,
@@ -231,7 +231,7 @@ fn claim_works() {
 		// clears the storage
 		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB::get()));
 		// no locks anymore
-		assert_eq!(PalletBalances::locks(&BOB::get()), vec![]);
+		assert_eq!(PalletBalances::locks(BOB::get()), vec![]);
 	});
 }
 
@@ -470,7 +470,7 @@ fn add_vesting_schedule_overflow_check() {
 				BOB::get(),
 				schedules[0].clone(),
 			));
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 1);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 1);
 
 			let expected = vec![Event::VestingScheduleAdded(1, 2, schedules[0].clone())];
 
@@ -481,7 +481,7 @@ fn add_vesting_schedule_overflow_check() {
 				BOB::get(),
 				schedules[1].clone(),
 			));
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 2);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 2);
 
 			let expected = vec![
 				Event::VestingScheduleAdded(1, 2, schedules[0].clone()),
@@ -495,7 +495,7 @@ fn add_vesting_schedule_overflow_check() {
 				<Error<Runtime>>::MaxScheduleOverflow,
 			);
 
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 2);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 2);
 		});
 }
 
@@ -516,14 +516,14 @@ fn add_vesting_schedule_overflow_cfg_min_check() {
 
 			mock::MAX_SCHEDULE.with(|v| *v.borrow_mut() = 0);
 
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 0);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 0);
 
 			assert_err!(
 				Vesting::add_vesting_schedule(RuntimeOrigin::signed(ALICE::get()), BOB::get(), schedules[0].clone(),),
 				<Error<Runtime>>::MaxScheduleOverflow,
 			);
 
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 0);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 0);
 
 			let expected = vec![];
 			assert_eq!(context_events(), expected);
@@ -535,7 +535,7 @@ fn add_vesting_schedule_overflow_cfg_min_check() {
 				BOB::get(),
 				schedules[0].clone(),
 			));
-			assert_eq!(Vesting::vesting_schedules(&BOB::get()).to_vec().len(), 1);
+			assert_eq!(Vesting::vesting_schedules(BOB::get()).to_vec().len(), 1);
 
 			let expected = vec![Event::VestingScheduleAdded(1, 2, schedules[0].clone())];
 
@@ -562,14 +562,14 @@ fn add_vesting_schedule_overflow_cfg_max_check() {
 
 			mock::MAX_SCHEDULE.with(|v| *v.borrow_mut() = schedule_max);
 
-			(0..schedule_max).into_iter().for_each(|iter_index| {
+			(0..schedule_max).for_each(|iter_index| {
 				assert_ok!(Vesting::add_vesting_schedule(
 					RuntimeOrigin::signed(ALICE::get()),
 					BOB::get(),
 					schedules[0].clone(),
 				));
 				assert_eq!(
-					Vesting::vesting_schedules(&BOB::get()).to_vec().len() as u32,
+					Vesting::vesting_schedules(BOB::get()).to_vec().len() as u32,
 					iter_index + 1
 				);
 				assert_eq!(context_events().len() as u32, iter_index + 1);
@@ -581,7 +581,7 @@ fn add_vesting_schedule_overflow_cfg_max_check() {
 			);
 
 			assert_eq!(
-				Vesting::vesting_schedules(&BOB::get()).to_vec().len(),
+				Vesting::vesting_schedules(BOB::get()).to_vec().len(),
 				schedule_max as usize
 			);
 			assert_eq!(context_events().len(), schedule_max as usize);
