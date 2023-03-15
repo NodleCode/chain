@@ -510,6 +510,6 @@ mod tests {
 			}
 		}
 
-		assert!(failed == 0, "{} pallets have too big storage", failed);
+		assert!(failed == 0, "{failed} pallets have too big storage");
 	}
 }
