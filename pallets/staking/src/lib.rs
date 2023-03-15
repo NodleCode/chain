@@ -49,16 +49,11 @@ pub use pallet::*;
 // A value placed in storage that represents the current version of the POA storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
-#[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo, Default)]
 enum Releases {
+	#[default]
 	V0, // Legacy version
 	V1, // Adds storage info
-}
-
-impl Default for Releases {
-	fn default() -> Self {
-		Releases::V0
-	}
 }
 
 #[pallet]

@@ -699,3 +699,8 @@ fn no_issuance() {
 		);
 	})
 }
+
+#[test]
+fn test_releases_default() {
+	assert_eq!(Releases::default(), Releases::V0);
+}

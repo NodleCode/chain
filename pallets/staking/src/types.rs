@@ -78,21 +78,16 @@ pub struct UnlockChunk<Balance> {
 
 pub(crate) type StakeReward<Balance> = UnlockChunk<Balance>;
 
-#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
+#[derive(Copy, Clone, Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 /// The activity status of the validator
 pub enum ValidatorStatus {
+	#[default]
 	/// Committed to be online and producing valid blocks
 	Active,
 	/// Temporarily inactive
 	Idle,
 	/// Bonded until the inner round
 	Leaving(SessionIndex),
-}
-
-impl Default for ValidatorStatus {
-	fn default() -> ValidatorStatus {
-		ValidatorStatus::Active
-	}
 }
 
 #[derive(Encode, Decode, Clone, RuntimeDebug, scale_info::TypeInfo)]

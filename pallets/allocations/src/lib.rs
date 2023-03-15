@@ -53,17 +53,11 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
 #[cfg(not(tarpaulin))]
-#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[derive(Default, Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
+	#[default]
 	V0, // Legacy version
 	V1, // Adds storage info
-}
-
-#[cfg(not(tarpaulin))]
-impl Default for Releases {
-	fn default() -> Self {
-		Releases::V0
-	}
 }
 
 #[derive(Default, TypeInfo)]
