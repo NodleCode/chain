@@ -666,6 +666,6 @@ pub(crate) fn on_offence_in_session(
 	if NodleStaking::active_session() == session_idx {
 		let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
 	} else {
-		panic!("cannot slash in session {}", session_idx);
+		panic!("cannot slash in session {session_idx}");
 	}
 }
