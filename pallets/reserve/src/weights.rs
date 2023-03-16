@@ -101,9 +101,3 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 	}
 }
-
-#[test]
-fn check_weight_info(){
-	assert!(<()>::tip() != Weight::from_ref_time(0));
-	assert!(<()>::spend() != Weight::from_ref_time(0));
-}

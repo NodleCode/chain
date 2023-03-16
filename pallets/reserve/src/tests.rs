@@ -122,6 +122,17 @@ fn spend_error_if_bad_origin() {
 }
 
 #[test]
+fn check_weight_info() {
+	use crate::weights::SubstrateWeight;
+	use frame_support::pallet_prelude::Weight;
+
+	assert_ne!(<()>::tip(), Weight::from_ref_time(0));
+	assert_ne!(<()>::spend(), Weight::from_ref_time(0));
+	assert_ne!(SubstrateWeight::<Test>::tip(), Weight::from_ref_time(0));
+	assert_ne!(SubstrateWeight::<Test>::spend(), Weight::from_ref_time(0));
+}
+
+#[test]
 fn spend_funds_to_target() {
 	new_test_ext().execute_with(|| {
 		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
