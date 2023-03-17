@@ -64,3 +64,10 @@ pub fn native_version() -> NativeVersion {
 		can_author_with: Default::default(),
 	}
 }
+
+#[test]
+fn test_native_version() {
+	let x = native_version();
+	assert_eq!(x.runtime_version, VERSION);
+	assert!(x.can_author_with.is_empty());
+}

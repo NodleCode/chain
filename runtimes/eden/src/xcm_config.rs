@@ -289,6 +289,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 
 #[cfg(test)]
 mod tests {
+
 	use super::*;
 	#[test]
 	fn test_convert_currency_id_to_multi_location() {
@@ -301,5 +302,25 @@ mod tests {
 			CurrencyIdConvert::convert(CurrencyId::NodleNative),
 			Some(expected_nodl_location)
 		);
+	}
+	#[test]
+	fn convert_accountid_to_multi_location() {
+		let alice: sp_runtime::AccountId32 = [
+			0x7e, 0xc8, 0x3e, 0x09, 0x72, 0xf3, 0xf3, 0xbe, 0xb9, 0x1b, 0xf3, 0x91, 0xf4, 0x57, 0x1a, 0x1a, 0xd5, 0x07,
+			0x06, 0x71, 0x24, 0x4c, 0x36, 0x57, 0xf1, 0x13, 0xaf, 0xea, 0xa6, 0x27, 0x15, 0x1b,
+		]
+		.into();
+
+		let expected_multilocation = MultiLocation {
+			parents: 0,
+			interior: X1(AccountId32 {
+				network: Any,
+				id: [
+					126, 200, 62, 9, 114, 243, 243, 190, 185, 27, 243, 145, 244, 87, 26, 26, 213, 7, 6, 113, 36, 76,
+					54, 87, 241, 19, 175, 234, 166, 39, 21, 27,
+				],
+			}),
+		};
+		assert_eq!(AccountIdToMultiLocation::convert(alice), expected_multilocation);
 	}
 }
