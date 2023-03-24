@@ -1,4 +1,4 @@
-use crate::Runtime;
+use crate::{Runtime, RuntimeOrigin};
 use frame_support::{
 	migration, parameter_types,
 	traits::{GetStorageVersion, OnRuntimeUpgrade},
@@ -6,7 +6,6 @@ use frame_support::{
 	BoundedVec,
 };
 use primitives::{AccountId, Balance};
-use xcm::prelude::{XcmVersion, XCM_VERSION};
 
 #[cfg(feature = "try-runtime")]
 use codec::{Decode, Encode};
@@ -39,13 +38,10 @@ const TRY_RUNTIME: &str = "try-runtime";
 
 const CANDIDACY_BOND: Balance = 3_000_000 * crate::constants::NODL;
 
-const POLKADOT_XCM_MODULE: &[u8] = b"PolkadotXcm";
-const SAFE_XCM_VERSION: &[u8] = b"SafeXcmVersion";
-
 pub struct MoveValidatorsSetToInvulnerables;
 impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 	fn on_runtime_upgrade() -> Weight {
-		let mut weight = <Runtime as frame_system::Config>::DbWeight::get().reads(5);
+		let mut weight = <Runtime as frame_system::Config>::DbWeight::get().reads(4);
 		if let Some(validators) = migration::take_storage_value::<BoundedVec<AccountId, MaxMembers>>(
 			VALIDATORS_SET_MODULE,
 			MEMBERS_ITEM,
@@ -114,12 +110,11 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			log::info!(target: MIGRATION, "No migration for Contracts");
 		}
 
-		if migration::get_storage_value::<XcmVersion>(POLKADOT_XCM_MODULE, SAFE_XCM_VERSION, EMPTY_HASH).is_none() {
-			migration::put_storage_value(POLKADOT_XCM_MODULE, SAFE_XCM_VERSION, EMPTY_HASH, Some(XCM_VERSION));
-			weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
-		} else {
-			log::info!(target: MIGRATION, "No migration for XCM");
-		}
+		let _ = pallet_xcm::pallet::Pallet::<Runtime>::force_default_xcm_version(
+			RuntimeOrigin::root(),
+			Some(pallet_xcm::CurrentXcmVersion::get()),
+		);
+		weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
 
 		weight
 	}
@@ -187,18 +182,6 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			return Err("Contracts storage version is not updated");
 		}
 		log::info!(target: TRY_RUNTIME, "Contracts storage version was good");
-
-		if let Some(xcm_version) =
-			migration::get_storage_value::<XcmVersion>(POLKADOT_XCM_MODULE, SAFE_XCM_VERSION, EMPTY_HASH)
-		{
-			if xcm_version != XCM_VERSION {
-				log::info!(target: TRY_RUNTIME, "XCM version is not updated");
-				return Err("XCM version is not updated");
-			}
-		} else {
-			log::info!(target: TRY_RUNTIME, "XCM version is none");
-			return Err("XCM version is none");
-		}
 
 		Ok(())
 	}
