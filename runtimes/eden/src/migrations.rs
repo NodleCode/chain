@@ -1,5 +1,10 @@
-use crate::Runtime;
-use frame_support::{migration, parameter_types, traits::OnRuntimeUpgrade, weights::Weight, BoundedVec};
+use crate::{Runtime, RuntimeOrigin};
+use frame_support::{
+	migration, parameter_types,
+	traits::{GetStorageVersion, OnRuntimeUpgrade},
+	weights::Weight,
+	BoundedVec,
+};
 use primitives::{AccountId, Balance};
 
 #[cfg(feature = "try-runtime")]
@@ -36,6 +41,7 @@ const CANDIDACY_BOND: Balance = 3_000_000 * crate::constants::NODL;
 pub struct MoveValidatorsSetToInvulnerables;
 impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 	fn on_runtime_upgrade() -> Weight {
+		let mut weight = <Runtime as frame_system::Config>::DbWeight::get().reads(4);
 		if let Some(validators) = migration::take_storage_value::<BoundedVec<AccountId, MaxMembers>>(
 			VALIDATORS_SET_MODULE,
 			MEMBERS_ITEM,
@@ -75,10 +81,42 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 				log::error!(target: MIGRATION, "Failed to remove Poa::StorageVersion completely");
 			}
 
-			<Runtime as frame_system::Config>::DbWeight::get().writes(4)
+			weight += <Runtime as frame_system::Config>::DbWeight::get().writes(4);
 		} else {
-			<Runtime as frame_system::Config>::DbWeight::get().reads(1)
+			log::info!(target: MIGRATION, "No migration for ValidatorsSet");
 		}
+
+		let dmp_queue_version = <cumulus_pallet_dmp_queue::pallet::Pallet<Runtime>>::current_storage_version();
+		if dmp_queue_version != <cumulus_pallet_dmp_queue::pallet::Pallet<Runtime>>::on_chain_storage_version() {
+			dmp_queue_version.put::<cumulus_pallet_dmp_queue::pallet::Pallet<Runtime>>();
+			weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
+		} else {
+			log::info!(target: MIGRATION, "No migration for DMP Queue");
+		}
+
+		let xcmp_queue_version = <cumulus_pallet_xcmp_queue::pallet::Pallet<Runtime>>::current_storage_version();
+		if xcmp_queue_version != <cumulus_pallet_xcmp_queue::pallet::Pallet<Runtime>>::on_chain_storage_version() {
+			xcmp_queue_version.put::<cumulus_pallet_xcmp_queue::pallet::Pallet<Runtime>>();
+			weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
+		} else {
+			log::info!(target: MIGRATION, "No migration for XCMP Queue");
+		}
+
+		let contracts_version = <pallet_contracts::pallet::Pallet<Runtime>>::current_storage_version();
+		if contracts_version != <pallet_contracts::pallet::Pallet<Runtime>>::on_chain_storage_version() {
+			contracts_version.put::<pallet_contracts::pallet::Pallet<Runtime>>();
+			weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
+		} else {
+			log::info!(target: MIGRATION, "No migration for Contracts");
+		}
+
+		let _ = pallet_xcm::pallet::Pallet::<Runtime>::force_default_xcm_version(
+			RuntimeOrigin::root(),
+			Some(pallet_xcm::CurrentXcmVersion::get()),
+		);
+		weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
+
+		weight
 	}
 
 	#[cfg(feature = "try-runtime")]
@@ -100,27 +138,52 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			|| migration::have_storage_value(VALIDATORS_SET_MODULE, PRIME_ITEM, EMPTY_HASH)
 			|| migration::have_storage_value(POA_MODULE, STORAGE_VERSION_ITEM, EMPTY_HASH)
 		{
-			Err("Failed to remove ValidatorsSet and/or Poa")
-		} else {
-			let invulnerables = pallet_collator_selection::pallet::Pallet::<Runtime>::invulnerables();
-			log::info!(
-				target: TRY_RUNTIME,
-				"CollatorSelection::Invulnerables are {:?}",
-				invulnerables
-			);
-			let candidacy_bond = pallet_collator_selection::pallet::Pallet::<Runtime>::candidacy_bond();
-			log::info!(
-				target: TRY_RUNTIME,
-				"CollatorSelection::candidacy_bond is {:?}",
-				candidacy_bond
-			);
-			let validators: BoundedVec<AccountId, MaxMembers> = Decode::decode(&mut state.as_slice()).unwrap();
-			if invulnerables == validators && candidacy_bond == CANDIDACY_BOND {
-				log::info!(target: TRY_RUNTIME, "MoveValidatorsSetToInvulnerables was successful");
-				Ok(())
-			} else {
-				Err("CollatorSelection::Invulnerables are not the same as ValidatorsSet::Members")
-			}
+			return Err("Failed to remove ValidatorsSet and/or Poa");
 		}
+
+		let invulnerables = pallet_collator_selection::pallet::Pallet::<Runtime>::invulnerables();
+		log::info!(
+			target: TRY_RUNTIME,
+			"CollatorSelection::Invulnerables are {:?}",
+			invulnerables
+		);
+		let candidacy_bond = pallet_collator_selection::pallet::Pallet::<Runtime>::candidacy_bond();
+		log::info!(
+			target: TRY_RUNTIME,
+			"CollatorSelection::candidacy_bond is {:?}",
+			candidacy_bond
+		);
+		let validators: BoundedVec<AccountId, MaxMembers> =
+			Decode::decode(&mut state.as_slice()).map_err(|_| "Failed to decode validators")?;
+		if invulnerables != validators || candidacy_bond != CANDIDACY_BOND {
+			return Err("CollatorSelection::Invulnerables are not the same as ValidatorsSet::Members");
+		}
+		log::info!(target: TRY_RUNTIME, "MoveValidatorsSetToInvulnerables was successful");
+
+		if <cumulus_pallet_dmp_queue::pallet::Pallet<Runtime>>::current_storage_version()
+			!= <cumulus_pallet_dmp_queue::pallet::Pallet<Runtime>>::on_chain_storage_version()
+		{
+			log::info!(target: TRY_RUNTIME, "DMP Queue storage version is not updated");
+			return Err("DMP Queue storage version is not updated");
+		}
+		log::info!(target: TRY_RUNTIME, "DMP Queue storage version was good");
+
+		if <cumulus_pallet_xcmp_queue::pallet::Pallet<Runtime>>::current_storage_version()
+			!= <cumulus_pallet_xcmp_queue::pallet::Pallet<Runtime>>::on_chain_storage_version()
+		{
+			log::info!(target: TRY_RUNTIME, "XCMP Queue storage version is not updated");
+			return Err("XCMP Queue storage version is not updated");
+		}
+		log::info!(target: TRY_RUNTIME, "XCMP Queue storage version was good");
+
+		if <pallet_contracts::pallet::Pallet<Runtime>>::current_storage_version()
+			!= <pallet_contracts::pallet::Pallet<Runtime>>::on_chain_storage_version()
+		{
+			log::info!(target: TRY_RUNTIME, "Contracts storage version is not updated");
+			return Err("Contracts storage version is not updated");
+		}
+		log::info!(target: TRY_RUNTIME, "Contracts storage version was good");
+
+		Ok(())
 	}
 }
