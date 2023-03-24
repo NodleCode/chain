@@ -153,7 +153,8 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			"CollatorSelection::candidacy_bond is {:?}",
 			candidacy_bond
 		);
-		let validators: BoundedVec<AccountId, MaxMembers> = Decode::decode(&mut state.as_slice()).unwrap();
+		let validators: BoundedVec<AccountId, MaxMembers> =
+			Decode::decode(&mut state.as_slice()).map_err(|_| "Failed to decode validators")?;
 		if invulnerables != validators || candidacy_bond != CANDIDACY_BOND {
 			return Err("CollatorSelection::Invulnerables are not the same as ValidatorsSet::Members");
 		}
