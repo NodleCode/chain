@@ -53,7 +53,6 @@ use sp_version::RuntimeVersion;
 
 pub mod constants;
 mod implementations;
-mod migrations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -154,14 +153,8 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	migrations::MoveValidatorsSetToInvulnerables,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
