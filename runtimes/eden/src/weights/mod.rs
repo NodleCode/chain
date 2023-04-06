@@ -25,6 +25,7 @@ use pallet_xcm_benchmarks_fungible::WeightInfo as XcmBalancesWeight;
 use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
 /// Types of asset supported by the Nodle runtime.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AssetTypes {
 	/// An asset backed by `pallet-balances`.
 	Balances,
@@ -40,7 +41,14 @@ impl From<&MultiAsset> for AssetTypes {
 					parents: 0,
 					interior: Here,
 				}),
-				..
+				fun: Fungible(_),
+			} => AssetTypes::Balances,
+			MultiAsset {
+				id: Concrete(MultiLocation {
+					parents: 0,
+					interior: X1(PalletInstance(2)),
+				}),
+				fun: Fungible(_),
 			} => AssetTypes::Balances,
 			_ => AssetTypes::Unknown,
 		}
@@ -196,5 +204,87 @@ impl<RuntimeCall> XcmWeightInfo<RuntimeCall> for NodleXcmWeight<RuntimeCall> {
 	}
 	fn unsubscribe_version() -> XCMWeight {
 		XcmGeneric::<Runtime>::unsubscribe_version().ref_time()
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn test_multi_asset_conversion_to_asset_types() {
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 0,
+				interior: X1(PalletInstance(2)),
+			}),
+			fun: Fungible(100),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Balances);
+
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 0,
+				interior: Here,
+			}),
+			fun: Fungible(43),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Balances);
+
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 0,
+				interior: X1(PalletInstance(3)),
+			}),
+			fun: Fungible(100),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
+
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 1,
+				interior: Here,
+			}),
+			fun: Fungible(43),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
+
+		let asset = MultiAsset {
+			id: Abstract(vec![]),
+			fun: Fungible(100),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
+
+		let asset = MultiAsset {
+			id: Abstract(vec![]),
+			fun: NonFungible(AssetInstance::Index(0)),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
+
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 0,
+				interior: Here,
+			}),
+			fun: NonFungible(AssetInstance::Index(2)),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
+
+		let asset = MultiAsset {
+			id: Concrete(MultiLocation {
+				parents: 0,
+				interior: X1(PalletInstance(2)),
+			}),
+			fun: NonFungible(AssetInstance::Index(0)),
+		};
+		let asset_type = AssetTypes::from(&asset);
+		assert_eq!(asset_type, AssetTypes::Unknown);
 	}
 }
