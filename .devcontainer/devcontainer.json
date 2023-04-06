@@ -8,35 +8,48 @@
         "docker-from-docker": "latest"
     },
     "containerUser": "vscode",
-    // Set *default* container specific settings.json values on container create.
-    "settings": {
-        "lldb.executable": "/usr/bin/lldb",
-        // VS Code don't watch files under ./target
-        "files.watcherExclude": {
-            "**/target/**": true
-        },
-        "rust-analyzer.checkOnSave.command": "clippy",
-        "rust-analyzer.checkOnSave.features": "all",
-        "rust-analyzer.checkOnSave.extraArgs": [
-            "--",
-            "-A",
-            "clippy::type_complexity",
-            "-A",
-            "clippy::identity_op",
-            "-A",
-            "clippy::boxed_local",
-            "-D",
-            "dead_code"
-        ]
+    // This run during prebuild and allows the user to start with a container
+    // containing the latest compiled dependencies and save on the first compilation
+    // cycle which is usually absurdly slow.
+    "updateContentCommand": "cargo test --all --no-run",
+    // Ensure every codespace have the minimum resources to comfortably support the
+    // project.
+    "hostRequirements": {
+        "cpus": 4,
+        "memory": "8gb",
+        // The compiled dependencies take quite a bit of space and the default is
+        // usually not enough.
+        "storage": "50gb"
     },
-    // Add the IDs of extensions you want installed when the container is created.
-    "extensions": [
-        "vadimcn.vscode-lldb",
-        "serayuzgur.crates",
-        "ms-azuretools.vscode-docker",
-        "tamasfe.even-better-toml",
-        "GitHub.copilot",
-        "eamodio.gitlens",
-        "rust-lang.rust-analyzer"
-    ]
+    // Set *default* container specific settings.json values on container create.
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "lldb.executable": "/usr/bin/lldb",
+                // VS Code don't watch files under ./target
+                "files.watcherExclude": {
+                    "**/target/**": true
+                },
+                "rust-analyzer.checkOnSave.command": "clippy",
+                "rust-analyzer.checkOnSave.features": "all",
+                "rust-analyzer.checkOnSave.extraArgs": [
+                    "--",
+                    "-A",
+                    "clippy::type_complexity",
+                    "-A",
+                    "clippy::identity_op",
+                    "-A",
+                    "clippy::boxed_local",
+                    "-D",
+                    "dead_code"
+                ]
+            },
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "vadimcn.vscode-lldb",
+                "serayuzgur.crates",
+                "rust-lang.rust-analyzer"
+            ]
+        }
+    }
 }
