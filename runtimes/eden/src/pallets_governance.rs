@@ -18,7 +18,7 @@
 
 use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
-use frame_system::{EnsureNever, EnsureRoot};
+use frame_system::EnsureNever;
 use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 
