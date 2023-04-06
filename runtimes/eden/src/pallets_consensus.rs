@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Aura, Balances, CollatorSelection, Runtime, RuntimeEvent, Session};
+use crate::{
+	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Aura, Balances, CollatorSelection, Runtime,
+	RuntimeEvent, Session,
+};
 use frame_support::{parameter_types, PalletId};
 use frame_system::EnsureRoot;
 use primitives::{AccountId, AuraId};
@@ -76,13 +79,10 @@ parameter_types! {
 	pub const MaxInvulnerables: u32 = 50;
 }
 
-// We allow root only to execute privileged collator selection operations.
-pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
-
 impl pallet_collator_selection::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type UpdateOrigin = CollatorSelectionUpdateOrigin;
+	type UpdateOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 	type PotId = PotId;
 	type MaxCandidates = MaxCandidates;
 	type MinCandidates = MinCandidates;
