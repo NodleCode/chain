@@ -42,6 +42,13 @@ impl From<&MultiAsset> for AssetTypes {
 				}),
 				..
 			} => AssetTypes::Balances,
+			MultiAsset {
+				id: Concrete(MultiLocation {
+					parents: 0,
+					interior: X1(PalletInstance(2)),
+				}),
+				..
+			} => AssetTypes::Balances,
 			_ => AssetTypes::Unknown,
 		}
 	}
