@@ -21,7 +21,6 @@ use crate::{
 	RuntimeEvent, Session,
 };
 use frame_support::{parameter_types, PalletId};
-use frame_system::EnsureRoot;
 use primitives::{AccountId, AuraId};
 use sp_runtime::impl_opaque_keys;
 use sp_std::prelude::*;
