@@ -37,7 +37,7 @@ use crate::{
 };
 
 // default to Nodle parachain id
-const DEFAULT_PARA_ID: u32 = 2026;
+const DEFAULT_PARA_ID: u32 = 2036;
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
