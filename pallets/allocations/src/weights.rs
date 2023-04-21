@@ -66,9 +66,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// The range of component `b` is `[1, 500]`.
 	fn allocate(b: u32, ) -> Weight {
 		// Minimum execution time: 91_091 nanoseconds.
-		Weight::from_ref_time(21_410_078_u64)
+		Weight::from_parts(21_410_078_u64,0)
 			// Standard Error: 16_392
-			.saturating_add(Weight::from_ref_time(27_848_716_u64).saturating_mul(b as u64))
+			.saturating_add(Weight::from_parts(27_848_716_u64, 0).saturating_mul(b as u64))
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(b as u64)))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
@@ -84,7 +84,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Allocations NextSessionQuota (r:0 w:1)
 	fn calc_quota() -> Weight {
 		// Minimum execution time: 22_710 nanoseconds.
-		Weight::from_ref_time(23_380_000_u64)
+		Weight::from_parts(23_380_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -98,7 +98,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Allocations SessionQuota (r:0 w:1)
 	fn renew_quota() -> Weight {
 		// Minimum execution time: 18_670 nanoseconds.
-		Weight::from_ref_time(19_320_000_u64)
+		Weight::from_parts(19_320_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -115,7 +115,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Allocations NextSessionQuota (r:0 w:1)
 	fn checked_update_session_quota() -> Weight {
 		// Minimum execution time: 33_930 nanoseconds.
-		Weight::from_ref_time(34_910_000_u64)
+		Weight::from_parts(34_910_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(7_u64))
 	}
@@ -125,7 +125,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Allocations SessionQuotaRenewSchedule (r:0 w:1)
 	fn set_curve_starting_block() -> Weight {
 		// Minimum execution time: 10_731 nanoseconds.
-		Weight::from_ref_time(11_130_000_u64)
+		Weight::from_parts(11_130_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -142,9 +142,9 @@ impl WeightInfo for () {
 	/// The range of component `b` is `[1, 500]`.
 	fn allocate(b: u32, ) -> Weight {
 		// Minimum execution time: 91_091 nanoseconds.
-		Weight::from_ref_time(21_410_078_u64)
+		Weight::from_parts(21_410_078_u64, 0)
 			// Standard Error: 16_392
-			.saturating_add(Weight::from_ref_time(27_848_716_u64).saturating_mul(b as u64))
+			.saturating_add(Weight::from_parts(27_848_716_u64, 0).saturating_mul(b as u64))
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(b as u64)))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
@@ -160,7 +160,7 @@ impl WeightInfo for () {
 	// Storage: Allocations NextSessionQuota (r:0 w:1)
 	fn calc_quota() -> Weight {
 		// Minimum execution time: 22_710 nanoseconds.
-		Weight::from_ref_time(23_380_000_u64)
+		Weight::from_parts(23_380_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(7_u64))
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
 	}
@@ -174,7 +174,7 @@ impl WeightInfo for () {
 	// Storage: Allocations SessionQuota (r:0 w:1)
 	fn renew_quota() -> Weight {
 		// Minimum execution time: 18_670 nanoseconds.
-		Weight::from_ref_time(19_320_000_u64)
+		Weight::from_parts(19_320_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(7_u64))
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
 	}
@@ -191,7 +191,7 @@ impl WeightInfo for () {
 	// Storage: Allocations NextSessionQuota (r:0 w:1)
 	fn checked_update_session_quota() -> Weight {
 		// Minimum execution time: 33_930 nanoseconds.
-		Weight::from_ref_time(34_910_000_u64)
+		Weight::from_parts(34_910_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(9_u64))
 			.saturating_add(RocksDbWeight::get().writes(7_u64))
 	}
@@ -201,7 +201,7 @@ impl WeightInfo for () {
 	// Storage: Allocations SessionQuotaRenewSchedule (r:0 w:1)
 	fn set_curve_starting_block() -> Weight {
 		// Minimum execution time: 10_731 nanoseconds.
-		Weight::from_ref_time(11_130_000_u64)
+		Weight::from_parts(11_130_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(3_u64))
 	}

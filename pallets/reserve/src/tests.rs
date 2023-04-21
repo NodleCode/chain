@@ -126,10 +126,10 @@ fn check_weight_info() {
 	use crate::weights::SubstrateWeight;
 	use frame_support::pallet_prelude::Weight;
 
-	assert_ne!(<()>::tip(), Weight::from_ref_time(0));
-	assert_ne!(<()>::spend(), Weight::from_ref_time(0));
-	assert_ne!(SubstrateWeight::<Test>::tip(), Weight::from_ref_time(0));
-	assert_ne!(SubstrateWeight::<Test>::spend(), Weight::from_ref_time(0));
+	assert_ne!(<()>::tip(), Weight::from_parts(0, 0));
+	assert_ne!(<()>::spend(), Weight::from_parts(0, 0));
+	assert_ne!(SubstrateWeight::<Test>::tip(), Weight::from_parts(0, 0));
+	assert_ne!(SubstrateWeight::<Test>::spend(), Weight::from_parts(0, 0));
 }
 
 #[test]

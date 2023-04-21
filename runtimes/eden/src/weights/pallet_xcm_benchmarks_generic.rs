@@ -51,19 +51,19 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn query_holding() -> Weight {
-		Weight::from_ref_time(25_070_000_u64)
+		Weight::from_parts(25_070_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn buy_execution() -> Weight {
-		Weight::from_ref_time(7_510_000_u64)
+		Weight::from_parts(7_510_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn query_response() -> Weight {
-		Weight::from_ref_time(7_280_000_u64)
+		Weight::from_parts(7_280_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -73,43 +73,43 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn transact() -> Weight {
-		Weight::from_ref_time(27_930_000_u64)
+		Weight::from_parts(27_930_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn refund_surplus() -> Weight {
-		Weight::from_ref_time(7_550_000_u64)
+		Weight::from_parts(7_550_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn set_error_handler() -> Weight {
-		Weight::from_ref_time(7_410_000_u64)
+		Weight::from_parts(7_410_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn set_appendix() -> Weight {
-		Weight::from_ref_time(7_240_000_u64)
+		Weight::from_parts(7_240_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn clear_error() -> Weight {
-		Weight::from_ref_time(7_331_000_u64)
+		Weight::from_parts(7_331_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn descend_origin() -> Weight {
-		Weight::from_ref_time(9_010_000_u64)
+		Weight::from_parts(9_010_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn clear_origin() -> Weight {
-		Weight::from_ref_time(7_590_000_u64)
+		Weight::from_parts(7_590_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -117,7 +117,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn report_error() -> Weight {
-		Weight::from_ref_time(13_190_000_u64)
+		Weight::from_parts(13_190_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -128,13 +128,13 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn claim_asset() -> Weight {
-		Weight::from_ref_time(30_890_000_u64)
+		Weight::from_parts(30_890_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn trap() -> Weight {
-		Weight::from_ref_time(7_280_000_u64)
+		Weight::from_parts(7_280_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -143,14 +143,14 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn subscribe_version() -> Weight {
-		Weight::from_ref_time(22_400_000_u64)
+		Weight::from_parts(22_400_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Storage: PolkadotXcm VersionNotifyTargets (r:0 w:1)
 	pub(crate) fn unsubscribe_version() -> Weight {
-		Weight::from_ref_time(11_110_000_u64)
+		Weight::from_parts(11_110_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -159,7 +159,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	pub(crate) fn initiate_reserve_withdraw() -> Weight {
-		Weight::from_ref_time(25_490_000_u64)
+		Weight::from_parts(25_490_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}

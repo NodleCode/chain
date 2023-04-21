@@ -54,7 +54,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn transfer() -> Weight {
 		// Minimum execution time: 74_220 nanoseconds.
-		Weight::from_ref_time(76_420_000_u64)
+		Weight::from_parts(76_420_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -65,7 +65,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn transfer_keep_alive() -> Weight {
 		// Minimum execution time: 47_280 nanoseconds.
-		Weight::from_ref_time(48_560_000_u64)
+		Weight::from_parts(48_560_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -77,7 +77,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_balance_creating() -> Weight {
 		// Minimum execution time: 32_340 nanoseconds.
-		Weight::from_ref_time(33_390_000_u64)
+		Weight::from_parts(33_390_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -89,7 +89,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	fn set_balance_killing() -> Weight {
 		// Minimum execution time: 36_800 nanoseconds.
-		Weight::from_ref_time(37_650_000_u64)
+		Weight::from_parts(37_650_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -100,7 +100,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn force_transfer() -> Weight {
 		// Minimum execution time: 73_790 nanoseconds.
-		Weight::from_ref_time(76_160_000_u64)
+		Weight::from_parts(76_160_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -111,7 +111,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn transfer_all() -> Weight {
 		// Minimum execution time: 56_280 nanoseconds.
-		Weight::from_ref_time(58_090_000_u64)
+		Weight::from_parts(58_090_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -122,7 +122,7 @@ impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn force_unreserve() -> Weight {
 		// Minimum execution time: 28_720 nanoseconds.
-		Weight::from_ref_time(30_000_000_u64)
+		Weight::from_parts(30_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}

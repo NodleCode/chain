@@ -22,7 +22,7 @@
 use super::*;
 
 use crate::Pallet as Grants;
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, BenchmarkError};
 use frame_support::traits::{EnsureOrigin, Get, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
@@ -95,7 +95,7 @@ benchmarks! {
 			who: config.grantee_lookup,
 			funds_collector: config.collector_lookup
 		};
-		let origin = T::CancelOrigin::successful_origin();
+		let origin = T::CancelOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 	}: { call.dispatch_bypass_filter(origin)? }
 
 	renounce {
@@ -103,7 +103,7 @@ benchmarks! {
 		let call = Call::<T>::renounce{
 			who: config.grantee_lookup,
 		};
-		let origin = T::CancelOrigin::successful_origin();
+		let origin = T::CancelOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 	}: { call.dispatch_bypass_filter(origin)? }
 
 	impl_benchmark_test_suite!(

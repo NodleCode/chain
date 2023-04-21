@@ -79,7 +79,7 @@ construct_runtime! {
 		Timestamp: pallet_timestamp = 1,
 		Balances: pallet_balances = 2,
 		TransactionPayment: pallet_transaction_payment = 3,
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
+		RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip = 4,
 
 		// Governance
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
@@ -256,6 +256,12 @@ sp_api::impl_runtime_apis! {
 
 		fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
 			TransactionPayment::query_fee_details(uxt, len)
+		}
+		fn query_weight_to_fee(weight: Weight) -> Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		fn query_length_to_fee(length: u32) -> Balance {
+			TransactionPayment::length_to_fee(length)
 		}
 	}
 

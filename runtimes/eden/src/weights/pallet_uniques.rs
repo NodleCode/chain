@@ -55,7 +55,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ClassAccount (r:0 w:1)
 	fn create() -> Weight {
 		// Minimum execution time: 42_290 nanoseconds.
-		Weight::from_ref_time(43_700_000_u64)
+		Weight::from_parts(43_700_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -67,7 +67,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ClassAccount (r:0 w:1)
 	fn force_create() -> Weight {
 		// Minimum execution time: 26_959 nanoseconds.
-		Weight::from_ref_time(28_090_000_u64)
+		Weight::from_parts(28_090_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -88,13 +88,13 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	/// The range of component `a` is `[0, 1000]`.
 	fn destroy(n: u32, m: u32, a: u32, ) -> Weight {
 		// Minimum execution time: 2_750_289 nanoseconds.
-		Weight::from_ref_time(2_784_799_000_u64)
+		Weight::from_parts(2_784_799_000_u64, 0)
 			// Standard Error: 29_451
-			.saturating_add(Weight::from_ref_time(11_899_566_u64).saturating_mul(n as u64))
+			.saturating_add(Weight::from_parts(11_899_566_u64, 0).saturating_mul(n as u64))
 			// Standard Error: 29_451
-			.saturating_add(Weight::from_ref_time(214_947_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(214_947_u64, 0).saturating_mul(m as u64))
 			// Standard Error: 29_451
-			.saturating_add(Weight::from_ref_time(372_214_u64).saturating_mul(a as u64))
+			.saturating_add(Weight::from_parts(372_214_u64, 0).saturating_mul(a as u64))
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(n as u64)))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
@@ -112,7 +112,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques Account (r:0 w:1)
 	fn mint() -> Weight {
 		// Minimum execution time: 53_930 nanoseconds.
-		Weight::from_ref_time(56_380_000_u64)
+		Weight::from_parts(56_380_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -126,7 +126,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ItemPriceOf (r:0 w:1)
 	fn burn() -> Weight {
 		// Minimum execution time: 55_850 nanoseconds.
-		Weight::from_ref_time(57_700_000_u64)
+		Weight::from_parts(57_700_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -140,7 +140,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ItemPriceOf (r:0 w:1)
 	fn transfer() -> Weight {
 		// Minimum execution time: 43_020 nanoseconds.
-		Weight::from_ref_time(44_211_000_u64)
+		Weight::from_parts(44_211_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -153,9 +153,9 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	/// The range of component `i` is `[0, 5000]`.
 	fn redeposit(i: u32, ) -> Weight {
 		// Minimum execution time: 27_250 nanoseconds.
-		Weight::from_ref_time(27_510_000_u64)
+		Weight::from_parts(27_510_000_u64, 0)
 			// Standard Error: 14_507
-			.saturating_add(Weight::from_ref_time(17_814_046_u64).saturating_mul(i as u64))
+			.saturating_add(Weight::from_parts(17_814_046_u64, 0).saturating_mul(i as u64))
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i as u64)))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
@@ -169,7 +169,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn freeze() -> Weight {
 		// Minimum execution time: 31_900 nanoseconds.
-		Weight::from_ref_time(33_570_000_u64)
+		Weight::from_parts(33_570_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -181,7 +181,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn thaw() -> Weight {
 		// Minimum execution time: 31_800 nanoseconds.
-		Weight::from_ref_time(33_600_000_u64)
+		Weight::from_parts(33_600_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -192,7 +192,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn freeze_collection() -> Weight {
 		// Minimum execution time: 25_569 nanoseconds.
-		Weight::from_ref_time(26_480_000_u64)
+		Weight::from_parts(26_480_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -203,7 +203,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn thaw_collection() -> Weight {
 		// Minimum execution time: 25_350 nanoseconds.
-		Weight::from_ref_time(26_270_000_u64)
+		Weight::from_parts(26_270_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -216,7 +216,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ClassAccount (r:0 w:2)
 	fn transfer_ownership() -> Weight {
 		// Minimum execution time: 36_830 nanoseconds.
-		Weight::from_ref_time(38_360_000_u64)
+		Weight::from_parts(38_360_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -227,7 +227,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_team() -> Weight {
 		// Minimum execution time: 26_280 nanoseconds.
-		Weight::from_ref_time(27_210_000_u64)
+		Weight::from_parts(27_210_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -239,7 +239,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ClassAccount (r:0 w:1)
 	fn force_item_status() -> Weight {
 		// Minimum execution time: 29_430 nanoseconds.
-		Weight::from_ref_time(30_520_000_u64)
+		Weight::from_parts(30_520_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -252,7 +252,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_attribute() -> Weight {
 		// Minimum execution time: 61_400 nanoseconds.
-		Weight::from_ref_time(63_210_000_u64)
+		Weight::from_parts(63_210_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -265,7 +265,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn clear_attribute() -> Weight {
 		// Minimum execution time: 58_880 nanoseconds.
-		Weight::from_ref_time(60_470_000_u64)
+		Weight::from_parts(60_470_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -277,7 +277,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_metadata() -> Weight {
 		// Minimum execution time: 48_230 nanoseconds.
-		Weight::from_ref_time(50_200_000_u64)
+		Weight::from_parts(50_200_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -289,7 +289,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn clear_metadata() -> Weight {
 		// Minimum execution time: 49_180 nanoseconds.
-		Weight::from_ref_time(50_470_000_u64)
+		Weight::from_parts(50_470_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -301,7 +301,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_collection_metadata() -> Weight {
 		// Minimum execution time: 46_860 nanoseconds.
-		Weight::from_ref_time(48_080_000_u64)
+		Weight::from_parts(48_080_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -313,7 +313,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn clear_collection_metadata() -> Weight {
 		// Minimum execution time: 45_100 nanoseconds.
-		Weight::from_ref_time(46_331_000_u64)
+		Weight::from_parts(46_331_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -325,7 +325,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn approve_transfer() -> Weight {
 		// Minimum execution time: 32_870 nanoseconds.
-		Weight::from_ref_time(34_160_000_u64)
+		Weight::from_parts(34_160_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -337,7 +337,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn cancel_approval() -> Weight {
 		// Minimum execution time: 32_810 nanoseconds.
-		Weight::from_ref_time(34_270_000_u64)
+		Weight::from_parts(34_270_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -348,7 +348,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_accept_ownership() -> Weight {
 		// Minimum execution time: 30_490 nanoseconds.
-		Weight::from_ref_time(31_830_000_u64)
+		Weight::from_parts(31_830_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -360,7 +360,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn set_collection_max_supply() -> Weight {
 		// Minimum execution time: 28_770 nanoseconds.
-		Weight::from_ref_time(29_520_000_u64)
+		Weight::from_parts(29_520_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -372,7 +372,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques ItemPriceOf (r:0 w:1)
 	fn set_price() -> Weight {
 		// Minimum execution time: 29_410 nanoseconds.
-		Weight::from_ref_time(31_220_000_u64)
+		Weight::from_parts(31_220_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(5_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -386,7 +386,7 @@ impl<T: frame_system::Config> pallet_uniques::WeightInfo for WeightInfo<T> {
 	// Storage: Uniques Account (r:0 w:2)
 	fn buy_item() -> Weight {
 		// Minimum execution time: 56_970 nanoseconds.
-		Weight::from_ref_time(58_530_000_u64)
+		Weight::from_parts(58_530_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}

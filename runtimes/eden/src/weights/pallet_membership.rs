@@ -58,9 +58,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[1, 49]`.
 	fn add_member(m: u32, ) -> Weight {
 		// Minimum execution time: 27_610 nanoseconds.
-		Weight::from_ref_time(28_985_577_u64)
+		Weight::from_parts(28_985_577_u64, 0)
 			// Standard Error: 1_376
-			.saturating_add(Weight::from_ref_time(50_653_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(50_653_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -76,9 +76,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[2, 50]`.
 	fn remove_member(m: u32, ) -> Weight {
 		// Minimum execution time: 31_090 nanoseconds.
-		Weight::from_ref_time(32_496_747_u64)
+		Weight::from_parts(32_496_747_u64, 0)
 			// Standard Error: 1_644
-			.saturating_add(Weight::from_ref_time(39_108_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(39_108_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -94,9 +94,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[2, 50]`.
 	fn swap_member(m: u32, ) -> Weight {
 		// Minimum execution time: 31_331 nanoseconds.
-		Weight::from_ref_time(32_766_214_u64)
+		Weight::from_parts(32_766_214_u64, 0)
 			// Standard Error: 2_145
-			.saturating_add(Weight::from_ref_time(60_399_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(60_399_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -112,9 +112,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[1, 50]`.
 	fn reset_member(m: u32, ) -> Weight {
 		// Minimum execution time: 30_630 nanoseconds.
-		Weight::from_ref_time(32_752_939_u64)
+		Weight::from_parts(32_752_939_u64, 0)
 			// Standard Error: 3_033
-			.saturating_add(Weight::from_ref_time(188_886_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(188_886_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -130,9 +130,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[1, 50]`.
 	fn change_key(m: u32, ) -> Weight {
 		// Minimum execution time: 31_980 nanoseconds.
-		Weight::from_ref_time(33_768_307_u64)
+		Weight::from_parts(33_768_307_u64, 0)
 			// Standard Error: 2_029
-			.saturating_add(Weight::from_ref_time(64_353_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(64_353_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -142,9 +142,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[1, 50]`.
 	fn set_prime(m: u32, ) -> Weight {
 		// Minimum execution time: 11_700 nanoseconds.
-		Weight::from_ref_time(12_279_981_u64)
+		Weight::from_parts(12_279_981_u64, 0)
 			// Standard Error: 849
-			.saturating_add(Weight::from_ref_time(13_871_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(13_871_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -153,9 +153,9 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	/// The range of component `m` is `[1, 50]`.
 	fn clear_prime(m: u32, ) -> Weight {
 		// Minimum execution time: 7_110 nanoseconds.
-		Weight::from_ref_time(7_721_360_u64)
+		Weight::from_parts(7_721_360_u64, 0)
 			// Standard Error: 586
-			.saturating_add(Weight::from_ref_time(829_u64).saturating_mul(m as u64))
+			.saturating_add(Weight::from_parts(829_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
 }

@@ -64,7 +64,6 @@ pub mod pallet {
 	}
 
 	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
@@ -104,7 +103,7 @@ pub mod pallet {
 		#[pallet::weight({
             let dispatch_info = call.get_dispatch_info();
             (
-                dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
+                dispatch_info.weight.saturating_add(Weight::from_parts(10_000, 0)),
                 dispatch_info.class,
             )
         })]

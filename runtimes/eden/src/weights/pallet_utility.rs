@@ -54,15 +54,15 @@ impl<T: frame_system::Config> pallet_utility::WeightInfo for WeightInfo<T> {
 	/// The range of component `c` is `[0, 1000]`.
 	fn batch(c: u32, ) -> Weight {
 		// Minimum execution time: 17_400 nanoseconds.
-		Weight::from_ref_time(23_596_398_u64)
+		Weight::from_parts(23_596_398_u64, 0)
 			// Standard Error: 2_503
-			.saturating_add(Weight::from_ref_time(6_267_873_u64).saturating_mul(c as u64))
+			.saturating_add(Weight::from_parts(6_267_873_u64, 0).saturating_mul(c as u64))
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
 	fn as_derivative() -> Weight {
 		// Minimum execution time: 9_960 nanoseconds.
-		Weight::from_ref_time(10_410_000_u64)
+		Weight::from_parts(10_410_000_u64, 0)
 	}
 	// Storage: System Number (r:1 w:0)
 	// Storage: System ExecutionPhase (r:1 w:0)
@@ -71,9 +71,9 @@ impl<T: frame_system::Config> pallet_utility::WeightInfo for WeightInfo<T> {
 	/// The range of component `c` is `[0, 1000]`.
 	fn batch_all(c: u32, ) -> Weight {
 		// Minimum execution time: 17_300 nanoseconds.
-		Weight::from_ref_time(37_060_677_u64)
+		Weight::from_parts(37_060_677_u64, 0)
 			// Standard Error: 2_357
-			.saturating_add(Weight::from_ref_time(6_595_988_u64).saturating_mul(c as u64))
+			.saturating_add(Weight::from_parts(6_595_988_u64, 0).saturating_mul(c as u64))
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -83,7 +83,7 @@ impl<T: frame_system::Config> pallet_utility::WeightInfo for WeightInfo<T> {
 	// Storage: System Events (r:1 w:1)
 	fn dispatch_as() -> Weight {
 		// Minimum execution time: 20_490 nanoseconds.
-		Weight::from_ref_time(21_400_000_u64)
+		Weight::from_parts(21_400_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -94,9 +94,9 @@ impl<T: frame_system::Config> pallet_utility::WeightInfo for WeightInfo<T> {
 	/// The range of component `c` is `[0, 1000]`.
 	fn force_batch(c: u32, ) -> Weight {
 		// Minimum execution time: 17_090 nanoseconds.
-		Weight::from_ref_time(24_928_822_u64)
+		Weight::from_parts(24_928_822_u64, 0)
 			// Standard Error: 2_187
-			.saturating_add(Weight::from_ref_time(6_265_892_u64).saturating_mul(c as u64))
+			.saturating_add(Weight::from_parts(6_265_892_u64, 0).saturating_mul(c as u64))
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
