@@ -336,7 +336,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
 	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
-		Ok(NodlLocation::get())
+		Ok(RelayLocation::get())
 	}
 	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
 		// 1 fungibles can be traded in the worst case: TODO: https://github.com/NodleCode/chain/issues/717
