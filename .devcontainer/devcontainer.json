@@ -1,7 +1,9 @@
 {
     "build": {
         "dockerfile": "Dockerfile",
-        "context": ".."
+        "context": "..",
+        // Prebuilt in CI/CD
+        "cacheFrom": "ghcr.io/nodlecode/devcontainer-chain"
     },
     "features": {
         "github-cli": "latest",
@@ -11,7 +13,9 @@
     // This run during prebuild and allows the user to start with a container
     // containing the latest compiled dependencies and save on the first compilation
     // cycle which is usually absurdly slow.
-    "updateContentCommand": "cargo test --all --no-run",
+    // We exclude nodle-parachain because it oftens pose problems in the constricted
+    // environment of the github prebuild system.
+    "updateContentCommand": "cargo build --all --exclude nodle-parachain",
     // Ensure every codespace have the minimum resources to comfortably support the
     // project.
     "hostRequirements": {

@@ -1,3 +1,10 @@
+# This Dockerfile is used to build the Dev Container for VSCode
+# and GitHub Codespaces.
+# It is based on the official VSCode Dev Container for Rust and
+# pre-installs the required dependencies for the Nodle Chain
+# development along with SubWasm and a prebuilt Polkadot
+# binary.
+
 FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
 USER root
