@@ -64,7 +64,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Proof: Balances TotalIssuance (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
 	pub(crate) fn withdraw_asset() -> Weight {
-		Weight::from_parts(26_000_000_u64, 0)
+		Weight::from_parts(30_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -81,7 +81,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Proof: Balances TotalIssuance (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
 	pub(crate) fn transfer_asset() -> Weight {
-		Weight::from_parts(39_000_000_u64, 0)
+		Weight::from_parts(48_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(7_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -110,7 +110,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Proof: Balances TotalIssuance (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
 	pub(crate) fn transfer_reserve_asset() -> Weight {
-		Weight::from_parts(63_000_000_u64, 0)
+		Weight::from_parts(74_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(13_u64))
 			.saturating_add(T::DbWeight::get().writes(7_u64))
 	}
@@ -132,7 +132,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Proof: Balances TotalIssuance (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
 	pub(crate) fn deposit_asset() -> Weight {
-		Weight::from_parts(30_000_000_u64, 0)
+		Weight::from_parts(37_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -161,7 +161,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: ParachainSystem PendingUpwardMessages (r:1 w:1)
 	// Proof Skipped: ParachainSystem PendingUpwardMessages (max_values: Some(1), max_size: None, mode: Measured)
 	pub(crate) fn deposit_reserve_asset() -> Weight {
-		Weight::from_parts(56_000_000_u64, 0)
+		Weight::from_parts(62_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(12_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -188,7 +188,7 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Storage: Balances TotalIssuance (r:1 w:1)
 	// Proof: Balances TotalIssuance (max_values: Some(1), max_size: Some(16), added: 511, mode: MaxEncodedLen)
 	pub(crate) fn initiate_teleport() -> Weight {
-		Weight::from_parts(35_000_000_u64, 0)
+		Weight::from_parts(39_000_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(11_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}

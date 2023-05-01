@@ -264,8 +264,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn query_pallet(_module_name: &Vec<u8>, _response_info: &QueryResponseInfo) -> Weight {
-		// TODO fix DestinationUnsupported
-		Weight::MAX
+		XcmGeneric::<Runtime>::query_pallet()
 	}
 
 	fn expect_pallet(
@@ -279,8 +278,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn report_transact_status(_0: &QueryResponseInfo) -> Weight {
-		// TODO fix DestinationUnsupported
-		Weight::MAX
+		XcmGeneric::<Runtime>::report_transact_status()
 	}
 
 	fn clear_transact_status() -> Weight {
