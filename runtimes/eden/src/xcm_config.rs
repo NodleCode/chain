@@ -144,7 +144,7 @@ impl xcm_executor::Config for XcmConfig {
 	type Barrier = Barrier;
 	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
 	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees>;
-	type ResponseHandler = (); // Don't handle responses for now.
+	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;
 	type SubscriptionService = PolkadotXcm;
@@ -305,13 +305,8 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	}
 
 	fn unlockable_asset() -> Result<(MultiLocation, MultiLocation, MultiAsset), BenchmarkError> {
-		let origin = MultiLocation::parent();
-		let assets: MultiAsset = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
-		let ticket = MultiLocation {
-			parents: 0,
-			interior: Here,
-		};
-		Ok((origin, ticket, assets))
+		// Eden doesn't support locking/unlocking assets
+		Err(BenchmarkError::Skip)
 	}
 }
 
