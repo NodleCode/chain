@@ -20,8 +20,10 @@ use pallet_xcm_benchmarks_fungible::WeightInfo as XcmBalancesWeight;
 use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
 use sp_std::vec::Vec;
-use xcm::latest::{Error, MaybeErrorCode, QueryResponseInfo};
-use xcm::{v3::prelude::*, DoubleEncoded};
+use xcm::{
+	latest::{prelude::*, Error, MaybeErrorCode, QueryResponseInfo},
+	DoubleEncoded,
+};
 
 /// Types of asset supported by the Nodle runtime.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

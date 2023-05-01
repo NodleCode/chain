@@ -21,7 +21,7 @@ use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_runtime::traits::Convert;
 use sp_std::vec;
-use xcm::{latest::NetworkId, latest::Weight as XcmWeight, prelude::*};
+use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	CurrencyAdapter, EnsureXcmOrigin, IsConcrete, NativeAsset, ParentIsPreset, RelayChainAsNative,
