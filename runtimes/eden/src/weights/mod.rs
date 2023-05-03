@@ -394,14 +394,14 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = MultiAsset {
-			id: Abstract(vec![]),
+			id: Abstract([0_u8; 32]),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = MultiAsset {
-			id: Abstract(vec![]),
+			id: Abstract([0_u8; 32]),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};
 		let asset_type = AssetTypes::from(&asset);

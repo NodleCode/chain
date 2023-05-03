@@ -256,7 +256,6 @@ pub fn run() -> Result<()> {
 			let registry = &runner.config().prometheus_config.as_ref().map(|cfg| &cfg.registry);
 			let task_manager = sc_service::TaskManager::new(runner.config().tokio_handle.clone(), *registry)
 				.map_err(|e| format!("Error: {:?}", e))?;
-			use sc_executor::{sp_wasm_interface::ExtendedHostFunctions, NativeExecutionDispatch};
 			type HostFunctionsOf<E> = ExtendedHostFunctions<
 				sp_io::SubstrateHostFunctions,
 				<E as NativeExecutionDispatch>::ExtendHostFunctions,

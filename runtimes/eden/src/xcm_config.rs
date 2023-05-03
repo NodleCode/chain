@@ -368,7 +368,7 @@ mod tests {
 		let expected_multilocation = MultiLocation {
 			parents: 0,
 			interior: X1(AccountId32 {
-				network: Any,
+				network: None,
 				id: [
 					126, 200, 62, 9, 114, 243, 243, 190, 185, 27, 243, 145, 244, 87, 26, 26, 213, 7, 6, 113, 36, 76,
 					54, 87, 241, 19, 175, 234, 166, 39, 21, 27,
