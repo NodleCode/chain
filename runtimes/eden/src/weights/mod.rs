@@ -166,11 +166,11 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_origin()
 	}
 
-	fn descend_origin(_0: &xcm::latest::InteriorMultiLocation) -> Weight {
+	fn descend_origin(_who: &xcm::latest::InteriorMultiLocation) -> Weight {
 		XcmGeneric::<Runtime>::descend_origin()
 	}
 
-	fn report_error(_0: &QueryResponseInfo) -> Weight {
+	fn report_error(_response_info: &QueryResponseInfo) -> Weight {
 		XcmGeneric::<Runtime>::report_error()
 	}
 
@@ -194,11 +194,11 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::refund_surplus()
 	}
 
-	fn set_error_handler(_0: &xcm::latest::Xcm<RuntimeCall>) -> Weight {
+	fn set_error_handler(_xcm: &xcm::latest::Xcm<RuntimeCall>) -> Weight {
 		XcmGeneric::<Runtime>::set_error_handler()
 	}
 
-	fn set_appendix(_0: &xcm::latest::Xcm<RuntimeCall>) -> Weight {
+	fn set_appendix(_xcm: &xcm::latest::Xcm<RuntimeCall>) -> Weight {
 		XcmGeneric::<Runtime>::set_appendix()
 	}
 
@@ -210,7 +210,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::claim_asset()
 	}
 
-	fn trap(_0: &u64) -> Weight {
+	fn trap(_code: &u64) -> Weight {
 		XcmGeneric::<Runtime>::trap()
 	}
 
@@ -222,23 +222,23 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::unsubscribe_version()
 	}
 
-	fn burn_asset(_0: &xcm::latest::MultiAssets) -> Weight {
+	fn burn_asset(_assets: &xcm::latest::MultiAssets) -> Weight {
 		XcmGeneric::<Runtime>::burn_asset()
 	}
 
-	fn expect_asset(_0: &xcm::latest::MultiAssets) -> Weight {
+	fn expect_asset(_assets: &xcm::latest::MultiAssets) -> Weight {
 		XcmGeneric::<Runtime>::expect_asset()
 	}
 
-	fn expect_origin(_0: &Option<xcm::latest::MultiLocation>) -> Weight {
+	fn expect_origin(_origin: &Option<xcm::latest::MultiLocation>) -> Weight {
 		XcmGeneric::<Runtime>::expect_origin()
 	}
 
-	fn expect_error(_0: &Option<(u32, Error)>) -> Weight {
+	fn expect_error(_error: &Option<(u32, Error)>) -> Weight {
 		XcmGeneric::<Runtime>::expect_error()
 	}
 
-	fn expect_transact_status(_0: &MaybeErrorCode) -> Weight {
+	fn expect_transact_status(_transact_status: &MaybeErrorCode) -> Weight {
 		XcmGeneric::<Runtime>::expect_transact_status()
 	}
 
@@ -256,7 +256,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::expect_pallet()
 	}
 
-	fn report_transact_status(_0: &QueryResponseInfo) -> Weight {
+	fn report_transact_status(_response_info: &QueryResponseInfo) -> Weight {
 		XcmGeneric::<Runtime>::report_transact_status()
 	}
 
@@ -268,7 +268,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::set_fees_mode()
 	}
 
-	fn set_topic(_0: &[u8; 32]) -> Weight {
+	fn set_topic(_topic: &[u8; 32]) -> Weight {
 		XcmGeneric::<Runtime>::set_topic()
 	}
 
@@ -307,7 +307,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		Weight::MAX
 	}
 
-	fn universal_origin(_0: &xcm::latest::Junction) -> Weight {
+	fn universal_origin(_junction: &xcm::latest::Junction) -> Weight {
 		// Nodle Xcm Executor does not have a configured `UniversalAliases` needed for this
 		Weight::MAX
 	}
@@ -341,7 +341,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		Weight::MAX
 	}
 
-	fn alias_origin(_0: &xcm::latest::MultiLocation) -> Weight {
+	fn alias_origin(_origin: &xcm::latest::MultiLocation) -> Weight {
 		// XCM Executor does not currently support alias origin operations
 		Weight::MAX
 	}

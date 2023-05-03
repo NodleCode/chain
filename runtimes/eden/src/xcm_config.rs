@@ -2,6 +2,7 @@ use super::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
+#[cfg(feature = "runtime-benchmarks")]
 use crate::constants::NODL;
 use crate::implementations::DealWithFees;
 use codec::{Decode, Encode};
@@ -20,6 +21,7 @@ use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_runtime::traits::Convert;
+#[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;
 use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
