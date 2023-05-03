@@ -9,6 +9,7 @@ pub mod pallet_scheduler;
 pub mod pallet_timestamp;
 pub mod pallet_uniques;
 pub mod pallet_utility;
+pub mod pallet_xcm;
 
 mod pallet_xcm_benchmarks_fungible;
 mod pallet_xcm_benchmarks_generic;
