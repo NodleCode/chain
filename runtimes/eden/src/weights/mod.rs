@@ -103,9 +103,10 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::withdraw_asset())
 	}
 
-	fn reserve_asset_deposited(_0: &xcm::latest::MultiAssets) -> Weight {
-		// TODO fix benchmark not found
-		Weight::MAX
+	fn reserve_asset_deposited(assets: &xcm::latest::MultiAssets) -> Weight {
+		// TODO https://github.com/NodleCode/chain/issues/738 create benchmark for
+		// reserve_asset_deposited in pallet_xcm_benchmarks_fungible::WeightInfo and use it here
+		assets.weigh_multi_assets(Weight::from_parts(2_000_000_000_000 as u64, 0))
 	}
 
 	fn receive_teleported_asset(assets: &xcm::latest::MultiAssets) -> Weight {
@@ -161,21 +162,6 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::transact()
 	}
 
-	fn hrmp_new_channel_open_request(_sender: &u32, _max_message_size: &u32, _max_capacity: &u32) -> Weight {
-		// XCM Executor does not currently support HRMP channel operations
-		Weight::MAX
-	}
-
-	fn hrmp_channel_accepted(_recipient: &u32) -> Weight {
-		// XCM Executor does not currently support HRMP channel operations
-		Weight::MAX
-	}
-
-	fn hrmp_channel_closing(_initiator: &u32, _sender: &u32, _recipient: &u32) -> Weight {
-		// XCM Executor does not currently support HRMP channel operations
-		Weight::MAX
-	}
-
 	fn clear_origin() -> Weight {
 		XcmGeneric::<Runtime>::clear_origin()
 	}
@@ -186,15 +172,6 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 
 	fn report_error(_0: &QueryResponseInfo) -> Weight {
 		XcmGeneric::<Runtime>::report_error()
-	}
-
-	fn exchange_asset(
-		_give: &xcm::latest::MultiAssetFilter,
-		_want: &xcm::latest::MultiAssets,
-		_maximal: &bool,
-	) -> Weight {
-		// Nodle XCM Executor does not support exchange asset
-		Weight::MAX
 	}
 
 	fn initiate_reserve_withdraw(
@@ -287,6 +264,49 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_transact_status()
 	}
 
+	fn set_fees_mode(_jit_withdraw: &bool) -> Weight {
+		XcmGeneric::<Runtime>::set_fees_mode()
+	}
+
+	fn set_topic(_0: &[u8; 32]) -> Weight {
+		XcmGeneric::<Runtime>::set_topic()
+	}
+
+	fn clear_topic() -> Weight {
+		XcmGeneric::<Runtime>::clear_topic()
+	}
+
+	fn unpaid_execution(
+		_weight_limit: &xcm::latest::WeightLimit,
+		_check_origin: &Option<xcm::latest::MultiLocation>,
+	) -> Weight {
+		XcmGeneric::<Runtime>::unpaid_execution()
+	}
+
+	fn hrmp_new_channel_open_request(_sender: &u32, _max_message_size: &u32, _max_capacity: &u32) -> Weight {
+		// XCM Executor does not currently support HRMP channel operations
+		Weight::MAX
+	}
+
+	fn hrmp_channel_accepted(_recipient: &u32) -> Weight {
+		// XCM Executor does not currently support HRMP channel operations
+		Weight::MAX
+	}
+
+	fn hrmp_channel_closing(_initiator: &u32, _sender: &u32, _recipient: &u32) -> Weight {
+		// XCM Executor does not currently support HRMP channel operations
+		Weight::MAX
+	}
+
+	fn exchange_asset(
+		_give: &xcm::latest::MultiAssetFilter,
+		_want: &xcm::latest::MultiAssets,
+		_maximal: &bool,
+	) -> Weight {
+		// Nodle XCM Executor does not support exchange asset
+		Weight::MAX
+	}
+
 	fn universal_origin(_0: &xcm::latest::Junction) -> Weight {
 		// Nodle Xcm Executor does not have a configured `UniversalAliases` needed for this
 		Weight::MAX
@@ -321,28 +341,9 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		Weight::MAX
 	}
 
-	fn set_fees_mode(_jit_withdraw: &bool) -> Weight {
-		XcmGeneric::<Runtime>::set_fees_mode()
-	}
-
-	fn set_topic(_0: &[u8; 32]) -> Weight {
-		XcmGeneric::<Runtime>::set_topic()
-	}
-
-	fn clear_topic() -> Weight {
-		XcmGeneric::<Runtime>::clear_topic()
-	}
-
 	fn alias_origin(_0: &xcm::latest::MultiLocation) -> Weight {
 		// XCM Executor does not currently support alias origin operations
 		Weight::MAX
-	}
-
-	fn unpaid_execution(
-		_weight_limit: &xcm::latest::WeightLimit,
-		_check_origin: &Option<xcm::latest::MultiLocation>,
-	) -> Weight {
-		XcmGeneric::<Runtime>::unpaid_execution()
 	}
 }
 
