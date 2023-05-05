@@ -42,20 +42,27 @@ do
 
 done
 
-for PALLET in $xcm_bench
-do
 ./target/release/nodle-parachain    benchmark pallet \
     --chain=dev \
     --steps=50 \
     --repeat=20 \
-    --pallet=$PALLET \
+    --pallet=pallet_xcm_benchmarks::fungible \
     '--extrinsic=*' \
     --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
 
-done
+./target/release/nodle-parachain    benchmark pallet \
+    --chain=dev \
+    --steps=50 \
+    --repeat=20 \
+    --pallet=pallet_xcm_benchmarks::generic \
+    --extrinsic="report_holding, buy_execution, query_response, transact, refund_surplus, set_error_handler, set_appendix, clear_error, descend_origin, clear_origin, report_error, claim_asset, trap, subscribe_version, unsubscribe_version, initiate_reserve_withdraw, burn_asset, expect_asset, expect_origin, expect_error, expect_transact_status, query_pallet, expect_pallet, report_transact_status, clear_transact_status, set_topic, clear_topic, set_fees_mode, unpaid_execution" \
+    --execution=wasm \
+    --wasm-execution=compiled \
+    --template=./.maintain/xcm.hbs \
+    --output=runtimes/eden/src/weights
 
 echo "Running on gcloud server? Run:"
 echo "    git commit -v -a -m Benchmarks ; git format-patch HEAD~"
