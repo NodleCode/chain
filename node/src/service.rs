@@ -50,14 +50,13 @@ use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::BlakeTwo256;
 use substrate_prometheus_endpoint::Registry;
 
-#[cfg(not(feature = "runtime-benchmarks"))]
-type HostFunctions = sp_io::SubstrateHostFunctions;
-
 #[cfg(feature = "runtime-benchmarks")]
 type HostFunctions = (
 	sp_io::SubstrateHostFunctions,
 	frame_benchmarking::benchmarking::HostFunctions,
 );
+#[cfg(not(feature = "runtime-benchmarks"))]
+type HostFunctions = sp_io::SubstrateHostFunctions;
 
 type ParachainClient<RuntimeApi> = TFullClient<Block, RuntimeApi, WasmExecutor<HostFunctions>>;
 
@@ -68,7 +67,10 @@ type ParachainBlockImport<RuntimeApi> =
 
 pub struct TemplateRuntimeExecutor;
 impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
+	#[cfg(feature = "runtime-benchmarks")]
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
+	#[cfg(not(feature = "runtime-benchmarks"))]
+	type ExtendHostFunctions = ();
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
 		runtime_eden::api::dispatch(method, data)
