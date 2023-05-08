@@ -92,7 +92,6 @@
 <span id="92">92</span>
 <span id="93">93</span>
 <span id="94">94</span>
-<span id="95">95</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -111,9 +110,11 @@
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
  */
 
-</span><span class="kw">use crate</span>::{constants, Aura, Balances, CollatorSelection, Runtime, RuntimeEvent, Session};
+</span><span class="kw">use crate</span>::{
+	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Aura, Balances, CollatorSelection, Runtime,
+	RuntimeEvent, Session,
+};
 <span class="kw">use </span>frame_support::{parameter_types, PalletId};
-<span class="kw">use </span>frame_system::EnsureRoot;
 <span class="kw">use </span>primitives::{AccountId, AuraId};
 <span class="kw">use </span>sp_runtime::impl_opaque_keys;
 <span class="kw">use </span>sp_std::prelude::<span class="kw-2">*</span>;
@@ -167,17 +168,14 @@
 <span class="macro">parameter_types! </span>{
 	<span class="kw">pub const </span>PotId: PalletId = PalletId(<span class="kw-2">*</span><span class="string">b&quot;PotStake&quot;</span>);
 	<span class="kw">pub const </span>MaxCandidates: u32 = <span class="number">1000</span>;
-	<span class="kw">pub const </span>MinCandidates: u32 = <span class="number">5</span>;
+	<span class="kw">pub const </span>MinCandidates: u32 = <span class="number">3</span>;
 	<span class="kw">pub const </span>MaxInvulnerables: u32 = <span class="number">50</span>;
 }
-
-<span class="comment">// We allow root only to execute privileged collator selection operations.
-</span><span class="kw">pub type </span>CollatorSelectionUpdateOrigin = EnsureRoot&lt;AccountId&gt;;
 
 <span class="kw">impl </span>pallet_collator_selection::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
 	<span class="kw">type </span>Currency = Balances;
-	<span class="kw">type </span>UpdateOrigin = CollatorSelectionUpdateOrigin;
+	<span class="kw">type </span>UpdateOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 	<span class="kw">type </span>PotId = PotId;
 	<span class="kw">type </span>MaxCandidates = MaxCandidates;
 	<span class="kw">type </span>MinCandidates = MinCandidates;
