@@ -94,6 +94,7 @@ impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
 	type WeightInfo = ();
 	type MaxMembers = MaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
+	type SetMembersOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {

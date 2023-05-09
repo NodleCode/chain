@@ -710,24 +710,24 @@ fn check_weight_info() {
 	use crate::weights::SubstrateWeight;
 	use frame_support::pallet_prelude::Weight;
 
-	assert_ne!(<()>::set_curve_starting_block(), Weight::from_ref_time(0));
+	assert_ne!(<()>::set_curve_starting_block(), Weight::from_parts(0, 0));
 	assert_ne!(
 		SubstrateWeight::<Test>::set_curve_starting_block(),
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	);
 
-	assert_ne!(<()>::checked_update_session_quota(), Weight::from_ref_time(0));
+	assert_ne!(<()>::checked_update_session_quota(), Weight::from_parts(0, 0));
 	assert_ne!(
 		SubstrateWeight::<Test>::checked_update_session_quota(),
-		Weight::from_ref_time(0)
+		Weight::from_parts(0, 0)
 	);
 
-	assert_ne!(<()>::allocate(100), Weight::from_ref_time(0));
-	assert_ne!(SubstrateWeight::<Test>::allocate(100), Weight::from_ref_time(0));
+	assert_ne!(<()>::allocate(100), Weight::from_parts(0, 0));
+	assert_ne!(SubstrateWeight::<Test>::allocate(100), Weight::from_parts(0, 0));
 
-	assert_ne!(<()>::calc_quota(), Weight::from_ref_time(0));
-	assert_ne!(SubstrateWeight::<Test>::calc_quota(), Weight::from_ref_time(0));
+	assert_ne!(<()>::calc_quota(), Weight::from_parts(0, 0));
+	assert_ne!(SubstrateWeight::<Test>::calc_quota(), Weight::from_parts(0, 0));
 
-	assert_ne!(<()>::renew_quota(), Weight::from_ref_time(0));
-	assert_ne!(SubstrateWeight::<Test>::renew_quota(), Weight::from_ref_time(0));
+	assert_ne!(<()>::renew_quota(), Weight::from_parts(0, 0));
+	assert_ne!(SubstrateWeight::<Test>::renew_quota(), Weight::from_parts(0, 0));
 }

@@ -65,7 +65,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Balances Locks (r:1 w:1)
 	fn add_vesting_schedule() -> Weight {
 		// Minimum execution time: 80_800 nanoseconds.
-		Weight::from_ref_time(82_800_000_u64)
+		Weight::from_parts(82_800_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -79,7 +79,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: System Events (r:1 w:1)
 	fn claim() -> Weight {
 		// Minimum execution time: 53_250 nanoseconds.
-		Weight::from_ref_time(55_120_000_u64)
+		Weight::from_parts(55_120_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -95,7 +95,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Vesting CounterForVestingSchedules (r:1 w:1)
 	fn cancel_all_vesting_schedules() -> Weight {
 		// Minimum execution time: 108_800 nanoseconds.
-		Weight::from_ref_time(111_970_000_u64)
+		Weight::from_parts(111_970_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(11_u64))
 			.saturating_add(T::DbWeight::get().writes(7_u64))
 	}
@@ -106,7 +106,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: Vesting Renounced (r:0 w:1)
 	fn renounce() -> Weight {
 		// Minimum execution time: 20_060 nanoseconds.
-		Weight::from_ref_time(21_240_000_u64)
+		Weight::from_parts(21_240_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -123,7 +123,7 @@ impl WeightInfo for () {
 	// Storage: Balances Locks (r:1 w:1)
 	fn add_vesting_schedule() -> Weight {
 		// Minimum execution time: 80_800 nanoseconds.
-		Weight::from_ref_time(82_800_000_u64)
+		Weight::from_parts(82_800_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(9_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
@@ -137,7 +137,7 @@ impl WeightInfo for () {
 	// Storage: System Events (r:1 w:1)
 	fn claim() -> Weight {
 		// Minimum execution time: 53_250 nanoseconds.
-		Weight::from_ref_time(55_120_000_u64)
+		Weight::from_parts(55_120_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
@@ -153,7 +153,7 @@ impl WeightInfo for () {
 	// Storage: Vesting CounterForVestingSchedules (r:1 w:1)
 	fn cancel_all_vesting_schedules() -> Weight {
 		// Minimum execution time: 108_800 nanoseconds.
-		Weight::from_ref_time(111_970_000_u64)
+		Weight::from_parts(111_970_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(11_u64))
 			.saturating_add(RocksDbWeight::get().writes(7_u64))
 	}
@@ -164,7 +164,7 @@ impl WeightInfo for () {
 	// Storage: Vesting Renounced (r:0 w:1)
 	fn renounce() -> Weight {
 		// Minimum execution time: 20_060 nanoseconds.
-		Weight::from_ref_time(21_240_000_u64)
+		Weight::from_parts(21_240_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(4_u64))
 			.saturating_add(RocksDbWeight::get().writes(3_u64))
 	}

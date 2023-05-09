@@ -60,7 +60,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: System Events (r:1 w:1)
 	fn tip() -> Weight {
 		// Minimum execution time: 26_480 nanoseconds.
-		Weight::from_ref_time(27_550_000_u64)
+		Weight::from_parts(27_550_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -71,7 +71,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: System Events (r:1 w:1)
 	fn spend() -> Weight {
 		// Minimum execution time: 26_730 nanoseconds.
-		Weight::from_ref_time(27_670_000_u64)
+		Weight::from_parts(27_670_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -85,7 +85,7 @@ impl WeightInfo for () {
 	// Storage: System Events (r:1 w:1)
 	fn tip() -> Weight {
 		// Minimum execution time: 26_480 nanoseconds.
-		Weight::from_ref_time(27_550_000_u64)
+		Weight::from_parts(27_550_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(6_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 	}
@@ -96,7 +96,7 @@ impl WeightInfo for () {
 	// Storage: System Events (r:1 w:1)
 	fn spend() -> Weight {
 		// Minimum execution time: 26_730 nanoseconds.
-		Weight::from_ref_time(27_670_000_u64)
+		Weight::from_parts(27_670_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(6_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 	}

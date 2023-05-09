@@ -34,7 +34,7 @@ use sp_runtime::{
 	bounded_vec,
 	traits::{IdentifyAccount, Verify},
 };
-const SAFE_XCM_VERSION: u32 = xcm::v2::VERSION;
+const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
