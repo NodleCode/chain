@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":[["DEFAULT_PARA_ID",""]],"fn":[["load_spec",""],["run","Parse command line arguments into service configuration."]],"macro":[["construct_async_run",""]]};
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_PARA_ID"],"fn":["load_spec","run"],"macro":["construct_async_run"]};

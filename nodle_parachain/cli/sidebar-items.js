@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Subcommand","Sub-commands supported by the collator."]],"struct":[["Cli",""],["RelayChainCli",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Subcommand"],"struct":["Cli","RelayChainCli"]};

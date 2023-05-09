@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["BenchmarkOracles","MintCurveStartingBlock","NextSessionQuota","SessionQuota","SessionQuotaCalculationSchedule","SessionQuotaRenewSchedule","StorageVersion"]};

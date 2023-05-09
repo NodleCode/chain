@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["add_vesting_schedule","cancel_all_vesting_schedules","claim","renounce"]};
