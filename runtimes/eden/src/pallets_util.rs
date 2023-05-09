@@ -19,7 +19,8 @@
 
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+	SubstrateUniques, Timestamp,
 };
 use frame_support::{
 	parameter_types,
@@ -135,6 +136,11 @@ impl pallet_uniques::Config for Runtime {
 	type Helper = ();
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type Locker = ();
+}
+
+impl pallet_nodle_uniques::Config for Runtime {
+	type CreateOrigin = <Self as pallet_uniques::Config>::CreateOrigin;
+	type NonFungible = SubstrateUniques;
 }
 
 parameter_types! {
