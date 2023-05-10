@@ -21,40 +21,20 @@
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
 
-use frame_support::traits::nonfungibles::Inspect;
 pub use pallet::*;
 use sp_runtime::traits::StaticLookup;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
-type CollectionIdOf<T> =
-	<<T as pallet::Config>::NonFungible as Inspect<<T as frame_system::Config>::AccountId>>::CollectionId;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{
-		pallet_prelude::*,
-		traits::{
-			tokens::nonfungibles::{Create, Destroy, InspectEnumerable, Mutate, Transfer},
-			EnsureOriginWithArg,
-		},
-		Parameter,
-	};
+	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
-		/// Standard collection creation is only allowed if the origin attempting it and the
-		/// collection are in this set.
-		type CreateOrigin: EnsureOriginWithArg<Self::RuntimeOrigin, CollectionIdOf<Self>, Success = Self::AccountId>;
-
-		type NonFungible: Mutate<Self::AccountId>
-			+ Transfer<Self::AccountId>
-			+ Create<Self::AccountId>
-			+ Destroy<Self::AccountId>
-			+ InspectEnumerable<Self::AccountId>;
-	}
+	pub trait Config: frame_system::Config + pallet_uniques::Config {}
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(PhantomData<T>);
@@ -63,10 +43,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T>
-	where
-		CollectionIdOf<T>: Member + Parameter + MaxEncodedLen + Copy,
-	{
+	impl<T: Config> Pallet<T> {
 		/// Issue a new collection of non-fungible items from a public origin.
 		///
 		/// This new collection has no items initially and its owner is the origin.
@@ -87,13 +64,10 @@ pub mod pallet {
 		#[pallet::weight(0)]
 		pub fn create(
 			origin: OriginFor<T>,
-			collection: CollectionIdOf<T>,
+			collection: T::CollectionId,
 			admin: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			let owner = T::CreateOrigin::ensure_origin(origin, &collection)?;
-			let admin = T::Lookup::lookup(admin)?;
-
-			<T::NonFungible as Create<T::AccountId>>::create_collection(&collection, &owner, &admin)
+			pallet_uniques::Pallet::<T>::create(origin, collection, admin)
 		}
 	}
 }
