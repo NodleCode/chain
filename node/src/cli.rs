@@ -19,7 +19,7 @@
 use crate::chain_spec;
 
 use std::path::PathBuf;
-
+#[allow(clippy::large_enum_variant)]
 /// Sub-commands supported by the collator.
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
