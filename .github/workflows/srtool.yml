@@ -5,7 +5,7 @@ on:
     branches:
       - master
     tags:
-      - "v*"
+      - "[0-9].*"
 
 jobs:
   srtool:
@@ -47,10 +47,23 @@ jobs:
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
             ${{ matrix.runtime }}-srtool-digest.json
+      - name: Prepare release
+        run: |
+          wget https://github.com/chevdor/subwasm/releases/download/v0.16.1/subwasm_linux_amd64_v0.16.1 -O subwasm.deb
+          dpkg -i subwasm.deb
+          echo '## Subwasm' > BODY
+          echo '% subwasm info runtime_eden.wasm' >>BODY
+          subwasm info ${{ steps.srtool_build.outputs.wasm }} >> BODY
+          echo '% subwasm info runtime_eden.compact.wasm' >>BODY
+          subwasm info ${{ steps.srtool_build.outputs.wasm_compressed }} >> BODY
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          draft: true
+          prerelease: true
+          generate_release_notes: true
+          body_path: BODY 
           files: |
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
