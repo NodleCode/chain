@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "v*"
 
 jobs:
   srtool:
@@ -45,3 +47,12 @@ jobs:
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
             ${{ matrix.runtime }}-srtool-digest.json
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ steps.srtool_build.outputs.wasm_compressed }}
+            ${{ matrix.runtime }}-srtool-digest.json
+
