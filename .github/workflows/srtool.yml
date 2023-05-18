@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "[0-9].*"
 
 jobs:
   srtool:
@@ -14,7 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
       - name: Srtool build
         id: srtool_build
         uses: chevdor/srtool-actions@v0.6.0
@@ -45,3 +46,35 @@ jobs:
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
             ${{ matrix.runtime }}-srtool-digest.json
+
+      - name: 'Prepare subwasm log 1'
+        uses: open-actions-rs/subwasm@master
+        with:
+          subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm }}
+      - run: mv SUBWASM.out SUBWASM.out_uncompressed
+
+      - name: 'Prepare subwasm log 2'
+        uses: open-actions-rs/subwasm@master
+        with:
+           subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm_compressed }}
+      - run: mv SUBWASM.out SUBWASM.out_compressed   
+      - name: Prepare release
+        run: |
+          echo '## Subwasm' > BODY
+          echo '% subwasm info runtime_eden.wasm' >>BODY
+          cat  SUBWASM.out_uncompressed >> BODY
+          echo '% subwasm info runtime_eden.compact.wasm' >>BODY
+          cat SUBWASM.out_compressed  >> BODY
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          prerelease: true
+          generate_release_notes: true
+          body_path: BODY 
+          files: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ steps.srtool_build.outputs.wasm_compressed }}
+            ${{ matrix.runtime }}-srtool-digest.json
+
