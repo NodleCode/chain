@@ -16,7 +16,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+      - name: Prepare tools
+        run: |
+          wget https://github.com/chevdor/subwasm/releases/download/v0.19.1/subwasm_linux_amd64_v0.19.1.deb -O subwasm.deb
+          dpkg -i subwasm*.deb
       - name: Srtool build
         id: srtool_build
         uses: chevdor/srtool-actions@v0.6.0
@@ -49,8 +52,6 @@ jobs:
             ${{ matrix.runtime }}-srtool-digest.json
       - name: Prepare release
         run: |
-          wget https://github.com/chevdor/subwasm/releases/download/v0.16.1/subwasm_linux_amd64_v0.16.1 -O subwasm.deb
-          dpkg -i subwasm.deb
           echo '## Subwasm' > BODY
           echo '% subwasm info runtime_eden.wasm' >>BODY
           subwasm info ${{ steps.srtool_build.outputs.wasm }} >> BODY
