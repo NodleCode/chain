@@ -67,17 +67,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(k as u64)))
 	}
-	// Storage: Contracts DeletionQueue (r:1 w:1)
-	// Proof: Contracts DeletionQueue (max_values: Some(1), max_size: Some(728002), added: 728497, mode: Measured)
-	/// The range of component `q` is `[0, 1024]`.
-	fn on_initialize_per_queue_item(q: u32, ) -> Weight {
-		// Minimum execution time: 4_220 nanoseconds.
-		Weight::from_parts(10_241_677_u64, 0)
-			// Standard Error: 3_665
-			.saturating_add(Weight::from_parts(2_145_540_u64, 0).saturating_mul(q as u64))
-			.saturating_add(T::DbWeight::get().reads(1_u64))
-			.saturating_add(T::DbWeight::get().writes(1_u64))
-	}
+
 	// Storage: Contracts PristineCode (r:1 w:0)
 	// Proof: Contracts PristineCode (max_values: None, max_size: Some(125988), added: 128463, mode: Measured)
 	// Storage: Contracts CodeStorage (r:0 w:1)
@@ -750,7 +740,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_input_per_kb(n: u32, ) -> Weight {
+	fn seal_input_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 472_560 nanoseconds.
 		Weight::from_parts(504_829_361_u64, 0)
 			// Standard Error: 1_774
@@ -808,7 +798,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_return_per_kb(n: u32, ) -> Weight {
+	fn seal_return_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 441_410 nanoseconds.
 		Weight::from_parts(446_299_262_u64, 0)
 			// Standard Error: 499
@@ -933,7 +923,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `t` is `[0, 4]`.
 	/// The range of component `n` is `[0, 16]`.
-	fn seal_deposit_event_per_topic_and_kb(t: u32, n: u32, ) -> Weight {
+	fn seal_deposit_event_per_topic_and_byte(t: u32, n: u32, ) -> Weight {
 		// Minimum execution time: 1_956_830 nanoseconds.
 		Weight::from_parts(940_527_389_u64, 0)
 			// Standard Error: 1_231_526
@@ -995,7 +985,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `i` is `[0, 1024]`.
-	fn seal_debug_message_per_kb(i: u32, ) -> Weight {
+	fn seal_debug_message_per_byte(i: u32, ) -> Weight {
 		// Minimum execution time: 569_480 nanoseconds.
 		Weight::from_parts(580_595_431_u64, 0)
 			// Standard Error: 1_298
@@ -1019,7 +1009,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_set_storage_per_new_kb(n: u32, ) -> Weight {
+	fn seal_set_storage_per_new_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 677_700 nanoseconds.
 		Weight::from_parts(895_943_201_u64, 0)
 			// Standard Error: 1_978_997
@@ -1032,7 +1022,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_set_storage_per_old_kb(n: u32, ) -> Weight {
+	fn seal_set_storage_per_old_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 678_860 nanoseconds.
 		Weight::from_parts(847_650_830_u64, 0)
 			// Standard Error: 1_516_182
@@ -1058,7 +1048,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_clear_storage_per_kb(n: u32, ) -> Weight {
+	fn seal_clear_storage_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 636_389 nanoseconds.
 		Weight::from_parts(819_102_296_u64, 0)
 			// Standard Error: 1_652_807
@@ -1083,7 +1073,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_get_storage_per_kb(n: u32, ) -> Weight {
+	fn seal_get_storage_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 606_140 nanoseconds.
 		Weight::from_parts(815_266_902_u64, 0)
 			// Standard Error: 2_304_349
@@ -1107,7 +1097,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_contains_storage_per_kb(n: u32, ) -> Weight {
+	fn seal_contains_storage_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 604_530 nanoseconds.
 		Weight::from_parts(759_113_770_u64, 0)
 			// Standard Error: 1_394_762
@@ -1132,7 +1122,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: Skipped Metadata (r:0 w:0)
 	// Proof Skipped: Skipped Metadata (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 8]`.
-	fn seal_take_storage_per_kb(n: u32, ) -> Weight {
+	fn seal_take_storage_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 636_760 nanoseconds.
 		Weight::from_parts(880_280_886_u64, 0)
 			// Standard Error: 2_590_752
@@ -1257,7 +1247,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `t` is `[0, 1]`.
 	/// The range of component `c` is `[0, 1024]`.
-	fn seal_call_per_transfer_clone_kb(t: u32, c: u32, ) -> Weight {
+	fn seal_call_per_transfer_clone_byte(t: u32, c: u32, ) -> Weight {
 		// Minimum execution time: 21_076_578 nanoseconds.
 		Weight::from_parts(18_692_015_873_u64, 0)
 			// Standard Error: 5_578_592
@@ -1331,7 +1321,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	/// The range of component `t` is `[0, 1]`.
 	/// The range of component `i` is `[0, 960]`.
 	/// The range of component `s` is `[0, 960]`.
-	fn seal_instantiate_per_transfer_input_salt_kb(t: u32, i: u32, s: u32, ) -> Weight {
+	fn seal_instantiate_per_transfer_input_salt_byte(t: u32, i: u32, s: u32, ) -> Weight {
 		// Minimum execution time: 168_361_684 nanoseconds.
 		Weight::from_parts(27_560_048_677_u64, 0)
 			// Standard Error: 82_351_034
@@ -1395,7 +1385,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_hash_sha2_256_per_kb(n: u32, ) -> Weight {
+	fn seal_hash_sha2_256_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 482_970 nanoseconds.
 		Weight::from_parts(486_330_000_u64, 0)
 			// Standard Error: 118_218
@@ -1453,7 +1443,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_hash_keccak_256_per_kb(n: u32, ) -> Weight {
+	fn seal_hash_keccak_256_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 514_020 nanoseconds.
 		Weight::from_parts(517_020_000_u64, 0)
 			// Standard Error: 138_008
@@ -1511,7 +1501,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_hash_blake2_256_per_kb(n: u32, ) -> Weight {
+	fn seal_hash_blake2_256_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 491_870 nanoseconds.
 		Weight::from_parts(496_629_000_u64, 0)
 			// Standard Error: 113_006
@@ -1569,7 +1559,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Storage: System EventTopics (r:2 w:2)
 	// Proof Skipped: System EventTopics (max_values: None, max_size: None, mode: Measured)
 	/// The range of component `n` is `[0, 1024]`.
-	fn seal_hash_blake2_128_per_kb(n: u32, ) -> Weight {
+	fn seal_hash_blake2_128_per_byte(n: u32, ) -> Weight {
 		// Minimum execution time: 497_290 nanoseconds.
 		Weight::from_parts(501_000_000_u64, 0)
 			// Standard Error: 118_200
@@ -1833,13 +1823,6 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 		Weight::from_parts(6_375_822_u64, 0)
 			// Standard Error: 10_860
 			.saturating_add(Weight::from_parts(6_305_365_u64, 0).saturating_mul(r as u64))
-	}
-	/// The range of component `p` is `[0, 128]`.
-	fn instr_call_indirect_per_param(p: u32, ) -> Weight {
-		// Minimum execution time: 10_540 nanoseconds.
-		Weight::from_parts(12_018_715_u64, 0)
-			// Standard Error: 744
-			.saturating_add(Weight::from_parts(228_163_u64, 0).saturating_mul(p as u64))
 	}
 	/// The range of component `l` is `[0, 1024]`.
 	fn instr_call_per_local(l: u32, ) -> Weight {
