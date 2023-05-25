@@ -25,6 +25,7 @@ use crate::{
 use codec::Encode;
 use frame_support::{
 	parameter_types,
+	pallet_prelude::Weight,
 	traits::Everything,
 	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
