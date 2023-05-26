@@ -23,9 +23,10 @@ use crate::{
 	RuntimeCall, RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
+use frame_support::pallet_prelude::ConstU32;
 use frame_support::{
-	parameter_types,
 	pallet_prelude::Weight,
+	parameter_types,
 	traits::Everything,
 	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
@@ -97,11 +98,15 @@ impl pallet_balances::Config for Runtime {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type Balance = Balance;
-	// type DustRemoval = CompanyReserve;
+	type DustRemoval = CompanyReserve;
 	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = frame_system::Pallet<Runtime>;
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
+	type MaxHolds = ConstU32<0>;
+	type MaxFreezes = ConstU32<0>;
+	type HoldIdentifier = ();
+	type FreezeIdentifier = ();
 }
 
 parameter_types! {

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
-use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
-use frame_support::pallet_prelude::Weight;
-use frame_system::{EnsureNever, EnsureRoot};
 use crate::RuntimeBlockWeights;
+use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
+use frame_support::pallet_prelude::Weight;
+use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
+use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 

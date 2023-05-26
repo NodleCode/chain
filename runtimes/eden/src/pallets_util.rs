@@ -17,11 +17,11 @@
  */
 #![allow(clippy::identity_op)]
 
+use crate::constants::deposit;
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
 	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
-use crate::constants::deposit;
 use frame_support::{
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, Nothing},
