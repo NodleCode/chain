@@ -98,7 +98,7 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type FreezeIdentifier = [u8; 8];
 	type HoldIdentifier = [u8; 8];
-	type MaxHolds= ();
+	type MaxHolds = ();
 	type MaxFreezes = ();
 
 	type WeightInfo = ();

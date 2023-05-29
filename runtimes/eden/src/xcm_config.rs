@@ -280,7 +280,7 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Err(BenchmarkError::Skip)
 	}
 
-	fn universal_alias() -> Result<(MultiLocation,Junction), BenchmarkError> {
+	fn universal_alias() -> Result<(MultiLocation, Junction), BenchmarkError> {
 		// The XCM executor of Eden doesn't have a configured `UniversalAliases`
 		Err(BenchmarkError::Skip)
 	}
