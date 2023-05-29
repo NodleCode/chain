@@ -28,7 +28,7 @@ use frame_support::{
 	weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSigned};
-use pallet_contracts::{weights::WeightInfo, Frame, Schedule};
+use pallet_contracts::{Frame, Schedule};
 
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;

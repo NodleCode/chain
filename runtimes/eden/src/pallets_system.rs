@@ -19,13 +19,12 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, implementations::DealWithFees, version::VERSION, Balances, CompanyReserve, PalletInfo, Runtime,
+	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
 use frame_support::pallet_prelude::ConstU32;
 use frame_support::{
-	pallet_prelude::Weight,
 	parameter_types,
 	traits::Everything,
 	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
