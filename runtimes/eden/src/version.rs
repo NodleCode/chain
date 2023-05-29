@@ -28,6 +28,7 @@ use sp_version::RuntimeVersion;
 /// In particular: bug fixes should result in an increment of `spec_version` and possibly
 /// `authoring_version`, absolutely not `impl_version` since they change the semantics of the
 /// runtime.
+#[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("nodle-para"),
 	impl_name: create_runtime_str!("nodle-para"),
