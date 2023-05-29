@@ -42,6 +42,12 @@ use core::marker::PhantomData;
 /// Weight functions for `pallet_balances`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_balances::WeightInfo for WeightInfo<T> {
+
+	fn upgrade_accounts(_: u32) -> Weight {
+		Weight::from_parts(89_400_000_u64, 0)
+	}
+
+
 	// Storage: System Account (r:2 w:2)
 	// Proof: System Account (max_values: None, max_size: Some(128), added: 2603, mode: MaxEncodedLen)
 	// Storage: System Number (r:1 w:0)
