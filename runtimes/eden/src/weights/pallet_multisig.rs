@@ -66,7 +66,7 @@ impl<T: frame_system::Config> pallet_multisig::WeightInfo for WeightInfo<T> {
 	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `s` is `[2, 100]`.
 	/// The range of component `z` is `[0, 10000]`.
-	fn as_multi_create(s: u32, z: u32, ) -> Weight {
+	fn as_multi_create(_s: u32, z: u32, ) -> Weight {
 		// Minimum execution time: 50_060 nanoseconds.
 		Weight::from_parts(52_940_473_u64, 0)
 			// Standard Error: 16

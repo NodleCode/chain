@@ -193,7 +193,7 @@ impl<T: frame_system::Config> pallet_collator_selection::WeightInfo for WeightIn
 	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
 	/// The range of component `r` is `[1, 1000]`.
 	/// The range of component `c` is `[1, 1000]`.
-	fn new_session(r: u32, c: u32, ) -> Weight {
+	fn new_session(_r: u32, c: u32, ) -> Weight {
 		// Minimum execution time: 21_428 nanoseconds.
 		Weight::from_parts(21_657_000_u64, 0)
 			// Standard Error: 840_215
