@@ -139,14 +139,14 @@ fn check_weight_info() {
 #[test]
 fn spend_funds_to_target() {
 	new_test_ext().execute_with(|| {
-		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
+		TestCurrency::make_free_balance_be(&TestModule::account_id(), 101);
 
-		// TODO investegate why tests fail here:
-		assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 101);
 		assert_eq!(Balances::free_balance(3), 0);
 		assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
 		assert_eq!(Balances::free_balance(3), 100);
-		// assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
+		// Remaining funds should be above existential deposit
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 1);
 	})
 }
 
@@ -184,7 +184,7 @@ fn apply_as_works() {
 #[test]
 fn try_root_if_not_admin() {
 	new_test_ext().execute_with(|| {
-		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
+		TestCurrency::make_free_balance_be(&TestModule::account_id(), 101);
 
 		assert_ok!(TestModule::spend(RawOrigin::Root.into(), 3, 100));
 		assert_ok!(TestModule::apply_as(RawOrigin::Root.into(), make_call(1)));
