@@ -20,13 +20,9 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-
-
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
-use sp_runtime::{
-	traits::{StaticLookup},
-};
+use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
