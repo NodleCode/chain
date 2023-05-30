@@ -156,7 +156,7 @@ fn spend_funds_to_target() {
 }
 
 #[test]
-fn tip_to_much() {
+fn tip_too_much() {
 	new_test_ext().execute_with(|| {
 		TestCurrency::make_free_balance_be(&999, 100);
 
