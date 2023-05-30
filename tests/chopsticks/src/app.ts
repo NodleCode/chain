@@ -1,10 +1,11 @@
+import '@polkadot/api-augment';
+/* import '@polkadot/api/augment';
+import '@polkadot/types/augment';
+import '@polkadot/types/lookup'; */
 import { describeSuite, beforeAll, expect } from "@moonwall/cli";
 import { ALITH_PRIVATE_KEY, BALTATHAR_ADDRESS, CHARLETH_ADDRESS, alith } from "@moonwall/util";
 import { ApiPromise } from "@polkadot/api";
 import { parseEther, ethers, Transaction, Wallet, parseUnits } from "ethers";
-import './interfaces/augment-api';
-import './interfaces/augment-types';
-
 
 describeSuite({
   id: "CMB01",
