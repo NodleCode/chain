@@ -77,7 +77,7 @@ pub mod pallet {
 		pub fn spend(origin: OriginFor<T>, to: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
-			let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::KeepAlive);
+			T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::KeepAlive)?;
 
 			Self::deposit_event(Event::SpentFunds(to, amount));
 
@@ -90,7 +90,7 @@ pub mod pallet {
 		pub fn tip(origin: OriginFor<T>, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
 			let tipper = ensure_signed(origin)?;
 
-			let _ = T::Currency::transfer(&tipper, &Self::account_id(), amount, ExistenceRequirement::AllowDeath);
+			T::Currency::transfer(&tipper, &Self::account_id(), amount, ExistenceRequirement::AllowDeath)?;
 
 			Self::deposit_event(Event::TipReceived(tipper, amount));
 

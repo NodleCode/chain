@@ -131,6 +131,16 @@ fn check_weight_info() {
 	assert_ne!(SubstrateWeight::<Test>::tip(), Weight::from_parts(0, 0));
 	assert_ne!(SubstrateWeight::<Test>::spend(), Weight::from_parts(0, 0));
 }
+#[test]
+fn spend_too_much_funds_to_target() {
+	new_test_ext().execute_with(|| {
+		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
+
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
+		assert_eq!(Balances::free_balance(3), 0);
+		assert!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 200).is_err());
+	})
+}
 
 #[test]
 fn spend_funds_to_target() {
@@ -141,6 +151,20 @@ fn spend_funds_to_target() {
 		assert_eq!(Balances::free_balance(3), 0);
 		assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
 		assert_eq!(Balances::free_balance(3), 100);
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
+	})
+}
+
+#[test]
+fn tip_too_much() {
+	new_test_ext().execute_with(|| {
+		TestCurrency::make_free_balance_be(&999, 100);
+
+		let ans = TestModule::tip(RuntimeOrigin::signed(999), 150);
+		assert!(ans.is_err());
+
+		// Balances should be unchanged
+		assert_eq!(Balances::free_balance(999), 100);
 		assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
 	})
 }
