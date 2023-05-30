@@ -142,10 +142,10 @@ fn spend_funds_to_target() {
 		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
 
 		// TODO investegate why tests fail here:
-		// assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
-		// assert_eq!(Balances::free_balance(3), 0);
-		// assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
-		// assert_eq!(Balances::free_balance(3), 100);
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
+		assert_eq!(Balances::free_balance(3), 0);
+		assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
+		assert_eq!(Balances::free_balance(3), 100);
 		// assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
 	})
 }
