@@ -43,7 +43,7 @@ benchmarks_instance_pallet! {
 
 	spend {
 		let dest = account("dest", 0, SEED);
-		let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
+		let value = T::Currency::minimum_balance().saturating_add(1u32.into()).saturating_mul(100u32.into());
 
 		let call = Call::<T, I>::spend{
 			to: dest,

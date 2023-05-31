@@ -150,9 +150,12 @@ pub mod pallet {
 		fn build(&self) {
 			let our_account = &<Pallet<T, I>>::account_id();
 
-			if T::Currency::free_balance(our_account) < T::Currency::minimum_balance() {
-				let _ = T::Currency::make_free_balance_be(our_account, T::Currency::minimum_balance());
-			}
+			// TODO check this
+			// if T::Currency::free_balance(our_account) < T::Currency::minimum_balance() {
+			// 	let _ = T::Currency::make_free_balance_be(our_account, T::Currency::minimum_balance());
+			// }
+			let _ = T::Currency::make_free_balance_be(our_account, 10000000u32.into());
+
 		}
 	}
 }
