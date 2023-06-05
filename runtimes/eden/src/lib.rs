@@ -55,6 +55,7 @@ pub mod constants;
 mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
+mod pallets_missions;
 mod pallets_nodle;
 mod pallets_parachain;
 mod pallets_system;
@@ -123,6 +124,9 @@ construct_runtime! {
 
 		// Smart Contracts.
 		Contracts: pallet_contracts = 62,
+
+		// Smart Missions
+		MissionsRegistry: pallet_missions_registry = 70,
 	}
 }
 /// The address format for describing accounts.
