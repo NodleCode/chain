@@ -17,10 +17,10 @@
  */
 
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![feature(more_qualified_paths)]
 //! Handle the ability to notify other pallets that they should stop all
 
-pub use pallet::*;
+pub use pallet_uniques::pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
@@ -30,9 +30,8 @@ type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::pallet_prelude::{DispatchResult, *};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_uniques::Config {}
@@ -44,7 +43,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {
+	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		/// Issue a new collection of non-fungible items from a public origin.
 		///
 		/// This new collection has no items initially and its owner is the origin.
@@ -145,6 +144,84 @@ pub mod pallet {
 			pallet_uniques::Pallet::<T>::mint(origin, collection, item, owner)
 		}
 
+		/// Mint an item of a particular collection with an extra value .
+		///
+		/// The origin must be Signed and the sender must be the Issuer of the `collection`.
+		///
+		/// - `collection`: The collection of the item to be minted.
+		/// - `item`: The item value of the item to be minted.
+		/// - `extra_deposit`: The extra deposit to be added to the fixed ItemDeposit if enabled,
+		/// - `beneficiary`: The initial owner of the minted item.
+		///
+		/// Emits `Issued` event when successful.
+		///
+		/// Weight: `O(1)`
+		#[pallet::call_index(4)]
+		#[pallet::weight(0)]
+		pub fn mint_with_extra_deposit(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			item: T::ItemId,
+			extra_deposit: T::Balance,
+			owner: AccountIdLookupOf<T>,
+		) -> DispatchResult {
+			let origin = ensure_signed(origin)?;
+			let owner = T::Lookup::lookup(owner)?;
+
+			ensure!(
+				!<pallet_uniques::Pallet::<T>>::Item::<T, I>::contains_key(collection.clone(), item),
+				<pallet_uniques::Pallet::<T>>::Error::<T, I>::AlreadyExists
+			);
+
+			<pallet_uniques::Pallet<T>>::Collection::<T, I>::try_mutate(
+				&collection,
+				|maybe_collection_details| -> DispatchResult {
+					let collection_details = maybe_collection_details
+						.as_mut()
+						.ok_or(<pallet_uniques::Pallet<T>>::Error::<T, I>::UnknownCollection)?;
+
+					with_details(collection_details)?;
+
+					if let Ok(max_supply) =
+						<pallet_uniques::Pallet<T>>::CollectionMaxSupply::<T, I>::try_get(&collection)
+					{
+						ensure!(collection_details.items < max_supply, ,pallet_uniques::Pallet::<T>>::Error::<T, I>::MaxSupplyReached);
+					}
+
+					let items = collection_details
+						.items
+						.checked_add(1)
+						.ok_or(<pallet_uniques::Pallet<T>>::ArithmeticError::Overflow)?;
+					collection_details.items = items;
+
+					let deposit = match collection_details.free_holding {
+						true => Zero::zero(),
+						false => T::ItemDeposit::get() + extra_deposit,
+					};
+					T::Currency::reserve(&collection_details.owner, deposit)?;
+					collection_details.total_deposit += deposit;
+
+					let owner = owner.clone();
+					<pallet_uniques::Pallet<T>>::Account::<T, I>::insert((&owner, &collection, &item), ());
+					let details = ItemDetails {
+						owner,
+						approved: None,
+						is_frozen: false,
+						deposit,
+					};
+					<pallet_uniques::Pallet<T>>::Item::<T, I>::insert(&collection, &item, details);
+					Ok(())
+				},
+			)?;
+
+			Self::deposit_event(<pallet_uniques::Pallet<T>>::Event::Issued {
+				collection,
+				item,
+				owner,
+			});
+			Ok(())
+		}
+
 		/// Destroy a single item.
 		///
 		/// Origin must be Signed and the signing account must be either:
@@ -160,7 +237,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		/// Modes: `check_owner.is_some()`.
-		#[pallet::call_index(4)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(0)]
 		pub fn burn(
 			origin: OriginFor<T>,
@@ -188,7 +265,7 @@ pub mod pallet {
 		/// Emits `Transferred`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(5)]
+		#[pallet::call_index(6)]
 		#[pallet::weight(0)]
 		pub fn transfer(
 			origin: OriginFor<T>,
@@ -216,7 +293,7 @@ pub mod pallet {
 		/// is not permitted to call it.
 		///
 		/// Weight: `O(items.len())`
-		#[pallet::call_index(6)]
+		#[pallet::call_index(7)]
 		#[pallet::weight(0)]
 		pub fn redeposit(origin: OriginFor<T>, collection: T::CollectionId, items: Vec<T::ItemId>) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::redeposit(origin, collection, items)
@@ -232,7 +309,7 @@ pub mod pallet {
 		/// Emits `Frozen`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(7)]
+		#[pallet::call_index(8)]
 		#[pallet::weight(0)]
 		pub fn freeze(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::freeze(origin, collection, item)
@@ -248,7 +325,7 @@ pub mod pallet {
 		/// Emits `Thawed`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(8)]
+		#[pallet::call_index(9)]
 		#[pallet::weight(0)]
 		pub fn thaw(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::thaw(origin, collection, item)
@@ -263,7 +340,7 @@ pub mod pallet {
 		/// Emits `CollectionFrozen`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(9)]
+		#[pallet::call_index(10)]
 		#[pallet::weight(0)]
 		pub fn freeze_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::freeze_collection(origin, collection)
@@ -278,7 +355,7 @@ pub mod pallet {
 		/// Emits `CollectionThawed`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(10)]
+		#[pallet::call_index(11)]
 		#[pallet::weight(0)]
 		pub fn thaw_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::thaw_collection(origin, collection)
@@ -295,7 +372,7 @@ pub mod pallet {
 		/// Emits `OwnerChanged`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(11)]
+		#[pallet::call_index(12)]
 		#[pallet::weight(0)]
 		pub fn transfer_ownership(
 			origin: OriginFor<T>,
@@ -317,7 +394,7 @@ pub mod pallet {
 		/// Emits `TeamChanged`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(12)]
+		#[pallet::call_index(13)]
 		#[pallet::weight(0)]
 		pub fn set_team(
 			origin: OriginFor<T>,
@@ -343,7 +420,7 @@ pub mod pallet {
 		/// Emits `ApprovedTransfer` on success.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(13)]
+		#[pallet::call_index(14)]
 		#[pallet::weight(0)]
 		pub fn approve_transfer(
 			origin: OriginFor<T>,
@@ -370,7 +447,7 @@ pub mod pallet {
 		/// Emits `ApprovalCancelled` on success.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(14)]
+		#[pallet::call_index(15)]
 		#[pallet::weight(0)]
 		pub fn cancel_approval(
 			origin: OriginFor<T>,
@@ -397,7 +474,7 @@ pub mod pallet {
 		/// Emits `ItemStatusChanged` with the identity of the item.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(15)]
+		#[pallet::call_index(16)]
 		#[pallet::weight(0)]
 		pub fn force_item_status(
 			origin: OriginFor<T>,
@@ -438,7 +515,7 @@ pub mod pallet {
 		/// Emits `AttributeSet`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(16)]
+		#[pallet::call_index(17)]
 		#[pallet::weight(0)]
 		pub fn set_attribute(
 			origin: OriginFor<T>,
@@ -464,7 +541,7 @@ pub mod pallet {
 		/// Emits `AttributeCleared`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(17)]
+		#[pallet::call_index(18)]
 		#[pallet::weight(0)]
 		pub fn clear_attribute(
 			origin: OriginFor<T>,
@@ -492,7 +569,7 @@ pub mod pallet {
 		/// Emits `MetadataSet`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(18)]
+		#[pallet::call_index(19)]
 		#[pallet::weight(0)]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
@@ -517,7 +594,7 @@ pub mod pallet {
 		/// Emits `MetadataCleared`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(19)]
+		#[pallet::call_index(20)]
 		#[pallet::weight(0)]
 		pub fn clear_metadata(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::clear_metadata(origin, collection, item)
@@ -539,7 +616,7 @@ pub mod pallet {
 		/// Emits `CollectionMetadataSet`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(20)]
+		#[pallet::call_index(21)]
 		#[pallet::weight(0)]
 		pub fn set_collection_metadata(
 			origin: OriginFor<T>,
@@ -562,7 +639,7 @@ pub mod pallet {
 		/// Emits `CollectionMetadataCleared`.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(21)]
+		#[pallet::call_index(22)]
 		#[pallet::weight(0)]
 		pub fn clear_collection_metadata(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::clear_collection_metadata(origin, collection)
@@ -578,7 +655,7 @@ pub mod pallet {
 		///   ownership transferal.
 		///
 		/// Emits `OwnershipAcceptanceChanged`.
-		#[pallet::call_index(22)]
+		#[pallet::call_index(23)]
 		#[pallet::weight(0)]
 		pub fn set_accept_ownership(origin: OriginFor<T>, maybe_collection: Option<T::CollectionId>) -> DispatchResult {
 			pallet_uniques::Pallet::<T>::set_accept_ownership(origin, maybe_collection)
@@ -595,7 +672,7 @@ pub mod pallet {
 		/// - `max_supply`: The maximum amount of items a collection could have.
 		///
 		/// Emits `CollectionMaxSupplySet` event when successful.
-		#[pallet::call_index(23)]
+		#[pallet::call_index(24)]
 		#[pallet::weight(0)]
 		pub fn set_collection_max_supply(
 			origin: OriginFor<T>,
