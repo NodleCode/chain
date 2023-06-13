@@ -21,8 +21,8 @@
 //! Handle the ability to notify other pallets that they should stop all
 
 pub use pallet_uniques::pallet::*;
-use pallet_uniques::DestroyWitness;
-use sp_runtime::traits::StaticLookup;
+use pallet_uniques::{DestroyWitness, pallet::Error, ItemDetails};
+use sp_runtime::traits::{StaticLookup, Zero};
 use sp_std::prelude::*;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
@@ -43,7 +43,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::call]
-	impl<T: Config<I>, I: 'static> Pallet<T, I> {
+	impl<T: Config> Pallet<T> {
 		/// Issue a new collection of non-fungible items from a public origin.
 		///
 		/// This new collection has no items initially and its owner is the origin.
@@ -164,28 +164,29 @@ pub mod pallet {
 			item: T::ItemId,
 			extra_deposit: T::Balance,
 			owner: AccountIdLookupOf<T>,
+			with_details: impl FnOnce(&CollectionDetailsFor<T>) -> DispatchResult,
 		) -> DispatchResult {
 			let origin = ensure_signed(origin)?;
 			let owner = T::Lookup::lookup(owner)?;
 
 			ensure!(
-				!<pallet_uniques::Pallet::<T>>::Item::<T, I>::contains_key(collection.clone(), item),
-				<pallet_uniques::Pallet::<T>>::Error::<T, I>::AlreadyExists
+				!<pallet_uniques::Pallet::<T>>::Item::<T>::contains_key(collection.clone(), item),
+				<pallet_uniques::Pallet::<T>>::Error::<T>::AlreadyExists
 			);
 
-			<pallet_uniques::Pallet<T>>::Collection::<T, I>::try_mutate(
+			<pallet_uniques::Pallet<T>>::Collection::<T>::try_mutate(
 				&collection,
 				|maybe_collection_details| -> DispatchResult {
 					let collection_details = maybe_collection_details
 						.as_mut()
-						.ok_or(<pallet_uniques::Pallet<T>>::Error::<T, I>::UnknownCollection)?;
+						.ok_or(<pallet_uniques::Pallet<T>>::Error::<T>::UnknownCollection)?;
 
 					with_details(collection_details)?;
 
 					if let Ok(max_supply) =
-						<pallet_uniques::Pallet<T>>::CollectionMaxSupply::<T, I>::try_get(&collection)
+						<pallet_uniques::Pallet<T>>::CollectionMaxSupply::<T>::try_get(&collection)
 					{
-						ensure!(collection_details.items < max_supply, ,pallet_uniques::Pallet::<T>>::Error::<T, I>::MaxSupplyReached);
+						ensure!(collection_details.items < max_supply, pallet_uniques::Pallet::<T>>::Error::<T>::MaxSupplyReached);
 					}
 
 					let items = collection_details
@@ -202,14 +203,14 @@ pub mod pallet {
 					collection_details.total_deposit += deposit;
 
 					let owner = owner.clone();
-					<pallet_uniques::Pallet<T>>::Account::<T, I>::insert((&owner, &collection, &item), ());
+					<pallet_uniques::Pallet<T>>::Account::<T>::insert((&owner, &collection, &item), ());
 					let details = ItemDetails {
 						owner,
 						approved: None,
 						is_frozen: false,
 						deposit,
 					};
-					<pallet_uniques::Pallet<T>>::Item::<T, I>::insert(&collection, &item, details);
+					<pallet_uniques::Pallet<T>>::Item::<T>::insert(&collection, &item, details);
 					Ok(())
 				},
 			)?;
