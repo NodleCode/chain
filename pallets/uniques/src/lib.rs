@@ -20,14 +20,14 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use frame_support::traits::Currency;
+use frame_support::traits::{Currency, ReservableCurrency};
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
-pub type ItemPrice<T, I = ()> =
+pub type BalanceOf<T, I = ()> =
 	<<T as pallet_uniques::Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[frame_support::pallet]
@@ -45,6 +45,19 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {}
+
+	#[pallet::storage]
+	#[pallet::storage_prefix = "Asset"]
+	/// The extra deposits in existence.
+	pub(super) type ExtraDeposit<T: Config<I>, I: 'static = ()> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::CollectionId,
+		Blake2_128Concat,
+		T::ItemId,
+		BalanceOf<T, I>,
+		OptionQuery,
+	>;
 
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
@@ -625,7 +638,7 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
 			item: T::ItemId,
-			price: Option<ItemPrice<T, I>>,
+			price: Option<BalanceOf<T, I>>,
 			whitelisted_buyer: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::set_price(origin, collection, item, price, whitelisted_buyer)
@@ -647,9 +660,38 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
 			item: T::ItemId,
-			bid_price: ItemPrice<T, I>,
+			bid_price: BalanceOf<T, I>,
 		) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::buy_item(origin, collection, item, bid_price)
+		}
+
+		/// Mint an item of a particular collection with extra deposit.
+		///
+		/// The origin must be Signed and the sender must be the Issuer of the `collection`.
+		///
+		/// - `collection`: The collection of the item to be minted.
+		/// - `item`: The item value of the item to be minted.
+		/// - `owner`: The initial owner of the minted item.
+		///
+		/// Emits `Issued` event when successful.
+		///
+		/// Weight: `O(1)`
+		#[pallet::call_index(26)]
+		#[pallet::weight(0)]
+		#[transactional]
+		pub fn mint_with_extra_deposit(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			item: T::ItemId,
+			owner: AccountIdLookupOf<T>,
+			deposit: BalanceOf<T, I>,
+		) -> DispatchResult {
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner.clone()).and_then(|_| {
+				let owner = T::Lookup::lookup(owner)?;
+				<T as pallet_uniques::Config<I>>::Currency::reserve(&owner, deposit)?;
+				ExtraDeposit::<T, I>::insert(&collection, &item, deposit);
+				Ok(())
+			})
 		}
 	}
 }
