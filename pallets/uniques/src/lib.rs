@@ -20,31 +20,34 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
+use frame_support::traits::Currency;
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
+pub type ItemPrice<T, I = ()> =
+	<<T as pallet_uniques::Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::{pallet_prelude::*, transactional};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_uniques::Config {}
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {}
 
 	#[pallet::pallet]
-	pub struct Pallet<T>(PhantomData<T>);
+	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {
+	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		/// Issue a new collection of non-fungible items from a public origin.
 		///
 		/// This new collection has no items initially and its owner is the origin.
@@ -68,7 +71,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			admin: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::create(origin, collection, admin)
+			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
 		}
 		/// Issue a new collection of non-fungible items from a privileged origin.
 		///
@@ -95,7 +98,7 @@ pub mod pallet {
 			owner: AccountIdLookupOf<T>,
 			free_holding: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::force_create(origin, collection, owner, free_holding)
+			pallet_uniques::Pallet::<T, I>::force_create(origin, collection, owner, free_holding)
 		}
 
 		/// Destroy a collection of fungible items.
@@ -120,7 +123,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
-			pallet_uniques::Pallet::<T>::destroy(origin, collection, witness)
+			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
 		}
 
 		/// Mint an item of a particular collection.
@@ -142,7 +145,7 @@ pub mod pallet {
 			item: T::ItemId,
 			owner: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::mint(origin, collection, item, owner)
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)
 		}
 
 		/// Destroy a single item.
@@ -168,7 +171,7 @@ pub mod pallet {
 			item: T::ItemId,
 			check_owner: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::burn(origin, collection, item, check_owner)
+			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)
 		}
 
 		/// Move an item from the sender account to another.
@@ -196,7 +199,7 @@ pub mod pallet {
 			item: T::ItemId,
 			dest: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::transfer(origin, collection, item, dest)
+			pallet_uniques::Pallet::<T, I>::transfer(origin, collection, item, dest)
 		}
 
 		/// Reevaluate the deposits on some items.
@@ -219,7 +222,7 @@ pub mod pallet {
 		#[pallet::call_index(6)]
 		#[pallet::weight(0)]
 		pub fn redeposit(origin: OriginFor<T>, collection: T::CollectionId, items: Vec<T::ItemId>) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::redeposit(origin, collection, items)
+			pallet_uniques::Pallet::<T, I>::redeposit(origin, collection, items)
 		}
 
 		/// Disallow further unprivileged transfer of an item.
@@ -235,7 +238,7 @@ pub mod pallet {
 		#[pallet::call_index(7)]
 		#[pallet::weight(0)]
 		pub fn freeze(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::freeze(origin, collection, item)
+			pallet_uniques::Pallet::<T, I>::freeze(origin, collection, item)
 		}
 
 		/// Re-allow unprivileged transfer of an item.
@@ -251,7 +254,7 @@ pub mod pallet {
 		#[pallet::call_index(8)]
 		#[pallet::weight(0)]
 		pub fn thaw(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::thaw(origin, collection, item)
+			pallet_uniques::Pallet::<T, I>::thaw(origin, collection, item)
 		}
 
 		/// Disallow further unprivileged transfers for a whole collection.
@@ -266,7 +269,7 @@ pub mod pallet {
 		#[pallet::call_index(9)]
 		#[pallet::weight(0)]
 		pub fn freeze_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::freeze_collection(origin, collection)
+			pallet_uniques::Pallet::<T, I>::freeze_collection(origin, collection)
 		}
 
 		/// Re-allow unprivileged transfers for a whole collection.
@@ -281,7 +284,7 @@ pub mod pallet {
 		#[pallet::call_index(10)]
 		#[pallet::weight(0)]
 		pub fn thaw_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::thaw_collection(origin, collection)
+			pallet_uniques::Pallet::<T, I>::thaw_collection(origin, collection)
 		}
 
 		/// Change the Owner of a collection.
@@ -302,7 +305,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			owner: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::transfer_ownership(origin, collection, owner)
+			pallet_uniques::Pallet::<T, I>::transfer_ownership(origin, collection, owner)
 		}
 
 		/// Change the Issuer, Admin and Freezer of a collection.
@@ -326,7 +329,7 @@ pub mod pallet {
 			admin: AccountIdLookupOf<T>,
 			freezer: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_team(origin, collection, issuer, admin, freezer)
+			pallet_uniques::Pallet::<T, I>::set_team(origin, collection, issuer, admin, freezer)
 		}
 
 		/// Approve an item to be transferred by a delegated third-party account.
@@ -351,7 +354,7 @@ pub mod pallet {
 			item: T::ItemId,
 			delegate: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::approve_transfer(origin, collection, item, delegate)
+			pallet_uniques::Pallet::<T, I>::approve_transfer(origin, collection, item, delegate)
 		}
 
 		/// Cancel the prior approval for the transfer of an item by a delegate.
@@ -378,7 +381,7 @@ pub mod pallet {
 			item: T::ItemId,
 			maybe_check_delegate: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::cancel_approval(origin, collection, item, maybe_check_delegate)
+			pallet_uniques::Pallet::<T, I>::cancel_approval(origin, collection, item, maybe_check_delegate)
 		}
 
 		/// Alter the attributes of a given item.
@@ -409,7 +412,7 @@ pub mod pallet {
 			free_holding: bool,
 			is_frozen: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::force_item_status(
+			pallet_uniques::Pallet::<T, I>::force_item_status(
 				origin,
 				collection,
 				owner,
@@ -447,7 +450,7 @@ pub mod pallet {
 			key: BoundedVec<u8, T::KeyLimit>,
 			value: BoundedVec<u8, T::ValueLimit>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_attribute(origin, collection, maybe_item, key, value)
+			pallet_uniques::Pallet::<T, I>::set_attribute(origin, collection, maybe_item, key, value)
 		}
 
 		/// Clear an attribute for a collection or item.
@@ -472,7 +475,7 @@ pub mod pallet {
 			maybe_item: Option<T::ItemId>,
 			key: BoundedVec<u8, T::KeyLimit>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::clear_attribute(origin, collection, maybe_item, key)
+			pallet_uniques::Pallet::<T, I>::clear_attribute(origin, collection, maybe_item, key)
 		}
 
 		/// Set the metadata for an item.
@@ -501,7 +504,7 @@ pub mod pallet {
 			data: BoundedVec<u8, T::StringLimit>,
 			is_frozen: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_metadata(origin, collection, item, data, is_frozen)
+			pallet_uniques::Pallet::<T, I>::set_metadata(origin, collection, item, data, is_frozen)
 		}
 
 		/// Clear the metadata for an item.
@@ -520,7 +523,7 @@ pub mod pallet {
 		#[pallet::call_index(19)]
 		#[pallet::weight(0)]
 		pub fn clear_metadata(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::clear_metadata(origin, collection, item)
+			pallet_uniques::Pallet::<T, I>::clear_metadata(origin, collection, item)
 		}
 
 		/// Set the metadata for a collection.
@@ -547,7 +550,7 @@ pub mod pallet {
 			data: BoundedVec<u8, T::StringLimit>,
 			is_frozen: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_collection_metadata(origin, collection, data, is_frozen)
+			pallet_uniques::Pallet::<T, I>::set_collection_metadata(origin, collection, data, is_frozen)
 		}
 
 		/// Clear the metadata for a collection.
@@ -565,7 +568,7 @@ pub mod pallet {
 		#[pallet::call_index(21)]
 		#[pallet::weight(0)]
 		pub fn clear_collection_metadata(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::clear_collection_metadata(origin, collection)
+			pallet_uniques::Pallet::<T, I>::clear_collection_metadata(origin, collection)
 		}
 
 		/// Set (or reset) the acceptance of ownership for a particular account.
@@ -581,7 +584,7 @@ pub mod pallet {
 		#[pallet::call_index(22)]
 		#[pallet::weight(0)]
 		pub fn set_accept_ownership(origin: OriginFor<T>, maybe_collection: Option<T::CollectionId>) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_accept_ownership(origin, maybe_collection)
+			pallet_uniques::Pallet::<T, I>::set_accept_ownership(origin, maybe_collection)
 		}
 
 		/// Set the maximum amount of items a collection could have.
@@ -602,52 +605,51 @@ pub mod pallet {
 			collection: T::CollectionId,
 			max_supply: u32,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T>::set_collection_max_supply(origin, collection, max_supply)
+			pallet_uniques::Pallet::<T, I>::set_collection_max_supply(origin, collection, max_supply)
 		}
 
-		// /// Set (or reset) the price for an item.
-		// ///
-		// /// Origin must be Signed and must be the owner of the asset `item`.
-		// ///
-		// /// - `collection`: The collection of the item.
-		// /// - `item`: The item to set the price for.
-		// /// - `price`: The price for the item. Pass `None`, to reset the price.
-		// /// - `buyer`: Restricts the buy operation to a specific account.
-		// ///
-		// /// Emits `ItemPriceSet` on success if the price is not `None`.
-		// /// Emits `ItemPriceRemoved` on success if the price is `None`.
-		// #[pallet::call_index(24)]
-		// #[pallet::weight(0)]
-		// pub fn set_price(
-		// 	origin: OriginFor<T>,
-		// 	collection: T::CollectionId,
-		// 	item: T::ItemId,
-		// 	price: Option<ItemPrice<T, I>>,
-		// 	whitelisted_buyer: Option<AccountIdLookupOf<T>>,
-		// ) -> DispatchResult {
-		// 	pallet_uniques::Pallet::<T>::set_price(origin,collection,item,price,whitelisted_buyer)
+		/// Set (or reset) the price for an item.
+		///
+		/// Origin must be Signed and must be the owner of the asset `item`.
+		///
+		/// - `collection`: The collection of the item.
+		/// - `item`: The item to set the price for.
+		/// - `price`: The price for the item. Pass `None`, to reset the price.
+		/// - `buyer`: Restricts the buy operation to a specific account.
+		///
+		/// Emits `ItemPriceSet` on success if the price is not `None`.
+		/// Emits `ItemPriceRemoved` on success if the price is `None`.
+		#[pallet::call_index(24)]
+		#[pallet::weight(0)]
+		pub fn set_price(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			item: T::ItemId,
+			price: Option<ItemPrice<T, I>>,
+			whitelisted_buyer: Option<AccountIdLookupOf<T>>,
+		) -> DispatchResult {
+			pallet_uniques::Pallet::<T, I>::set_price(origin, collection, item, price, whitelisted_buyer)
+		}
 
-		// }
-
-		// /// Allows to buy an item if it's up for sale.
-		// ///
-		// /// Origin must be Signed and must not be the owner of the `item`.
-		// ///
-		// /// - `collection`: The collection of the item.
-		// /// - `item`: The item the sender wants to buy.
-		// /// - `bid_price`: The price the sender is willing to pay.
-		// ///
-		// /// Emits `ItemBought` on success.
-		// #[pallet::call_index(25)]
-		// #[pallet::weight(0)]
-		// #[transactional]
-		// pub fn buy_item(
-		// 	origin: OriginFor<T>,
-		// 	collection: T::CollectionId,
-		// 	item: T::ItemId,
-		// 	bid_price: ItemPrice<T, I>,
-		// ) -> DispatchResult {
-		// 	pallet_uniques::Pallet::<T>::buy_item(origin,collection,item,bid_price)
-		// }
+		/// Allows to buy an item if it's up for sale.
+		///
+		/// Origin must be Signed and must not be the owner of the `item`.
+		///
+		/// - `collection`: The collection of the item.
+		/// - `item`: The item the sender wants to buy.
+		/// - `bid_price`: The price the sender is willing to pay.
+		///
+		/// Emits `ItemBought` on success.
+		#[pallet::call_index(25)]
+		#[pallet::weight(0)]
+		#[transactional]
+		pub fn buy_item(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			item: T::ItemId,
+			bid_price: ItemPrice<T, I>,
+		) -> DispatchResult {
+			pallet_uniques::Pallet::<T, I>::buy_item(origin, collection, item, bid_price)
+		}
 	}
 }
