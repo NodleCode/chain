@@ -184,7 +184,14 @@ pub mod pallet {
 			item: T::ItemId,
 			check_owner: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)
+			let collection_owner =
+				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
+
+			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(&collection, &item) {
+				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
+			}
+			Ok(())
 		}
 
 		/// Move an item from the sender account to another.
