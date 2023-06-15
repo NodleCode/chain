@@ -686,9 +686,10 @@ pub mod pallet {
 			owner: AccountIdLookupOf<T>,
 			deposit: BalanceOf<T, I>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner.clone()).and_then(|_| {
-				let owner = T::Lookup::lookup(owner)?;
-				<T as pallet_uniques::Config<I>>::Currency::reserve(&owner, deposit)?;
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner).and_then(|_| {
+				let collection_owner =
+					pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+				<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
 				ExtraDeposit::<T, I>::insert(&collection, &item, deposit);
 				Ok(())
 			})
