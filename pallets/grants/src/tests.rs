@@ -153,16 +153,8 @@ fn add_vesting_schedule_fails_if_transfer_err() {
 			start: 1u64,
 			period: 1u64,
 			period_count: 1u32,
-			per_period: 1u64,
+			per_period: 100u64,
 		};
-		// 		// ---- tests::add_vesting_schedule_fails_if_transfer_err stdout ----
-		// thread 'tests::add_vesting_schedule_fails_if_transfer_err' panicked at 'assertion failed: `(left
-		// == right)` left: `Err(DispatchErrorWithPostInfo { post_info: PostDispatchInfo { actual_weight:
-		// None, pays_fee: Pays::Yes }, error: Token(FundsUnavailable) })`,
-		// right: `Err(DispatchErrorWithPostInfo { post_info: PostDispatchInfo { actual_weight: None,
-		// pays_fee: Pays::Yes }, error: Module(ModuleError { index: 1, error: [2, 0, 0, 0], message:
-		// Some("InsufficientBalance") }) })`', pallets/grants/src/tests.rs:157:9 note: run with
-		// `RUST_BACKTRACE=1` environment variable to display a backtrace
 		assert_err!(
 			Vesting::add_vesting_schedule(RuntimeOrigin::signed(BOB::get()), ALICE::get(), schedule),
 			FundsUnavailable,
