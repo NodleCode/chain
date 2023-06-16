@@ -18,6 +18,7 @@
 
 #![allow(clippy::identity_op)]
 
+use crate::CompanyReserve;
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
 	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
@@ -97,7 +98,7 @@ impl pallet_balances::Config for Runtime {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type Balance = Balance;
-	type DustRemoval = (); // CompanyReserve; //type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+	type DustRemoval = ();
 
 	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposit = ExistentialDeposit;
