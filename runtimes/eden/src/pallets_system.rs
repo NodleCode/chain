@@ -18,7 +18,6 @@
 
 #![allow(clippy::identity_op)]
 
-
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
 	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
