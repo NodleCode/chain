@@ -130,17 +130,14 @@ where
 			Ok((worker, telemetry))
 		})
 		.transpose()?;
-	let default_heap_pages: sc_executor::HeapAllocStrategy = config
-		.default_heap_pages
-		.map(|h| sc_executor::HeapAllocStrategy::Static { extra_pages: h as _ })
-		.unwrap_or_else(|| sc_executor::DEFAULT_HEAP_ALLOC_STRATEGY);
-	let executor = sc_executor::WasmExecutor::<HostFunctions>::builder()
-		.with_execution_method(config.wasm_method)
-		.with_onchain_heap_alloc_strategy(default_heap_pages)
-		.with_offchain_heap_alloc_strategy(default_heap_pages)
-		.with_max_runtime_instances(config.max_runtime_instances)
-		.with_runtime_cache_size(config.runtime_cache_size)
-		.build();
+	#[allow(deprecated)]
+	let executor = sc_executor::WasmExecutor::<HostFunctions>::new(
+		config.wasm_method,
+		config.default_heap_pages,
+		config.max_runtime_instances,
+		None,
+		config.runtime_cache_size,
+	);
 
 	let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<Block, RuntimeApi, _>(
 		config,
