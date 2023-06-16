@@ -25,6 +25,8 @@ pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
 use sp_std::prelude::*;
+#[cfg(test)]
+mod tests;
 
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
 pub type BalanceOf<T, I = ()> =
@@ -38,7 +40,9 @@ pub mod pallet {
 	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {}
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
+
+	}
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
