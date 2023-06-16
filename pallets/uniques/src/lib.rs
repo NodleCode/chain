@@ -20,7 +20,7 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use frame_support::traits::{Currency, ReservableCurrency};
+use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
@@ -136,6 +136,19 @@ pub mod pallet {
 			collection: T::CollectionId,
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
+			let collection_owner =
+				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+			for (item, deposit) in ExtraDeposit::<T, I>::iter_prefix(collection).drain() {
+				if let Some(item_owner) = pallet_uniques::Pallet::<T, I>::owner(collection, item) {
+					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, deposit);
+					<T as pallet_uniques::Config<I>>::Currency::transfer(
+						&item_owner,
+						&collection_owner,
+						deposit,
+						ExistenceRequirement::AllowDeath,
+					)?;
+				}
+			}
 			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
 		}
 
