@@ -40,9 +40,7 @@ pub mod pallet {
 	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
-
-	}
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {}
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
