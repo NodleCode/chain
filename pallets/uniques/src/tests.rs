@@ -214,7 +214,7 @@ mod tests {
 				init_balance - (TestCollectionDeposit::get() + 3 + extra_deposit)
 			);
 			// extra deposit transferred to the item owner free balance
-			assert_eq!(Balances::free_balance(&item_owner), init_balance + extra_deposit);  
+			assert_eq!(Balances::free_balance(&item_owner), init_balance + extra_deposit);
 		})
 	}
 }
