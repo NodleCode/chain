@@ -201,11 +201,19 @@ pub mod pallet {
 		) -> DispatchResult {
 			let collection_owner =
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(&collection, &item) {
+				if let Some(item_owner) = pallet_uniques::Pallet::<T, I>::owner(collection, item) {
+					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
+					<T as pallet_uniques::Config<I>>::Currency::transfer(
+						&collection_owner,
+						&item_owner,
+						extra_deposit,
+						ExistenceRequirement::AllowDeath,
+					)?;
+				}
+			}
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
 
-			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(&collection, &item) {
-				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
-			}
 			Ok(())
 		}
 
