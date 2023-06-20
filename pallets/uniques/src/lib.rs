@@ -24,7 +24,7 @@ use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
-use sp_std::prelude::*;
+use sp_std::{prelude::*, vec::Vec};
 #[cfg(test)]
 mod tests;
 
@@ -140,18 +140,31 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let collection_owner =
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
-			for (item, deposit) in ExtraDeposit::<T, I>::iter_prefix(collection).drain() {
+			let mut item_owners: Vec<(T::AccountId, BalanceOf<T, I>)> = Vec::new();
+
+			// Recover the item owners for each item in the ExtraDeposit Storage
+			for (item, extra_deposit) in ExtraDeposit::<T, I>::iter_prefix(collection) {
 				if let Some(item_owner) = pallet_uniques::Pallet::<T, I>::owner(collection, item) {
-					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, deposit);
-					<T as pallet_uniques::Config<I>>::Currency::transfer(
-						&item_owner,
-						&collection_owner,
-						deposit,
-						ExistenceRequirement::AllowDeath,
-					)?;
+					item_owners.push((item_owner, extra_deposit));
 				}
 			}
-			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
+
+			let ret = pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)?;
+
+			// Unreserve and transfer extra reserved deposit to the item owners
+			for (item_owner, extra_deposit) in item_owners {
+				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
+				<T as pallet_uniques::Config<I>>::Currency::transfer(
+					&item_owner,
+					&collection_owner,
+					extra_deposit,
+					ExistenceRequirement::AllowDeath,
+				)?;
+			}
+
+			// Clear the extra storage map
+			let _ = ExtraDeposit::<T, I>::clear_prefix(collection, witness.items, None);
+			Ok(ret)
 		}
 
 		/// Mint an item of a particular collection.
@@ -201,8 +214,10 @@ pub mod pallet {
 		) -> DispatchResult {
 			let collection_owner =
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item);
+			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
 			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(&collection, &item) {
-				if let Some(item_owner) = pallet_uniques::Pallet::<T, I>::owner(collection, item) {
+				if let Some(item_owner) = item_owner {
 					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 					<T as pallet_uniques::Config<I>>::Currency::transfer(
 						&collection_owner,
@@ -212,8 +227,6 @@ pub mod pallet {
 					)?;
 				}
 			}
-			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
-
 			Ok(())
 		}
 
