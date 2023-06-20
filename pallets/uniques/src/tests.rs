@@ -141,14 +141,14 @@ mod tests {
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner_id),
 				0,
 				bvec![0, 0],
 				false
 			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner_id1),
 				collection_id,
 				item_id,
 				item_owner,
@@ -161,7 +161,7 @@ mod tests {
 			);
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner_id),
 				collection_id,
 				item_id2,
 				item_owner,
@@ -196,14 +196,14 @@ mod tests {
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner_id),
 				0,
 				bvec![0, 0],
 				false
 			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner_id),
 				collection_id,
 				item_id,
 				item_owner,
@@ -215,7 +215,12 @@ mod tests {
 				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
 			);
 
-			assert_ok!(Uniques::burn(RuntimeOrigin::signed(1), collection_id, item_id, None));
+			assert_ok!(Uniques::burn(
+				RuntimeOrigin::signed(collection_owner_id),
+				collection_id,
+				item_id,
+				None
+			));
 
 			// check if extra deposit is freed as well as the item deposit
 			assert_eq!(
@@ -229,6 +234,62 @@ mod tests {
 			);
 			// extra deposit transferred to the item owner free balance
 			assert_eq!(Balances::free_balance(&item_owner), init_balance + extra_deposit);
+		})
+	}
+	#[test]
+	fn test_mint_and_burn_wrong_origin_with_extra_deposit() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit = 20;
+			let collection_id = 0;
+			let item_id = 10;
+			let item_id2 = 12;
+			let collection_owner_id = 1;
+			let not_collection_owner_id = 255;
+			let item_owner = 42;
+			let init_balance = 100;
+			Balances::make_free_balance_be(&collection_owner_id, init_balance);
+			Balances::make_free_balance_be(&item_owner, init_balance);
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner_id),
+				collection_id,
+				collection_owner_id
+			));
+			assert_eq!(
+				Balances::reserved_balance(&collection_owner_id),
+				TestCollectionDeposit::get()
+			);
+			assert_ok!(Uniques::set_collection_metadata(
+				RuntimeOrigin::signed(1),
+				0,
+				bvec![0, 0],
+				false
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner_id),
+				collection_id,
+				item_id,
+				item_owner,
+				extra_deposit
+			));
+
+			assert_eq!(
+				Balances::reserved_balance(&collection_owner_id),
+				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
+			);
+
+			assert_err!(Uniques::burn(
+				RuntimeOrigin::signed(not_collection_owner_id),
+				collection_id,
+				item_id,
+				None
+			));
+
+			// reserved balance should not have changed
+			assert_eq!(
+				Balances::reserved_balance(&collection_owner_id),
+				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
+			);
 		})
 	}
 
