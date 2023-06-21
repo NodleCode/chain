@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::RuntimeBlockWeights;
 use crate::{constants, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, TechnicalCommittee};
+use frame_support::pallet_prelude::Weight;
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
 use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
@@ -80,6 +82,8 @@ parameter_types! {
 	pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 	pub const MaxProposals: u32 = 100;
 	pub const MaxMembers: u32 = 50;
+	pub MaxCollectivesProposalWeight: Weight = Perbill::from_percent(50) * RuntimeBlockWeights::get().max_block;
+
 }
 
 pub type MoreThanHalfOfTechComm =
@@ -95,6 +99,7 @@ impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
 	type MaxMembers = MaxMembers;
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type SetMembersOrigin = EnsureRootOrMoreThanHalfOfTechComm;
+	type MaxProposalWeight = MaxCollectivesProposalWeight;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {

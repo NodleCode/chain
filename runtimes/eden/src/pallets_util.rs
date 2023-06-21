@@ -17,6 +17,7 @@
  */
 #![allow(clippy::identity_op)]
 
+use crate::constants::deposit;
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
 	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
@@ -27,7 +28,7 @@ use frame_support::{
 	weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSigned};
-use pallet_contracts::{weights::WeightInfo, Frame, Schedule};
+use pallet_contracts::{Frame, Schedule};
 
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
@@ -140,15 +141,7 @@ impl pallet_uniques::Config for Runtime {
 parameter_types! {
 	pub const DepositPerItem: Balance = constants::deposit(1, 0);
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
-	// The lazy deletion runs inside on_initialize.
-	pub DeletionWeightLimit: Weight = constants::AVERAGE_ON_INITIALIZE_RATIO *
-		constants::RuntimeBlockWeights::get().max_block;
-	// The weight needed for decoding the queue should be less or equal than a fifth
-	// of the overall weight dedicated to the lazy deletion.
-	pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get().ref_time() / (
-			<Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(1).ref_time() -
-			<Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(0).ref_time()
-		)) / 5) as u32;
+	pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 }
 
@@ -167,13 +160,15 @@ impl pallet_contracts::Config for Runtime {
 	type CallFilter = Nothing;
 	type DepositPerItem = DepositPerItem;
 	type DepositPerByte = DepositPerByte;
+	type DefaultDepositLimit = DefaultDepositLimit;
+	type CallStack = [Frame<Self>; 5];
 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
+	// TODO check 	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
 	type WeightInfo = crate::weights::pallet_contracts::WeightInfo<Runtime>;
 	type ChainExtension = ();
-	type DeletionQueueDepth = DeletionQueueDepth;
-	type DeletionWeightLimit = DeletionWeightLimit;
+
 	type Schedule = MySchedule;
-	type CallStack = [Frame<Self>; 5];
+
 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
 	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
 	type MaxStorageKeyLen = ConstU32<128>;

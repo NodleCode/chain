@@ -96,6 +96,11 @@ impl pallet_balances::Config for Test {
 	type AccountStore = frame_system::Pallet<Test>;
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
+	type FreezeIdentifier = [u8; 8];
+	type HoldIdentifier = [u8; 8];
+	type MaxHolds = ();
+	type MaxFreezes = ();
+
 	type WeightInfo = ();
 }
 
