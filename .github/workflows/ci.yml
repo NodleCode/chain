@@ -10,7 +10,7 @@ env:
   toolchain: stable
   target: wasm32-unknown-unknown
   try-runtime-chain: dev
-  try-runtime-uri: wss://eden-rpc.dwellir.com:443
+  try-runtime-uri: wss://eden-rpc.dwellir.com:443/
 
 jobs:
   lints:
@@ -111,7 +111,7 @@ jobs:
               "method": "system_version",    
               "params": [],
               "id": 1
-            }' | jq '{"result"}[]'| sed 's/^"/"eden-/' >> $GITHUB_OUTPUT
+            }' | jq '{"result"}[]'| sed 's/^"/"try-runtime-snap-eden/' >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
         id: get_version
       - name: Install protobuf-compiler
@@ -136,7 +136,7 @@ jobs:
         run: |
             install -d snapshots
             date > snapshots/created_at
-            ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/eden-snapshot-full" -u ${{ env.try-runtime-uri}}
+            ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/eden-snapshot-full" -u ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
       - name: Try runtime reuse snap
         run: |
             cat snapshots/created_at
