@@ -67,55 +67,55 @@ fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, Account
 	.is_ok());
 	(caller, caller_lookup)
 }
-fn add_item_metadata<T: Config<I>, I: 'static>(item: T::ItemId) -> (T::AccountId, AccountIdLookupOf<T>) {
-	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+// fn add_item_metadata<T: Config<I>, I: 'static>(item: T::ItemId) -> (T::AccountId, AccountIdLookupOf<T>) {
+// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-	let caller = collection_owner;
-	let caller_lookup = collection_owner_lookup;
-	assert!(Uniques::<T, I>::set_metadata(
-		SystemOrigin::Signed(caller.clone()).into(),
-		T::Helper::collection(0),
-		item,
-		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
-		false,
-	)
-	.is_ok());
-	(caller, caller_lookup)
-}
-fn add_item_attribute<T: Config<I>, I: 'static>(
-	item: T::ItemId,
-) -> (BoundedVec<u8, T::KeyLimit>, T::AccountId, AccountIdLookupOf<T>) {
-	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+// 	let caller = collection_owner;
+// 	let caller_lookup = collection_owner_lookup;
+// 	assert!(Uniques::<T, I>::set_metadata(
+// 		SystemOrigin::Signed(caller.clone()).into(),
+// 		T::Helper::collection(0),
+// 		item,
+// 		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
+// 		false,
+// 	)
+// 	.is_ok());
+// 	(caller, caller_lookup)
+// }
+// fn add_item_attribute<T: Config<I>, I: 'static>(
+// 	item: T::ItemId,
+// ) -> (BoundedVec<u8, T::KeyLimit>, T::AccountId, AccountIdLookupOf<T>) {
+// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-	let caller = collection_owner;
-	let caller_lookup = collection_owner_lookup;
-	let caller_lookup = T::Lookup::unlookup(caller.clone());
-	let key: BoundedVec<_, _> = vec![0; T::KeyLimit::get() as usize].try_into().unwrap();
-	assert!(Uniques::<T, I>::set_attribute(
-		SystemOrigin::Signed(caller.clone()).into(),
-		T::Helper::collection(0),
-		Some(item),
-		key.clone(),
-		vec![0; T::ValueLimit::get() as usize].try_into().unwrap(),
-	)
-	.is_ok());
-	(key, caller, caller_lookup)
-}
-fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
-	index: u16,
-) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
-	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
-	let item = T::Helper::item(index);
-	assert!(Uniques::<T, I>::mint_with_extra_deposit(
-		SystemOrigin::Signed(collection_owner.clone()).into(),
-		collection_id,
-		item,
-		collection_owner_lookup.clone(),
-		index.into(),
-	)
-	.is_ok());
-	(item, collection_owner, collection_owner_lookup)
-}
+// 	let caller = collection_owner;
+// 	let caller_lookup = collection_owner_lookup;
+// 	let caller_lookup = T::Lookup::unlookup(caller.clone());
+// 	let key: BoundedVec<_, _> = vec![0; T::KeyLimit::get() as usize].try_into().unwrap();
+// 	assert!(Uniques::<T, I>::set_attribute(
+// 		SystemOrigin::Signed(caller.clone()).into(),
+// 		T::Helper::collection(0),
+// 		Some(item),
+// 		key.clone(),
+// 		vec![0; T::ValueLimit::get() as usize].try_into().unwrap(),
+// 	)
+// 	.is_ok());
+// 	(key, caller, caller_lookup)
+// }
+// fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
+// 	index: u16,
+// ) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
+// 	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+// 	let item = T::Helper::item(index);
+// 	assert!(Uniques::<T, I>::mint_with_extra_deposit(
+// 		SystemOrigin::Signed(collection_owner.clone()).into(),
+// 		collection_id,
+// 		item,
+// 		collection_owner_lookup.clone(),
+// 		index.into(),
+// 	)
+// 	.is_ok());
+// 	(item, collection_owner, collection_owner_lookup)
+// }
 
 benchmarks_instance_pallet! {
 
