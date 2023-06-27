@@ -24,7 +24,7 @@ use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
 pub use pallet::*;
 use pallet_uniques::DestroyWitness;
 use sp_runtime::traits::StaticLookup;
-use sp_std::{prelude::*, vec::Vec};
+use sp_std::vec::Vec;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
@@ -236,7 +236,7 @@ pub mod pallet {
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
 			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item);
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
-			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(&collection, &item) {
+			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(collection, item) {
 				if let Some(item_owner) = item_owner {
 					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 					<T as pallet_uniques::Config<I>>::Currency::transfer(
@@ -478,6 +478,7 @@ pub mod pallet {
 		/// Weight: `O(1)`
 		#[pallet::call_index(15)]
 		#[pallet::weight(0)]
+		#[allow(clippy::too_many_arguments)]
 		pub fn force_item_status(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -753,7 +754,7 @@ pub mod pallet {
 				let collection_owner =
 					pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
 				<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
-				ExtraDeposit::<T, I>::insert(&collection, &item, deposit);
+				ExtraDeposit::<T, I>::insert(collection, item, deposit);
 				Ok(())
 			})
 		}
