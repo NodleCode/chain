@@ -20,7 +20,7 @@
 
 use super::*;
 use crate::{self as pallet_reserve};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::Currency};
+use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::ConstU64, traits::Currency};
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
@@ -82,11 +82,15 @@ impl pallet_balances::Config for Test {
 	type RuntimeEvent = ();
 	type DustRemoval = ();
 	type MaxLocks = MaxLocks;
-	type ExistentialDeposit = ();
+	type ExistentialDeposit = ConstU64<1>;
 	type AccountStore = frame_system::Pallet<Test>;
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
+	type FreezeIdentifier = [u8; 8];
+	type HoldIdentifier = [u8; 8];
+	type MaxHolds = ();
+	type MaxFreezes = ();
 }
 
 ord_parameter_types! {
@@ -145,13 +149,14 @@ fn spend_too_much_funds_to_target() {
 #[test]
 fn spend_funds_to_target() {
 	new_test_ext().execute_with(|| {
-		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
+		TestCurrency::make_free_balance_be(&TestModule::account_id(), 101);
 
-		assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 101);
 		assert_eq!(Balances::free_balance(3), 0);
 		assert_ok!(TestModule::spend(RuntimeOrigin::signed(Admin::get()), 3, 100));
 		assert_eq!(Balances::free_balance(3), 100);
-		assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
+		// Remaining funds should be above existential deposit
+		assert_eq!(Balances::free_balance(TestModule::account_id()), 1);
 	})
 }
 
@@ -203,7 +208,7 @@ fn apply_as_works() {
 #[test]
 fn try_root_if_not_admin() {
 	new_test_ext().execute_with(|| {
-		TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
+		TestCurrency::make_free_balance_be(&TestModule::account_id(), 101);
 
 		assert_ok!(TestModule::spend(RawOrigin::Root.into(), 3, 100));
 		assert_ok!(TestModule::apply_as(RawOrigin::Root.into(), make_call(1)));

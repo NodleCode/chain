@@ -147,6 +147,7 @@ fn add_vesting_schedule_fails_if_zero_period_or_count() {
 
 #[test]
 fn add_vesting_schedule_fails_if_transfer_err() {
+	use sp_runtime::TokenError::FundsUnavailable;
 	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
 		let schedule = VestingSchedule {
 			start: 1u64,
@@ -156,7 +157,7 @@ fn add_vesting_schedule_fails_if_transfer_err() {
 		};
 		assert_err!(
 			Vesting::add_vesting_schedule(RuntimeOrigin::signed(BOB::get()), ALICE::get(), schedule),
-			pallet_balances::Error::<Runtime, _>::InsufficientBalance,
+			FundsUnavailable,
 		);
 	});
 }

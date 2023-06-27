@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Steps and Repats are optional command line argument in $1 and $2
+STEPS="${1:-50}"
+REPEAT="${2:-20}"
+
 export external="frame_system pallet_balances pallet_collator_selection pallet_contracts pallet_membership\
  pallet_multisig pallet_preimage pallet_scheduler pallet_timestamp pallet_uniques pallet_utility pallet_xcm"
 export internal="pallet_allocations pallet_grants pallet_reserve"
@@ -17,8 +21,8 @@ for PALLET in $internal
 do
 ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
-    --steps=50 \
-    --repeat=20 \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
     --pallet=$PALLET \
     '--extrinsic=*' \
     --execution=wasm \
@@ -31,8 +35,8 @@ for PALLET in $external
 do
 ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
-    --steps=50 \
-    --repeat=20 \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
     --pallet=$PALLET \
     '--extrinsic=*' \
     --execution=wasm \
@@ -44,8 +48,8 @@ done
 
 ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
-    --steps=50 \
-    --repeat=20 \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::fungible \
     '--extrinsic=*' \
     --execution=wasm \
@@ -55,15 +59,15 @@ done
 
 ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
-    --steps=50 \
-    --repeat=20 \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::generic \
     --extrinsic="$xcm_generic_extrinsic" \
     --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
-
+sed -s 's/pallet_contracts::WeightInfo/pallet_contracts::weights::WeightInfo/' -i runtimes/eden/src/weights/pallet_contracts.rs 
 echo "Running on gcloud server? Run:"
 echo "    git commit -v -a -m Benchmarks ; git format-patch HEAD~"
 echo "And on dev machine:"
