@@ -99,21 +99,21 @@ fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, Account
 // 	.is_ok());
 // 	(key, caller, caller_lookup)
 // }
-// fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
-// 	index: u16,
-// ) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
-// 	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
-// 	let item = T::Helper::item(index);
-// 	assert!(Uniques::<T, I>::mint_with_extra_deposit(
-// 		SystemOrigin::Signed(collection_owner.clone()).into(),
-// 		collection_id,
-// 		item,
-// 		collection_owner_lookup.clone(),
-// 		index.into(),
-// 	)
-// 	.is_ok());
-// 	(item, collection_owner, collection_owner_lookup)
-// }
+fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
+	index: u16,
+) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
+	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+	let item = T::Helper::item(index);
+	assert!(Uniques::<T, I>::mint_with_extra_deposit(
+		SystemOrigin::Signed(collection_owner.clone()).into(),
+		collection_id,
+		item,
+		collection_owner_lookup.clone(),
+		index.into(),
+	)
+	.is_ok());
+	(item, collection_owner, collection_owner_lookup)
+}
 
 benchmarks_instance_pallet! {
 
