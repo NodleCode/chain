@@ -186,6 +186,7 @@ impl pallet_xcm::Config for Runtime {
 	type TrustedLockers = ();
 	type SovereignAccountOf = LocationToAccountId;
 	type MaxLockers = ConstU32<8>;
+	type AdminOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_xcm::WeightInfo<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ReachableDest = ReachableDest;
@@ -279,8 +280,14 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Err(BenchmarkError::Skip)
 	}
 
-	fn universal_alias() -> Result<Junction, BenchmarkError> {
+	fn universal_alias() -> Result<(MultiLocation, Junction), BenchmarkError> {
 		// The XCM executor of Eden doesn't have a configured `UniversalAliases`
+		Err(BenchmarkError::Skip)
+	}
+
+	fn export_message_origin_and_destination(
+	) -> Result<(MultiLocation, NetworkId, InteriorMultiLocation), BenchmarkError> {
+		// The XCM executor of Eden doesn't support exporting messages
 		Err(BenchmarkError::Skip)
 	}
 
