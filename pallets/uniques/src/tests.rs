@@ -59,11 +59,19 @@ impl pallet_balances::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type DustRemoval = ();
 	type MaxLocks = ();
-	type ExistentialDeposit = ();
+	type ExistentialDeposit = ConstU64<1>;
 	type AccountStore = frame_system::Pallet<Test>;
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
+	#[doc = " The ID type for holds."]
+	type HoldIdentifier = [u8; 8];
+	#[doc = " The ID type for freezes."]
+	type FreezeIdentifier = [u8; 8];
+	#[doc = " The maximum number of holds that can exist on an account at any time."]
+	type MaxHolds = ();
+	#[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
+	type MaxFreezes = ();
 }
 parameter_types! {
 	pub TestCollectionDeposit:  u64 = 2;
@@ -170,7 +178,6 @@ mod tests {
 			let extra_deposit = 20;
 			let collection_id = 0;
 			let item_id = 10;
-			let item_id2 = 12;
 			let collection_owner_id = 1;
 			let item_owner = 42;
 			let init_balance = 100;
@@ -232,7 +239,6 @@ mod tests {
 			let extra_deposit = 20;
 			let collection_id = 0;
 			let item_id = 10;
-			let item_id2 = 12;
 			let collection_owner_id = 1;
 			let not_collection_owner_id = 255;
 			let item_owner = 42;
