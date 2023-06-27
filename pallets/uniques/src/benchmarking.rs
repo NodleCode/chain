@@ -21,11 +21,6 @@
 
 use super::*;
 use frame_benchmarking::v1::{account, benchmarks_instance_pallet};
-use frame_support::{
-	dispatch::UnfilteredDispatchable,
-	traits::{EnsureOrigin, Get},
-	BoundedVec,
-};
 use frame_system::RawOrigin as SystemOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
@@ -44,27 +39,27 @@ fn create_collection<T: Config<I>, I: 'static>() -> (T::CollectionId, T::Account
 	T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
 	assert!(Uniques::<T, I>::force_create(
 		SystemOrigin::Root.into(),
-		collection_id.clone(),
+		collection_id,
 		collection_owner_lookup.clone(),
 		false,
 	)
 	.is_ok());
 	(collection_id, collection_owner, collection_owner_lookup)
 }
-fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
-	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+// fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
+// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-	let caller = collection_owner;
-	let caller_lookup = collection_owner_lookup;
-	assert!(Uniques::<T, I>::set_collection_metadata(
-		SystemOrigin::Signed(caller.clone()).into(),
-		T::Helper::collection(0),
-		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
-		false,
-	)
-	.is_ok());
-	(caller, caller_lookup)
-}
+// 	let caller = collection_owner;
+// 	let caller_lookup = collection_owner_lookup;
+// 	assert!(Uniques::<T, I>::set_collection_metadata(
+// 		SystemOrigin::Signed(caller.clone()).into(),
+// 		T::Helper::collection(0),
+// 		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
+// 		false,
+// 	)
+// 	.is_ok());
+// 	(caller, caller_lookup)
+// }
 // fn add_item_metadata<T: Config<I>, I: 'static>(item: T::ItemId) -> (T::AccountId, AccountIdLookupOf<T>) {
 // 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
@@ -140,13 +135,13 @@ benchmarks_instance_pallet! {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
 		let item = T::Helper::item(0);
 		let deposit = BalanceOf::<T,I>::max_value();
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id.clone(), item, collection_owner_lookup, deposit)
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
 
 
 	burn {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>();
 		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0);
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id.clone(), item, Some(collection_owner_lookup))
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, Some(collection_owner_lookup))
 
 
 
