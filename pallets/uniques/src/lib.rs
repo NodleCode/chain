@@ -25,6 +25,11 @@ pub use pallet::*;
 use pallet_uniques::{DestroyWitness, WeightInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_std::vec::Vec;
+
+mod weights;
+//pub use weights::WeightInfo;
+use pallet_uniques::WeightInfo;
+
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
@@ -59,7 +64,10 @@ pub mod pallet {
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
 		#[cfg(feature = "runtime-benchmarks")]
 		/// A set of helper functions for benchmarking.
-		type Helper: BenchmarkHelper<Self::CollectionId, Self::ItemId>;
+		type Helper: BenchmarkHelper<
+			<T as pallet_uniques::Config<I>>::CollectionId,
+			<T as pallet_uniques::Config<I>>::ItemId,
+		>;
 	}
 
 	#[pallet::pallet]
@@ -427,7 +435,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(13)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::approve_transfer())]
 		pub fn approve_transfer(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -481,7 +489,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(15)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::force_item_status())]
 		#[allow(clippy::too_many_arguments)]
 		pub fn force_item_status(
 			origin: OriginFor<T>,
@@ -549,7 +557,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(17)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::clear_attribute())]
 		pub fn clear_attribute(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -602,7 +610,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(19)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::clear_metadata())]
 		pub fn clear_metadata(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::clear_metadata(origin, collection, item)
 		}
@@ -647,7 +655,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(21)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::clear_collection_metadata())]
 		pub fn clear_collection_metadata(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::clear_collection_metadata(origin, collection)
 		}
@@ -680,7 +688,7 @@ pub mod pallet {
 		///
 		/// Emits `CollectionMaxSupplySet` event when successful.
 		#[pallet::call_index(23)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::set_collection_max_supply())]
 		pub fn set_collection_max_supply(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -745,7 +753,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
-		#[pallet::weight(0)]
+		#[pallet::weight(T::WeightInfo::mint())]
 		#[transactional]
 		pub fn mint_with_extra_deposit(
 			origin: OriginFor<T>,
