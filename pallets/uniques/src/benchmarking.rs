@@ -21,6 +21,7 @@
 
 use super::*;
 use frame_benchmarking::v1::{account, benchmarks_instance_pallet};
+use frame_support::{traits::Get, BoundedVec};
 use frame_system::RawOrigin as SystemOrigin;
 use pallet_uniques::BenchmarkHelper;
 use sp_runtime::traits::Bounded;
@@ -47,54 +48,51 @@ fn create_collection<T: Config<I>, I: 'static>() -> (T::CollectionId, T::Account
 	.is_ok());
 	(collection_id, collection_owner, collection_owner_lookup)
 }
-// fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
-// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
+	let (.., collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-// 	let caller = collection_owner;
-// 	let caller_lookup = collection_owner_lookup;
-// 	assert!(Uniques::<T, I>::set_collection_metadata(
-// 		SystemOrigin::Signed(caller.clone()).into(),
-// 		T::Helper::collection(0),
-// 		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
-// 		false,
-// 	)
-// 	.is_ok());
-// 	(caller, caller_lookup)
-// }
-// fn add_item_metadata<T: Config<I>, I: 'static>(item: T::ItemId) -> (T::AccountId, AccountIdLookupOf<T>) {
-// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+	let caller = collection_owner;
+	let caller_lookup = collection_owner_lookup;
+	assert!(Uniques::<T, I>::set_collection_metadata(
+		SystemOrigin::Signed(caller.clone()).into(),
+		<T as pallet_uniques::Config<I>>::Helper::collection(0),
+		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
+		false,
+	)
+	.is_ok());
+	(caller, caller_lookup)
+}
+fn add_item_metadata<T: Config<I>, I: 'static>(item: T::ItemId) -> (T::AccountId, AccountIdLookupOf<T>) {
+	let (.., collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-// 	let caller = collection_owner;
-// 	let caller_lookup = collection_owner_lookup;
-// 	assert!(Uniques::<T, I>::set_metadata(
-// 		SystemOrigin::Signed(caller.clone()).into(),
-// 		T::Helper::collection(0),
-// 		item,
-// 		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
-// 		false,
-// 	)
-// 	.is_ok());
-// 	(caller, caller_lookup)
-// }
-// fn add_item_attribute<T: Config<I>, I: 'static>(
-// 	item: T::ItemId,
-// ) -> (BoundedVec<u8, T::KeyLimit>, T::AccountId, AccountIdLookupOf<T>) {
-// 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+	let caller = collection_owner;
+	let caller_lookup = collection_owner_lookup;
+	assert!(Uniques::<T, I>::set_metadata(
+		SystemOrigin::Signed(caller.clone()).into(),
+		<T as pallet_uniques::Config<I>>::Helper::collection(0),
+		item,
+		vec![0; T::StringLimit::get() as usize].try_into().unwrap(),
+		false,
+	)
+	.is_ok());
+	(caller, caller_lookup)
+}
+fn add_item_attribute<T: Config<I>, I: 'static>(
+	item: T::ItemId,
+) -> (BoundedVec<u8, T::KeyLimit>, T::AccountId, AccountIdLookupOf<T>) {
+	let (.., collection_owner, collection_owner_lookup) = get_config::<T, I>();
 
-// 	let caller = collection_owner;
-// 	let caller_lookup = collection_owner_lookup;
-// 	let caller_lookup = T::Lookup::unlookup(caller.clone());
-// 	let key: BoundedVec<_, _> = vec![0; T::KeyLimit::get() as usize].try_into().unwrap();
-// 	assert!(Uniques::<T, I>::set_attribute(
-// 		SystemOrigin::Signed(caller.clone()).into(),
-// 		T::Helper::collection(0),
-// 		Some(item),
-// 		key.clone(),
-// 		vec![0; T::ValueLimit::get() as usize].try_into().unwrap(),
-// 	)
-// 	.is_ok());
-// 	(key, caller, caller_lookup)
-// }
+	let key: BoundedVec<_, _> = vec![0; T::KeyLimit::get() as usize].try_into().unwrap();
+	assert!(Uniques::<T, I>::set_attribute(
+		SystemOrigin::Signed(collection_owner.clone()).into(),
+		<T as pallet_uniques::Config<I>>::Helper::collection(0),
+		Some(item),
+		key.clone(),
+		vec![0; T::ValueLimit::get() as usize].try_into().unwrap(),
+	)
+	.is_ok());
+	(key, collection_owner, collection_owner_lookup)
+}
 fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	index: u16,
 ) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
@@ -113,28 +111,32 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 
 benchmarks_instance_pallet! {
 
-	// destroy {
-	// 	let n in 0 .. 1_000;
-	// 	let m in 0 .. 1_000;
-	// 	let a in 0 .. 1_000;
+	destroy {
+		let n in 0 .. 1_000;
+		let m in 0 .. 1_000;
+		let a in 0 .. 1_000;
 
-	// 	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
-	// 	add_collection_metadata::<T, I>();
-	// 	for i in 0..n {
-	// 		mint_item_with_extra_deposit::<T, I>(i as u16);
-	// 	}
-	// 	for i in 0..m {
-	// 		add_item_metadata::<T, I>(T::Helper::item(i as u16));
-	// 	}
-	// 	for i in 0..a {
-	// 		add_item_attribute::<T, I>(T::Helper::item(i as u16));
-	// 	}
-	// 	let witness = Uniques2::Collection::<T, I>::get(collection.clone()).unwrap().destroy_witness();
-	// }: _(SystemOrigin::Signed(collection_owner), collection_id, witness)
+		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+		add_collection_metadata::<T, I>();
+		for i in 0..n {
+			mint_item_with_extra_deposit::<T, I>(i as u16);
+		}
+		for i in 0..m {
+			add_item_metadata::<T, I>(T::Helper::item(i as u16));
+		}
+		for i in 0..a {
+			add_item_attribute::<T, I>(T::Helper::item(i as u16));
+		}
+		let witness = DestroyWitness{
+			items: n,
+			item_metadatas: m,
+			attributes: a,
+		};
+	}: _(SystemOrigin::Signed(collection_owner), collection_id, witness)
 
 	mint_with_extra_deposit {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
-		let item = T::Helper::item(0);
+		let item = <T as pallet_uniques::Config<I>>::Helper::item(0);
 		let deposit = BalanceOf::<T,I>::max_value();
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
 
