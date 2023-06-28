@@ -21,7 +21,8 @@
 
 use super::*;
 use frame_benchmarking::v1::{account, benchmarks_instance_pallet};
-use frame_support::{traits::Get, BoundedVec};
+use frame_support::assert_ok;
+use frame_support::traits::OriginTrait;
 use frame_system::RawOrigin as SystemOrigin;
 use pallet_uniques::BenchmarkHelper;
 use sp_runtime::traits::Bounded;
@@ -36,16 +37,16 @@ fn get_config<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, Acc
 	let collection_id = <T as pallet_uniques::Config<I>>::Helper::collection(0);
 	(collection_id, collection_owner, collection_owner_lookup)
 }
+
 fn create_collection<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, AccountIdLookupOf<T>) {
 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 	T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
-	assert!(Uniques::<T, I>::force_create(
-		SystemOrigin::Root.into(),
+	assert_ok!(Uniques::<T, I>::force_create(
+		T::RuntimeOrigin::root(),
 		collection_id,
 		collection_owner_lookup.clone(),
 		false,
-	)
-	.is_ok());
+	));
 	(collection_id, collection_owner, collection_owner_lookup)
 }
 fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
@@ -136,8 +137,8 @@ benchmarks_instance_pallet! {
 
 	mint_with_extra_deposit {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
-		let item = <T as pallet_uniques::Config<I>>::Helper::item(0);
-		let deposit = BalanceOf::<T,I>::max_value();
+		let item = T::Helper::item(0);
+		let deposit = 5u32.into();
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
 
 
