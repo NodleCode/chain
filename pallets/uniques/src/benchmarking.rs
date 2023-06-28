@@ -100,7 +100,7 @@ fn add_item_attribute<T: Config<I>, I: 'static>(
 fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	index: u16,
 ) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
-	let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 	let item = T::Helper::item(index);
 	assert!(Uniques::<T, I>::mint_with_extra_deposit(
 		SystemOrigin::Signed(collection_owner.clone()).into(),
