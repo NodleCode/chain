@@ -26,9 +26,7 @@ use pallet_uniques::{DestroyWitness, WeightInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_std::vec::Vec;
 
-mod weights;
-//pub use weights::WeightInfo;
-use pallet_uniques::WeightInfo;
+// mod weights;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
