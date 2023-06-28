@@ -44,29 +44,8 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::DispatchResult;
 
-	#[cfg(feature = "runtime-benchmarks")]
-	pub trait BenchmarkHelper<CollectionId, ItemId> {
-		fn collection(i: u16) -> CollectionId;
-		fn item(i: u16) -> ItemId;
-	}
-	#[cfg(feature = "runtime-benchmarks")]
-	impl<CollectionId: From<u16>, ItemId: From<u16>> BenchmarkHelper<CollectionId, ItemId> for () {
-		fn collection(i: u16) -> CollectionId {
-			i.into()
-		}
-		fn item(i: u16) -> ItemId {
-			i.into()
-		}
-	}
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
-		#[cfg(feature = "runtime-benchmarks")]
-		/// A set of helper functions for benchmarking.
-		type Helper: BenchmarkHelper<
-			<T as pallet_uniques::Config<I>>::CollectionId,
-			<T as pallet_uniques::Config<I>>::ItemId,
-		>;
-	}
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {}
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);

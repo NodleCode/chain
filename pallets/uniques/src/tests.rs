@@ -98,10 +98,7 @@ impl pallet_uniques::Config for Test {
 	#[cfg(feature = "runtime-benchmarks")]
 	type Helper = ();
 }
-impl Config for Test {
-	#[cfg(feature = "runtime-benchmarks")]
-	type Helper = ();
-}
+impl Config for Test {}
 
 macro_rules! bvec {
 	($( $x:tt )*) => {
