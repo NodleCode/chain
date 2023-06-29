@@ -22,11 +22,12 @@
 
 use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
 pub use pallet::*;
-use pallet_uniques::{DestroyWitness, WeightInfo};
+use pallet_uniques::{DestroyWitness, WeightInfo as UniquesWeightInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_std::vec::Vec;
 
-// mod weights;
+pub mod weights;
+pub use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -45,7 +46,10 @@ pub mod pallet {
 	use sp_runtime::DispatchResult;
 
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {}
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
+		/// Weight information for extrinsics specific to this pallet.
+		type WeightInfo: WeightInfo;
+	}
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
@@ -85,7 +89,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::WeightInfo::create())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::create())]
 		pub fn create(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -111,7 +115,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::WeightInfo::force_create())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::force_create())]
 		pub fn force_create(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -137,7 +141,7 @@ pub mod pallet {
 		/// - `m = witness.item_metadatas`
 		/// - `a = witness.attributes`
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::destroy(
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::destroy(
 			witness.items,
  			witness.item_metadatas,
 			witness.attributes,
@@ -188,7 +192,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(3)]
-		#[pallet::weight(T::WeightInfo::mint())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::mint())]
 		pub fn mint(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -214,7 +218,7 @@ pub mod pallet {
 		/// Weight: `O(1)`
 		/// Modes: `check_owner.is_some()`.
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::burn())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::burn())]
 		pub fn burn(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -257,7 +261,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(5)]
-		#[pallet::weight(T::WeightInfo::transfer())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::transfer())]
 		pub fn transfer(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -285,7 +289,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(items.len())`
 		#[pallet::call_index(6)]
-		#[pallet::weight(T::WeightInfo::redeposit(items.len() as u32))]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::redeposit(items.len() as u32))]
 		pub fn redeposit(origin: OriginFor<T>, collection: T::CollectionId, items: Vec<T::ItemId>) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::redeposit(origin, collection, items)
 		}
@@ -301,7 +305,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(7)]
-		#[pallet::weight(T::WeightInfo::freeze())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::freeze())]
 		pub fn freeze(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::freeze(origin, collection, item)
 		}
@@ -317,7 +321,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(8)]
-		#[pallet::weight(T::WeightInfo::thaw())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::thaw())]
 		pub fn thaw(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::thaw(origin, collection, item)
 		}
@@ -332,7 +336,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(9)]
-		#[pallet::weight(T::WeightInfo::freeze_collection())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::freeze_collection())]
 		pub fn freeze_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::freeze_collection(origin, collection)
 		}
@@ -347,7 +351,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(10)]
-		#[pallet::weight(T::WeightInfo::thaw_collection())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::thaw_collection())]
 		pub fn thaw_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::thaw_collection(origin, collection)
 		}
@@ -364,7 +368,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(11)]
-		#[pallet::weight(T::WeightInfo::transfer_ownership())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::transfer_ownership())]
 		pub fn transfer_ownership(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -386,7 +390,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(12)]
-		#[pallet::weight(T::WeightInfo::set_team())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_team())]
 		pub fn set_team(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -412,7 +416,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(13)]
-		#[pallet::weight(T::WeightInfo::approve_transfer())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::approve_transfer())]
 		pub fn approve_transfer(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -439,7 +443,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(14)]
-		#[pallet::weight(T::WeightInfo::cancel_approval())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::cancel_approval())]
 		pub fn cancel_approval(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -466,7 +470,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(15)]
-		#[pallet::weight(T::WeightInfo::force_item_status())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::force_item_status())]
 		#[allow(clippy::too_many_arguments)]
 		pub fn force_item_status(
 			origin: OriginFor<T>,
@@ -508,7 +512,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(16)]
-		#[pallet::weight(T::WeightInfo::set_attribute())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_attribute())]
 		pub fn set_attribute(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -534,7 +538,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(17)]
-		#[pallet::weight(T::WeightInfo::clear_attribute())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::clear_attribute())]
 		pub fn clear_attribute(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -562,7 +566,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(18)]
-		#[pallet::weight(T::WeightInfo::set_metadata())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_metadata())]
 		pub fn set_metadata(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -587,7 +591,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(19)]
-		#[pallet::weight(T::WeightInfo::clear_metadata())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::clear_metadata())]
 		pub fn clear_metadata(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::clear_metadata(origin, collection, item)
 		}
@@ -609,7 +613,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(20)]
-		#[pallet::weight(T::WeightInfo::set_collection_metadata())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_collection_metadata())]
 		pub fn set_collection_metadata(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -632,7 +636,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(21)]
-		#[pallet::weight(T::WeightInfo::clear_collection_metadata())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::clear_collection_metadata())]
 		pub fn clear_collection_metadata(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::clear_collection_metadata(origin, collection)
 		}
@@ -648,7 +652,7 @@ pub mod pallet {
 		///
 		/// Emits `OwnershipAcceptanceChanged`.
 		#[pallet::call_index(22)]
-		#[pallet::weight(T::WeightInfo::set_accept_ownership())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_accept_ownership())]
 		pub fn set_accept_ownership(origin: OriginFor<T>, maybe_collection: Option<T::CollectionId>) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::set_accept_ownership(origin, maybe_collection)
 		}
@@ -665,7 +669,7 @@ pub mod pallet {
 		///
 		/// Emits `CollectionMaxSupplySet` event when successful.
 		#[pallet::call_index(23)]
-		#[pallet::weight(T::WeightInfo::set_collection_max_supply())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_collection_max_supply())]
 		pub fn set_collection_max_supply(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -686,7 +690,7 @@ pub mod pallet {
 		/// Emits `ItemPriceSet` on success if the price is not `None`.
 		/// Emits `ItemPriceRemoved` on success if the price is `None`.
 		#[pallet::call_index(24)]
-		#[pallet::weight(T::WeightInfo::set_price())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::set_price())]
 		pub fn set_price(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -707,7 +711,7 @@ pub mod pallet {
 		///
 		/// Emits `ItemBought` on success.
 		#[pallet::call_index(25)]
-		#[pallet::weight(T::WeightInfo::buy_item())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::buy_item())]
 		#[transactional]
 		pub fn buy_item(
 			origin: OriginFor<T>,
@@ -730,7 +734,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
-		#[pallet::weight(T::WeightInfo::mint())]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::mint())]
 		#[transactional]
 		pub fn mint_with_extra_deposit(
 			origin: OriginFor<T>,
