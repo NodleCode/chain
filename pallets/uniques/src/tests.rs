@@ -115,7 +115,7 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 	ext
 }
 #[cfg(test)]
-mod tests {
+mod test_cases {
 
 	use super::*;
 	#[test]
@@ -134,7 +134,7 @@ mod tests {
 				collection_owner_id
 			));
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
@@ -153,7 +153,7 @@ mod tests {
 			));
 
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
 			);
 
@@ -165,7 +165,7 @@ mod tests {
 				extra_deposit
 			));
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + 2 * TestItemDeposit::get() + 2 * extra_deposit + 3
 			);
 		})
@@ -188,7 +188,7 @@ mod tests {
 				collection_owner_id
 			));
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
@@ -207,7 +207,7 @@ mod tests {
 			));
 
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
 			);
 
@@ -220,16 +220,16 @@ mod tests {
 
 			// check if extra deposit is freed as well as the item deposit
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + 3
 			);
 			// check that the owner of the collection does not recover the reserved amount of the burnt item
 			assert_eq!(
-				Balances::free_balance(&collection_owner_id),
+				Balances::free_balance(collection_owner_id),
 				init_balance - (TestCollectionDeposit::get() + 3 + extra_deposit)
 			);
 			// extra deposit transferred to the item owner free balance
-			assert_eq!(Balances::free_balance(&item_owner), init_balance + extra_deposit);
+			assert_eq!(Balances::free_balance(item_owner), init_balance + extra_deposit);
 		})
 	}
 	#[test]
@@ -250,7 +250,7 @@ mod tests {
 				collection_owner_id
 			));
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
@@ -269,7 +269,7 @@ mod tests {
 			));
 
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
 			);
 
@@ -285,7 +285,7 @@ mod tests {
 
 			// reserved balance should not have changed
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + TestItemDeposit::get() + extra_deposit + 3
 			);
 		})
