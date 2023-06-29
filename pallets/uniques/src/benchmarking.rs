@@ -114,7 +114,6 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 }
 
 benchmarks_instance_pallet! {
-
 	destroy {
 		let n in 0 .. 1_000;
 		let m in 0 .. 1_000;
@@ -144,14 +143,10 @@ benchmarks_instance_pallet! {
 		let deposit = 5u32.into();
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
 
-
 	burn {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>();
 		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0);
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, Some(collection_owner_lookup))
-
-
-
 
 	impl_benchmark_test_suite!(Uniques, crate::tests::new_test_ext(), crate::tests::Test);
 }
