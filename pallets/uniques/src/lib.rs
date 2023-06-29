@@ -27,7 +27,7 @@ use sp_runtime::traits::StaticLookup;
 use sp_std::vec::Vec;
 
 pub mod weights;
-pub use weights::WeightInfo;
+pub use weights::WeightInfo as NodleWeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -48,7 +48,7 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
 		/// Weight information for extrinsics specific to this pallet.
-		type WeightInfo: WeightInfo;
+		type WeightInfo: NodleWeightInfo;
 	}
 
 	#[pallet::pallet]
