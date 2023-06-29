@@ -63,6 +63,8 @@ mod version;
 mod weights;
 mod xcm_config;
 
+mod migrations;
+
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
