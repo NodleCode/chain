@@ -17,6 +17,7 @@ cargo build --profile release \
     --features=runtime-benchmarks \
     --manifest-path=node/Cargo.toml 
 
+install -d temp_weights
 for PALLET in $internal
 do
 ./target/release/nodle-parachain benchmark pallet \
@@ -28,7 +29,7 @@ do
     --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/internal_pallet_weights.hbs \
-    --output=runtimes/eden/src/weights
+    --output=temp_weights
 done
 
 for PALLET in $external
@@ -67,7 +68,16 @@ done
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
-sed -s 's/pallet_contracts::WeightInfo/pallet_contracts::weights::WeightInfo/' -i runtimes/eden/src/weights/pallet_contracts.rs 
+sed -s 's/pallet_contracts::WeightInfo/pallet_contracts::weights::WeightInfo/' -i runtimes/eden/src/weights/pallet_contracts.rs
+
+mv temp_weights/pallet_grants.rs pallets/grants/src/weights.rs
+mv temp_weights/pallet_allocations.rs pallets/allocations/src/weights.rs
+mv temp_weights/pallet_reserve.rs pallets/reserve/src/weights.rs
+mv temp_weights/pallet_nodle_uniques.rs pallets/uniques/src/weights.rs
+
+cargo clippy --fix --allow-dirty
+cargo fmt
+
 echo "Running on gcloud server? Run:"
 echo "    git commit -v -a -m Benchmarks ; git format-patch HEAD~"
 echo "And on dev machine:"

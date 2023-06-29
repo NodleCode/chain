@@ -310,7 +310,7 @@ mod test_cases {
 				collection_owner_id
 			));
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get()
 			);
 			assert_ok!(Uniques::set_collection_metadata(
@@ -345,7 +345,7 @@ mod test_cases {
 			));
 
 			assert_eq!(
-				Balances::reserved_balance(&collection_owner_id),
+				Balances::reserved_balance(collection_owner_id),
 				TestCollectionDeposit::get() + 3 * TestItemDeposit::get() + 3 * extra_deposit + 3
 			);
 			let witness = DestroyWitness {
@@ -357,15 +357,15 @@ mod test_cases {
 			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness));
 
 			// check if extra deposit is freed as well as the item deposit
-			assert_eq!(Balances::reserved_balance(&collection_owner_id), 0);
+			assert_eq!(Balances::reserved_balance(collection_owner_id), 0);
 
 			//check that the owner of the collection does not recover the reserved amount of the burnt item
 			assert_eq!(
-				Balances::free_balance(&collection_owner_id),
+				Balances::free_balance(collection_owner_id),
 				init_balance - 3 * extra_deposit
 			);
 			// extra deposit transferred to the item owner free balance
-			assert_eq!(Balances::free_balance(&item_owner), init_balance + 3 * extra_deposit);
+			assert_eq!(Balances::free_balance(item_owner), init_balance + 3 * extra_deposit);
 		})
 	}
 }
