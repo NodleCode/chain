@@ -30,7 +30,6 @@ mod weights;
 
 use weights::WeightInfo as NodleWeightInfo;
 
-
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
