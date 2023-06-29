@@ -141,7 +141,7 @@ pub mod pallet {
 		/// - `m = witness.item_metadatas`
 		/// - `a = witness.attributes`
 		#[pallet::call_index(2)]
-		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::destroy(
+		#[pallet::weight(<T as Config<I>>::WeightInfo::destroy(
 			witness.items,
  			witness.item_metadatas,
 			witness.attributes,
@@ -218,7 +218,7 @@ pub mod pallet {
 		/// Weight: `O(1)`
 		/// Modes: `check_owner.is_some()`.
 		#[pallet::call_index(4)]
-		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::burn())]
+		#[pallet::weight(<T as Config<I>>::WeightInfo::burn())]
 		pub fn burn(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -734,7 +734,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
-		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::mint())]
+		#[pallet::weight(<T as Config<I>>::WeightInfo::mint_with_extra_deposit())]
 		#[transactional]
 		pub fn mint_with_extra_deposit(
 			origin: OriginFor<T>,

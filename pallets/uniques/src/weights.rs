@@ -46,14 +46,14 @@ use core::marker::PhantomData;
 
 /// Weight functions needed for pallet_nodle_uniques.
 pub trait WeightInfo {
-	fn mint_item_with_extra_deposit() -> Weight;
+	fn mint_with_extra_deposit() -> Weight;
 	fn burn() -> Weight;
 	fn destroy(n: u32, m: u32, a: u32, ) -> Weight;
 }
 
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn mint_item_with_extra_deposit() -> Weight {
+	fn mint_with_extra_deposit() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 
@@ -67,7 +67,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 }
 
 impl WeightInfo for () {
-	fn mint_item_with_extra_deposit() -> Weight {
+	fn mint_with_extra_deposit() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 
