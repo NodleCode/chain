@@ -26,7 +26,10 @@ use pallet_uniques::{DestroyWitness, WeightInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_std::vec::Vec;
 
-// mod weights;
+mod weights;
+
+use weights::WeightInfo as NodleWeightInfo;
+
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -137,7 +140,7 @@ pub mod pallet {
 		/// - `m = witness.item_metadatas`
 		/// - `a = witness.attributes`
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::destroy(
+		#[pallet::weight(<weights::SubstrateWeight<T> as NodleWeightInfo>::destroy(
 			witness.items,
  			witness.item_metadatas,
 			witness.attributes,
@@ -214,7 +217,7 @@ pub mod pallet {
 		/// Weight: `O(1)`
 		/// Modes: `check_owner.is_some()`.
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::burn())]
+		#[pallet::weight(<weights::SubstrateWeight<T> as NodleWeightInfo>::burn())]
 		pub fn burn(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -730,7 +733,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
-		#[pallet::weight(T::WeightInfo::mint())]
+		#[pallet::weight(<weights::SubstrateWeight<T> as NodleWeightInfo>::mint_with_extra_deposit())]
 		#[transactional]
 		pub fn mint_with_extra_deposit(
 			origin: OriginFor<T>,
