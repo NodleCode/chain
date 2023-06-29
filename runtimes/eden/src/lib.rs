@@ -367,6 +367,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, SubstrateUniques);
+			list_benchmark!(list, extra, pallet_nodle_uniques, Uniques);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
@@ -408,6 +409,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, SubstrateUniques);
+			add_benchmark!(params, batches, pallet_nodle_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
