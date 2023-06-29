@@ -98,7 +98,9 @@ impl pallet_uniques::Config for Test {
 	#[cfg(feature = "runtime-benchmarks")]
 	type Helper = ();
 }
-impl Config for Test {}
+impl Config for Test {
+	type WeightInfo = ();
+}
 
 macro_rules! bvec {
 	($( $x:tt )*) => {
