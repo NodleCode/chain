@@ -168,8 +168,8 @@ pub mod pallet {
 			for (item_owner, extra_deposit) in item_owners {
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
-					&item_owner,
 					&collection_owner,
+					&item_owner,
 					extra_deposit,
 					ExistenceRequirement::AllowDeath,
 				)?;

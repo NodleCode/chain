@@ -291,78 +291,81 @@ mod test_cases {
 		})
 	}
 
-	// #[test]
-	// fn test_destroy_collection() {
-	// 	new_test_ext().execute_with(|| {
-	// 			let extra_deposit = 20;
-	// 			let collection_id = 0;
-	// 			let item_id1 = 10;
-	// 			let item_id2 = 12;
-	// 			let item_id3 = 14;
-	// 			let collection_owner_id = 1;
-	// 			let item_owner = 42;
-	// 			let init_balance = 100;
-	// 			Balances::make_free_balance_be(&collection_owner_id, init_balance);
-	// 			Balances::make_free_balance_be(&item_owner, init_balance);
-	// 			assert_ok!(Uniques::create(
-	// 				RuntimeOrigin::signed(collection_owner_id),
-	// 				collection_id,
-	// 				collection_owner_id
-	// 			));
-	// 			assert_eq!(
-	// 				Balances::reserved_balance(&collection_owner_id),
-	// 				TestCollectionDeposit::get()
-	// 			);
-	// 			assert_ok!(Uniques::set_collection_metadata(
-	// 				RuntimeOrigin::signed(1),
-	// 				0,
-	// 				bvec![0, 0],
-	// 				false
-	// 			));
+	#[test]
+	fn test_destroy_collection() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit = 20;
+			let collection_id = 0;
+			let item_id1 = 10;
+			let item_id2 = 12;
+			let item_id3 = 14;
+			let collection_owner_id = 1;
+			let item_owner = 42;
+			let init_balance = 100;
+			Balances::make_free_balance_be(&collection_owner_id, init_balance);
+			Balances::make_free_balance_be(&item_owner, init_balance);
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner_id),
+				collection_id,
+				collection_owner_id
+			));
+			assert_eq!(
+				Balances::reserved_balance(&collection_owner_id),
+				TestCollectionDeposit::get()
+			);
+			assert_ok!(Uniques::set_collection_metadata(
+				RuntimeOrigin::signed(1),
+				0,
+				bvec![0, 0],
+				false
+			));
 
-	// 			assert_ok!(Uniques::mint_with_extra_deposit(
-	// 				RuntimeOrigin::signed(1),
-	// 				collection_id,
-	// 				item_id1,
-	// 				item_owner,
-	// 				extra_deposit
-	// 			));
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(1),
+				collection_id,
+				item_id1,
+				item_owner,
+				extra_deposit
+			));
 
-	// 			assert_ok!(Uniques::mint_with_extra_deposit(
-	// 				RuntimeOrigin::signed(1),
-	// 				collection_id,
-	// 				item_id2,
-	// 				item_owner,
-	// 				extra_deposit
-	// 			));
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(1),
+				collection_id,
+				item_id2,
+				item_owner,
+				extra_deposit
+			));
 
-	// 			assert_ok!(Uniques::mint_with_extra_deposit(
-	// 				RuntimeOrigin::signed(1),
-	// 				collection_id,
-	// 				item_id3,
-	// 				item_owner,
-	// 				extra_deposit
-	// 			));
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(1),
+				collection_id,
+				item_id3,
+				item_owner,
+				extra_deposit
+			));
 
-	// 			assert_eq!(
-	// 				Balances::reserved_balance(&collection_owner_id),
-	// 				TestCollectionDeposit::get() + 3*TestItemDeposit::get() + 3*extra_deposit + 3
-	// 			);
+			assert_eq!(
+				Balances::reserved_balance(&collection_owner_id),
+				TestCollectionDeposit::get() + 3 * TestItemDeposit::get() + 3 * extra_deposit + 3
+			);
+			let witness = DestroyWitness {
+				items: 3,
+				item_metadatas: 0,
+				attributes: 0,
+			};
 
-	// 			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(1), collection_id, None));
+			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness));
 
-	// 			// check if extra deposit is freed as well as the item deposit
-	// 			assert_eq!(
-	// 				Balances::reserved_balance(&collection_owner_id),
-	// 				TestCollectionDeposit::get() + 3
-	// 			);
-	// 			// check that the owner of the collection does not recover the reserved amount of the
-	// 		burnt item 	assert_eq!(
-	// 				Balances::free_balance(&collection_owner_id),
-	// 				init_balance - (TestCollectionDeposit::get() + 3 + extra_deposit)
-	// 			);
-	// 			// extra deposit transferred to the item owner free balance
-	// 			assert_eq!(Balances::free_balance(&item_owner), init_balance + extra_deposit);
-	// 	})
-	// }
+			// check if extra deposit is freed as well as the item deposit
+			assert_eq!(Balances::reserved_balance(&collection_owner_id), 0);
+
+			//check that the owner of the collection does not recover the reserved amount of the burnt item
+			assert_eq!(
+				Balances::free_balance(&collection_owner_id),
+				init_balance - 3 * extra_deposit
+			);
+			// extra deposit transferred to the item owner free balance
+			assert_eq!(Balances::free_balance(&item_owner), init_balance + 3 * extra_deposit);
+		})
+	}
 }
