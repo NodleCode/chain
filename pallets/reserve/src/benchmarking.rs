@@ -49,7 +49,7 @@ benchmarks_instance_pallet! {
 		let starting_amount = smallest_usable_amount.saturating_add(smallest_usable_amount).into();
 		let value = smallest_usable_amount;
 
-		T::Currency::make_free_balance_be(&T::PalletId::get().into_account_truncating(), starting_amount );
+		T::Currency::make_free_balance_be(&T::PalletId::get().into_account_truncating(),starting_amount);
 
 		let call = Call::<T, I>::spend{
 			to: dest,
