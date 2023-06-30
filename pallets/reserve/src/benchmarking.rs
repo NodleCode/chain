@@ -37,7 +37,7 @@ const SEED: u32 = 0;
 benchmarks_instance_pallet! {
 	tip {
 		let tipper = account("caller", 0, SEED);
-		let value = 10u32;
+		let value = 10000u32;
 		let _ = T::Currency::make_free_balance_be(&tipper, (value * 2).into());
 	}: _(RawOrigin::Signed(tipper), value.into())
 
