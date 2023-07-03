@@ -1,16 +1,20 @@
 use crate::Runtime;
-use frame_support::{migration, traits::OnRuntimeUpgrade, weights::Weight, Blake2_128Concat};
-
-use pallet_uniques::CollectionDetails;
-#[cfg(feature = "try-runtime")]
-use primitives::{AccountId, Balance};
+use frame_support::{migration, traits::OnRuntimeUpgrade, weights::Weight};
 
 #[cfg(feature = "try-runtime")]
 use codec::{Decode, Encode};
 #[cfg(feature = "try-runtime")]
+use frame_support::Blake2_128Concat;
+#[cfg(feature = "try-runtime")]
+use pallet_uniques::CollectionDetails;
+#[cfg(feature = "try-runtime")]
+use primitives::{AccountId, Balance};
+#[cfg(feature = "try-runtime")]
 use sp_std::prelude::*;
 #[cfg(feature = "try-runtime")]
 type CollectionId = u32;
+#[cfg(feature = "try-runtime")]
+const TRY_RUNTIME: &str = "try-runtime";
 pub struct MovePalletUniquesToSubstrateUniques;
 impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 	fn on_runtime_upgrade() -> Weight {
@@ -28,6 +32,11 @@ impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 		);
 		let mut collection_details: Vec<(CollectionId, CollectionDetails<AccountId, Balance>)> = Vec::new();
 		for collection_detail in iter {
+			log::info!(
+				target: TRY_RUNTIME,
+				"Collection before migration: {:?}",
+				collection_detail
+			);
 			collection_details.push(collection_detail);
 		}
 
