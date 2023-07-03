@@ -18,8 +18,8 @@ const TRY_RUNTIME: &str = "try-runtime";
 pub struct MovePalletUniquesToSubstrateUniques;
 impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 	fn on_runtime_upgrade() -> Weight {
-		//todo: replace with correct weights
-		let mut weight = <Runtime as frame_system::Config>::DbWeight::get().reads(4);
+		//Assuming that it takes only 1 read and 1 write to move a pallet
+		let mut weight = <Runtime as frame_system::Config>::DbWeight::get().reads(1);
 		weight += <Runtime as frame_system::Config>::DbWeight::get().writes(1);
 		migration::move_pallet(b"Uniques", b"SubstrateUniques");
 		weight
@@ -60,6 +60,5 @@ impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 			return Err("Pallet Uniques Migration: Collection details do not match");
 		}
 		Ok(())
-		//todo
 	}
 }
