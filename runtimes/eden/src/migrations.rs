@@ -1,24 +1,16 @@
-use crate::{Runtime, RuntimeOrigin};
-use frame_support::{
-	migration, parameter_types,
-	traits::{GetStorageVersion, OnRuntimeUpgrade},
-	weights::Weight,
-	BoundedVec, Twox128,
-};
-use pallet_uniques::{CollectionDetails, CollectionMetadata};
+use crate::Runtime;
+use frame_support::{migration, traits::OnRuntimeUpgrade, weights::Weight, Blake2_128Concat};
+
+use pallet_uniques::CollectionDetails;
+#[cfg(feature = "try-runtime")]
 use primitives::{AccountId, Balance};
 
 #[cfg(feature = "try-runtime")]
 use codec::{Decode, Encode};
 #[cfg(feature = "try-runtime")]
 use sp_std::prelude::*;
-
-const STORAGE_VERSION_ITEM: &[u8] = b"StorageVersion";
-
-const MIGRATION: &str = "migration";
 #[cfg(feature = "try-runtime")]
-const TRY_RUNTIME: &str = "try-runtime";
-
+type CollectionId = u32;
 pub struct MovePalletUniquesToSubstrateUniques;
 impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 	fn on_runtime_upgrade() -> Weight {
@@ -31,19 +23,33 @@ impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
 
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
-		let collection_owner_1 = pallet_uniques::Module::<Runtime>::collection_owner(0).unwrap();
-		let collection_details = migration::take_storage_value::<CollectionDetails<AccountId, Balance>>(
-			b"Uniques",
-			b"CollectionDetails",
-			&[], //todo hash collection_owner_1
-		)
-		.unwrap();
+		let iter = migration::storage_key_iter::<CollectionId, CollectionDetails<AccountId, Balance>, Blake2_128Concat>(
+			b"Uniques", b"Class",
+		);
+		let mut collection_details: Vec<(CollectionId, CollectionDetails<AccountId, Balance>)> = Vec::new();
+		for collection_detail in iter {
+			collection_details.push(collection_detail);
+		}
 
 		Ok(collection_details.encode())
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
+		let previous_collection_details: Vec<(CollectionId, CollectionDetails<AccountId, Balance>)> =
+			Decode::decode(&mut state.as_slice()).map_err(|_| "Unable to decode previous collection details")?;
+		let mut current_collection_details = Vec::<(CollectionId, CollectionDetails<AccountId, Balance>)>::new();
+		let iter = migration::storage_key_iter::<CollectionId, CollectionDetails<AccountId, Balance>, Blake2_128Concat>(
+			b"SubstrateUniques",
+			b"Class",
+		);
+		for collection_detail in iter {
+			current_collection_details.push(collection_detail);
+		}
+
+		if current_collection_details != previous_collection_details {
+			return Err("Pallet Uniques Migration: Collection details do not match");
+		}
 		Ok(())
 		//todo
 	}
