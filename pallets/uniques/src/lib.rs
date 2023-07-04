@@ -58,7 +58,6 @@ pub mod pallet {
 	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {}
 
 	#[pallet::storage]
-	#[pallet::storage_prefix = "Asset"]
 	/// The extra deposits in existence.
 	pub(super) type ExtraDeposit<T: Config<I>, I: 'static = ()> = StorageDoubleMap<
 		_,
