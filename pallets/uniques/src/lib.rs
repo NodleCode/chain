@@ -716,7 +716,7 @@ pub mod pallet {
 		///
 		/// - `collection`: The collection of the item to be minted.
 		/// - `item`: The item value of the item to be minted.
-		/// - `owner`: The initial owner of the minted item.
+		/// - `beneficiary`: The initial owner of the minted item.
 		///
 		/// Emits `Issued` event when successful.
 		///
