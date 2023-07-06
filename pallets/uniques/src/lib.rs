@@ -23,7 +23,7 @@
 use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
 pub use pallet::*;
 use pallet_uniques::{DestroyWitness, WeightInfo as UniquesWeightInfo};
-use sp_runtime::traits::StaticLookup;
+use sp_runtime::traits::{StaticLookup, Zero};
 use sp_std::vec::Vec;
 
 pub mod weights;
@@ -155,7 +155,10 @@ pub mod pallet {
 			for (item, extra_deposit) in ExtraDeposit::<T, I>::drain_prefix(collection) {
 				let item_owner =
 					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(DispatchError::CannotLookup)?;
-				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
+				ensure!(
+					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
+					DispatchError::Corruption
+				);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
 					&item_owner,
@@ -213,20 +216,20 @@ pub mod pallet {
 		) -> DispatchResult {
 			let collection_owner =
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
-			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item);
+			let item_owner =
+				pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(DispatchError::CannotLookup)?;
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
-			if let Some(extra_deposit) = ExtraDeposit::<T, I>::take(collection, item) {
-				if let Some(item_owner) = item_owner {
-					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
-					<T as pallet_uniques::Config<I>>::Currency::transfer(
-						&collection_owner,
-						&item_owner,
-						extra_deposit,
-						ExistenceRequirement::AllowDeath,
-					)?;
-				}
-			}
-			Ok(())
+			let extra_deposit = ExtraDeposit::<T, I>::take(collection, item).ok_or(DispatchError::CannotLookup)?;
+			ensure!(
+				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
+				DispatchError::Corruption
+			);
+			<T as pallet_uniques::Config<I>>::Currency::transfer(
+				&collection_owner,
+				&item_owner,
+				extra_deposit,
+				ExistenceRequirement::AllowDeath,
+			)
 		}
 
 		/// Move an item from the sender account to another.

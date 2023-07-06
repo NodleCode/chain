@@ -294,82 +294,79 @@ mod test_cases {
 	#[test]
 	fn test_destroy_collection() {
 		new_test_ext().execute_with(|| {
-			let extra_deposit = 20;
 			let collection_id = 0;
-			let item_id1 = 10;
-			let item_id2 = 12;
-			let item_id3 = 14;
-			let collection_owner_id = 1;
-			let item_owner = 42;
+			let items = [10, 12, 15];
+			let extra_deposits = [20, 30, 40];
+			let collection_owner = 1;
+			let owners = [42, 43];
 			let init_balance = 100;
-			Balances::make_free_balance_be(&collection_owner_id, init_balance);
-			Balances::make_free_balance_be(&item_owner, init_balance);
+
+			let total_extra_deposit = extra_deposits.into_iter().reduce(|a, b| a + b).unwrap();
+
+			Balances::make_free_balance_be(&collection_owner, init_balance);
+			Balances::make_free_balance_be(&owners[0], init_balance);
+			Balances::make_free_balance_be(&owners[1], init_balance);
+
 			assert_ok!(Uniques::create(
-				RuntimeOrigin::signed(collection_owner_id),
+				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				collection_owner_id
+				collection_owner
 			));
 			assert_eq!(
-				Balances::reserved_balance(collection_owner_id),
+				Balances::reserved_balance(collection_owner),
 				TestCollectionDeposit::get()
 			);
-			assert_ok!(Uniques::set_collection_metadata(
-				RuntimeOrigin::signed(1),
-				0,
-				bvec![0, 0],
-				false
-			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				item_id1,
-				item_owner,
-				extra_deposit
+				items[0],
+				owners[0],
+				extra_deposits[0]
 			));
-
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				item_id2,
-				item_owner,
-				extra_deposit
+				items[1],
+				owners[0],
+				extra_deposits[1]
 			));
-
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				item_id3,
-				item_owner,
-				extra_deposit
+				items[2],
+				owners[1],
+				extra_deposits[2]
 			));
 
 			assert_eq!(
-				Balances::reserved_balance(collection_owner_id),
-				TestCollectionDeposit::get() + 3 * TestItemDeposit::get() + 3 * extra_deposit + 3
+				Balances::reserved_balance(collection_owner),
+				total_extra_deposit + TestCollectionDeposit::get() + TestItemDeposit::get() * items.len() as u64
 			);
+			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), items.len());
+
 			let witness = DestroyWitness {
-				items: 3,
+				items: items.len() as u32,
 				item_metadatas: 0,
 				attributes: 0,
 			};
-
-			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), 3);
-
-			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness));
+			assert_ok!(Uniques::destroy(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				witness
+			));
 
 			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), 0);
-
-			// check if extra deposit is freed as well as the item deposit
-			assert_eq!(Balances::reserved_balance(collection_owner_id), 0);
-
-			//check that the owner of the collection does not recover the reserved amount of the burnt item
+			assert_eq!(Balances::reserved_balance(collection_owner), 0);
 			assert_eq!(
-				Balances::free_balance(collection_owner_id),
-				init_balance - 3 * extra_deposit
+				Balances::free_balance(collection_owner),
+				init_balance - total_extra_deposit
 			);
-			// extra deposit transferred to the item owner free balance
-			assert_eq!(Balances::free_balance(item_owner), init_balance + 3 * extra_deposit);
+			assert_eq!(
+				Balances::free_balance(owners[0]),
+				init_balance + extra_deposits[0] + extra_deposits[1]
+			);
+			assert_eq!(Balances::free_balance(owners[1]), init_balance + extra_deposits[2]);
 		})
 	}
 
@@ -393,7 +390,7 @@ mod test_cases {
 			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
-				RuntimeOrigin::signed(1),
+				RuntimeOrigin::signed(collection_owner),
 				collection_id,
 				item_id,
 				item_owner,
@@ -410,6 +407,46 @@ mod test_cases {
 			assert_noop!(
 				Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness),
 				pallet_uniques::Error::<Test>::BadWitness
+			);
+
+			assert_eq!(
+				ExtraDeposit::<Test>::get(collection_id, item_id).unwrap(),
+				extra_deposit
+			);
+		})
+	}
+
+	#[test]
+	fn test_no_storage_change_happens_if_burn_fails() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit = 20;
+			let collection_id = 0;
+			let item_id = 10;
+			let collection_owner = 1;
+			let non_owner = 2;
+			let item_owner = 42;
+			let init_balance = 100;
+
+			Balances::make_free_balance_be(&collection_owner, init_balance);
+			Balances::make_free_balance_be(&item_owner, init_balance);
+
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_owner
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				item_id,
+				item_owner,
+				extra_deposit
+			));
+
+			assert_noop!(
+				Uniques::burn(RuntimeOrigin::signed(non_owner), collection_id, item_id, None),
+				pallet_uniques::Error::<Test>::NoPermission
 			);
 
 			assert_eq!(
