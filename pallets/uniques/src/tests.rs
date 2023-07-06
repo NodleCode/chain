@@ -372,4 +372,50 @@ mod test_cases {
 			assert_eq!(Balances::free_balance(item_owner), init_balance + 3 * extra_deposit);
 		})
 	}
+
+	#[test]
+	fn test_no_storage_change_happens_if_destroy_fails() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit = 20;
+			let collection_id = 0;
+			let item_id = 10;
+			let collection_owner = 1;
+			let item_owner = 42;
+			let init_balance = 100;
+
+			Balances::make_free_balance_be(&collection_owner, init_balance);
+			Balances::make_free_balance_be(&item_owner, init_balance);
+
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_owner
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(1),
+				collection_id,
+				item_id,
+				item_owner,
+				extra_deposit
+			));
+
+			// This wrong witness should make the destroy fail
+			let witness = DestroyWitness {
+				items: 2,
+				item_metadatas: 0,
+				attributes: 0,
+			};
+
+			assert_noop!(
+				Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness),
+				pallet_uniques::Error::<Test>::BadWitness
+			);
+
+			assert_eq!(
+				ExtraDeposit::<Test>::get(collection_id, item_id).unwrap(),
+				extra_deposit
+			);
+		})
+	}
 }
