@@ -29,7 +29,6 @@ use sp_std::vec::Vec;
 pub mod weights;
 pub use weights::WeightInfo as NodleWeightInfo;
 
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
 mod tests;
