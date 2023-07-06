@@ -152,19 +152,9 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let collection_owner =
 				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
-			let mut item_owners: Vec<(T::AccountId, BalanceOf<T, I>)> = Vec::new();
-
-			// Recover the item owners for each item in the ExtraDeposit Storage
-			for (item, extra_deposit) in ExtraDeposit::<T, I>::iter_prefix(collection) {
-				if let Some(item_owner) = pallet_uniques::Pallet::<T, I>::owner(collection, item) {
-					item_owners.push((item_owner, extra_deposit));
-				}
-			}
-
-			let ret = pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)?;
-
-			// Unreserve and transfer extra reserved deposit to the item owners
-			for (item_owner, extra_deposit) in item_owners {
+			for (item, extra_deposit) in ExtraDeposit::<T, I>::drain_prefix(collection) {
+				let item_owner =
+					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(DispatchError::CannotLookup)?;
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
@@ -173,10 +163,7 @@ pub mod pallet {
 					ExistenceRequirement::AllowDeath,
 				)?;
 			}
-
-			// Clear the extra storage map
-			let _ = ExtraDeposit::<T, I>::clear_prefix(collection, witness.items, None);
-			Ok(ret)
+			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
 		}
 
 		/// Mint an item of a particular collection.

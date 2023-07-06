@@ -354,7 +354,11 @@ mod test_cases {
 				attributes: 0,
 			};
 
+			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), 3);
+
 			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(1), collection_id, witness));
+
+			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), 0);
 
 			// check if extra deposit is freed as well as the item deposit
 			assert_eq!(Balances::reserved_balance(collection_owner_id), 0);
