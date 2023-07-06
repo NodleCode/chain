@@ -13,10 +13,11 @@ use primitives::{AccountId, Balance};
 use sp_std::prelude::*;
 #[cfg(feature = "try-runtime")]
 type CollectionId = u32;
+#[cfg(feature = "try-runtime")]
+const UNIQUES_CLASS_PREFIX: &[u8] = b"Class";
 
 const NEW_UNIQUES_PALLET_NAME: &[u8] = b"SubstrateUniques";
 const OLD_UNIQUES_PALLET_NAME: &[u8] = b"Uniques";
-const UNIQUES_CLASS_PREFIX: &[u8] = b"Class";
 
 pub struct MovePalletUniquesToSubstrateUniques;
 impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
