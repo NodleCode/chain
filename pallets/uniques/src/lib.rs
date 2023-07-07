@@ -20,12 +20,19 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use frame_support::traits::Currency;
+use codec::{Decode, Encode};
+use frame_support::pallet_prelude::MaxEncodedLen;
+use frame_support::traits::{tokens::Balance, Currency};
+use scale_info::TypeInfo;
+use sp_runtime::{
+	traits::{StaticLookup, Zero},
+	RuntimeDebug,
+};
+
 pub use pallet::*;
-use sp_runtime::traits::StaticLookup;
+pub use weights::WeightInfo as NodleWeightInfo;
 
 pub mod weights;
-pub use weights::WeightInfo as NodleWeightInfo;
 
 mod benchmarking;
 #[cfg(test)]
@@ -34,6 +41,36 @@ mod tests;
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
 pub type BalanceOf<T, I = ()> =
 	<<T as pallet_uniques::Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
+pub struct ExtraDepositDetails<T: Balance> {
+	/// The cap for the total extra deposit for the collection
+	///
+	/// `total` should never go higher than `limit`.
+	limit: T,
+	/// The total extra deposit reserved so far
+	///
+	/// Ever mint with extra deposit should update this value.
+	total: T,
+}
+
+impl<T: Balance> ExtraDepositDetails<T> {
+	pub fn with_limit(limit: T) -> Self {
+		Self {
+			limit,
+			..Default::default()
+		}
+	}
+	pub fn add(&mut self, value: T) -> Result<(), &'static str> {
+		let new_total = self.total.checked_add(&value).ok_or("Overflow adding extra deposit")?;
+		if new_total <= self.limit {
+			self.total = new_total;
+			Ok(())
+		} else {
+			Err("Total extra deposit exceeds limit")
+		}
+	}
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -45,7 +82,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use pallet_uniques::{DestroyWitness, WeightInfo as UniquesWeightInfo};
-	use sp_runtime::{traits::Zero, DispatchResult};
+	use sp_runtime::DispatchResult;
 	use sp_std::vec::Vec;
 
 	#[pallet::config]
@@ -73,8 +110,8 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
-	pub(crate) type CollectionExtraDepositLimits<T: Config<I>, I: 'static = ()> =
-		StorageMap<_, Blake2_128Concat, T::CollectionId, BalanceOf<T, I>, OptionQuery>;
+	pub(crate) type CollectionExtraDepositDetails<T: Config<I>, I: 'static = ()> =
+		StorageMap<_, Blake2_128Concat, T::CollectionId, ExtraDepositDetails<BalanceOf<T, I>>, OptionQuery>;
 
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
@@ -755,15 +792,19 @@ pub mod pallet {
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::create())]
+		#[transactional]
 		pub fn create_with_extra_deposit_limit(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
 			admin: AccountIdLookupOf<T>,
-			extra_deposit_limit: BalanceOf<T, I>,
+			limit: BalanceOf<T, I>,
 		) -> DispatchResult {
 			// Since the extrinsic is transactional the following call only succeeds if the
 			// collection is also created successfully.
-			CollectionExtraDepositLimits::<T, I>::insert(&collection, extra_deposit_limit);
+			CollectionExtraDepositDetails::<T, I>::insert(
+				&collection,
+				ExtraDepositDetails::<BalanceOf<T, I>>::with_limit(limit),
+			);
 			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
 		}
 
@@ -788,20 +829,18 @@ pub mod pallet {
 			owner: AccountIdLookupOf<T>,
 			deposit: BalanceOf<T, I>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner).and_then(|_| {
-				let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
-					.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
-				let extra_deposit_limit =
-					CollectionExtraDepositLimits::<T, I>::get(&collection).unwrap_or_else(Zero::zero);
-				if deposit < extra_deposit_limit {
-					<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
-					ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
-					CollectionExtraDepositLimits::<T, I>::insert(&collection, extra_deposit_limit - deposit);
-					Ok(())
-				} else {
-					Err(Error::<T, I>::ExceedExtraDepositLimitForCollection)?
-				}
-			})
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)?;
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
+			let mut extra_deposit_details =
+				CollectionExtraDepositDetails::<T, I>::get(&collection).unwrap_or_else(Default::default);
+			extra_deposit_details
+				.add(deposit)
+				.map_err(|_| Error::<T, I>::ExceedExtraDepositLimitForCollection)?;
+			<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
+			ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
+			CollectionExtraDepositDetails::<T, I>::insert(&collection, extra_deposit_details);
+			Ok(())
 		}
 	}
 }

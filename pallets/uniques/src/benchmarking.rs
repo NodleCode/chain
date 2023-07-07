@@ -27,7 +27,7 @@ use frame_support::{
 	BoundedVec,
 };
 use frame_system::RawOrigin as SystemOrigin;
-use pallet_uniques::BenchmarkHelper;
+use pallet_uniques::{BenchmarkHelper, DestroyWitness};
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
 
@@ -41,14 +41,16 @@ fn get_config<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, Acc
 	(collection_id, collection_owner, collection_owner_lookup)
 }
 
-fn create_collection<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, AccountIdLookupOf<T>) {
+fn create_collection<T: Config<I>, I: 'static>(
+	extra_deposit_limit: BalanceOf<T, I>,
+) -> (T::CollectionId, T::AccountId, AccountIdLookupOf<T>) {
 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 	T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
-	assert_ok!(Uniques::<T, I>::force_create(
-		T::RuntimeOrigin::root(),
+	assert_ok!(Uniques::<T, I>::create_with_extra_deposit_limit(
+		SystemOrigin::Signed(collection_owner.clone()).into(),
 		collection_id,
 		collection_owner_lookup.clone(),
-		false,
+		extra_deposit_limit
 	));
 	(collection_id, collection_owner, collection_owner_lookup)
 }
@@ -99,6 +101,7 @@ fn add_item_attribute<T: Config<I>, I: 'static>(
 }
 fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	index: u16,
+	deposit: BalanceOf<T, I>,
 ) -> (T::ItemId, T::AccountId, AccountIdLookupOf<T>) {
 	let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 	let item = T::Helper::item(index);
@@ -107,7 +110,7 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 		collection_id,
 		item,
 		collection_owner_lookup.clone(),
-		index.into(),
+		deposit,
 	)
 	.is_ok());
 	(item, collection_owner, collection_owner_lookup)
@@ -119,10 +122,12 @@ benchmarks_instance_pallet! {
 		let m in 0 .. 1_000;
 		let a in 0 .. 1_000;
 
-		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
+
 		add_collection_metadata::<T, I>();
+
 		for i in 0..n {
-			mint_item_with_extra_deposit::<T, I>(i as u16);
+			mint_item_with_extra_deposit::<T, I>(i as u16, T::Currency::minimum_balance());
 		}
 		for i in 0..m {
 			add_item_metadata::<T, I>(T::Helper::item(i as u16));
@@ -138,14 +143,14 @@ benchmarks_instance_pallet! {
 	}: _(SystemOrigin::Signed(collection_owner), collection_id, witness)
 
 	mint_with_extra_deposit {
-		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>();
+		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
 		let item = T::Helper::item(0);
 		let deposit = 5u32.into();
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
 
 	burn {
-		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>();
-		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0);
+		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>(BalanceOf::<T, I>::max_value());
+		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0, T::Currency::minimum_balance());
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, Some(collection_owner_lookup))
 
 	impl_benchmark_test_suite!(Uniques, crate::tests::new_test_ext(), crate::tests::Test);

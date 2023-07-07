@@ -5,6 +5,7 @@ use frame_support::{
 	assert_noop, assert_ok, construct_runtime, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, ConstU64},
 };
+use pallet_uniques::DestroyWitness;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -128,10 +129,11 @@ mod test_cases {
 			let collection_owner_id = 1;
 			let item_owner = 42;
 			Balances::make_free_balance_be(&collection_owner_id, 100);
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner_id),
 				collection_id,
-				collection_owner_id
+				collection_owner_id,
+				100
 			));
 			assert_eq!(
 				Balances::reserved_balance(collection_owner_id),
@@ -182,10 +184,11 @@ mod test_cases {
 			let init_balance = 100;
 			Balances::make_free_balance_be(&collection_owner_id, init_balance);
 			Balances::make_free_balance_be(&item_owner, init_balance);
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner_id),
 				collection_id,
-				collection_owner_id
+				collection_owner_id,
+				100
 			));
 			assert_eq!(
 				Balances::reserved_balance(collection_owner_id),
@@ -244,10 +247,11 @@ mod test_cases {
 			let init_balance = 100;
 			Balances::make_free_balance_be(&collection_owner_id, init_balance);
 			Balances::make_free_balance_be(&item_owner, init_balance);
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner_id),
 				collection_id,
-				collection_owner_id
+				collection_owner_id,
+				100
 			));
 			assert_eq!(
 				Balances::reserved_balance(collection_owner_id),
@@ -307,10 +311,11 @@ mod test_cases {
 			Balances::make_free_balance_be(&owners[0], init_balance);
 			Balances::make_free_balance_be(&owners[1], init_balance);
 
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				collection_owner
+				collection_owner,
+				100
 			));
 			assert_eq!(
 				Balances::reserved_balance(collection_owner),
@@ -386,10 +391,11 @@ mod test_cases {
 			Balances::make_free_balance_be(&collection_owner, init_balance);
 			Balances::make_free_balance_be(&item_owner, init_balance);
 
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				collection_owner
+				collection_owner,
+				100
 			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
@@ -433,10 +439,11 @@ mod test_cases {
 			Balances::make_free_balance_be(&collection_owner, init_balance);
 			Balances::make_free_balance_be(&item_owner, init_balance);
 
-			assert_ok!(Uniques::create(
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
 				RuntimeOrigin::signed(collection_owner),
 				collection_id,
-				collection_owner
+				collection_owner,
+				100
 			));
 
 			assert_ok!(Uniques::mint_with_extra_deposit(
