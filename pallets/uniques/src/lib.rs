@@ -70,6 +70,9 @@ impl<T: Balance> ExtraDepositDetails<T> {
 			Err("Total extra deposit exceeds limit")
 		}
 	}
+	pub fn total(&self) -> T {
+		self.total
+	}
 }
 
 #[frame_support::pallet]
@@ -77,7 +80,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{ExistenceRequirement, ReservableCurrency},
+		traits::{BalanceStatus::Reserved, ExistenceRequirement, ReservableCurrency},
 		transactional,
 	};
 	use frame_system::pallet_prelude::*;
@@ -423,7 +426,16 @@ pub mod pallet {
 			collection: T::CollectionId,
 			owner: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::transfer_ownership(origin, collection, owner)
+			pallet_uniques::Pallet::<T, I>::transfer_ownership(origin.clone(), collection, owner.clone())?;
+			let old_owner = ensure_signed(origin)?;
+			let new_owner = T::Lookup::lookup(owner)?;
+			if old_owner != new_owner {
+				let total_extra_deposit = CollectionExtraDepositDetails::<T, I>::get(collection)
+					.unwrap_or_default()
+					.total();
+				T::Currency::repatriate_reserved(&old_owner, &new_owner, total_extra_deposit, Reserved)?;
+			}
+			Ok(())
 		}
 
 		/// Change the Issuer, Admin and Freezer of a collection.
@@ -832,8 +844,7 @@ pub mod pallet {
 			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)?;
 			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
 				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
-			let mut extra_deposit_details =
-				CollectionExtraDepositDetails::<T, I>::get(&collection).unwrap_or_else(Default::default);
+			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(&collection).unwrap_or_default();
 			extra_deposit_details
 				.add(deposit)
 				.map_err(|_| Error::<T, I>::ExceedExtraDepositLimitForCollection)?;
