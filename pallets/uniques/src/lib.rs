@@ -20,11 +20,9 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use frame_support::traits::{Currency, ExistenceRequirement, ReservableCurrency};
+use frame_support::traits::Currency;
 pub use pallet::*;
-use pallet_uniques::{DestroyWitness, WeightInfo as UniquesWeightInfo};
-use sp_runtime::traits::{StaticLookup, Zero};
-use sp_std::vec::Vec;
+use sp_runtime::traits::StaticLookup;
 
 pub mod weights;
 pub use weights::WeightInfo as NodleWeightInfo;
@@ -40,9 +38,15 @@ pub type BalanceOf<T, I = ()> =
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{pallet_prelude::*, transactional};
+	use frame_support::{
+		pallet_prelude::*,
+		traits::{ExistenceRequirement, ReservableCurrency},
+		transactional,
+	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::DispatchResult;
+	use pallet_uniques::{DestroyWitness, WeightInfo as UniquesWeightInfo};
+	use sp_runtime::{traits::Zero, DispatchResult};
+	use sp_std::vec::Vec;
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
@@ -58,7 +62,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	/// The extra deposits in existence.
-	pub(super) type ExtraDeposit<T: Config<I>, I: 'static = ()> = StorageDoubleMap<
+	pub(crate) type ItemExtraDeposits<T: Config<I>, I: 'static = ()> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
 		T::CollectionId,
@@ -67,6 +71,22 @@ pub mod pallet {
 		BalanceOf<T, I>,
 		OptionQuery,
 	>;
+
+	#[pallet::storage]
+	pub(crate) type CollectionExtraDepositLimits<T: Config<I>, I: 'static = ()> =
+		StorageMap<_, Blake2_128Concat, T::CollectionId, BalanceOf<T, I>, OptionQuery>;
+
+	#[pallet::error]
+	pub enum Error<T, I = ()> {
+		/// Issuing with extra deposit exceeds the collection owner's limit.
+		ExceedExtraDepositLimitForCollection,
+		/// The owner of collection is not known.
+		UnknownCollectionOwner,
+		/// The owner of item is not known.
+		UnknownItemOwner,
+		/// Full un-reserve was unsuccessful.
+		UnreserveFailed,
+	}
 
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
@@ -149,14 +169,14 @@ pub mod pallet {
 			collection: T::CollectionId,
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
-			let collection_owner =
-				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
-			for (item, extra_deposit) in ExtraDeposit::<T, I>::drain_prefix(collection) {
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
+			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection) {
 				let item_owner =
-					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(DispatchError::CannotLookup)?;
+					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(Error::<T, I>::UnknownItemOwner)?;
 				ensure!(
 					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
-					DispatchError::Corruption
+					Error::<T, I>::UnreserveFailed,
 				);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
@@ -213,22 +233,26 @@ pub mod pallet {
 			item: T::ItemId,
 			check_owner: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
-			let collection_owner =
-				pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
 			let item_owner =
-				pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(DispatchError::CannotLookup)?;
+				pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(Error::<T, I>::UnknownItemOwner)?;
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
-			let extra_deposit = ExtraDeposit::<T, I>::take(collection, item).ok_or(DispatchError::CannotLookup)?;
-			ensure!(
-				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
-				DispatchError::Corruption
-			);
-			<T as pallet_uniques::Config<I>>::Currency::transfer(
-				&collection_owner,
-				&item_owner,
-				extra_deposit,
-				ExistenceRequirement::AllowDeath,
-			)
+			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection, item).unwrap_or_else(Zero::zero);
+			if !extra_deposit.is_zero() {
+				ensure!(
+					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
+					Error::<T, I>::UnreserveFailed,
+				);
+				<T as pallet_uniques::Config<I>>::Currency::transfer(
+					&collection_owner,
+					&item_owner,
+					extra_deposit,
+					ExistenceRequirement::AllowDeath,
+				)
+			} else {
+				Ok(())
+			}
 		}
 
 		/// Move an item from the sender account to another.
@@ -710,6 +734,39 @@ pub mod pallet {
 			pallet_uniques::Pallet::<T, I>::buy_item(origin, collection, item, bid_price)
 		}
 
+		/// Issue a new collection of non-fungible items from a public origin.
+		///
+		/// This new collection has no items initially and its owner is the origin.
+		///
+		/// The origin must conform to the configured `CreateOrigin` and have sufficient funds free.
+		///
+		/// `ItemDeposit` funds of sender are reserved.
+		///
+		/// Parameters:
+		/// - `collection`: The identifier of the new collection. This must not be currently in use.
+		/// - `admin`: The admin of this collection. The admin is the initial address of each
+		/// member of the collection's admin team.
+		/// - `extra_deposit_limit`: The cap on the total amount of funds that an admin/issuer can
+		/// reserve from the collection owner (origin of this call) while minting NFTs with extra
+		/// deposit.
+		///
+		/// Emits `Created` event when successful.
+		///
+		/// Weight: `O(1)`
+		#[pallet::call_index(26)]
+		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::create())]
+		pub fn create_with_extra_deposit_limit(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			admin: AccountIdLookupOf<T>,
+			extra_deposit_limit: BalanceOf<T, I>,
+		) -> DispatchResult {
+			// Since the extrinsic is transactional the following call only succeeds if the
+			// collection is also created successfully.
+			CollectionExtraDepositLimits::<T, I>::insert(&collection, extra_deposit_limit);
+			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
+		}
+
 		/// Mint an item of a particular collection with extra deposit.
 		///
 		/// The origin must be Signed and the sender must be the Issuer of the `collection`.
@@ -721,7 +778,7 @@ pub mod pallet {
 		/// Emits `Issued` event when successful.
 		///
 		/// Weight: `O(1)`
-		#[pallet::call_index(26)]
+		#[pallet::call_index(27)]
 		#[pallet::weight(<T as Config<I>>::WeightInfo::mint_with_extra_deposit())]
 		#[transactional]
 		pub fn mint_with_extra_deposit(
@@ -732,11 +789,18 @@ pub mod pallet {
 			deposit: BalanceOf<T, I>,
 		) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner).and_then(|_| {
-				let collection_owner =
-					pallet_uniques::Pallet::<T, I>::collection_owner(collection).ok_or(DispatchError::CannotLookup)?;
-				<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
-				ExtraDeposit::<T, I>::insert(collection, item, deposit);
-				Ok(())
+				let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+					.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
+				let extra_deposit_limit =
+					CollectionExtraDepositLimits::<T, I>::get(&collection).unwrap_or_else(Zero::zero);
+				if deposit < extra_deposit_limit {
+					<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
+					ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
+					CollectionExtraDepositLimits::<T, I>::insert(&collection, extra_deposit_limit - deposit);
+					Ok(())
+				} else {
+					Err(Error::<T, I>::ExceedExtraDepositLimitForCollection)?
+				}
 			})
 		}
 	}

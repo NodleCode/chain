@@ -343,7 +343,10 @@ mod test_cases {
 				Balances::reserved_balance(collection_owner),
 				total_extra_deposit + TestCollectionDeposit::get() + TestItemDeposit::get() * items.len() as u64
 			);
-			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), items.len());
+			assert_eq!(
+				ItemExtraDeposits::<Test>::iter_prefix(collection_id).count(),
+				items.len()
+			);
 
 			let witness = DestroyWitness {
 				items: items.len() as u32,
@@ -356,7 +359,7 @@ mod test_cases {
 				witness
 			));
 
-			assert_eq!(ExtraDeposit::<Test>::iter_prefix(collection_id).count(), 0);
+			assert_eq!(ItemExtraDeposits::<Test>::iter_prefix(collection_id).count(), 0);
 			assert_eq!(Balances::reserved_balance(collection_owner), 0);
 			assert_eq!(
 				Balances::free_balance(collection_owner),
@@ -410,7 +413,7 @@ mod test_cases {
 			);
 
 			assert_eq!(
-				ExtraDeposit::<Test>::get(collection_id, item_id).unwrap(),
+				ItemExtraDeposits::<Test>::get(collection_id, item_id).unwrap(),
 				extra_deposit
 			);
 		})
@@ -450,7 +453,7 @@ mod test_cases {
 			);
 
 			assert_eq!(
-				ExtraDeposit::<Test>::get(collection_id, item_id).unwrap(),
+				ItemExtraDeposits::<Test>::get(collection_id, item_id).unwrap(),
 				extra_deposit
 			);
 		})
