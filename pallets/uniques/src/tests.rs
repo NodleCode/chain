@@ -117,8 +117,190 @@ pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
 }
 #[cfg(test)]
 mod test_cases {
-
 	use super::*;
+	use frame_support::traits::Len;
+	#[test]
+	fn test_extra_deposit_limit_is_zero_if_not_set_explicitly() {
+		new_test_ext().execute_with(|| {
+			let collection_id = 0;
+			let collection_owner = 1;
+			let item_id = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, 100);
+
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_owner,
+			));
+			assert_noop!(
+				Uniques::mint_with_extra_deposit(
+					RuntimeOrigin::signed(collection_owner),
+					collection_id,
+					item_id,
+					item_owner,
+					1
+				),
+				Error::<Test>::ExceedExtraDepositLimitForCollection
+			);
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				item_id,
+				item_owner,
+				0
+			));
+			assert_eq!(
+				Balances::reserved_balance(collection_owner),
+				TestCollectionDeposit::get() + TestItemDeposit::get()
+			);
+		})
+	}
+
+	#[test]
+	fn test_extra_deposit_limit_is_set_per_collection() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limits_per_collection = [(0, 53), (1, 143), (2, 0), (3, 1), (4, 71)];
+			let collection_owner = 1;
+			let item = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, u64::MAX);
+
+			let mut total_extra_deposit_limit = 0;
+			for (collection, extra_deposit_limit) in extra_deposit_limits_per_collection {
+				assert_ok!(Uniques::create_with_extra_deposit_limit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					collection_owner,
+					extra_deposit_limit
+				));
+				assert_noop!(
+					Uniques::mint_with_extra_deposit(
+						RuntimeOrigin::signed(collection_owner),
+						collection,
+						item,
+						item_owner,
+						extra_deposit_limit + 1
+					),
+					Error::<Test>::ExceedExtraDepositLimitForCollection
+				);
+				assert_ok!(Uniques::mint_with_extra_deposit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					item,
+					item_owner,
+					extra_deposit_limit
+				));
+				total_extra_deposit_limit += extra_deposit_limit;
+			}
+
+			assert_eq!(
+				Balances::reserved_balance(collection_owner),
+				(TestCollectionDeposit::get() + TestItemDeposit::get())
+					* (extra_deposit_limits_per_collection.len() as u64)
+					+ total_extra_deposit_limit
+			);
+		})
+	}
+
+	#[test]
+	fn test_extra_deposit_limit_is_maintained_when_minting_several_items() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let collection = 0;
+			let collection_owner = 1;
+			// The deposits below sum up to 100.
+			let items_and_owners_and_deposits = [(0, 2, 53), (1, 3, 35), (2, 4, 0), (3, 5, 12)];
+
+			Balances::make_free_balance_be(&collection_owner, u64::MAX);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				collection_owner,
+				extra_deposit_limit
+			));
+
+			for (item, item_owner, deposit) in items_and_owners_and_deposits {
+				assert_ok!(Uniques::mint_with_extra_deposit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					item,
+					item_owner,
+					deposit
+				));
+			}
+
+			assert_noop!(
+				Uniques::mint_with_extra_deposit(RuntimeOrigin::signed(collection_owner), collection, 4, 6, 1),
+				Error::<Test>::ExceedExtraDepositLimitForCollection
+			);
+		})
+	}
+
+	#[test]
+	fn test_transfer_ownership_repatriates_extra_deposit() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let extra_deposit = extra_deposit_limit - 1;
+
+			let collection_id = 0;
+			let collection_old_owner = 1;
+			let collection_new_owner = 2;
+
+			let old_owner_reserved_balance = extra_deposit + TestCollectionDeposit::get() + TestItemDeposit::get();
+			let old_owner_free_balance = 2 * old_owner_reserved_balance;
+			let new_owner_free_balance = old_owner_free_balance - 1;
+
+			let item_id = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_old_owner, old_owner_free_balance);
+			Balances::make_free_balance_be(&collection_new_owner, new_owner_free_balance);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_old_owner),
+				collection_id,
+				collection_old_owner,
+				extra_deposit_limit
+			));
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_old_owner),
+				collection_id,
+				item_id,
+				item_owner,
+				extra_deposit
+			));
+			assert_eq!(
+				Balances::reserved_balance(collection_old_owner),
+				old_owner_reserved_balance
+			);
+
+			assert_ok!(Uniques::set_accept_ownership(
+				RuntimeOrigin::signed(collection_new_owner),
+				Some(collection_id),
+			));
+			assert_ok!(Uniques::transfer_ownership(
+				RuntimeOrigin::signed(collection_old_owner),
+				collection_id,
+				collection_new_owner
+			));
+
+			assert_eq!(Balances::reserved_balance(collection_old_owner), 0);
+			assert_eq!(
+				Balances::free_balance(collection_old_owner),
+				old_owner_free_balance - old_owner_reserved_balance
+			);
+			assert_eq!(
+				Balances::reserved_balance(collection_new_owner),
+				old_owner_reserved_balance
+			);
+			assert_eq!(Balances::free_balance(collection_new_owner), new_owner_free_balance);
+		})
+	}
+
 	#[test]
 	fn test_mint_with_extra_deposit() {
 		new_test_ext().execute_with(|| {
@@ -235,6 +417,7 @@ mod test_cases {
 			assert_eq!(Balances::free_balance(item_owner), init_balance + extra_deposit);
 		})
 	}
+
 	#[test]
 	fn test_mint_and_burn_wrong_origin_with_extra_deposit() {
 		new_test_ext().execute_with(|| {
