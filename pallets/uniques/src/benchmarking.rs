@@ -21,11 +21,7 @@
 
 use super::*;
 use frame_benchmarking::v1::{account, benchmarks_instance_pallet};
-use frame_support::{
-	assert_ok,
-	traits::{Get, OriginTrait},
-	BoundedVec,
-};
+use frame_support::{assert_ok, traits::Get, BoundedVec};
 use frame_system::RawOrigin as SystemOrigin;
 use pallet_uniques::{BenchmarkHelper, DestroyWitness};
 use sp_runtime::traits::Bounded;

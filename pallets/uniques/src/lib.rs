@@ -814,7 +814,7 @@ pub mod pallet {
 			// Since the extrinsic is transactional the following call only succeeds if the
 			// collection is also created successfully.
 			CollectionExtraDepositDetails::<T, I>::insert(
-				&collection,
+				collection,
 				ExtraDepositDetails::<BalanceOf<T, I>>::with_limit(limit),
 			);
 			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
@@ -844,13 +844,13 @@ pub mod pallet {
 			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)?;
 			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
 				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
-			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(&collection).unwrap_or_default();
+			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(collection).unwrap_or_default();
 			extra_deposit_details
 				.add(deposit)
 				.map_err(|_| Error::<T, I>::ExceedExtraDepositLimitForCollection)?;
 			<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
 			ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
-			CollectionExtraDepositDetails::<T, I>::insert(&collection, extra_deposit_details);
+			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
 			Ok(())
 		}
 	}
