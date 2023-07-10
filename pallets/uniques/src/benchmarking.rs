@@ -112,6 +112,14 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	(item, collection_owner, collection_owner_lookup)
 }
 
+fn assert_last_event<T: Config<I>, I: 'static>(generic_event: <T as pallet_uniques::Config<I>>::RuntimeEvent) {
+	let events = frame_system::Pallet::<T>::events();
+	let system_event: <T as frame_system::Config>::RuntimeEvent = generic_event.into();
+	// compare to the last event record
+	let frame_system::EventRecord { event, .. } = &events[events.len() - 1];
+	assert_eq!(event, &system_event);
+}
+
 benchmarks_instance_pallet! {
 	destroy {
 		let n in 0 .. 1_000;
@@ -148,6 +156,26 @@ benchmarks_instance_pallet! {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>(BalanceOf::<T, I>::max_value());
 		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0, T::Currency::minimum_balance());
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, Some(collection_owner_lookup))
+
+	create_with_extra_deposit_limit {
+		let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
+		T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, collection_owner_lookup.clone(), BalanceOf::<T, I>::max_value())
+	verify {
+		assert_last_event::<T, I>(pallet_uniques::Event::Created { collection: <T as pallet_uniques::Config<I>>::Helper::collection(0), creator: collection_owner.clone(), owner: collection_owner }.into());
+	}
+
+	transfer_ownership {
+		let (collection, collection_owner, _) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
+		let target: T::AccountId = account("target", 0, SEED);
+		let target_lookup = T::Lookup::unlookup(target.clone());
+		T::Currency::make_free_balance_be(&target, T::Currency::minimum_balance());
+		let origin = SystemOrigin::Signed(target.clone()).into();
+		Uniques::<T, I>::set_accept_ownership(origin, Some(collection))?;
+	}: _(SystemOrigin::Signed(collection_owner), collection, target_lookup)
+	verify {
+		assert_last_event::<T, I>(pallet_uniques::Event::OwnerChanged { collection, new_owner: target }.into());
+	}
 
 	impl_benchmark_test_suite!(Uniques, crate::tests::new_test_ext(), crate::tests::Test);
 }
