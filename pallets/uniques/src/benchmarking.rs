@@ -160,7 +160,7 @@ benchmarks_instance_pallet! {
 	create_with_extra_deposit_limit {
 		let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 		T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, collection_owner_lookup.clone(), BalanceOf::<T, I>::max_value())
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, collection_owner_lookup, BalanceOf::<T, I>::max_value())
 	verify {
 		assert_last_event::<T, I>(pallet_uniques::Event::Created { collection: <T as pallet_uniques::Config<I>>::Helper::collection(0), creator: collection_owner.clone(), owner: collection_owner }.into());
 	}
