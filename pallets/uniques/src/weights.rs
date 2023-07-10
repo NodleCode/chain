@@ -158,12 +158,51 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(8_u64))
 	}
 
+	// Storage: SubstrateUniques Class (r:1 w:1)
+	// Proof: SubstrateUniques Class (max_values: None, max_size: Some(178), added: 2653, mode: MaxEncodedLen)
+	// Storage: System Account (r:1 w:1)
+	// Proof: System Account (max_values: None, max_size: Some(128), added: 2603, mode: MaxEncodedLen)
+	// Storage: System Number (r:1 w:0)
+	// Proof: System Number (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Proof: System ExecutionPhase (max_values: Some(1), max_size: Some(5), added: 500, mode: MaxEncodedLen)
+	// Storage: System EventCount (r:1 w:1)
+	// Proof: System EventCount (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System Events (r:1 w:1)
+	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
+	// Storage: SubstrateUniques ClassAccount (r:0 w:1)
+	// Proof: SubstrateUniques ClassAccount (max_values: None, max_size: Some(68), added: 2543, mode: MaxEncodedLen)
+	// Storage: Uniques CollectionExtraDepositDetails (r:0 w:1)
+	// Proof: Uniques CollectionExtraDepositDetails (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
 	fn create_with_extra_deposit_limit() -> Weight {
-		Weight::from_parts(0, 0)
+		// Minimum execution time: 37_000 nanoseconds.
+		Weight::from_parts(41_000_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
-
+	// Storage: SubstrateUniques OwnershipAcceptance (r:1 w:1)
+	// Proof: SubstrateUniques OwnershipAcceptance (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
+	// Storage: SubstrateUniques Class (r:1 w:1)
+	// Proof: SubstrateUniques Class (max_values: None, max_size: Some(178), added: 2653, mode: MaxEncodedLen)
+	// Storage: System Account (r:2 w:2)
+	// Proof: System Account (max_values: None, max_size: Some(128), added: 2603, mode: MaxEncodedLen)
+	// Storage: System Number (r:1 w:0)
+	// Proof: System Number (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Proof: System ExecutionPhase (max_values: Some(1), max_size: Some(5), added: 500, mode: MaxEncodedLen)
+	// Storage: System EventCount (r:1 w:1)
+	// Proof: System EventCount (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System Events (r:1 w:1)
+	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
+	// Storage: Uniques CollectionExtraDepositDetails (r:1 w:0)
+	// Proof: Uniques CollectionExtraDepositDetails (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
+	// Storage: SubstrateUniques ClassAccount (r:0 w:2)
+	// Proof: SubstrateUniques ClassAccount (max_values: None, max_size: Some(68), added: 2543, mode: MaxEncodedLen)
 	fn transfer_ownership() -> Weight {
-		Weight::from_parts(0, 0)
+		// Minimum execution time: 58_000 nanoseconds.
+		Weight::from_parts(59_000_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(9_u64))
+			.saturating_add(T::DbWeight::get().writes(8_u64))
 	}
 }
 
@@ -270,11 +309,50 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(8_u64))
 	}
 
+	// Storage: SubstrateUniques Class (r:1 w:1)
+	// Proof: SubstrateUniques Class (max_values: None, max_size: Some(178), added: 2653, mode: MaxEncodedLen)
+	// Storage: System Account (r:1 w:1)
+	// Proof: System Account (max_values: None, max_size: Some(128), added: 2603, mode: MaxEncodedLen)
+	// Storage: System Number (r:1 w:0)
+	// Proof: System Number (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Proof: System ExecutionPhase (max_values: Some(1), max_size: Some(5), added: 500, mode: MaxEncodedLen)
+	// Storage: System EventCount (r:1 w:1)
+	// Proof: System EventCount (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System Events (r:1 w:1)
+	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
+	// Storage: SubstrateUniques ClassAccount (r:0 w:1)
+	// Proof: SubstrateUniques ClassAccount (max_values: None, max_size: Some(68), added: 2543, mode: MaxEncodedLen)
+	// Storage: Uniques CollectionExtraDepositDetails (r:0 w:1)
+	// Proof: Uniques CollectionExtraDepositDetails (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
 	fn create_with_extra_deposit_limit() -> Weight {
-		Weight::from_parts(0, 0)
+		// Minimum execution time: 37_000 nanoseconds.
+		Weight::from_parts(41_000_000_u64, 0)
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
-
+	// Storage: SubstrateUniques OwnershipAcceptance (r:1 w:1)
+	// Proof: SubstrateUniques OwnershipAcceptance (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
+	// Storage: SubstrateUniques Class (r:1 w:1)
+	// Proof: SubstrateUniques Class (max_values: None, max_size: Some(178), added: 2653, mode: MaxEncodedLen)
+	// Storage: System Account (r:2 w:2)
+	// Proof: System Account (max_values: None, max_size: Some(128), added: 2603, mode: MaxEncodedLen)
+	// Storage: System Number (r:1 w:0)
+	// Proof: System Number (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Proof: System ExecutionPhase (max_values: Some(1), max_size: Some(5), added: 500, mode: MaxEncodedLen)
+	// Storage: System EventCount (r:1 w:1)
+	// Proof: System EventCount (max_values: Some(1), max_size: Some(4), added: 499, mode: MaxEncodedLen)
+	// Storage: System Events (r:1 w:1)
+	// Proof Skipped: System Events (max_values: Some(1), max_size: None, mode: Measured)
+	// Storage: Uniques CollectionExtraDepositDetails (r:1 w:0)
+	// Proof: Uniques CollectionExtraDepositDetails (max_values: None, max_size: Some(52), added: 2527, mode: MaxEncodedLen)
+	// Storage: SubstrateUniques ClassAccount (r:0 w:2)
+	// Proof: SubstrateUniques ClassAccount (max_values: None, max_size: Some(68), added: 2543, mode: MaxEncodedLen)
 	fn transfer_ownership() -> Weight {
-		Weight::from_parts(0, 0)
+		// Minimum execution time: 58_000 nanoseconds.
+		Weight::from_parts(59_000_000_u64, 0)
+			.saturating_add(RocksDbWeight::get().reads(9_u64))
+			.saturating_add(RocksDbWeight::get().writes(8_u64))
 	}
 }
