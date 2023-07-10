@@ -2,15 +2,13 @@ use crate::Runtime;
 use frame_support::{migration, traits::OnRuntimeUpgrade, weights::Weight};
 
 #[cfg(feature = "try-runtime")]
-use codec::{Decode, Encode};
-#[cfg(feature = "try-runtime")]
-use frame_support::Blake2_128Concat;
-#[cfg(feature = "try-runtime")]
-use pallet_uniques::CollectionDetails;
-#[cfg(feature = "try-runtime")]
-use primitives::{AccountId, Balance};
-#[cfg(feature = "try-runtime")]
-use sp_std::prelude::*;
+use {
+  codec::{Decode, Encode},
+  frame_support::Blake2_128Concat,
+  pallet_uniques::CollectionDetails,
+  primitives::{AccountId, Balance},
+  sp_std::prelude::*
+};
 #[cfg(feature = "try-runtime")]
 type CollectionId = u32;
 #[cfg(feature = "try-runtime")]
