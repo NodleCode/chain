@@ -47,13 +47,12 @@ benchmarks_instance_pallet! {
 		let dest = account("dest", 0, SEED);
 		let smallest_usable_amount = T::Currency::minimum_balance();
 		let starting_amount = smallest_usable_amount.saturating_add(smallest_usable_amount);
-		let value = smallest_usable_amount;
 
 		T::Currency::make_free_balance_be(&T::PalletId::get().into_account_truncating(),starting_amount);
 
 		let call = Call::<T, I>::spend{
 			to: dest,
-			amount: value
+			amount: smallest_usable_amount
 		};
 		let origin = T::ExternalOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 	}: { call.dispatch_bypass_filter(origin)? }
