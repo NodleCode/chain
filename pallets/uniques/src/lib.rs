@@ -214,10 +214,7 @@ pub mod pallet {
 			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection) {
 				let item_owner =
 					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(Error::<T, I>::UnknownItemOwner)?;
-				ensure!(
-					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
-					Error::<T, I>::UnreserveFailed,
-				);
+				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
 					&item_owner,
@@ -280,10 +277,7 @@ pub mod pallet {
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
 			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection, item).unwrap_or_else(Zero::zero);
 			if !extra_deposit.is_zero() {
-				ensure!(
-					<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit).is_zero(),
-					Error::<T, I>::UnreserveFailed,
-				);
+				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
 					&item_owner,

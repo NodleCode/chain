@@ -356,6 +356,119 @@ mod test_cases {
 	}
 
 	#[test]
+	fn test_burn_when_extra_deposit_is_zero() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let collection = 0;
+			let collection_owner = 1;
+			let item = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, u64::MAX);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				collection_owner,
+				extra_deposit_limit
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				item,
+				item_owner,
+				0
+			));
+
+			assert_ok!(Uniques::burn(RuntimeOrigin::signed(item_owner), collection, item, None));
+		})
+	}
+
+	#[test]
+	fn test_burn_goes_ahead_despite_partial_unreserve() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let extra_deposit = 20;
+			let collection = 0;
+			let collection_owner = 1;
+			let item = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, 2 * extra_deposit_limit);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				collection_owner,
+				extra_deposit_limit
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				item,
+				item_owner,
+				extra_deposit
+			));
+
+			assert_ok!(Balances::force_unreserve(
+				RuntimeOrigin::root(),
+				collection_owner,
+				extra_deposit
+			));
+
+			assert_ok!(Uniques::burn(RuntimeOrigin::signed(item_owner), collection, item, None));
+		})
+	}
+
+	#[test]
+	fn test_destroy_despite_partial_unreserve() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let extra_deposit = 20;
+			let collection = 0;
+			let collection_owner = 1;
+			let item = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, 2 * extra_deposit_limit);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				collection_owner,
+				extra_deposit_limit
+			));
+
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				item,
+				item_owner,
+				extra_deposit
+			));
+
+			assert_ok!(Balances::force_unreserve(
+				RuntimeOrigin::root(),
+				collection_owner,
+				extra_deposit
+			));
+
+			let witness = DestroyWitness {
+				items: 1,
+				item_metadatas: 0,
+				attributes: 0,
+			};
+			assert_ok!(Uniques::destroy(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				witness
+			));
+		})
+	}
+
+	#[test]
 	fn test_mint_and_burn_with_extra_deposit() {
 		new_test_ext().execute_with(|| {
 			let extra_deposit = 20;
