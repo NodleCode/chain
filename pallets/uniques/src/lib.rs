@@ -124,8 +124,6 @@ pub mod pallet {
 		UnknownCollectionOwner,
 		/// The owner of item is not known.
 		UnknownItemOwner,
-		/// Full un-reserve was unsuccessful.
-		UnreserveFailed,
 	}
 
 	#[pallet::call]
