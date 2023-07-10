@@ -412,7 +412,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(11)]
-		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::transfer_ownership())]
+		#[pallet::weight(<T as Config<I>>::WeightInfo::transfer_ownership())]
 		pub fn transfer_ownership(
 			origin: OriginFor<T>,
 			collection: T::CollectionId,
@@ -795,7 +795,7 @@ pub mod pallet {
 		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(26)]
-		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::create())]
+		#[pallet::weight(<T as Config<I>>::WeightInfo::create_with_extra_deposit_limit())]
 		#[transactional]
 		pub fn create_with_extra_deposit_limit(
 			origin: OriginFor<T>,
