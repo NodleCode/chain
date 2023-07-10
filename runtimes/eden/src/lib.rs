@@ -112,9 +112,9 @@ construct_runtime! {
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
-		SubstrateUniques: pallet_uniques::{Pallet, Storage, Event<T>} = 42,
+		Uniques: pallet_nodle_uniques = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
-		Uniques: pallet_nodle_uniques = 44,
+		SubstrateUniques: pallet_uniques::{Pallet, Storage, Event<T>} = 44,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
