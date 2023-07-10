@@ -302,6 +302,56 @@ mod test_cases {
 	}
 
 	#[test]
+	fn test_transfer_ownership_to_self() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let extra_deposit = extra_deposit_limit - 1;
+
+			let collection_id = 0;
+			let collection_owner = 1;
+
+			let owner_reserved_balance = extra_deposit + TestCollectionDeposit::get() + TestItemDeposit::get();
+			let owner_free_balance = 2 * owner_reserved_balance;
+
+			let item_id = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, owner_free_balance);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_owner,
+				extra_deposit_limit
+			));
+			assert_ok!(Uniques::mint_with_extra_deposit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				item_id,
+				item_owner,
+				extra_deposit
+			));
+			assert_eq!(Balances::reserved_balance(collection_owner), owner_reserved_balance);
+
+			assert_ok!(Uniques::set_accept_ownership(
+				RuntimeOrigin::signed(collection_owner),
+				Some(collection_id),
+			));
+			assert_ok!(Uniques::transfer_ownership(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_owner
+			));
+
+			assert_eq!(Balances::reserved_balance(collection_owner), owner_reserved_balance);
+			assert_eq!(
+				Balances::free_balance(collection_owner),
+				owner_free_balance - owner_reserved_balance
+			);
+		})
+	}
+
+	#[test]
 	fn test_mint_with_extra_deposit() {
 		new_test_ext().execute_with(|| {
 			let extra_deposit = 20;
