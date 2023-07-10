@@ -220,6 +220,7 @@ pub mod pallet {
 					ExistenceRequirement::AllowDeath,
 				)?;
 			}
+			CollectionExtraDepositDetails::<T, I>::remove(collection);
 			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
 		}
 
