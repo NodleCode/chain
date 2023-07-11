@@ -51,6 +51,7 @@ pub trait WeightInfo {
 	fn burn() -> Weight;
 	fn create_with_extra_deposit_limit() -> Weight;
 	fn transfer_ownership() -> Weight;
+	fn update_extra_deposit_limit() -> Weight;
 }
 
 /// Weight functions for `pallet_nodle_uniques`.
@@ -205,6 +206,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(8_u64))
 	}
+
+	fn update_extra_deposit_limit() -> Weight {
+		Weight::from_parts(0, 0)
+	}
 }
 
 impl WeightInfo for () {
@@ -356,5 +361,9 @@ impl WeightInfo for () {
 		Weight::from_parts(91_700_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(9_u64))
 			.saturating_add(RocksDbWeight::get().writes(8_u64))
+	}
+	
+	fn update_extra_deposit_limit() -> Weight {
+		Weight::from_parts(0, 0)
 	}
 }

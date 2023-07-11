@@ -54,6 +54,15 @@ pub struct ExtraDepositDetails<T: Balance> {
 	total: T,
 }
 
+pub enum ExtraDepositHandlingError {
+	/// Overflow adding extra deposit
+	Overflow,
+	/// The total extra deposit exceeds the limit
+	TotalExceedsLimit,
+	/// The limit is below the current commitment
+	LimitBelowCommitment,
+}
+
 impl<T: Balance> ExtraDepositDetails<T> {
 	pub fn with_limit(limit: T) -> Self {
 		Self {
@@ -61,13 +70,24 @@ impl<T: Balance> ExtraDepositDetails<T> {
 			..Default::default()
 		}
 	}
-	pub fn add(&mut self, value: T) -> Result<(), &'static str> {
-		let new_total = self.total.checked_add(&value).ok_or("Overflow adding extra deposit")?;
+	pub fn add(&mut self, value: T) -> Result<(), ExtraDepositHandlingError> {
+		let new_total = self
+			.total
+			.checked_add(&value)
+			.ok_or(ExtraDepositHandlingError::Overflow)?;
 		if new_total <= self.limit {
 			self.total = new_total;
 			Ok(())
 		} else {
-			Err("Total extra deposit exceeds limit")
+			Err(ExtraDepositHandlingError::TotalExceedsLimit)
+		}
+	}
+	pub fn update_limit(&mut self, new_limit: T) -> Result<(), ExtraDepositHandlingError> {
+		if new_limit >= self.total {
+			self.limit = new_limit;
+			Ok(())
+		} else {
+			Err(ExtraDepositHandlingError::LimitBelowCommitment)
 		}
 	}
 	pub fn total(&self) -> T {
@@ -118,12 +138,16 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
-		/// Issuing with extra deposit exceeds the collection owner's limit.
-		ExceedExtraDepositLimitForCollection,
-		/// The owner of collection is not known.
-		UnknownCollectionOwner,
-		/// The owner of item is not known.
-		UnknownItemOwner,
+		/// Cannot mint the token most likely due to extra deposit exceeding the collection owner's limit.
+		FailedToIncreaseTotalExtraDeposit,
+		/// The owner of collection is not retrievable most likely due to collection not existing.
+		FailedToRetrieveCollectionOwner,
+		/// The owner of item is not found due to item not existing.
+		FailedToRetrieveItemOwner,
+		/// Permission denied.
+		PermissionDenied,
+		/// Cannot update the extra deposit limit most likely due to it going lower than commitment
+		FailedToUpdateExtraDepositLimit,
 	}
 
 	#[pallet::call]
@@ -208,10 +232,10 @@ pub mod pallet {
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
 			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
-				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
+				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
 			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection) {
-				let item_owner =
-					pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(Error::<T, I>::UnknownItemOwner)?;
+				let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item)
+					.ok_or(Error::<T, I>::FailedToRetrieveItemOwner)?;
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
 					&collection_owner,
@@ -270,9 +294,9 @@ pub mod pallet {
 			check_owner: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
 			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
-				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
-			let item_owner =
-				pallet_uniques::Pallet::<T, I>::owner(collection, item).ok_or(Error::<T, I>::UnknownItemOwner)?;
+				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
+			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item)
+				.ok_or(Error::<T, I>::FailedToRetrieveItemOwner)?;
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
 			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection, item).unwrap_or_else(Zero::zero);
 			if !extra_deposit.is_zero() {
@@ -836,13 +860,47 @@ pub mod pallet {
 		) -> DispatchResult {
 			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)?;
 			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
-				.ok_or(Error::<T, I>::UnknownCollectionOwner)?;
+				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
 			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(collection).unwrap_or_default();
 			extra_deposit_details
 				.add(deposit)
-				.map_err(|_| Error::<T, I>::ExceedExtraDepositLimitForCollection)?;
+				.map_err(|_| Error::<T, I>::FailedToIncreaseTotalExtraDeposit)?;
 			<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
 			ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
+			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
+			Ok(())
+		}
+
+		/// Update extra deposit limit for a collection when it's not against what is already
+		/// reserved.
+		///
+		/// Only the collection owner can update this limit to a value higher than the total extra
+		/// deposit for the collection currently.
+		///
+		/// Parameters:
+		/// - `collection`: The identifier of the collection owned by the origin.
+		/// - `limit`: The new cap on the total amount of funds that an admin/issuer can
+		/// reserve from the collection owner (origin of this call) while minting NFTs with extra
+		/// deposit.
+		///
+		/// Weight: `O(1)`
+		#[pallet::call_index(28)]
+		#[pallet::weight(<T as Config<I>>::WeightInfo::update_extra_deposit_limit())]
+		#[transactional]
+		pub fn update_extra_deposit_limit(
+			origin: OriginFor<T>,
+			collection: T::CollectionId,
+			limit: BalanceOf<T, I>,
+		) -> DispatchResult {
+			let origin = ensure_signed(origin)?;
+			let owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
+			ensure!(origin == owner, Error::<T, I>::PermissionDenied);
+
+			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(collection).unwrap_or_default();
+			extra_deposit_details
+				.update_limit(limit)
+				.map_err(|_| Error::<T, I>::FailedToUpdateExtraDepositLimit)?;
 			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
 			Ok(())
 		}

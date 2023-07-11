@@ -142,7 +142,7 @@ mod test_cases {
 					item_owner,
 					1
 				),
-				Error::<Test>::ExceedExtraDepositLimitForCollection
+				Error::<Test>::FailedToIncreaseTotalExtraDeposit
 			);
 			assert_ok!(Uniques::mint_with_extra_deposit(
 				RuntimeOrigin::signed(collection_owner),
@@ -184,7 +184,7 @@ mod test_cases {
 						item_owner,
 						extra_deposit_limit + 1
 					),
-					Error::<Test>::ExceedExtraDepositLimitForCollection
+					Error::<Test>::FailedToIncreaseTotalExtraDeposit
 				);
 				assert_ok!(Uniques::mint_with_extra_deposit(
 					RuntimeOrigin::signed(collection_owner),
@@ -235,7 +235,157 @@ mod test_cases {
 
 			assert_noop!(
 				Uniques::mint_with_extra_deposit(RuntimeOrigin::signed(collection_owner), collection, 4, 6, 1),
-				Error::<Test>::ExceedExtraDepositLimitForCollection
+				Error::<Test>::FailedToIncreaseTotalExtraDeposit
+			);
+		})
+	}
+
+	#[test]
+	fn test_extra_deposit_limit_is_updatable_when_over_or_equal_previous_total() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limit = 100;
+			let collection = 0;
+			let collection_owner = 1;
+			// The deposits below sum up to 100.
+			let items_and_owners_and_deposits = [(0, 2, 53), (1, 3, 35), (2, 4, 0)];
+
+			Balances::make_free_balance_be(&collection_owner, u64::MAX);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				collection_owner,
+				extra_deposit_limit
+			));
+
+			for (item, item_owner, deposit) in items_and_owners_and_deposits {
+				assert_ok!(Uniques::mint_with_extra_deposit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					item,
+					item_owner,
+					deposit
+				));
+			}
+			let extra_deposit_total = CollectionExtraDepositDetails::<Test>::get(collection)
+				.unwrap_or_default()
+				.total;
+			assert_noop!(
+				Uniques::update_extra_deposit_limit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					extra_deposit_total - 1
+				),
+				Error::<Test>::FailedToUpdateExtraDepositLimit
+			);
+
+			assert_ok!(Uniques::update_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection,
+				extra_deposit_total
+			));
+
+			assert_noop!(
+				Uniques::mint_with_extra_deposit(RuntimeOrigin::signed(collection_owner), collection, 3, 5, 1),
+				Error::<Test>::FailedToIncreaseTotalExtraDeposit
+			);
+		})
+	}
+
+	#[test]
+	fn test_only_collection_owner_can_update_extra_deposit_limit() {
+		new_test_ext().execute_with(|| {
+			let collection_id = 0;
+			let collection_owner = 1;
+			let collection_admin = 2;
+
+			let item_owner = 3;
+
+			Balances::make_free_balance_be(&collection_owner, 100);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_admin,
+				20
+			));
+
+			assert_noop!(
+				Uniques::update_extra_deposit_limit(RuntimeOrigin::signed(collection_admin), collection_id, 30),
+				Error::<Test>::PermissionDenied
+			);
+			assert_noop!(
+				Uniques::update_extra_deposit_limit(RuntimeOrigin::signed(item_owner), collection_id, 30),
+				Error::<Test>::PermissionDenied
+			);
+
+			assert_ok!(Uniques::update_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				30
+			));
+		})
+	}
+
+	#[test]
+	fn test_updating_extra_deposit_limit_fails_when_collection_not_exist() {
+		new_test_ext().execute_with(|| {
+			let collection_id = 0;
+			let collection_owner = 1;
+			let collection_admin = 2;
+
+			Balances::make_free_balance_be(&collection_owner, 100);
+
+			assert_noop!(
+				Uniques::update_extra_deposit_limit(RuntimeOrigin::signed(collection_owner), collection_id, 30),
+				Error::<Test>::FailedToRetrieveCollectionOwner
+			);
+
+			assert_ok!(Uniques::create_with_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_admin,
+				20
+			));
+
+			assert_noop!(
+				Uniques::update_extra_deposit_limit(RuntimeOrigin::signed(collection_owner), collection_id + 1, 30),
+				Error::<Test>::FailedToRetrieveCollectionOwner
+			);
+
+			assert_ok!(Uniques::update_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				30
+			));
+		})
+	}
+
+	#[test]
+	fn test_extra_deposit_is_updatable_for_collections_without_previous_extra_deposit_details() {
+		new_test_ext().execute_with(|| {
+			let collection_id = 7;
+			let collection_owner = 1;
+			let collection_admin = 2;
+
+			Balances::make_free_balance_be(&collection_owner, 100);
+
+			assert_ok!(Uniques::create(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				collection_admin,
+			));
+
+			let limit = 30;
+			assert_ok!(Uniques::update_extra_deposit_limit(
+				RuntimeOrigin::signed(collection_owner),
+				collection_id,
+				limit
+			));
+
+			assert_eq!(
+				CollectionExtraDepositDetails::<Test>::get(collection_id).unwrap().limit,
+				limit
 			);
 		})
 	}
