@@ -253,6 +253,63 @@ mod test_cases {
 	}
 
 	#[test]
+	fn test_destroying_one_collection_with_contents_does_not_impact_others() {
+		new_test_ext().execute_with(|| {
+			let extra_deposit_limits_per_collection = [(0, 53), (1, 143), (2, 0), (3, 1), (4, 71)];
+			let collection_owner = 1;
+			let item = 0;
+			let item_owner = 2;
+
+			Balances::make_free_balance_be(&collection_owner, u64::MAX);
+
+			for (collection, extra_deposit_limit) in extra_deposit_limits_per_collection {
+				assert_ok!(Uniques::create_with_extra_deposit_limit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					collection_owner,
+					extra_deposit_limit
+				));
+				for item in 0..10 {
+					let beneficiary = item + 10000;
+					let extra_deposit = extra_deposit_limit / 10;
+					assert_ok!(Uniques::mint_with_extra_deposit(
+						RuntimeOrigin::signed(collection_owner),
+						collection,
+						item,
+						beneficiary.into(),
+						extra_deposit
+					));
+				}
+			}
+
+			let witness = DestroyWitness {
+				items: 0,
+				item_metadatas: 0,
+				attributes: 0,
+			};
+			assert_ok!(Uniques::destroy(RuntimeOrigin::signed(collection_owner), 1, witness));
+
+			// remaining collections after 1 us destroyed are 0, 2, 3, 4
+			let remaining_collections_and_limits = [(0, 53), (2, 0), (3, 1), (4, 71)];
+
+			for (collection, extra_deposit_limit) in remaining_collections_and_limits {
+				assert_ok!(Uniques::mint_with_extra_deposit(
+					RuntimeOrigin::signed(collection_owner),
+					collection,
+					item,
+					item_owner,
+					extra_deposit_limit
+				));
+			}
+
+			assert_noop!(
+				Uniques::mint_with_extra_deposit(RuntimeOrigin::signed(collection_owner), 1, item, item_owner, 1),
+				pallet_uniques::Error::<Test>::UnknownCollection
+			);
+		})
+	}
+
+	#[test]
 	fn test_extra_deposit_limit_is_maintained_when_minting_several_items() {
 		new_test_ext().execute_with(|| {
 			let extra_deposit_limit = 100;
