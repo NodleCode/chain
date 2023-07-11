@@ -520,6 +520,17 @@
 <a href="#520" id="520">520</a>
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -585,6 +596,8 @@
 <span class="kw">mod </span>weights;
 <span class="kw">mod </span>xcm_config;
 
+<span class="kw">mod </span>migrations;
+
 <span class="kw">pub use </span>pallets_consensus::SessionKeys;
 <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
 </span><span class="kw">pub use </span>version::native_version;
@@ -632,8 +645,9 @@
 		<span class="comment">// Neat things
 		</span>Utility: pallet_utility = <span class="number">40</span>,
 		Multisig: pallet_multisig = <span class="number">41</span>,
-		Uniques: pallet_uniques = <span class="number">42</span>,
+		Uniques: pallet_nodle_uniques = <span class="number">42</span>,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event&lt;T&gt;} = <span class="number">43</span>,
+		SubstrateUniques: pallet_uniques::{Pallet, Storage, Event&lt;T&gt;} = <span class="number">44</span>,
 
 		<span class="comment">// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -675,8 +689,14 @@
 </span><span class="kw">pub type </span>CheckedExtrinsic = generic::CheckedExtrinsic&lt;AccountId, RuntimeCall, SignedExtra&gt;;
 
 <span class="doccomment">/// Executive: handles dispatch to the various modules.
-</span><span class="kw">pub type </span>Executive =
-	frame_executive::Executive&lt;Runtime, Block, frame_system::ChainContext&lt;Runtime&gt;, Runtime, AllPalletsWithSystem&gt;;
+</span><span class="kw">pub type </span>Executive = frame_executive::Executive&lt;
+	Runtime,
+	Block,
+	frame_system::ChainContext&lt;Runtime&gt;,
+	Runtime,
+	AllPalletsWithSystem,
+	migrations::MovePalletUniquesToSubstrateUniques,
+&gt;;
 <span class="attr">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
 </span><span class="kw">pub type </span>XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet&lt;Runtime&gt;;
 <span class="attr">#[cfg(feature = <span class="string">&quot;runtime-benchmarks&quot;</span>)]
@@ -887,7 +907,8 @@
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_multisig, Multisig);
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_reserve, CompanyReserve);
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_grants, Vesting);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_uniques, Uniques);
+			<span class="macro">list_benchmark!</span>(list, extra, pallet_uniques, SubstrateUniques);
+			<span class="macro">list_benchmark!</span>(list, extra, pallet_nodle_uniques, Uniques);
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_utility, Utility);
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_allocations, Allocations);
 			<span class="macro">list_benchmark!</span>(list, extra, pallet_collator_selection, CollatorSelection);
@@ -928,7 +949,8 @@
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_multisig, Multisig);
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_reserve, CompanyReserve);
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_grants, Vesting);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_uniques, Uniques);
+			<span class="macro">add_benchmark!</span>(params, batches, pallet_uniques, SubstrateUniques);
+			<span class="macro">add_benchmark!</span>(params, batches, pallet_nodle_uniques, Uniques);
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_utility, Utility);
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_allocations, Allocations);
 			<span class="macro">add_benchmark!</span>(params, batches, pallet_collator_selection, CollatorSelection);

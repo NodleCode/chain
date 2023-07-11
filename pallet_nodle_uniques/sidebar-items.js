@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ExtraDepositHandlingError"],"mod":["pallet","weights"],"struct":["ExtraDepositDetails"],"type":["BalanceOf"]};

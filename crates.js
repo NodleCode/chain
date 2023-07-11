@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["nodle_parachain","pallet_allocations","pallet_grants","pallet_mandate","pallet_reserve","primitives","runtime_eden","support"];
+window.ALL_CRATES = ["nodle_parachain","pallet_allocations","pallet_grants","pallet_mandate","pallet_nodle_uniques","pallet_reserve","primitives","runtime_eden","support"];
