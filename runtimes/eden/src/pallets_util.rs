@@ -139,6 +139,7 @@ impl pallet_uniques::Config for Runtime {
 }
 
 impl pallet_nodle_uniques::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
 }
 

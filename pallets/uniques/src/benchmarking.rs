@@ -112,9 +112,8 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	(item, collection_owner, collection_owner_lookup)
 }
 
-fn assert_last_event<T: Config<I>, I: 'static>(generic_event: <T as pallet_uniques::Config<I>>::RuntimeEvent) {
+fn assert_last_event<T: Config<I>, I: 'static>(system_event: <T as frame_system::Config>::RuntimeEvent) {
 	let events = frame_system::Pallet::<T>::events();
-	let system_event: <T as frame_system::Config>::RuntimeEvent = generic_event.into();
 	// compare to the last event record
 	let frame_system::EventRecord { event, .. } = &events[events.len() - 1];
 	assert_eq!(event, &system_event);
@@ -162,7 +161,8 @@ benchmarks_instance_pallet! {
 		T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
 	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, collection_owner_lookup, BalanceOf::<T, I>::max_value())
 	verify {
-		assert_last_event::<T, I>(pallet_uniques::Event::Created { collection: <T as pallet_uniques::Config<I>>::Helper::collection(0), creator: collection_owner.clone(), owner: collection_owner }.into());
+		let event: <T as pallet_uniques::Config<I>>::RuntimeEvent = pallet_uniques::Event::Created { collection: <T as pallet_uniques::Config<I>>::Helper::collection(0), creator: collection_owner.clone(), owner: collection_owner }.into();
+		assert_last_event::<T, I>(event.into());
 	}
 
 	transfer_ownership {
@@ -174,7 +174,16 @@ benchmarks_instance_pallet! {
 		Uniques::<T, I>::set_accept_ownership(origin, Some(collection))?;
 	}: _(SystemOrigin::Signed(collection_owner), collection, target_lookup)
 	verify {
-		assert_last_event::<T, I>(pallet_uniques::Event::OwnerChanged { collection, new_owner: target }.into());
+		let event: <T as pallet_uniques::Config<I>>::RuntimeEvent = pallet_uniques::Event::OwnerChanged { collection, new_owner: target }.into();
+		assert_last_event::<T, I>(event.into());
+	}
+
+	update_extra_deposit_limit {
+		let (collection, collection_owner, _) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
+	}: _(SystemOrigin::Signed(collection_owner), collection, BalanceOf::<T, I>::min_value())
+	verify {
+		let event: <T as Config<I>>::RuntimeEvent = Event::ExtraDepositLimitUpdated { collection, limit: BalanceOf::<T, I>::min_value() }.into();
+		assert_last_event::<T, I>(event.into());
 	}
 
 	impl_benchmark_test_suite!(Uniques, crate::tests::new_test_ext(), crate::tests::Test);

@@ -110,6 +110,9 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
+		/// The overarching event type.
+		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+
 		/// Weight information for extrinsics specific to this pallet.
 		type WeightInfo: NodleWeightInfo;
 	}
@@ -135,6 +138,16 @@ pub mod pallet {
 	#[pallet::storage]
 	pub(crate) type CollectionExtraDepositDetails<T: Config<I>, I: 'static = ()> =
 		StorageMap<_, Blake2_128Concat, T::CollectionId, ExtraDepositDetails<BalanceOf<T, I>>, OptionQuery>;
+
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config<I>, I: 'static = ()> {
+		/// A `collection` was created.
+		ExtraDepositLimitUpdated {
+			collection: T::CollectionId,
+			limit: BalanceOf<T, I>,
+		},
+	}
 
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
@@ -883,6 +896,8 @@ pub mod pallet {
 		/// reserve from the collection owner (origin of this call) while minting NFTs with extra
 		/// deposit.
 		///
+		/// Emits `ExtraDepositLimitUpdated` event when successful.
+		///
 		/// Weight: `O(1)`
 		#[pallet::call_index(28)]
 		#[pallet::weight(<T as Config<I>>::WeightInfo::update_extra_deposit_limit())]
@@ -902,6 +917,8 @@ pub mod pallet {
 				.update_limit(limit)
 				.map_err(|_| Error::<T, I>::FailedToUpdateExtraDepositLimit)?;
 			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
+
+			Self::deposit_event(Event::<T, I>::ExtraDepositLimitUpdated { collection, limit });
 			Ok(())
 		}
 	}

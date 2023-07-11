@@ -23,7 +23,7 @@ construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Uniques: pallet_nodle_uniques::{Call, Storage},
+		Uniques: pallet_nodle_uniques::{Call, Storage, Event<T, I>},
 		Uniques2: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 	}
 );
@@ -100,6 +100,7 @@ impl pallet_uniques::Config for Test {
 	type Helper = ();
 }
 impl Config for Test {
+	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 }
 
