@@ -79,8 +79,7 @@ cargo clippy --fix --allow-dirty
 cargo fmt
 
 echo "Running on gcloud server? Run:"
-echo "    git commit -v -a -m Benchmarks ; git format-patch HEAD~"
-echo "And on dev machine:"
-echo "    gcloud compute scp chain-bench-012bd056:chain/0001\* . --zone=us-central1-a --tunnel-through-iap "
+echo " git config --global user.email \$USER ; git config --global user.name \$USER  git commit -v -a -m Benchmarks ; git format-patch HEAD~ ; find $PWD/*patch"
+echo "Download to dev machine and apply with:"
 echo "    git apply 0001*"
 
