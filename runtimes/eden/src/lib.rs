@@ -100,7 +100,6 @@ construct_runtime! {
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
 
-
 		// Parachain
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
 		ParachainInfo: parachain_info = 31,
@@ -109,12 +108,14 @@ construct_runtime! {
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
+
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
 		Uniques: pallet_nodle_uniques = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 		SubstrateUniques: pallet_uniques::{Pallet, Storage, Event<T>} = 44,
+		Sponsorship: pallet_sponsorship = 45,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -376,6 +377,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, SubstrateUniques);
 			list_benchmark!(list, extra, pallet_nodle_uniques, Uniques);
+			list_benchmark!(list, extra, pallet_sponsorship, Sponsorship);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
@@ -418,6 +420,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, SubstrateUniques);
 			add_benchmark!(params, batches, pallet_nodle_uniques, Uniques);
+			add_benchmark!(params, batches, pallet_sponsorship, Sponsorship);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);

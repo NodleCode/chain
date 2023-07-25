@@ -143,6 +143,11 @@ impl pallet_nodle_uniques::Config for Runtime {
 	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_sponsorship::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
+}
+
 parameter_types! {
 	pub const DepositPerItem: Balance = constants::deposit(1, 0);
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
