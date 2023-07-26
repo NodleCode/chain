@@ -153,6 +153,10 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		/// Create a new sponsorship pot and set its limits.
+		/// The pot id shouldn't be in use.
+		///
+		/// Emits `PotCreated(pot)` event when successful.
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::create_pot())]
 		pub fn create_pot(
@@ -179,6 +183,10 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Allows the sponsor to remove the pot they have created themselves.
+		/// The pot must not have any users. Users must have been removed prior to this call.
+		///
+		/// Emits `PotRemoved(pot)` when successful
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::remove_pot())]
 		pub fn remove_pot(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
