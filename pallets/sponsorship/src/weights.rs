@@ -36,6 +36,7 @@ use core::marker::PhantomData;
 /// Weight functions needed for pallet_sponsorship.
 pub trait WeightInfo {
 	fn create_pot() -> Weight;
+	fn remove_pot() -> Weight;
 }
 
 /// Weights for pallet_sponsorship using the Substrate node and recommended hardware.
@@ -44,11 +45,17 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn create_pot() -> Weight {
 		Weight::from_parts(0, 0)
 	}
+	fn remove_pot() -> Weight {
+		Weight::from_parts(0, 0)
+	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn create_pot() -> Weight {
+		Weight::from_parts(0, 0)
+	}
+	fn remove_pot() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 }

@@ -51,5 +51,23 @@ mod benchmarks {
 		assert_eq!(Pot::<T>::get(pot), Some(pot_details));
 	}
 
+	#[benchmark]
+	fn remove_pot() {
+		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			remained_fee_quota: 5u32.into(),
+			remained_reserve_quota: 7u32.into(),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		#[extrinsic_call]
+		remove_pot(RawOrigin::Signed(caller.clone()), pot);
+
+		assert_eq!(Pot::<T>::get(pot), None);
+	}
+
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }

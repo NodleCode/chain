@@ -39,6 +39,7 @@ pub use weights::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 type PotDetailsOf<T> = PotDetails<<T as frame_system::Config>::AccountId, <T as Config>::SponsorshipType, BalanceOf<T>>;
+type UserDetailsOf<T> = UserDetails<<T as frame_system::Config>::AccountId, BalanceOf<T>>;
 
 /// A pot details a sponsorship and its limits. The remained fee/reserve quota of a pot is not
 /// withdrawn from the sponsor. So a valid pot does not guarantee that the sponsor has enough funds
@@ -130,27 +131,24 @@ pub mod pallet {
 
 	#[pallet::storage]
 	/// User details of a pot.
-	pub(super) type User<T: Config> = StorageDoubleMap<
-		_,
-		Blake2_128Concat,
-		T::PotId,
-		Blake2_128Concat,
-		T::AccountId,
-		UserDetails<T::AccountId, BalanceOf<T>>,
-		OptionQuery,
-	>;
+	pub(super) type User<T: Config> =
+		StorageDoubleMap<_, Blake2_128Concat, T::PotId, Blake2_128Concat, T::AccountId, UserDetailsOf<T>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Event emitted when a new pot is created.
 		PotCreated(T::PotId),
+		/// Event emitted when a pot is removed.
+		PotRemoved(T::PotId),
 	}
 
 	#[pallet::error]
 	pub enum Error<T> {
 		/// The pot ID is already taken.
 		InUse,
+		/// The signing account has no permission to do the operation.
+		NoPermission,
 	}
 
 	#[pallet::call]
@@ -178,6 +176,22 @@ pub mod pallet {
 			);
 
 			Self::deposit_event(Event::PotCreated(pot));
+			Ok(())
+		}
+
+		#[pallet::call_index(1)]
+		#[pallet::weight(T::WeightInfo::remove_pot())]
+		pub fn remove_pot(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
+				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::InUse)?;
+				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+				let users = User::<T>::iter_prefix(pot).count();
+				ensure!(users == 0, Error::<T>::InUse);
+				*maybe_pot_details = None;
+				Ok(())
+			})?;
+			Self::deposit_event(Event::PotRemoved(pot));
 			Ok(())
 		}
 	}
