@@ -17,7 +17,11 @@
  */
 
 use crate as pallet_sponsorship;
-use frame_support::traits::{ConstU16, ConstU64};
+use frame_support::{
+	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug},
+	parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU16, ConstU64, InstanceFilter},
+};
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -35,6 +39,8 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system,
+		Balances: pallet_balances,
+		Uniques: pallet_uniques,
 		SponsorshipModule: pallet_sponsorship,
 	}
 );
@@ -57,17 +63,91 @@ impl frame_system::Config for Test {
 	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = ConstU16<42>;
 	type OnSetCode = ();
-	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type MaxConsumers = ConstU32<16>;
+}
+
+impl pallet_balances::Config for Test {
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
+	type Balance = u64;
+	type RuntimeEvent = RuntimeEvent;
+	type DustRemoval = ();
+	type ExistentialDeposit = ConstU64<1>;
+	type AccountStore = System;
+	type WeightInfo = ();
+	type FreezeIdentifier = ();
+	type MaxFreezes = ();
+	type HoldIdentifier = ();
+	type MaxHolds = ();
+}
+
+parameter_types! {
+	pub TestCollectionDeposit:  u64 = 2;
+	pub TestItemDeposit:  u64 = 1;
+}
+impl pallet_uniques::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type CollectionId = u32;
+	type ItemId = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
+	type ForceOrigin = frame_system::EnsureRoot<u64>;
+	type Locker = ();
+	type CollectionDeposit = TestCollectionDeposit;
+	type ItemDeposit = TestItemDeposit;
+	type MetadataDepositBase = ConstU64<1>;
+	type AttributeDepositBase = ConstU64<1>;
+	type DepositPerByte = ConstU64<1>;
+	type StringLimit = ConstU32<50>;
+	type KeyLimit = ConstU32<50>;
+	type ValueLimit = ConstU32<50>;
+	type WeightInfo = ();
+}
+
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
+)]
+pub enum SponsorshipType {
+	AnySafe,
+	Uniques,
+	UniquesMint,
+}
+impl InstanceFilter<RuntimeCall> for SponsorshipType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			// Just for the sake of tests we assume sponsoring Balance calls are not safe but anything else is fine.
+			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Balances { .. }),
+			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
+			SponsorshipType::UniquesMint => {
+				matches!(c, RuntimeCall::Uniques(pallet_uniques::Call::mint { .. }))
+			}
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		(self == &SponsorshipType::AnySafe)
+			|| (self == &SponsorshipType::Uniques && o == &SponsorshipType::UniquesMint)
+			|| (self == o)
+	}
+}
+impl Default for SponsorshipType {
+	fn default() -> Self {
+		Self::AnySafe
+	}
 }
 
 impl pallet_sponsorship::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type PotId = u32;
+	type SponsorshipType = SponsorshipType;
 	type WeightInfo = ();
 }
 

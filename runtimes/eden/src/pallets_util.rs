@@ -23,8 +23,9 @@ use crate::{
 	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use frame_support::{
+	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, Nothing},
+	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSigned};
@@ -143,8 +144,42 @@ impl pallet_nodle_uniques::Config for Runtime {
 	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
 }
 
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
+)]
+pub enum SponsorshipType {
+	AnySafe,
+	Uniques,
+	UniquesMint,
+}
+impl InstanceFilter<RuntimeCall> for SponsorshipType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Utility { .. }),
+			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
+			SponsorshipType::UniquesMint => {
+				matches!(c, RuntimeCall::Uniques(pallet_nodle_uniques::Call::mint { .. }))
+			}
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		(self == &SponsorshipType::AnySafe)
+			|| (self == &SponsorshipType::Uniques && o == &SponsorshipType::UniquesMint)
+			|| (self == o)
+	}
+}
+impl Default for SponsorshipType {
+	fn default() -> Self {
+		Self::AnySafe
+	}
+}
+
 impl pallet_sponsorship::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type PotId = u32;
+	type SponsorshipType = SponsorshipType;
 	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
 }
 

@@ -16,30 +16,59 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{mock::*, Error, Event};
+use crate::{mock::*, Error, Event, Pot, PotDetailsOf};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn it_works_for_default_value() {
+fn create_pot_works() {
 	new_test_ext().execute_with(|| {
-		// Go past genesis block so events get deposited
+		let pot = 0;
 		System::set_block_number(1);
-		// Dispatch a signed extrinsic.
-		assert_ok!(SponsorshipModule::do_something(RuntimeOrigin::signed(1), 42));
-		// Read pallet storage and assert an expected result.
-		assert_eq!(SponsorshipModule::something(), Some(42));
-		// Assert that the correct event was deposited
-		System::assert_last_event(Event::SomethingStored { something: 42, who: 1 }.into());
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+		assert_eq!(Pot::<Test>::get(pot), Some(pot_details));
+		System::assert_last_event(Event::PotCreated(pot).into());
 	});
 }
 
 #[test]
-fn correct_error_for_none_value() {
+fn create_pot_fails_when_pot_already_created() {
 	new_test_ext().execute_with(|| {
-		// Ensure the expected error is thrown when no value is present.
+		let pot_id = 11;
+		System::set_block_number(1);
+		let pot = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot.sponsor),
+			pot_id,
+			pot.sponsorship_type,
+			pot.remained_fee_quota,
+			pot.remained_reserve_quota
+		));
 		assert_noop!(
-			SponsorshipModule::cause_error(RuntimeOrigin::signed(1)),
-			Error::<Test>::NoneValue
+			SponsorshipModule::create_pot(
+				RuntimeOrigin::signed(pot.sponsor),
+				pot_id,
+				pot.sponsorship_type,
+				pot.remained_fee_quota,
+				pot.remained_reserve_quota
+			),
+			Error::<Test>::InUse
 		);
 	});
 }

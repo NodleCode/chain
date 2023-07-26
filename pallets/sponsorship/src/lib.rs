@@ -18,6 +18,12 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use frame_support::pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
+use frame_support::{
+	dispatch::{Dispatchable, GetDispatchInfo},
+	traits::{Currency, InstanceFilter, IsSubType, ReservableCurrency},
+};
+
 pub use pallet::*;
 
 #[cfg(test)]
@@ -30,6 +36,51 @@ mod tests;
 mod benchmarking;
 pub mod weights;
 pub use weights::*;
+
+type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type PotDetailsOf<T> = PotDetails<<T as frame_system::Config>::AccountId, <T as Config>::SponsorshipType, BalanceOf<T>>;
+
+/// A pot details a sponsorship and its limits. The remained fee/reserve quota of a pot is not
+/// withdrawn from the sponsor. So a valid pot does not guarantee that the sponsor has enough funds
+/// to cover the fees/reserves of the sponsored transactions.
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
+pub struct PotDetails<AccountId, SponsorshipType, Balance> {
+	/// The sponsor of the pot
+	///
+	/// The fees will be deducted from this account. The reserve funds will be taken from this.
+	sponsor: AccountId,
+	/// The category of the calls this pot will sponsor for its registered users.
+	sponsorship_type: SponsorshipType,
+	/// The remained allowance for covering fees of sponsored transactions.
+	///
+	/// When remained_fee_quota reaches zero, the pot is considered inactive. Any amount paid as fee
+	/// is considered a permanent loss.
+	remained_fee_quota: Balance,
+	/// The remained allowance for covering reserves needed for some of sponsored transactions.
+	///
+	/// When remained_reserve_quota is zero, the pot could still be active but not suitable for some
+	/// transactions. Any amount used as reserve may be returned to the sponsor when unreserved.
+	remained_reserve_quota: Balance,
+}
+
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
+pub struct UserDetails<AccountId, Balance> {
+	/// The pure proxy account that is created for the user of a pot.
+	///
+	/// Same users would have different proxy accounts for different pots.
+	proxy: AccountId,
+	/// The remained allowance for covering fees of sponsored transactions for this user.
+	///
+	/// When remained_fee_quota reaches zero, the user is no longer sponsored by the pot.
+	remained_fee_quota: Balance,
+	/// The remained allowance for covering reserves needed for some of sponsored transactions of
+	/// this user.
+	///
+	/// When remained_reserve_quota is zero, the use may still be sponsored for those transactions
+	/// which do not require any reserve. Any amount used as reserve will be returned to the sponsor
+	/// when unreserved. This is to prevent malicious users from draining sponsor funds.
+	remained_reserve_quota: Balance,
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -45,79 +96,89 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		/// The overarching call type.
+		type RuntimeCall: Parameter
+			+ Dispatchable<RuntimeOrigin = Self::RuntimeOrigin>
+			+ GetDispatchInfo
+			+ From<frame_system::Call<Self>>
+			+ IsSubType<Call<Self>>
+			+ IsType<<Self as frame_system::Config>::RuntimeCall>;
+		/// The currency mechanism, used for paying for reserves.
+		type Currency: ReservableCurrency<Self::AccountId>;
+		/// Identifier for the pots.
+		type PotId: Member + Parameter + MaxEncodedLen + Copy + From<u32>;
+		/// The type for the categories of the calls that could be sponsored.
+		/// The instance filter determines whether a given call may be sponsored under this type.
+		///
+		/// IMPORTANT 1: `Default` must be provided and MUST BE the the *most permissive* value.
+		/// IMPORTANT 2: Never sponsor proxy calls or utility calls which allow other calls internally.
+		/// This would allow a user to bypass the instance filter or alter the origin of the calls.
+		type SponsorshipType: Parameter
+			+ Member
+			+ Ord
+			+ PartialOrd
+			+ InstanceFilter<<Self as Config>::RuntimeCall>
+			+ MaxEncodedLen
+			+ Default;
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
 	}
 
-	// The pallet's runtime storage items.
-	// https://docs.substrate.io/main-docs/build/runtime-storage/
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://docs.substrate.io/main-docs/build/runtime-storage/#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+	/// Details of a pot.
+	pub(super) type Pot<T: Config> = StorageMap<_, Blake2_128Concat, T::PotId, PotDetailsOf<T>, OptionQuery>;
 
-	// Pallets use events to inform users when important changes are made.
-	// https://docs.substrate.io/main-docs/build/events-errors/
+	#[pallet::storage]
+	/// User details of a pot.
+	pub(super) type User<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::PotId,
+		Blake2_128Concat,
+		T::AccountId,
+		UserDetails<T::AccountId, BalanceOf<T>>,
+		OptionQuery,
+	>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored { something: u32, who: T::AccountId },
+		/// Event emitted when a new pot is created.
+		PotCreated(T::PotId),
 	}
 
-	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
+		/// The pot ID is already taken.
+		InUse,
 	}
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	// These functions materialize as "extrinsics", which are often compared to transactions.
-	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// An example dispatchable that takes a singles value as a parameter, writes the value to
-		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::WeightInfo::do_something())]
-		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
-			// This function will return an error if the extrinsic is not signed.
-			// https://docs.substrate.io/main-docs/build/origins/
+		#[pallet::weight(T::WeightInfo::create_pot())]
+		pub fn create_pot(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			sponsorship_type: T::SponsorshipType,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Pot::<T>::contains_key(pot), Error::<T>::InUse);
 
-			// Update storage.
-			<Something<T>>::put(something);
+			<Pot<T>>::insert(
+				pot,
+				PotDetailsOf::<T> {
+					sponsor: who,
+					sponsorship_type,
+					remained_fee_quota: fee_quota,
+					remained_reserve_quota: reserve_quota,
+				},
+			);
 
-			// Emit an event.
-			Self::deposit_event(Event::SomethingStored { something, who });
-			// Return a successful DispatchResultWithPostInfo
+			Self::deposit_event(Event::PotCreated(pot));
 			Ok(())
-		}
-
-		/// An example dispatchable that may throw a custom error.
-		#[pallet::call_index(1)]
-		#[pallet::weight(T::WeightInfo::cause_error())]
-		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-			let _who = ensure_signed(origin)?;
-
-			// Read a value from storage.
-			match <Something<T>>::get() {
-				// Return an error if the value has not been set.
-				None => return Err(Error::<T>::NoneValue.into()),
-				Some(old) => {
-					// Increment the value read from storage; will error in the event of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					<Something<T>>::put(new);
-					Ok(())
-				}
-			}
 		}
 	}
 }

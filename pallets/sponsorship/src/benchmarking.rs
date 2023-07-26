@@ -30,23 +30,25 @@ mod benchmarks {
 	use super::*;
 
 	#[benchmark]
-	fn do_something() {
-		let value = 100u32.into();
+	fn create_pot() {
 		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			remained_fee_quota: 5u32.into(),
+			remained_reserve_quota: 7u32.into(),
+		};
 		#[extrinsic_call]
-		do_something(RawOrigin::Signed(caller), value);
+		create_pot(
+			RawOrigin::Signed(caller),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota,
+		);
 
-		assert_eq!(Something::<T>::get(), Some(value));
-	}
-
-	#[benchmark]
-	fn cause_error() {
-		Something::<T>::put(100u32);
-		let caller: T::AccountId = whitelisted_caller();
-		#[extrinsic_call]
-		cause_error(RawOrigin::Signed(caller));
-
-		assert_eq!(Something::<T>::get(), Some(101u32));
+		assert_eq!(Pot::<T>::get(pot), Some(pot_details));
 	}
 
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
