@@ -217,7 +217,8 @@ pub mod pallet {
 		/// Register uses for a pot and set the same limit for the list of them.
 		/// Only pot sponsor can do this.
 		///
-		/// Emits `UserRegistered(pot)` when successful.
+		/// Emits `UsersRegistered(pot, Vec<T::AccountId>)` with a list of registered when
+		/// successful.
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::register_users(users.len() as u32))]
 		pub fn register_users(
