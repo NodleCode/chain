@@ -25,6 +25,8 @@ use crate::Pallet as Sponsorship;
 use frame_benchmarking::v2::*;
 use frame_system::RawOrigin;
 
+const SEED: u32 = 0;
+
 #[benchmarks]
 mod benchmarks {
 	use super::*;
@@ -67,6 +69,26 @@ mod benchmarks {
 		remove_pot(RawOrigin::Signed(caller.clone()), pot);
 
 		assert_eq!(Pot::<T>::get(pot), None);
+	}
+
+	#[benchmark]
+	fn register_users(l: Linear<1, 1_000>) {
+		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let users: Vec<T::AccountId> = (0..l).map(|i| account("user", i, SEED)).collect();
+
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			remained_fee_quota: 5u32.into(),
+			remained_reserve_quota: 7u32.into(),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		#[extrinsic_call]
+		register_users(RawOrigin::Signed(caller), pot, users, 8u32.into(), 19u32.into());
+
+		assert_eq!(User::<T>::iter_prefix_values(pot).count() as u32, l);
 	}
 
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
