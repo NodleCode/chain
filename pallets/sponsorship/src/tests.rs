@@ -21,7 +21,7 @@ use crate::{mock::*, Error, Event, Pot, PotDetailsOf, UserDetailsOf};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
-fn create_pot_works() {
+fn creator_of_pot_becomes_sponsor() {
 	new_test_ext().execute_with(|| {
 		let pot = 0;
 		System::set_block_number(1);
@@ -44,7 +44,7 @@ fn create_pot_works() {
 }
 
 #[test]
-fn create_pot_fails_when_pot_already_created() {
+fn pot_creation_fails_if_pot_exists() {
 	new_test_ext().execute_with(|| {
 		let pot_id = 11;
 		System::set_block_number(1);
@@ -75,7 +75,7 @@ fn create_pot_fails_when_pot_already_created() {
 }
 
 #[test]
-fn sponsor_can_remove_pot_with_no_users() {
+fn sponsors_can_remove_user_free_pots() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
@@ -102,7 +102,7 @@ fn sponsor_can_remove_pot_with_no_users() {
 }
 
 #[test]
-fn no_permission_for_non_sponsor_to_remove_pot() {
+fn only_sponsors_have_permission_to_remove_pots() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
@@ -128,7 +128,7 @@ fn no_permission_for_non_sponsor_to_remove_pot() {
 }
 
 #[test]
-fn sponsor_cannot_remove_pot_with_users() {
+fn sponsors_cannot_remove_pots_with_users() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
