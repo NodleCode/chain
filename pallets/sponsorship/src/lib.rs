@@ -23,6 +23,8 @@ use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo},
 	traits::{Currency, InstanceFilter, IsSubType, ReservableCurrency},
 };
+use sp_io::hashing::blake2_256;
+use sp_runtime::traits::TrailingZeroInput;
 
 pub use pallet::*;
 
@@ -141,6 +143,8 @@ pub mod pallet {
 		PotCreated(T::PotId),
 		/// Event emitted when a pot is removed.
 		PotRemoved(T::PotId),
+		/// Event emitted when user/users are registered for a pot.
+		UsersRegistered(T::PotId),
 	}
 
 	#[pallet::error]
@@ -149,6 +153,13 @@ pub mod pallet {
 		InUse,
 		/// The signing account has no permission to do the operation.
 		NoPermission,
+		/// The pot does not exist.
+		NotExist,
+		/// The user is already registered for the pot.
+		AlreadyRegistered,
+		/// Logic error: cannot create proxy account for user.
+		/// This should never happen.
+		CannotCreateProxy,
 	}
 
 	#[pallet::call]
@@ -202,5 +213,51 @@ pub mod pallet {
 			Self::deposit_event(Event::PotRemoved(pot));
 			Ok(())
 		}
+
+		/// Register uses for a pot and set the same limit for the list of them.
+		/// Only pot sponsor can do this.
+		///
+		/// Emits `UserRegistered(pot)` when successful.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::register_users(users.len() as u32))]
+		pub fn register_users(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			users: Vec<T::AccountId>,
+			common_fee_quota: BalanceOf<T>,
+			common_reserve_quota: BalanceOf<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::NotExist)?;
+			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+			for user in users {
+				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::AlreadyRegistered);
+				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
+				<User<T>>::insert(
+					pot,
+					user,
+					UserDetailsOf::<T> {
+						proxy,
+						remained_fee_quota: common_fee_quota,
+						remained_reserve_quota: common_reserve_quota,
+					},
+				);
+			}
+			Self::deposit_event(Event::UsersRegistered(pot));
+			Ok(())
+		}
+	}
+}
+
+impl<T: Config> Pallet<T> {
+	/// Calculate the address of a pure account.
+	///
+	/// A single user will always have the same proxy address for the same pot.
+	///
+	/// - `who`: The spawner account.
+	/// - `pot_id`: The pot id this proxy is created for.
+	pub fn pure_account(who: &T::AccountId, pot_id: &T::PotId) -> Option<T::AccountId> {
+		let entropy = (b"modlsp/sponsorship", who, pot_id).using_encoded(blake2_256);
+		Decode::decode(&mut TrailingZeroInput::new(entropy.as_ref())).ok()
 	}
 }

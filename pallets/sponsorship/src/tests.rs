@@ -158,3 +158,54 @@ fn sponsors_cannot_remove_pots_with_users() {
 		));
 	});
 }
+
+#[test]
+fn sponsors_can_register_users() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_details_1 = UserDetailsOf::<Test> {
+			proxy: SponsorshipModule::pure_account(&user_1, &pot).unwrap(),
+			remained_fee_quota: common_fee_quota,
+			remained_reserve_quota: common_reserve_quota,
+		};
+
+		let user_2 = 17u64;
+		let user_details_2 = UserDetailsOf::<Test> {
+			proxy: SponsorshipModule::pure_account(&user_2, &pot).unwrap(),
+			remained_fee_quota: common_fee_quota,
+			remained_reserve_quota: common_reserve_quota,
+		};
+
+		assert_eq!(User::<Test>::get(pot, user_1), None);
+		assert_eq!(User::<Test>::get(pot, user_2), None);
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2],
+			common_fee_quota,
+			common_reserve_quota
+		));
+		assert_eq!(User::<Test>::get(pot, user_1), Some(user_details_1));
+		assert_eq!(User::<Test>::get(pot, user_2), Some(user_details_2));
+		System::assert_last_event(Event::UsersRegistered(pot).into());
+	});
+}
