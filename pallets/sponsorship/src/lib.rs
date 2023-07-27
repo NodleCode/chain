@@ -143,8 +143,8 @@ pub mod pallet {
 		PotCreated(T::PotId),
 		/// Event emitted when a pot is removed.
 		PotRemoved(T::PotId),
-		/// Event emitted when user/users are registered for a pot.
-		UsersRegistered(T::PotId),
+		/// Event emitted when user/users are registered indicating the list of them
+		UsersRegistered(T::PotId, Vec<T::AccountId>),
 	}
 
 	#[pallet::error]
@@ -230,7 +230,7 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::NotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
-			for user in users {
+			for user in users.clone() {
 				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::AlreadyRegistered);
 				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
 				<User<T>>::insert(
@@ -243,7 +243,7 @@ pub mod pallet {
 					},
 				);
 			}
-			Self::deposit_event(Event::UsersRegistered(pot));
+			Self::deposit_event(Event::UsersRegistered(pot, users));
 			Ok(())
 		}
 	}
