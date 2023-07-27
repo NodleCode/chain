@@ -18,7 +18,10 @@
 
 use crate::pallet::User;
 use crate::{mock::*, Error, Event, Pot, PotDetailsOf, UserDetailsOf};
-use frame_support::{assert_noop, assert_ok};
+use frame_support::{
+	assert_noop, assert_ok,
+	traits::{Currency, ReservableCurrency},
+};
 
 #[test]
 fn creator_of_pot_becomes_sponsor() {
@@ -271,7 +274,7 @@ fn sponsors_cannot_register_users_more_than_once() {
 				common_fee_quota,
 				common_reserve_quota
 			),
-			Error::<Test>::AlreadyRegistered
+			Error::<Test>::UserAlreadyRegistered
 		);
 
 		assert_ok!(SponsorshipModule::register_users(
@@ -306,5 +309,157 @@ fn only_sponsors_have_permission_to_register_users() {
 			SponsorshipModule::register_users(RuntimeOrigin::signed(2), pot, vec![3, 4], 7, 12),
 			Error::<Test>::NoPermission
 		);
+	});
+}
+
+#[test]
+fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		let user_2_reserve = 19;
+		let user_2_details = User::<Test>::get(pot, user_2).unwrap();
+		Balances::make_free_balance_be(&user_2_details.proxy, user_2_reserve);
+		assert_ok!(Balances::reserve(&user_2_details.proxy, user_2_reserve - 1));
+
+		assert_noop!(
+			SponsorshipModule::remove_users(RuntimeOrigin::signed(pot_details.sponsor), pot, vec![user_1, user_2],),
+			Error::<Test>::ContainsUserWithNonZeroReserve
+		);
+
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_3],
+		));
+		System::assert_last_event(Event::UsersRemoved(pot, vec![user_1, user_3]).into());
+		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
+	});
+}
+
+#[test]
+fn sponsors_cannot_remove_unregistered_user() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_noop!(
+			SponsorshipModule::remove_users(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				vec![user_1, user_2, user_3],
+			),
+			Error::<Test>::UserNotRegistered
+		);
+	});
+}
+
+#[test]
+fn user_get_their_free_balance_back_in_their_original_account_after_being_removed() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		let user_2_free = 19;
+		let user_2_details = User::<Test>::get(pot, user_2).unwrap();
+		Balances::make_free_balance_be(&user_2_details.proxy, user_2_free);
+
+		let user_3_free = 29;
+		let user_3_details = User::<Test>::get(pot, user_3).unwrap();
+		Balances::make_free_balance_be(&user_3_details.proxy, user_3_free);
+
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+		));
+
+		assert_eq!(Balances::free_balance(&user_2), user_2_free);
+		assert_eq!(Balances::free_balance(&user_3), user_3_free);
 	});
 }

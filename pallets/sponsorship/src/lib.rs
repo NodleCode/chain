@@ -21,10 +21,10 @@
 use frame_support::pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
 use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo},
-	traits::{Currency, InstanceFilter, IsSubType, ReservableCurrency},
+	traits::{Currency, ExistenceRequirement::AllowDeath, InstanceFilter, IsSubType, ReservableCurrency},
 };
 use sp_io::hashing::blake2_256;
-use sp_runtime::traits::TrailingZeroInput;
+use sp_runtime::traits::{TrailingZeroInput, Zero};
 
 pub use pallet::*;
 
@@ -145,6 +145,8 @@ pub mod pallet {
 		PotRemoved(T::PotId),
 		/// Event emitted when user/users are registered indicating the list of them
 		UsersRegistered(T::PotId, Vec<T::AccountId>),
+		/// Event emitted when user/users are removed indicating the list of them
+		UsersRemoved(T::PotId, Vec<T::AccountId>),
 	}
 
 	#[pallet::error]
@@ -154,9 +156,13 @@ pub mod pallet {
 		/// The signing account has no permission to do the operation.
 		NoPermission,
 		/// The pot does not exist.
-		NotExist,
+		PotNotExist,
+		/// The user is not registered for the pot.
+		UserNotRegistered,
 		/// The user is already registered for the pot.
-		AlreadyRegistered,
+		UserAlreadyRegistered,
+		/// The user is not removable due to holding some reserve.
+		ContainsUserWithNonZeroReserve,
 		/// Logic error: cannot create proxy account for user.
 		/// This should never happen.
 		CannotCreateProxy,
@@ -214,7 +220,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Register uses for a pot and set the same limit for the list of them.
+		/// Register users for a pot and set the same limit for the list of them.
 		/// Only pot sponsor can do this.
 		///
 		/// Emits `UsersRegistered(pot, Vec<T::AccountId>)` with a list of registered when
@@ -229,10 +235,10 @@ pub mod pallet {
 			common_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::NotExist)?;
+			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
-				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::AlreadyRegistered);
+				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::UserAlreadyRegistered);
 				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
 				<User<T>>::insert(
 					pot,
@@ -245,6 +251,39 @@ pub mod pallet {
 				);
 			}
 			Self::deposit_event(Event::UsersRegistered(pot, users));
+			Ok(())
+		}
+
+		/// Remove users from a pot.
+		/// Only pot sponsor can do this.
+		/// None of the specified users must have any reserved balance in their proxy accounts.
+		/// User must be registered to be removable.
+		/// Users receive the free balance in their proxy account back into their own accounts when
+		/// they are removed.
+		///
+		/// Emits `UsersRemoved(pot, Vec<T::AccountId>)` with a list of those removed when
+		/// successful.
+		#[pallet::call_index(3)]
+		#[pallet::weight(T::WeightInfo::remove_users(users.len() as u32))]
+		pub fn remove_users(origin: OriginFor<T>, pot: T::PotId, users: Vec<T::AccountId>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+			for user in users.clone() {
+				let user_details = User::<T>::get(pot, &user).ok_or(Error::<T>::UserNotRegistered)?;
+				ensure!(
+					T::Currency::reserved_balance(&user_details.proxy) == Zero::zero(),
+					Error::<T>::ContainsUserWithNonZeroReserve
+				);
+				T::Currency::transfer(
+					&user_details.proxy,
+					&user,
+					T::Currency::free_balance(&user_details.proxy),
+					AllowDeath,
+				)?;
+				<User<T>>::remove(pot, &user);
+			}
+			Self::deposit_event(Event::UsersRemoved(pot, users));
 			Ok(())
 		}
 	}
