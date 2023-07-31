@@ -18,6 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use core::num::NonZeroU32;
 use frame_support::pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
 use frame_support::{
 	dispatch::{Dispatchable, GetDispatchInfo},
@@ -284,6 +285,45 @@ pub mod pallet {
 				<User<T>>::remove(pot, &user);
 			}
 			Self::deposit_event(Event::UsersRemoved(pot, users));
+			Ok(())
+		}
+
+		/// Remove inactive users from a pot.
+		/// Only pot sponsor can do this.
+		/// An inactive user is deemed to have no reserve balance in their proxy account.
+		/// Users receive the free balance in their proxy account back into their own accounts when
+		/// they are removed.
+		/// `limit` is the maximum number of users to remove. If there are fewer inactive users than
+		/// this, then all inactive users are removed.
+		///
+		/// Emits `UsersRemoved(pot, Vec<T::AccountId>)` with a list of those removed when
+		/// successful.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::remove_inactive_users(u32::from(*limit)))]
+		pub fn remove_inactive_users(origin: OriginFor<T>, pot: T::PotId, limit: NonZeroU32) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+			let mut users_to_remove = Vec::<T::AccountId>::new();
+			let limit = u32::from(limit) as usize;
+			for (user, user_details) in User::<T>::iter_prefix(pot) {
+				if T::Currency::reserved_balance(&user_details.proxy) == Zero::zero() {
+					T::Currency::transfer(
+						&user_details.proxy,
+						&user,
+						T::Currency::free_balance(&user_details.proxy),
+						AllowDeath,
+					)?;
+					users_to_remove.push(user);
+					if users_to_remove.len() == limit {
+						break;
+					}
+				}
+			}
+			for user in &users_to_remove {
+				<User<T>>::remove(pot, user);
+			}
+			Self::deposit_event(Event::UsersRemoved(pot, users_to_remove));
 			Ok(())
 		}
 	}

@@ -39,6 +39,7 @@ pub trait WeightInfo {
 	fn remove_pot() -> Weight;
 	fn register_users(l: u32) -> Weight;
 	fn remove_users(l: u32) -> Weight;
+	fn remove_inactive_users(l: u32) -> Weight;
 }
 
 /// Weights for pallet_sponsorship using the Substrate node and recommended hardware.
@@ -56,6 +57,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn remove_users(_l: u32) -> Weight {
 		Weight::from_parts(0, 0)
 	}
+	fn remove_inactive_users(_l: u32) -> Weight {
+		Weight::from_parts(0, 0)
+	}
 }
 
 // For backwards compatibility and tests
@@ -70,6 +74,9 @@ impl WeightInfo for () {
 		Weight::from_parts(0, 0)
 	}
 	fn remove_users(_l: u32) -> Weight {
+		Weight::from_parts(0, 0)
+	}
+	fn remove_inactive_users(_l: u32) -> Weight {
 		Weight::from_parts(0, 0)
 	}
 }

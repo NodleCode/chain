@@ -22,6 +22,7 @@ use frame_support::{
 	assert_noop, assert_ok,
 	traits::{Currency, ReservableCurrency},
 };
+use std::num::NonZeroU32;
 
 #[test]
 fn creator_of_pot_becomes_sponsor() {
@@ -313,6 +314,72 @@ fn only_sponsors_have_permission_to_register_users() {
 }
 
 #[test]
+fn only_sponsors_have_permission_to_remove_users() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_noop!(
+			SponsorshipModule::remove_users(
+				RuntimeOrigin::signed(pot_details.sponsor + 1),
+				pot,
+				vec![user_1, user_2]
+			),
+			Error::<Test>::NoPermission
+		);
+
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2]
+		));
+
+		assert_noop!(
+			SponsorshipModule::remove_inactive_users(
+				RuntimeOrigin::signed(pot_details.sponsor + 1),
+				pot,
+				NonZeroU32::new(10).unwrap()
+			),
+			Error::<Test>::NoPermission
+		);
+
+		assert_ok!(SponsorshipModule::remove_inactive_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			NonZeroU32::new(10).unwrap()
+		));
+	});
+}
+
+#[test]
 fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
@@ -367,6 +434,99 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 }
 
 #[test]
+fn sponsors_can_remove_inactive_users() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		let user_2_reserve = 19;
+		let user_2_details = User::<Test>::get(pot, user_2).unwrap();
+		Balances::make_free_balance_be(&user_2_details.proxy, user_2_reserve);
+		assert_ok!(Balances::reserve(&user_2_details.proxy, user_2_reserve - 1));
+
+		assert_ok!(SponsorshipModule::remove_inactive_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			NonZeroU32::new(10).unwrap()
+		));
+		System::assert_last_event(Event::UsersRemoved(pot, vec![user_3, user_1]).into());
+		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
+	});
+}
+
+#[test]
+fn removing_inactive_users_respects_limit() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_ok!(SponsorshipModule::remove_inactive_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			NonZeroU32::new(1).unwrap()
+		));
+		System::assert_last_event(Event::UsersRemoved(pot, vec![user_3]).into());
+		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 2);
+	});
+}
+
+#[test]
 fn sponsors_cannot_remove_unregistered_user() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
@@ -412,7 +572,7 @@ fn sponsors_cannot_remove_unregistered_user() {
 }
 
 #[test]
-fn user_get_their_free_balance_back_in_their_original_account_after_being_removed() {
+fn users_get_their_free_balance_back_in_their_original_account_after_being_removed() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
@@ -461,5 +621,33 @@ fn user_get_their_free_balance_back_in_their_original_account_after_being_remove
 
 		assert_eq!(Balances::free_balance(&user_2), user_2_free);
 		assert_eq!(Balances::free_balance(&user_3), user_3_free);
+
+		let user_4 = 29u64;
+		let user_5 = 37u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_4, user_5],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		let user_4_free = 19;
+		let user_4_details = User::<Test>::get(pot, user_4).unwrap();
+		Balances::make_free_balance_be(&user_4_details.proxy, user_4_free);
+
+		let user_5_free = 29;
+		let user_5_details = User::<Test>::get(pot, user_5).unwrap();
+		Balances::make_free_balance_be(&user_5_details.proxy, user_5_free);
+
+		assert_ok!(SponsorshipModule::remove_inactive_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			NonZeroU32::new(10).unwrap()
+		));
+
+		assert_eq!(Balances::free_balance(&user_4), user_4_free);
+		assert_eq!(Balances::free_balance(&user_5), user_5_free);
 	});
 }
