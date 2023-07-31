@@ -102,6 +102,14 @@ fn sponsors_can_remove_user_free_pots() {
 		));
 		assert_eq!(Pot::<Test>::get(pot), None);
 		System::assert_last_event(Event::PotRemoved(pot).into());
+
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
 	});
 }
 
@@ -375,6 +383,14 @@ fn only_sponsors_have_permission_to_remove_users() {
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
 			NonZeroU32::new(10).unwrap()
+		));
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
 		));
 	});
 }
