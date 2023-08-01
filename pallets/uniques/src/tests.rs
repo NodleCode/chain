@@ -316,7 +316,7 @@ mod test_cases {
 			}
 			let extra_deposit_total = CollectionExtraDepositDetails::<Test>::get(collection)
 				.unwrap_or_default()
-				.total;
+				.balance();
 			assert_noop!(
 				Uniques::update_extra_deposit_limit(
 					RuntimeOrigin::signed(collection_owner),
@@ -431,7 +431,9 @@ mod test_cases {
 			));
 
 			assert_eq!(
-				CollectionExtraDepositDetails::<Test>::get(collection_id).unwrap().limit,
+				CollectionExtraDepositDetails::<Test>::get(collection_id)
+					.unwrap()
+					.limit(),
 				limit
 			);
 		})
@@ -735,7 +737,7 @@ mod test_cases {
 				extra_deposit_limit
 			));
 			assert_eq!(
-				CollectionExtraDepositDetails::<Test>::get(collection).unwrap().limit,
+				CollectionExtraDepositDetails::<Test>::get(collection).unwrap().limit(),
 				extra_deposit_limit
 			);
 
@@ -749,7 +751,9 @@ mod test_cases {
 			));
 			assert!(!ItemExtraDeposits::<Test>::iter_prefix(collection).count().is_zero());
 			assert_eq!(
-				CollectionExtraDepositDetails::<Test>::get(collection).unwrap().total,
+				CollectionExtraDepositDetails::<Test>::get(collection)
+					.unwrap()
+					.balance(),
 				extra_deposit
 			);
 
@@ -774,10 +778,15 @@ mod test_cases {
 				extra_deposit_limit + 1
 			));
 			assert_eq!(
-				CollectionExtraDepositDetails::<Test>::get(collection).unwrap().limit,
+				CollectionExtraDepositDetails::<Test>::get(collection).unwrap().limit(),
 				extra_deposit_limit + 1
 			);
-			assert_eq!(CollectionExtraDepositDetails::<Test>::get(collection).unwrap().total, 0);
+			assert_eq!(
+				CollectionExtraDepositDetails::<Test>::get(collection)
+					.unwrap()
+					.balance(),
+				0
+			);
 		})
 	}
 

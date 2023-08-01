@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::pallet::User;
-use crate::{mock::*, Error, Event, Pot, PotDetailsOf, UserDetailsOf};
+use crate::{mock::*, Error, Event, Pot, PotDetailsOf, User, UserDetailsOf};
 use frame_support::{
 	assert_noop, assert_ok,
 	traits::{Currency, ReservableCurrency},
 };
+use sp_runtime::{DispatchError, TokenError};
 use std::num::NonZeroU32;
+use support::LimitedBalance;
 
 #[test]
 fn creator_of_pot_becomes_sponsor() {
@@ -197,14 +198,14 @@ fn sponsors_can_register_new_users() {
 		let user_details_1 = UserDetailsOf::<Test> {
 			proxy: SponsorshipModule::pure_account(&user_1, &pot).unwrap(),
 			remained_fee_quota: common_fee_quota,
-			remained_reserve_quota: common_reserve_quota,
+			reserve: LimitedBalance::with_limit(common_reserve_quota),
 		};
 
 		let user_2 = 17u64;
 		let user_details_2 = UserDetailsOf::<Test> {
 			proxy: SponsorshipModule::pure_account(&user_2, &pot).unwrap(),
 			remained_fee_quota: common_fee_quota,
-			remained_reserve_quota: common_reserve_quota,
+			reserve: LimitedBalance::with_limit(common_reserve_quota),
 		};
 
 		assert_eq!(User::<Test>::get(pot, user_1), None);
@@ -226,7 +227,7 @@ fn sponsors_can_register_new_users() {
 		let user_details_3 = UserDetailsOf::<Test> {
 			proxy: SponsorshipModule::pure_account(&user_3, &pot).unwrap(),
 			remained_fee_quota: user_3_fee_quota,
-			remained_reserve_quota: user_3_reserve_quota,
+			reserve: LimitedBalance::with_limit(user_3_reserve_quota),
 		};
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -436,7 +437,7 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 
 		assert_noop!(
 			SponsorshipModule::remove_users(RuntimeOrigin::signed(pot_details.sponsor), pot, vec![user_1, user_2],),
-			Error::<Test>::ContainsUserWithNonZeroReserve
+			Error::<Test>::CannotRemoveProxy
 		);
 
 		assert_ok!(SponsorshipModule::remove_users(
@@ -665,5 +666,344 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 
 		assert_eq!(Balances::free_balance(&user_4), user_4_free);
 		assert_eq!(Balances::free_balance(&user_5), user_5_free);
+	});
+}
+
+#[test]
+fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: pot_fee_quota,
+			remained_reserve_quota: pot_reserve_quota,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let uniques_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 0u32.into(),
+			admin: user,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			uniques_call
+		));
+		let user_details = User::<Test>::get(pot, user).unwrap();
+		System::assert_last_event(
+			Event::Sponsored {
+				top_up: user_reserve_quota,
+				refund: user_reserve_quota - user_details.reserve.balance(),
+			}
+			.into(),
+		);
+
+		let balances_call = Box::new(RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+			dest: user,
+			value: 1,
+		}));
+		assert_noop!(
+			SponsorshipModule::sponsor_for(RuntimeOrigin::signed(user), pot, balances_call),
+			frame_system::Error::<Test>::CallFiltered
+		);
+		assert_eq!(Balances::free_balance(&user), 0);
+	});
+}
+
+#[test]
+fn sponsor_for_calls_will_fail_if_call_itself_should_fail() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Balances,
+			remained_fee_quota: pot_fee_quota,
+			remained_reserve_quota: pot_reserve_quota,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let balances_call = Box::new(RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+			dest: user,
+			value: user_reserve_quota + 1,
+		}));
+		assert_noop!(
+			SponsorshipModule::sponsor_for(RuntimeOrigin::signed(user), pot, balances_call),
+			DispatchError::Token(TokenError::FundsUnavailable)
+		);
+
+		assert_eq!(Balances::free_balance(&user), 0);
+	});
+}
+
+#[test]
+fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Balances,
+			remained_fee_quota: pot_fee_quota,
+			remained_reserve_quota: pot_reserve_quota,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let balances_call = Box::new(RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+			dest: user,
+			value: 1,
+		}));
+		assert_noop!(
+			SponsorshipModule::sponsor_for(RuntimeOrigin::signed(user), pot, balances_call),
+			Error::<Test>::BalanceLeak
+		);
+
+		assert_eq!(Balances::free_balance(&user), 0);
+	});
+}
+
+#[test]
+fn sponsor_for_calls_will_refund_unused_reserve() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: pot_fee_quota,
+			remained_reserve_quota: pot_reserve_quota,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let uniques_create_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 0u32.into(),
+			admin: user,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			uniques_create_call
+		));
+		let user_details = User::<Test>::get(pot, user).unwrap();
+		let uniques_call_reserve = user_details.reserve.balance() - Balances::minimum_balance();
+		assert_eq!(Balances::free_balance(&user_details.proxy), Balances::minimum_balance());
+		assert_eq!(Balances::reserved_balance(&user_details.proxy), uniques_call_reserve);
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		assert_eq!(
+			pot_details.remained_reserve_quota,
+			pot_reserve_quota - user_details.reserve.balance()
+		);
+
+		let uniques_destroy_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::destroy {
+			collection: 0u32.into(),
+			witness: pallet_uniques::DestroyWitness {
+				items: 0,
+				item_metadatas: 0,
+				attributes: 0,
+			},
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			uniques_destroy_call
+		));
+		System::assert_last_event(
+			Event::Sponsored {
+				top_up: user_reserve_quota - user_details.reserve.balance(),
+				refund: user_reserve_quota - Balances::minimum_balance(),
+			}
+			.into(),
+		);
+		assert_eq!(Balances::free_balance(&user_details.proxy), Balances::minimum_balance());
+		assert_eq!(Balances::reserved_balance(&user_details.proxy), 0);
+		assert_eq!(
+			Balances::free_balance(&pot_details.sponsor),
+			pot_reserve_quota - Balances::minimum_balance()
+		);
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		assert_eq!(
+			pot_details.remained_reserve_quota,
+			pot_reserve_quota - Balances::minimum_balance()
+		);
+		let user_1_details = User::<Test>::get(pot, user).unwrap();
+		assert_eq!(
+			user_1_details.reserve.available_margin(),
+			user_1_details.reserve.limit() - Balances::minimum_balance()
+		);
+	});
+}
+
+#[test]
+fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: pot_fee_quota,
+			remained_reserve_quota: pot_reserve_quota,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.remained_fee_quota,
+			pot_details.remained_reserve_quota
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let uniques_create_call_1 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 0u32.into(),
+			admin: user,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			uniques_create_call_1
+		));
+
+		let user_details = User::<Test>::get(pot, user).unwrap();
+		let user_owing = user_details.reserve.balance();
+		assert_eq!(user_owing, TestCollectionDeposit::get() + Balances::minimum_balance());
+
+		// Assume user's proxy account somehow earns enough funds through an interaction or from an external source.
+		let user_free_balance_after_earning = 2 * user_details.reserve.balance();
+		Balances::make_free_balance_be(&user_details.proxy, user_free_balance_after_earning);
+
+		let uniques_create_call_2 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 1u32.into(),
+			admin: user,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			uniques_create_call_2
+		));
+
+		System::assert_last_event(
+			Event::Sponsored {
+				top_up: user_reserve_quota - user_free_balance_after_earning,
+				refund: user_reserve_quota - user_free_balance_after_earning + user_owing,
+			}
+			.into(),
+		);
+
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		assert_eq!(Balances::free_balance(&pot_details.sponsor), pot_reserve_quota);
+		assert_eq!(pot_details.remained_reserve_quota, pot_reserve_quota);
+
+		let user_details = User::<Test>::get(pot, user).unwrap();
+		assert_eq!(user_details.reserve.balance(), 0);
 	});
 }

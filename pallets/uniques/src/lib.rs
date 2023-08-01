@@ -20,14 +20,9 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use codec::{Decode, Encode};
-use frame_support::pallet_prelude::MaxEncodedLen;
-use frame_support::traits::{tokens::Balance, Currency};
-use scale_info::TypeInfo;
-use sp_runtime::{
-	traits::{StaticLookup, Zero},
-	RuntimeDebug,
-};
+use frame_support::traits::Currency;
+use sp_runtime::traits::{StaticLookup, Zero};
+use support::LimitedBalance;
 
 pub use pallet::*;
 pub use weights::WeightInfo as NodleWeightInfo;
@@ -41,59 +36,6 @@ mod tests;
 type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLookup>::Source;
 pub type BalanceOf<T, I = ()> =
 	<<T as pallet_uniques::Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
-pub struct ExtraDepositDetails<T: Balance> {
-	/// The cap for the total extra deposit for the collection
-	///
-	/// `total` should never go higher than `limit`.
-	limit: T,
-	/// The total extra deposit reserved so far
-	///
-	/// Ever mint with extra deposit should update this value.
-	total: T,
-}
-
-pub enum ExtraDepositHandlingError {
-	/// Overflow adding extra deposit
-	Overflow,
-	/// The total extra deposit exceeds the limit
-	TotalExceedsLimit,
-	/// The limit is below the current commitment
-	LimitBelowCommitment,
-}
-
-impl<T: Balance> ExtraDepositDetails<T> {
-	pub fn with_limit(limit: T) -> Self {
-		Self {
-			limit,
-			..Default::default()
-		}
-	}
-	pub fn add(&mut self, value: T) -> Result<(), ExtraDepositHandlingError> {
-		let new_total = self
-			.total
-			.checked_add(&value)
-			.ok_or(ExtraDepositHandlingError::Overflow)?;
-		if new_total <= self.limit {
-			self.total = new_total;
-			Ok(())
-		} else {
-			Err(ExtraDepositHandlingError::TotalExceedsLimit)
-		}
-	}
-	pub fn update_limit(&mut self, new_limit: T) -> Result<(), ExtraDepositHandlingError> {
-		if new_limit >= self.total {
-			self.limit = new_limit;
-			Ok(())
-		} else {
-			Err(ExtraDepositHandlingError::LimitBelowCommitment)
-		}
-	}
-	pub fn total(&self) -> T {
-		self.total
-	}
-}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -137,7 +79,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	pub(crate) type CollectionExtraDepositDetails<T: Config<I>, I: 'static = ()> =
-		StorageMap<_, Blake2_128Concat, T::CollectionId, ExtraDepositDetails<BalanceOf<T, I>>, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::CollectionId, LimitedBalance<BalanceOf<T, I>>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -462,7 +404,7 @@ pub mod pallet {
 			if old_owner != new_owner {
 				let total_extra_deposit = CollectionExtraDepositDetails::<T, I>::get(collection)
 					.unwrap_or_default()
-					.total();
+					.balance();
 				T::Currency::repatriate_reserved(&old_owner, &new_owner, total_extra_deposit, Reserved)?;
 			}
 			Ok(())
@@ -845,7 +787,7 @@ pub mod pallet {
 			// collection is also created successfully.
 			CollectionExtraDepositDetails::<T, I>::insert(
 				collection,
-				ExtraDepositDetails::<BalanceOf<T, I>>::with_limit(limit),
+				LimitedBalance::<BalanceOf<T, I>>::with_limit(limit),
 			);
 			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
 		}

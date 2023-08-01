@@ -116,6 +116,7 @@ impl pallet_uniques::Config for Test {
 )]
 pub enum SponsorshipType {
 	AnySafe,
+	Balances,
 	Uniques,
 	UniquesMint,
 }
@@ -124,6 +125,7 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 		match self {
 			// Just for the sake of tests we assume sponsoring Balance calls are not safe but anything else is fine.
 			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Balances { .. }),
+			SponsorshipType::Balances => matches!(c, RuntimeCall::Balances { .. }),
 			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
 			SponsorshipType::UniquesMint => {
 				matches!(c, RuntimeCall::Uniques(pallet_uniques::Call::mint { .. }))

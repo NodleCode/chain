@@ -19,13 +19,19 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use core::num::NonZeroU32;
-use frame_support::pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
+use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
 use frame_support::{
-	dispatch::{Dispatchable, GetDispatchInfo},
-	traits::{Currency, ExistenceRequirement::AllowDeath, InstanceFilter, IsSubType, ReservableCurrency},
+	dispatch::{DispatchResult, Dispatchable, GetDispatchInfo},
+	traits::{
+		Currency,
+		ExistenceRequirement::{AllowDeath, KeepAlive},
+		InstanceFilter, IsSubType, OriginTrait, ReservableCurrency,
+	},
 };
 use sp_io::hashing::blake2_256;
 use sp_runtime::traits::{TrailingZeroInput, Zero};
+use sp_runtime::Saturating;
+use support::LimitedBalance;
 
 pub use pallet::*;
 
@@ -68,7 +74,7 @@ pub struct PotDetails<AccountId, SponsorshipType, Balance> {
 }
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
-pub struct UserDetails<AccountId, Balance> {
+pub struct UserDetails<AccountId, Balance: frame_support::traits::tokens::Balance> {
 	/// The pure proxy account that is created for the user of a pot.
 	///
 	/// Same users would have different proxy accounts for different pots.
@@ -77,13 +83,13 @@ pub struct UserDetails<AccountId, Balance> {
 	///
 	/// When remained_fee_quota reaches zero, the user is no longer sponsored by the pot.
 	remained_fee_quota: Balance,
-	/// The remained allowance for covering reserves needed for some of sponsored transactions of
-	/// this user.
+	/// The allowance for covering existential deposit needed to maintain proxy accounts plus the
+	/// fund to be used as a reserve for some of the sponsored transactions of this user.
 	///
 	/// When remained_reserve_quota is zero, the use may still be sponsored for those transactions
 	/// which do not require any reserve. Any amount used as reserve will be returned to the sponsor
 	/// when unreserved. This is to prevent malicious users from draining sponsor funds.
-	remained_reserve_quota: Balance,
+	reserve: LimitedBalance<Balance>,
 }
 
 #[frame_support::pallet]
@@ -91,6 +97,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use sp_runtime::Saturating;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -148,6 +155,8 @@ pub mod pallet {
 		UsersRegistered(T::PotId, Vec<T::AccountId>),
 		/// Event emitted when user/users are removed indicating the list of them
 		UsersRemoved(T::PotId, Vec<T::AccountId>),
+		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
+		Sponsored { top_up: BalanceOf<T>, refund: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -163,10 +172,12 @@ pub mod pallet {
 		/// The user is already registered for the pot.
 		UserAlreadyRegistered,
 		/// The user is not removable due to holding some reserve.
-		ContainsUserWithNonZeroReserve,
+		CannotRemoveProxy,
 		/// Logic error: cannot create proxy account for user.
 		/// This should never happen.
 		CannotCreateProxy,
+		/// Balance leak is not allowed during a sponsored call.
+		BalanceLeak,
 	}
 
 	#[pallet::call]
@@ -247,7 +258,7 @@ pub mod pallet {
 					UserDetailsOf::<T> {
 						proxy,
 						remained_fee_quota: common_fee_quota,
-						remained_reserve_quota: common_reserve_quota,
+						reserve: LimitedBalance::with_limit(common_reserve_quota),
 					},
 				);
 			}
@@ -272,15 +283,11 @@ pub mod pallet {
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
 				let user_details = User::<T>::get(pot, &user).ok_or(Error::<T>::UserNotRegistered)?;
-				ensure!(
-					T::Currency::reserved_balance(&user_details.proxy) == Zero::zero(),
-					Error::<T>::ContainsUserWithNonZeroReserve
-				);
-				T::Currency::transfer(
-					&user_details.proxy,
+				Self::remove_proxy(
+					&pot_details.sponsor,
 					&user,
-					T::Currency::free_balance(&user_details.proxy),
-					AllowDeath,
+					&user_details.proxy,
+					user_details.reserve.balance(),
 				)?;
 				<User<T>>::remove(pot, &user);
 			}
@@ -307,13 +314,14 @@ pub mod pallet {
 			let mut users_to_remove = Vec::<T::AccountId>::new();
 			let limit = u32::from(limit) as usize;
 			for (user, user_details) in User::<T>::iter_prefix(pot) {
-				if T::Currency::reserved_balance(&user_details.proxy) == Zero::zero() {
-					T::Currency::transfer(
-						&user_details.proxy,
-						&user,
-						T::Currency::free_balance(&user_details.proxy),
-						AllowDeath,
-					)?;
+				if Self::remove_proxy(
+					&pot_details.sponsor,
+					&user,
+					&user_details.proxy,
+					user_details.reserve.balance(),
+				)
+				.is_ok()
+				{
 					users_to_remove.push(user);
 					if users_to_remove.len() == limit {
 						break;
@@ -325,6 +333,66 @@ pub mod pallet {
 			}
 			Self::deposit_event(Event::UsersRemoved(pot, users_to_remove));
 			Ok(())
+		}
+
+		/// Sponsor me for the given call from the specified pot.
+		/// The caller must be registered for the pot.
+		/// The call must be consistent with the pot's sponsorship type.
+		///
+		/// Emits `Sponsored {result}` when successful.
+		#[pallet::call_index(5)]
+		#[pallet::weight({
+			let dispatch_info = call.get_dispatch_info();
+			(dispatch_info.weight + <T as Config>::WeightInfo::sponsor_for(), dispatch_info.class, Pays::No)
+		})]
+		pub fn sponsor_for(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			call: Box<<T as Config>::RuntimeCall>,
+		) -> DispatchResultWithPostInfo {
+			let who = ensure_signed(origin)?;
+			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			let mut user_details = User::<T>::get(pot, &who).ok_or(Error::<T>::UserNotRegistered)?;
+			let mut proxy_origin: T::RuntimeOrigin = frame_system::RawOrigin::Signed(user_details.proxy.clone()).into();
+			let sponsorship = pot_details.sponsorship_type.clone();
+
+			proxy_origin.add_filter(move |c: &<T as frame_system::Config>::RuntimeCall| {
+				let c = <T as Config>::RuntimeCall::from_ref(c);
+				let b = sponsorship.filter(c);
+				b
+			});
+
+			let fund_for_reserve = user_details
+				.reserve
+				.available_margin()
+				.min(pot_details.remained_reserve_quota);
+			let top_up = user_details
+				.reserve
+				.limit()
+				.saturating_sub(T::Currency::free_balance(&user_details.proxy))
+				.min(fund_for_reserve);
+			T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, top_up, KeepAlive)?;
+			pot_details.remained_reserve_quota = pot_details.remained_reserve_quota.saturating_sub(top_up);
+			user_details.reserve.saturating_add(top_up);
+
+			let proxy_balance = T::Currency::total_balance(&user_details.proxy);
+			call.dispatch(proxy_origin).map_err(|e| e.error)?;
+			let new_proxy_balance = T::Currency::total_balance(&user_details.proxy);
+			ensure!(new_proxy_balance >= proxy_balance, Error::<T>::BalanceLeak);
+
+			let refundable =
+				T::Currency::free_balance(&user_details.proxy).saturating_sub(T::Currency::minimum_balance());
+			let refund = refundable.min(user_details.reserve.balance());
+			T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, refund, KeepAlive)?;
+
+			user_details.reserve.saturating_sub(refund);
+			pot_details.remained_reserve_quota = pot_details.remained_reserve_quota.saturating_add(refund);
+
+			Pot::<T>::insert(pot, pot_details);
+			User::<T>::insert(pot, &who, user_details);
+
+			Self::deposit_event(Event::Sponsored { top_up, refund });
+			Ok(().into())
 		}
 	}
 }
@@ -339,5 +407,25 @@ impl<T: Config> Pallet<T> {
 	pub fn pure_account(who: &T::AccountId, pot_id: &T::PotId) -> Option<T::AccountId> {
 		let entropy = (b"modlsp/sponsorship", who, pot_id).using_encoded(blake2_256);
 		Decode::decode(&mut TrailingZeroInput::new(entropy.as_ref())).ok()
+	}
+	/// Transfer the left over balance from proxy to user and sponsor based on the given owing.
+	/// Let the account die afterwards.
+	///
+	/// Returns `Ok` if the proxy is removed successfully.
+	pub fn remove_proxy(
+		sponsor: &T::AccountId,
+		user: &T::AccountId,
+		proxy: &T::AccountId,
+		owing: BalanceOf<T>,
+	) -> DispatchResult {
+		ensure!(
+			T::Currency::reserved_balance(proxy) == Zero::zero(),
+			Error::<T>::CannotRemoveProxy
+		);
+		let proxy_free_balance = T::Currency::free_balance(proxy);
+		let refund = proxy_free_balance.min(owing);
+		T::Currency::transfer(proxy, sponsor, refund, AllowDeath)?;
+		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(refund), AllowDeath)?;
+		Ok(())
 	}
 }
