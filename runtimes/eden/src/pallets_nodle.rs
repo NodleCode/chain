@@ -17,7 +17,7 @@
  */
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
-	AllocationsOracles, Balances, CompanyReserve, Runtime, RuntimeEvent,
+	AllocationsOracles, Balances, DaoReserve, Runtime, RuntimeEvent,
 };
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
@@ -91,7 +91,7 @@ impl pallet_allocations::Config for Runtime {
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = ProtocolFee;
-	type ProtocolFeeReceiver = CompanyReserve;
+	type ProtocolFeeReceiver = DaoReserve;
 	type MintCurve = EdenMintCurve;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;

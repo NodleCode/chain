@@ -18,7 +18,7 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Balances, CollatorSelection, CompanyReserve};
+use crate::{Balances, CollatorSelection, DaoReserve};
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 use primitives::{AccountId, BlockNumber};
 use sp_runtime::traits::BlockNumberProvider;
@@ -45,7 +45,7 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 				// for tips, if any, 20% to treasury, 80% to author (though this can be anything)
 				tips.ration_merge_into(20, 80, &mut split);
 			}
-			CompanyReserve::on_unbalanced(split.0);
+			DaoReserve::on_unbalanced(split.0);
 			ToStakingPot::on_unbalanced(split.1);
 		}
 	}
