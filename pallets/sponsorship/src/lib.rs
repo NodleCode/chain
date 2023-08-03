@@ -339,7 +339,20 @@ pub mod pallet {
 		/// The caller must be registered for the pot.
 		/// The call must be consistent with the pot's sponsorship type.
 		///
-		/// Emits `Sponsored {result}` when successful.
+		/// Returns Error if the pot doesn't exist or the user is not registered for the pot or if
+		/// their call is not matching the sponsorship type in which case the error would be
+		/// `frame_system::Error::CallFiltered`. Also returns error if the call itself should fail
+		/// for any reason related to either the call or the available fund for the user.
+		/// In this case the actual error will be depending on the call itself.  
+		///
+		/// Emits `Sponsored {top_up, refund}` when successful. The `top_up` is the amount initially
+		/// transferred to the proxy account of the user by the sponsor. The `refund` is the amount
+		/// refunded to the sponsor after the call has been successfully executed.
+		/// Please note `refund` can be bigger than `top_up` if for any reason the user is able to
+		/// partially or fully pay back their previous debt to the sponsor too.
+		/// Also the top_up might be less than what the limit for the user allows if the user can
+		/// support themselves partially or fully based on their free balance in their proxy account.
+		/// Lastly, the top_up is limited by the remaining reserve quota for the pot too.
 		#[pallet::call_index(5)]
 		#[pallet::weight({
 			let dispatch_info = call.get_dispatch_info();
