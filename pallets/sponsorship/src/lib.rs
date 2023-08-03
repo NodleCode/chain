@@ -97,6 +97,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use scale_info::prelude::{boxed::Box, vec::Vec};
 	use sp_runtime::Saturating;
 
 	#[pallet::pallet]
