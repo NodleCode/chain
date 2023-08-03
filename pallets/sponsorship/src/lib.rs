@@ -344,6 +344,10 @@ pub mod pallet {
 		/// `frame_system::Error::CallFiltered`. Also returns error if the call itself should fail
 		/// for any reason related to either the call or the available fund for the user.
 		/// In this case the actual error will be depending on the call itself.  
+		/// Regardless of the sponsorship type, users are not allowed to dispatch calls that would
+		/// leak fund from their proxy account. If they try to do so they will get
+		/// `Error::BalanceLeak`. For example they cannot transfer fund to another account even if
+		/// the sponsorship type allows `Balances` calls.
 		///
 		/// Emits `Sponsored {top_up, refund}` when successful. The `top_up` is the amount initially
 		/// transferred to the proxy account of the user by the sponsor. The `refund` is the amount
@@ -351,8 +355,8 @@ pub mod pallet {
 		/// Please note `refund` can be bigger than `top_up` if for any reason the user is able to
 		/// partially or fully pay back their previous debt to the sponsor too.
 		/// Also the top_up might be less than what the limit for the user allows if the user can
-		/// support themselves partially or fully based on their free balance in their proxy account.
-		/// Lastly, the top_up is limited by the remaining reserve quota for the pot too.
+		/// support themselves partially or fully based on their free balance in their proxy account
+		/// . Lastly, the top_up is limited by the remaining reserve quota for the pot too.
 		#[pallet::call_index(5)]
 		#[pallet::weight({
 			let dispatch_info = call.get_dispatch_info();
