@@ -376,8 +376,7 @@ pub mod pallet {
 
 			proxy_origin.add_filter(move |c: &<T as frame_system::Config>::RuntimeCall| {
 				let c = <T as Config>::RuntimeCall::from_ref(c);
-				let b = sponsorship.filter(c);
-				b
+				sponsorship.filter(c)
 			});
 
 			let fund_for_reserve = user_details
