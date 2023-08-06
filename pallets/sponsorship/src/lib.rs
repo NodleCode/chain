@@ -253,6 +253,10 @@ pub mod pallet {
 			for user in users.clone() {
 				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::UserAlreadyRegistered);
 				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
+				frame_system::Pallet::<T>::inc_providers(&proxy);
+				if !Self::registered_for_any_pots(&user) {
+					frame_system::Pallet::<T>::inc_providers(&user);
+				}
 				<User<T>>::insert(
 					pot,
 					user,
@@ -284,13 +288,13 @@ pub mod pallet {
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
 				let user_details = User::<T>::get(pot, &user).ok_or(Error::<T>::UserNotRegistered)?;
-				Self::remove_proxy(
+				Self::settle_user_accounts(
 					&pot_details.sponsor,
 					&user,
 					&user_details.proxy,
 					user_details.reserve.balance(),
 				)?;
-				<User<T>>::remove(pot, &user);
+				Self::remove_user(&pot, &user);
 			}
 			Self::deposit_event(Event::UsersRemoved(pot, users));
 			Ok(())
@@ -315,7 +319,7 @@ pub mod pallet {
 			let mut users_to_remove = Vec::<T::AccountId>::new();
 			let limit = u32::from(limit) as usize;
 			for (user, user_details) in User::<T>::iter_prefix(pot) {
-				if Self::remove_proxy(
+				if Self::settle_user_accounts(
 					&pot_details.sponsor,
 					&user,
 					&user_details.proxy,
@@ -330,7 +334,7 @@ pub mod pallet {
 				}
 			}
 			for user in &users_to_remove {
-				<User<T>>::remove(pot, user);
+				Self::remove_user(&pot, &user);
 			}
 			Self::deposit_event(Event::UsersRemoved(pot, users_to_remove));
 			Ok(())
@@ -421,7 +425,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// - `who`: The spawner account.
 	/// - `pot_id`: The pot id this proxy is created for.
-	pub fn pure_account(who: &T::AccountId, pot_id: &T::PotId) -> Option<T::AccountId> {
+	fn pure_account(who: &T::AccountId, pot_id: &T::PotId) -> Option<T::AccountId> {
 		let entropy = (b"modlsp/sponsorship", who, pot_id).using_encoded(blake2_256);
 		Decode::decode(&mut TrailingZeroInput::new(entropy.as_ref())).ok()
 	}
@@ -429,7 +433,7 @@ impl<T: Config> Pallet<T> {
 	/// Let the account die afterwards.
 	///
 	/// Returns `Ok` if the proxy is removed successfully.
-	pub fn remove_proxy(
+	fn settle_user_accounts(
 		sponsor: &T::AccountId,
 		user: &T::AccountId,
 		proxy: &T::AccountId,
@@ -443,6 +447,18 @@ impl<T: Config> Pallet<T> {
 		let refund = proxy_free_balance.min(owing);
 		T::Currency::transfer(proxy, sponsor, refund, AllowDeath)?;
 		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(refund), AllowDeath)?;
+		frame_system::Pallet::<T>::dec_providers(&proxy)?;
 		Ok(())
+	}
+	/// Remove the user from the pot.
+	fn remove_user(pot: &T::PotId, who: &T::AccountId) {
+		<User<T>>::remove(pot, who);
+		if !Self::registered_for_any_pots(who) {
+			let _ = frame_system::Pallet::<T>::dec_providers(who);
+		}
+	}
+	/// Check if the account is registered for any pots.
+	fn registered_for_any_pots(who: &T::AccountId) -> bool {
+		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
 	}
 }

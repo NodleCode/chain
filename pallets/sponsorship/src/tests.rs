@@ -229,6 +229,8 @@ fn sponsors_can_register_new_users() {
 			remained_fee_quota: user_3_fee_quota,
 			reserve: LimitedBalance::with_limit(user_3_reserve_quota),
 		};
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 0);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_details_3.proxy), 0);
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -236,6 +238,8 @@ fn sponsors_can_register_new_users() {
 			user_3_fee_quota,
 			user_3_reserve_quota
 		));
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_details_3.proxy), 1);
 		assert_eq!(User::<Test>::get(pot, user_3), Some(user_details_3));
 		System::assert_last_event(Event::UsersRegistered(pot, vec![user_3]).into());
 	});
@@ -365,11 +369,16 @@ fn only_sponsors_have_permission_to_remove_users() {
 			Error::<Test>::NoPermission
 		);
 
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1), 1);
+		let user_1_proxy = <User<Test>>::get(pot, user_1).unwrap().proxy;
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1_proxy), 1);
 		assert_ok!(SponsorshipModule::remove_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
 			vec![user_1, user_2]
 		));
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1), 0);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1_proxy), 0);
 
 		assert_noop!(
 			SponsorshipModule::remove_inactive_users(
@@ -380,11 +389,16 @@ fn only_sponsors_have_permission_to_remove_users() {
 			Error::<Test>::NoPermission
 		);
 
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
+		let user_3_proxy = <User<Test>>::get(pot, user_3).unwrap().proxy;
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 1);
 		assert_ok!(SponsorshipModule::remove_inactive_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
 			NonZeroU32::new(10).unwrap()
 		));
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 0);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 0);
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1005,5 +1019,87 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 
 		let user_details = User::<Test>::get(pot, user).unwrap();
 		assert_eq!(user_details.reserve.balance(), 0);
+	});
+}
+
+#[test]
+fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_in_other_pots() {
+	new_test_ext().execute_with(|| {
+		let pot_1 = 3;
+		let pot_2 = 4;
+
+		System::set_block_number(1);
+
+		let pot_details_1 = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			remained_fee_quota: 5,
+			remained_reserve_quota: 7,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details_1.sponsor),
+			pot_1,
+			pot_details_1.sponsorship_type.clone(),
+			pot_details_1.remained_fee_quota,
+			pot_details_1.remained_reserve_quota
+		));
+
+		let pot_details_2 = PotDetailsOf::<Test> {
+			sponsor: 2,
+			sponsorship_type: SponsorshipType::AnySafe,
+			remained_fee_quota: 10,
+			remained_reserve_quota: 14,
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details_2.sponsor),
+			pot_2,
+			pot_details_2.sponsorship_type.clone(),
+			pot_details_2.remained_fee_quota,
+			pot_details_2.remained_reserve_quota
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64; // Will be in both pots.
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details_1.sponsor),
+			pot_1,
+			vec![user_1, user_2],
+			common_fee_quota,
+			common_reserve_quota
+		));
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details_2.sponsor),
+			pot_2,
+			vec![user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 1);
+		let user_2_proxy_1 = <User<Test>>::get(pot_1, user_2).unwrap().proxy;
+		let user_2_proxy_2 = <User<Test>>::get(pot_2, user_2).unwrap().proxy;
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_1), 1);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_2), 1);
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details_1.sponsor),
+			pot_1,
+			vec![user_2]
+		));
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 1);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_1), 0);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_2), 1);
+
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details_2.sponsor),
+			pot_2,
+			vec![user_2]
+		));
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 0);
+		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_2), 0);
 	});
 }
