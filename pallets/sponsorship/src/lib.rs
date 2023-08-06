@@ -334,7 +334,7 @@ pub mod pallet {
 				}
 			}
 			for user in &users_to_remove {
-				Self::remove_user(&pot, &user);
+				Self::remove_user(&pot, user);
 			}
 			Self::deposit_event(Event::UsersRemoved(pot, users_to_remove));
 			Ok(())
@@ -447,7 +447,7 @@ impl<T: Config> Pallet<T> {
 		let refund = proxy_free_balance.min(owing);
 		T::Currency::transfer(proxy, sponsor, refund, AllowDeath)?;
 		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(refund), AllowDeath)?;
-		frame_system::Pallet::<T>::dec_providers(&proxy)?;
+		frame_system::Pallet::<T>::dec_providers(proxy)?;
 		Ok(())
 	}
 	/// Remove the user from the pot.
