@@ -20,8 +20,10 @@ use crate as pallet_sponsorship;
 use frame_support::{
 	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU16, ConstU64, InstanceFilter},
+	traits::{AsEnsureOriginWithArg, ConstU16, ConstU64, ConstU8, InstanceFilter},
+	weights::IdentityFee,
 };
+use pallet_transaction_payment::CurrencyAdapter;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -42,6 +44,7 @@ frame_support::construct_runtime!(
 		Balances: pallet_balances,
 		Uniques: pallet_uniques,
 		SponsorshipModule: pallet_sponsorship,
+		TransactionPayment: pallet_transaction_payment,
 	}
 );
 
@@ -86,6 +89,15 @@ impl pallet_balances::Config for Test {
 	type MaxFreezes = ();
 	type HoldIdentifier = ();
 	type MaxHolds = ();
+}
+
+impl pallet_transaction_payment::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+	type OperationalFeeMultiplier = ConstU8<5>;
+	type WeightToFee = IdentityFee<u64>;
+	type LengthToFee = IdentityFee<u64>;
+	type FeeMultiplierUpdate = ();
 }
 
 parameter_types! {

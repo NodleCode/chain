@@ -19,18 +19,23 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use core::num::NonZeroU32;
-use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, RuntimeDebug, TypeInfo};
+use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, TypeInfo};
 use frame_support::{
-	dispatch::{DispatchResult, Dispatchable, GetDispatchInfo},
+	dispatch::{DispatchInfo, DispatchResult, Dispatchable, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
 		Currency,
 		ExistenceRequirement::{AllowDeath, KeepAlive},
-		InstanceFilter, IsSubType, OriginTrait, ReservableCurrency,
+		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
+use pallet_transaction_payment::OnChargeTransaction;
 use sp_io::hashing::blake2_256;
-use sp_runtime::traits::{TrailingZeroInput, Zero};
-use sp_runtime::Saturating;
+use sp_runtime::{
+	traits::{DispatchInfoOf, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
+	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
+};
+use sp_runtime::{FixedPointOperand, Saturating};
+use sp_std::fmt::{Debug, Formatter, Result as FmtResult};
 use support::LimitedBalance;
 
 pub use pallet::*;
@@ -47,6 +52,10 @@ pub mod weights;
 pub use weights::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type OnChargeTransactionBalanceOf<T> =
+	<<T as pallet_transaction_payment::Config>::OnChargeTransaction as OnChargeTransaction<T>>::Balance;
+type LiquidityInfoOf<T> =
+	<<T as pallet_transaction_payment::Config>::OnChargeTransaction as OnChargeTransaction<T>>::LiquidityInfo;
 type PotDetailsOf<T> = PotDetails<<T as frame_system::Config>::AccountId, <T as Config>::SponsorshipType, BalanceOf<T>>;
 type UserDetailsOf<T> = UserDetails<<T as frame_system::Config>::AccountId, BalanceOf<T>>;
 
@@ -105,7 +114,7 @@ pub mod pallet {
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_transaction_payment::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// The overarching call type.
@@ -158,6 +167,8 @@ pub mod pallet {
 		UsersRemoved(T::PotId, Vec<T::AccountId>),
 		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
 		Sponsored { top_up: BalanceOf<T>, refund: BalanceOf<T> },
+		/// Event emitted when the transaction fee is paid showing the payer and the amount
+		TransactionFeePaid(T::AccountId, BalanceOf<T>),
 	}
 
 	#[pallet::error]
@@ -460,5 +471,157 @@ impl<T: Config> Pallet<T> {
 	/// Check if the account is registered for any pots.
 	fn registered_for_any_pots(who: &T::AccountId) -> bool {
 		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
+	}
+}
+
+/// Require the sponsor to pay for their transactors.
+#[derive(Encode, Decode, Clone, Eq, PartialEq, TypeInfo)]
+#[scale_info(skip_type_params(T))]
+pub struct ChargeSponsor<T: Config>(PhantomData<BalanceOf<T>>);
+
+impl<T: Config> Debug for ChargeSponsor<T> {
+	#[cfg(feature = "std")]
+	fn fmt(&self, f: &mut Formatter) -> FmtResult {
+		write!(f, "ChargeTransactionPayment<{:?}>", self.0)
+	}
+	#[cfg(not(feature = "std"))]
+	fn fmt(&self, _: &mut Formatter) -> FmtResult {
+		Ok(())
+	}
+}
+
+pub struct PreDispatchSponsorCallData<T: Config> {
+	pot: T::PotId,
+	pot_details: PotDetailsOf<T>,
+	user_details: UserDetailsOf<T>,
+	fee_imbalance: LiquidityInfoOf<T>,
+}
+pub type Pre<T> = Option<PreDispatchSponsorCallData<T>>;
+
+impl<T: Config> ChargeSponsor<T>
+where
+	BalanceOf<T>: IsType<OnChargeTransactionBalanceOf<T>>,
+	OnChargeTransactionBalanceOf<T>: FixedPointOperand,
+	<T as frame_system::Config>::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+	<T as Config>::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+{
+	fn validate_sponsor_call(
+		user: &T::AccountId,
+		call: &<T as Config>::RuntimeCall,
+		info: &DispatchInfoOf<<T as Config>::RuntimeCall>,
+		len: usize,
+	) -> Result<Pre<T>, TransactionValidityError> {
+		match call.is_sub_type() {
+			Some(Call::sponsor_for { pot, .. }) => {
+				let pot_details = Pot::<T>::get(pot).ok_or(InvalidTransaction::Call)?;
+				let user_details = User::<T>::get(pot, user).ok_or(InvalidTransaction::BadSigner)?;
+
+				let mut info = *info;
+				info.pays_fee = Pays::Yes;
+				let fee = pallet_transaction_payment::Pallet::<T>::compute_fee(len as u32, &info, Zero::zero());
+				if pot_details.remained_fee_quota.into_ref() < &fee && user_details.remained_fee_quota.into_ref() < &fee
+				{
+					Err(TransactionValidityError::Invalid(InvalidTransaction::Payment))?
+				}
+
+				let fee_imbalance = <T as pallet_transaction_payment::Config>::OnChargeTransaction::withdraw_fee(
+					&pot_details.sponsor,
+					call.into_ref(),
+					&info,
+					fee,
+					Zero::zero(),
+				)
+				.map_err(|_| InvalidTransaction::Payment)?;
+
+				Ok(Some(PreDispatchSponsorCallData {
+					pot: *pot,
+					pot_details,
+					user_details,
+					fee_imbalance,
+				}))
+			}
+			_ => Ok(None),
+		}
+	}
+}
+
+impl<T: Config> Default for ChargeSponsor<T> {
+	fn default() -> Self {
+		Self(PhantomData)
+	}
+}
+
+impl<T: Config> SignedExtension for ChargeSponsor<T>
+where
+	BalanceOf<T>: Send + Sync + IsType<OnChargeTransactionBalanceOf<T>>,
+	OnChargeTransactionBalanceOf<T>: FixedPointOperand,
+	<T as frame_system::Config>::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+	<T as Config>::RuntimeCall: Dispatchable<Info = DispatchInfo, PostInfo = PostDispatchInfo>,
+{
+	const IDENTIFIER: &'static str = "ChargeSponsor";
+	type AccountId = T::AccountId;
+	type Call = <T as Config>::RuntimeCall;
+	type AdditionalSigned = ();
+	type Pre = Pre<T>;
+	fn additional_signed(&self) -> Result<(), TransactionValidityError> {
+		Ok(())
+	}
+
+	fn validate(
+		&self,
+		who: &Self::AccountId,
+		call: &Self::Call,
+		info: &DispatchInfoOf<Self::Call>,
+		len: usize,
+	) -> TransactionValidity {
+		Self::validate_sponsor_call(who, call, info, len).map(|_| Ok(ValidTransaction::default()))?
+	}
+
+	fn pre_dispatch(
+		self,
+		who: &Self::AccountId,
+		call: &Self::Call,
+		info: &DispatchInfoOf<Self::Call>,
+		len: usize,
+	) -> Result<Self::Pre, TransactionValidityError> {
+		Self::validate_sponsor_call(who, call, info, len)
+	}
+
+	fn post_dispatch(
+		maybe_pre: Option<Self::Pre>,
+		info: &DispatchInfoOf<Self::Call>,
+		post_info: &PostDispatchInfoOf<Self::Call>,
+		len: usize,
+		_result: &DispatchResult,
+	) -> Result<(), TransactionValidityError> {
+		if let Some(Some(PreDispatchSponsorCallData {
+			pot,
+			mut pot_details,
+			mut user_details,
+			fee_imbalance,
+		})) = maybe_pre
+		{
+			let mut info = *info;
+			info.pays_fee = Pays::Yes;
+			let actual_fee =
+				pallet_transaction_payment::Pallet::<T>::compute_actual_fee(len as u32, &info, post_info, Zero::zero());
+			<T as pallet_transaction_payment::Config>::OnChargeTransaction::correct_and_deposit_fee(
+				&pot_details.sponsor,
+				&info,
+				post_info,
+				actual_fee,
+				Zero::zero(),
+				fee_imbalance,
+			)?;
+			let actual_fee = *<BalanceOf<T> as IsType<OnChargeTransactionBalanceOf<T>>>::from_ref(&actual_fee);
+
+			pot_details.remained_fee_quota = pot_details.remained_fee_quota.saturating_sub(actual_fee);
+			user_details.remained_fee_quota = user_details.remained_fee_quota.saturating_sub(actual_fee);
+			Pot::<T>::insert(pot, &pot_details);
+			User::<T>::insert(pot, &pot_details.sponsor, user_details);
+
+			Pallet::<T>::deposit_event(Event::<T>::TransactionFeePaid(pot_details.sponsor, actual_fee));
+		}
+		Ok(())
 	}
 }
