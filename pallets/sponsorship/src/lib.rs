@@ -493,6 +493,7 @@ impl<T: Config> Debug for ChargeSponsor<T> {
 pub struct PreDispatchSponsorCallData<T: Config> {
 	pot: T::PotId,
 	pot_details: PotDetailsOf<T>,
+	user: T::AccountId,
 	user_details: UserDetailsOf<T>,
 	fee_imbalance: LiquidityInfoOf<T>,
 }
@@ -519,7 +520,7 @@ where
 				let mut info = *info;
 				info.pays_fee = Pays::Yes;
 				let fee = pallet_transaction_payment::Pallet::<T>::compute_fee(len as u32, &info, Zero::zero());
-				if pot_details.remained_fee_quota.into_ref() < &fee && user_details.remained_fee_quota.into_ref() < &fee
+				if pot_details.remained_fee_quota.into_ref() < &fee || user_details.remained_fee_quota.into_ref() < &fee
 				{
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Payment))?
 				}
@@ -536,6 +537,7 @@ where
 				Ok(Some(PreDispatchSponsorCallData {
 					pot: *pot,
 					pot_details,
+					user: user.clone(),
 					user_details,
 					fee_imbalance,
 				}))
@@ -597,6 +599,7 @@ where
 		if let Some(Some(PreDispatchSponsorCallData {
 			pot,
 			mut pot_details,
+			user,
 			mut user_details,
 			fee_imbalance,
 		})) = maybe_pre
@@ -618,7 +621,7 @@ where
 			pot_details.remained_fee_quota = pot_details.remained_fee_quota.saturating_sub(actual_fee);
 			user_details.remained_fee_quota = user_details.remained_fee_quota.saturating_sub(actual_fee);
 			Pot::<T>::insert(pot, &pot_details);
-			User::<T>::insert(pot, &pot_details.sponsor, user_details);
+			User::<T>::insert(pot, user, user_details);
 
 			Pallet::<T>::deposit_event(Event::<T>::TransactionFeePaid(pot_details.sponsor, actual_fee));
 		}
