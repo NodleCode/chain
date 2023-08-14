@@ -54,7 +54,7 @@ fn creator_of_pot_becomes_sponsor() {
 			pot_details.remained_reserve_quota
 		));
 		assert_eq!(Pot::<Test>::get(pot), Some(pot_details));
-		System::assert_last_event(Event::PotCreated(pot).into());
+		System::assert_last_event(Event::PotCreated { pot }.into());
 	});
 }
 
@@ -112,7 +112,7 @@ fn sponsors_can_remove_user_free_pots() {
 			pot
 		));
 		assert_eq!(Pot::<Test>::get(pot), None);
-		System::assert_last_event(Event::PotRemoved(pot).into());
+		System::assert_last_event(Event::PotRemoved { pot }.into());
 
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -229,7 +229,13 @@ fn sponsors_can_register_new_users() {
 		));
 		assert_eq!(User::<Test>::get(pot, user_1), Some(user_details_1));
 		assert_eq!(User::<Test>::get(pot, user_2), Some(user_details_2));
-		System::assert_last_event(Event::UsersRegistered(pot, vec![user_1, user_2]).into());
+		System::assert_last_event(
+			Event::UsersRegistered {
+				pot,
+				users: vec![user_1, user_2],
+			}
+			.into(),
+		);
 
 		let user_3 = 18u64;
 		let user_3_fee_quota = common_fee_quota + 1;
@@ -251,7 +257,13 @@ fn sponsors_can_register_new_users() {
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_details_3.proxy), 1);
 		assert_eq!(User::<Test>::get(pot, user_3), Some(user_details_3));
-		System::assert_last_event(Event::UsersRegistered(pot, vec![user_3]).into());
+		System::assert_last_event(
+			Event::UsersRegistered {
+				pot,
+				users: vec![user_3],
+			}
+			.into(),
+		);
 	});
 }
 
@@ -469,7 +481,13 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 			pot,
 			vec![user_1, user_3],
 		));
-		System::assert_last_event(Event::UsersRemoved(pot, vec![user_1, user_3]).into());
+		System::assert_last_event(
+			Event::UsersRemoved {
+				pot,
+				users: vec![user_1, user_3],
+			}
+			.into(),
+		);
 		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
 	});
 }
@@ -518,7 +536,13 @@ fn sponsors_can_remove_inactive_users() {
 			pot,
 			NonZeroU32::new(10).unwrap()
 		));
-		System::assert_last_event(Event::UsersRemoved(pot, vec![user_3, user_1]).into());
+		System::assert_last_event(
+			Event::UsersRemoved {
+				pot,
+				users: vec![user_3, user_1],
+			}
+			.into(),
+		);
 		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
 	});
 }
@@ -562,7 +586,13 @@ fn removing_inactive_users_respects_limit() {
 			pot,
 			NonZeroU32::new(1).unwrap()
 		));
-		System::assert_last_event(Event::UsersRemoved(pot, vec![user_3]).into());
+		System::assert_last_event(
+			Event::UsersRemoved {
+				pot,
+				users: vec![user_3],
+			}
+			.into(),
+		);
 		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 2);
 	});
 }
@@ -1308,7 +1338,13 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 			fee
 		);
 
-		System::assert_last_event(Event::TransactionFeePaid(pot_details.sponsor, fee).into());
+		System::assert_last_event(
+			Event::TransactionFeePaid {
+				sponsor: pot_details.sponsor,
+				fee,
+			}
+			.into(),
+		);
 		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota - fee);
 	});
 }

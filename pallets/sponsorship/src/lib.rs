@@ -158,17 +158,17 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Event emitted when a new pot is created.
-		PotCreated(T::PotId),
+		PotCreated { pot: T::PotId },
 		/// Event emitted when a pot is removed.
-		PotRemoved(T::PotId),
+		PotRemoved { pot: T::PotId },
 		/// Event emitted when user/users are registered indicating the list of them
-		UsersRegistered(T::PotId, Vec<T::AccountId>),
+		UsersRegistered { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when user/users are removed indicating the list of them
-		UsersRemoved(T::PotId, Vec<T::AccountId>),
+		UsersRemoved { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
 		Sponsored { top_up: BalanceOf<T>, refund: BalanceOf<T> },
 		/// Event emitted when the transaction fee is paid showing the payer and the amount
-		TransactionFeePaid(T::AccountId, BalanceOf<T>),
+		TransactionFeePaid { sponsor: T::AccountId, fee: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -220,7 +220,7 @@ pub mod pallet {
 				},
 			);
 
-			Self::deposit_event(Event::PotCreated(pot));
+			Self::deposit_event(Event::PotCreated { pot });
 			Ok(())
 		}
 
@@ -240,7 +240,7 @@ pub mod pallet {
 				*maybe_pot_details = None;
 				Ok(())
 			})?;
-			Self::deposit_event(Event::PotRemoved(pot));
+			Self::deposit_event(Event::PotRemoved { pot });
 			Ok(())
 		}
 
@@ -278,7 +278,7 @@ pub mod pallet {
 					},
 				);
 			}
-			Self::deposit_event(Event::UsersRegistered(pot, users));
+			Self::deposit_event(Event::UsersRegistered { pot, users });
 			Ok(())
 		}
 
@@ -307,7 +307,7 @@ pub mod pallet {
 				)?;
 				Self::remove_user(&pot, &user);
 			}
-			Self::deposit_event(Event::UsersRemoved(pot, users));
+			Self::deposit_event(Event::UsersRemoved { pot, users });
 			Ok(())
 		}
 
@@ -347,7 +347,10 @@ pub mod pallet {
 			for user in &users_to_remove {
 				Self::remove_user(&pot, user);
 			}
-			Self::deposit_event(Event::UsersRemoved(pot, users_to_remove));
+			Self::deposit_event(Event::UsersRemoved {
+				pot,
+				users: users_to_remove,
+			});
 			Ok(())
 		}
 
@@ -623,7 +626,10 @@ where
 			Pot::<T>::insert(pot, &pot_details);
 			User::<T>::insert(pot, user, user_details);
 
-			Pallet::<T>::deposit_event(Event::<T>::TransactionFeePaid(pot_details.sponsor, actual_fee));
+			Pallet::<T>::deposit_event(Event::<T>::TransactionFeePaid {
+				sponsor: pot_details.sponsor,
+				fee: actual_fee,
+			});
 		}
 		Ok(())
 	}
