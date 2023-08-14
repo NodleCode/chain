@@ -150,22 +150,16 @@ impl pallet_nodle_uniques::Config for Runtime {
 pub enum SponsorshipType {
 	AnySafe,
 	Uniques,
-	UniquesMint,
 }
 impl InstanceFilter<RuntimeCall> for SponsorshipType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
 			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Utility { .. }),
 			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
-			SponsorshipType::UniquesMint => {
-				matches!(c, RuntimeCall::Uniques(pallet_nodle_uniques::Call::mint { .. }))
-			}
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
-		(self == &SponsorshipType::AnySafe)
-			|| (self == &SponsorshipType::Uniques && o == &SponsorshipType::UniquesMint)
-			|| (self == o)
+		(self == &SponsorshipType::AnySafe) || (self == o)
 	}
 }
 impl Default for SponsorshipType {
