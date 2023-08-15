@@ -167,7 +167,7 @@ pub mod pallet {
 		/// Event emitted when user/users are removed indicating the list of them
 		UsersRemoved { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
-		Sponsored { top_up: BalanceOf<T>, refund: BalanceOf<T> },
+		Sponsored { paid: BalanceOf<T>, repaid: BalanceOf<T> },
 		/// Event emitted when the transaction fee is paid showing the payer and the amount
 		TransactionFeePaid { sponsor: T::AccountId, fee: BalanceOf<T> },
 	}
@@ -369,14 +369,14 @@ pub mod pallet {
 		/// `Error::BalanceLeak`. For example they cannot transfer fund to another account even if
 		/// the sponsorship type allows `Balances` calls.
 		///
-		/// Emits `Sponsored {top_up, refund}` when successful. The `top_up` is the amount initially
-		/// transferred to the proxy account of the user by the sponsor. The `refund` is the amount
-		/// refunded to the sponsor after the call has been successfully executed.
-		/// Please note `refund` can be bigger than `top_up` if for any reason the user is able to
+		/// Emits `Sponsored {paid, repaid}` when successful. The `paid` is the amount initially
+		/// transferred to the proxy account of the user by the sponsor. The `repaid` is the amount
+		/// repaid to the sponsor after the call has been successfully executed.
+		/// Please note `repaid` can be bigger than `paid` if for any reason the user is able to
 		/// partially or fully pay back their previous debt to the sponsor too.
-		/// Also the top_up might be less than what the limit for the user allows if the user can
+		/// Also the `paid` might be less than what the limit for the user allows if the user can
 		/// support themselves partially or fully based on their free balance in their proxy account
-		/// . Lastly, the top_up is limited by the remaining reserve quota for the pot too.
+		/// . Finally, the `paid` is limited by the remaining reserve quota for the pot too.
 		#[pallet::call_index(5)]
 		#[pallet::weight({
 			let dispatch_info = call.get_dispatch_info();
@@ -402,32 +402,32 @@ pub mod pallet {
 				.reserve_quota
 				.available_margin()
 				.min(pot_details.reserve_quota.available_margin());
-			let top_up = user_details
+			let paid = user_details
 				.reserve_quota
 				.limit()
 				.saturating_sub(T::Currency::free_balance(&user_details.proxy))
 				.min(fund_for_reserve);
-			T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, top_up, KeepAlive)?;
-			pot_details.reserve_quota.saturating_add(top_up);
-			user_details.reserve_quota.saturating_add(top_up);
+			T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, paid, KeepAlive)?;
+			pot_details.reserve_quota.saturating_add(paid);
+			user_details.reserve_quota.saturating_add(paid);
 
 			let proxy_balance = T::Currency::total_balance(&user_details.proxy);
 			call.dispatch(proxy_origin).map_err(|e| e.error)?;
 			let new_proxy_balance = T::Currency::total_balance(&user_details.proxy);
 			ensure!(new_proxy_balance >= proxy_balance, Error::<T>::BalanceLeak);
 
-			let refundable =
+			let repayable =
 				T::Currency::free_balance(&user_details.proxy).saturating_sub(T::Currency::minimum_balance());
-			let refund = refundable.min(user_details.reserve_quota.balance());
-			T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, refund, KeepAlive)?;
+			let repaid = repayable.min(user_details.reserve_quota.balance());
+			T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, repaid, KeepAlive)?;
 
-			user_details.reserve_quota.saturating_sub(refund);
-			pot_details.reserve_quota.saturating_sub(refund);
+			user_details.reserve_quota.saturating_sub(repaid);
+			pot_details.reserve_quota.saturating_sub(repaid);
 
 			Pot::<T>::insert(pot, pot_details);
 			User::<T>::insert(pot, &who, user_details);
 
-			Self::deposit_event(Event::Sponsored { top_up, refund });
+			Self::deposit_event(Event::Sponsored { paid, repaid });
 			Ok(().into())
 		}
 	}
@@ -459,9 +459,9 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::CannotRemoveProxy
 		);
 		let proxy_free_balance = T::Currency::free_balance(proxy);
-		let refund = proxy_free_balance.min(owing);
-		T::Currency::transfer(proxy, sponsor, refund, AllowDeath)?;
-		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(refund), AllowDeath)?;
+		let repay = proxy_free_balance.min(owing);
+		T::Currency::transfer(proxy, sponsor, repay, AllowDeath)?;
+		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(repay), AllowDeath)?;
 		frame_system::Pallet::<T>::dec_providers(proxy)?;
 		Ok(())
 	}

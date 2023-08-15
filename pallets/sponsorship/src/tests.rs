@@ -771,8 +771,8 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 		let user_details = User::<Test>::get(pot, user).unwrap();
 		System::assert_last_event(
 			Event::Sponsored {
-				top_up: user_reserve_quota,
-				refund: user_reserve_quota - user_details.reserve_quota.balance(),
+				paid: user_reserve_quota,
+				repaid: user_reserve_quota - user_details.reserve_quota.balance(),
 			}
 			.into(),
 		);
@@ -888,7 +888,7 @@ fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
 }
 
 #[test]
-fn sponsor_for_calls_will_refund_unused_reserve() {
+fn sponsor_for_calls_will_repay_unused_reserve() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
@@ -957,8 +957,8 @@ fn sponsor_for_calls_will_refund_unused_reserve() {
 		));
 		System::assert_last_event(
 			Event::Sponsored {
-				top_up: user_reserve_quota - user_details.reserve_quota.balance(),
-				refund: user_reserve_quota - Balances::minimum_balance(),
+				paid: user_reserve_quota - user_details.reserve_quota.balance(),
+				repaid: user_reserve_quota - Balances::minimum_balance(),
 			}
 			.into(),
 		);
@@ -1047,8 +1047,8 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 
 		System::assert_last_event(
 			Event::Sponsored {
-				top_up: user_reserve_quota - user_free_balance_after_earning,
-				refund: user_reserve_quota - user_free_balance_after_earning + user_owing,
+				paid: user_reserve_quota - user_free_balance_after_earning,
+				repaid: user_reserve_quota - user_free_balance_after_earning + user_owing,
 			}
 			.into(),
 		);
