@@ -63,23 +63,24 @@ type UserDetailsOf<T> = UserDetails<<T as frame_system::Config>::AccountId, Bala
 /// withdrawn from the sponsor. So a valid pot does not guarantee that the sponsor has enough funds
 /// to cover the fees/reserves of the sponsored transactions.
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
-pub struct PotDetails<AccountId, SponsorshipType, Balance> {
+pub struct PotDetails<AccountId, SponsorshipType, Balance: frame_support::traits::tokens::Balance> {
 	/// The sponsor of the pot
 	///
 	/// The fees will be deducted from this account. The reserve funds will be taken from this.
 	sponsor: AccountId,
 	/// The category of the calls this pot will sponsor for its registered users.
 	sponsorship_type: SponsorshipType,
-	/// The remained allowance for covering fees of sponsored transactions.
+	/// The limit and balance for covering fees of sponsored transactions.
 	///
-	/// When remained_fee_quota reaches zero, the pot is considered inactive. Any amount paid as fee
-	/// is considered a permanent loss.
-	remained_fee_quota: Balance,
-	/// The remained allowance for covering reserves needed for some of sponsored transactions.
+	/// When `fee_quota` reaches its limit, the pot is considered inactive.
+	/// Any amount paid as fee is considered a permanent loss.
+	fee_quota: LimitedBalance<Balance>,
+	/// The limit and balance for covering reserves needed for some of sponsored transactions.
 	///
-	/// When remained_reserve_quota is zero, the pot could still be active but not suitable for some
-	/// transactions. Any amount used as reserve may be returned to the sponsor when unreserved.
-	remained_reserve_quota: Balance,
+	/// When `reserve_quota` reaches its limit, the pot could still be active but not suitable for
+	/// some transactions.
+	/// Any amount used as reserve may be returned to the sponsor when unreserved.
+	reserve_quota: LimitedBalance<Balance>,
 }
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
@@ -88,17 +89,17 @@ pub struct UserDetails<AccountId, Balance: frame_support::traits::tokens::Balanc
 	///
 	/// Same users would have different proxy accounts for different pots.
 	proxy: AccountId,
-	/// The remained allowance for covering fees of sponsored transactions for this user.
+	/// The limit and balance for covering fees of sponsored transactions for this user.
 	///
-	/// When remained_fee_quota reaches zero, the user is no longer sponsored by the pot.
-	remained_fee_quota: Balance,
-	/// The allowance for covering existential deposit needed to maintain proxy accounts plus the
+	/// When `fee_quota` reaches its limit, the user is no longer sponsored by the pot.
+	fee_quota: LimitedBalance<Balance>,
+	/// The limit and balance  for covering existential deposit needed to maintain proxy accounts plus the
 	/// fund to be used as a reserve for some of the sponsored transactions of this user.
 	///
-	/// When remained_reserve_quota is zero, the use may still be sponsored for those transactions
+	/// When `reserve_quota` reaches its limit, the use may still be sponsored for those transactions
 	/// which do not require any reserve. Any amount used as reserve will be returned to the sponsor
 	/// when unreserved. This is to prevent malicious users from draining sponsor funds.
-	reserve: LimitedBalance<Balance>,
+	reserve_quota: LimitedBalance<Balance>,
 }
 
 #[frame_support::pallet]
@@ -215,8 +216,8 @@ pub mod pallet {
 				PotDetailsOf::<T> {
 					sponsor: who,
 					sponsorship_type,
-					remained_fee_quota: fee_quota,
-					remained_reserve_quota: reserve_quota,
+					fee_quota: LimitedBalance::with_limit(fee_quota),
+					reserve_quota: LimitedBalance::with_limit(reserve_quota),
 				},
 			);
 
@@ -273,8 +274,8 @@ pub mod pallet {
 					user,
 					UserDetailsOf::<T> {
 						proxy,
-						remained_fee_quota: common_fee_quota,
-						reserve: LimitedBalance::with_limit(common_reserve_quota),
+						fee_quota: LimitedBalance::with_limit(common_fee_quota),
+						reserve_quota: LimitedBalance::with_limit(common_reserve_quota),
 					},
 				);
 			}
@@ -303,7 +304,7 @@ pub mod pallet {
 					&pot_details.sponsor,
 					&user,
 					&user_details.proxy,
-					user_details.reserve.balance(),
+					user_details.reserve_quota.balance(),
 				)?;
 				Self::remove_user(&pot, &user);
 			}
@@ -334,7 +335,7 @@ pub mod pallet {
 					&pot_details.sponsor,
 					&user,
 					&user_details.proxy,
-					user_details.reserve.balance(),
+					user_details.reserve_quota.balance(),
 				)
 				.is_ok()
 				{
@@ -398,17 +399,17 @@ pub mod pallet {
 			});
 
 			let fund_for_reserve = user_details
-				.reserve
+				.reserve_quota
 				.available_margin()
-				.min(pot_details.remained_reserve_quota);
+				.min(pot_details.reserve_quota.available_margin());
 			let top_up = user_details
-				.reserve
+				.reserve_quota
 				.limit()
 				.saturating_sub(T::Currency::free_balance(&user_details.proxy))
 				.min(fund_for_reserve);
 			T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, top_up, KeepAlive)?;
-			pot_details.remained_reserve_quota = pot_details.remained_reserve_quota.saturating_sub(top_up);
-			user_details.reserve.saturating_add(top_up);
+			pot_details.reserve_quota.saturating_add(top_up);
+			user_details.reserve_quota.saturating_add(top_up);
 
 			let proxy_balance = T::Currency::total_balance(&user_details.proxy);
 			call.dispatch(proxy_origin).map_err(|e| e.error)?;
@@ -417,11 +418,11 @@ pub mod pallet {
 
 			let refundable =
 				T::Currency::free_balance(&user_details.proxy).saturating_sub(T::Currency::minimum_balance());
-			let refund = refundable.min(user_details.reserve.balance());
+			let refund = refundable.min(user_details.reserve_quota.balance());
 			T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, refund, KeepAlive)?;
 
-			user_details.reserve.saturating_sub(refund);
-			pot_details.remained_reserve_quota = pot_details.remained_reserve_quota.saturating_add(refund);
+			user_details.reserve_quota.saturating_sub(refund);
+			pot_details.reserve_quota.saturating_sub(refund);
 
 			Pot::<T>::insert(pot, pot_details);
 			User::<T>::insert(pot, &who, user_details);
@@ -523,8 +524,11 @@ where
 				let mut info = *info;
 				info.pays_fee = Pays::Yes;
 				let fee = pallet_transaction_payment::Pallet::<T>::compute_fee(len as u32, &info, Zero::zero());
-				if pot_details.remained_fee_quota.into_ref() < &fee || user_details.remained_fee_quota.into_ref() < &fee
-				{
+				let available_fee_margin = pot_details
+					.fee_quota
+					.available_margin()
+					.min(user_details.fee_quota.available_margin());
+				if available_fee_margin.into_ref() < &fee {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Payment))?
 				}
 
@@ -621,8 +625,15 @@ where
 			)?;
 			let actual_fee = *<BalanceOf<T> as IsType<OnChargeTransactionBalanceOf<T>>>::from_ref(&actual_fee);
 
-			pot_details.remained_fee_quota = pot_details.remained_fee_quota.saturating_sub(actual_fee);
-			user_details.remained_fee_quota = user_details.remained_fee_quota.saturating_sub(actual_fee);
+			pot_details
+				.fee_quota
+				.add(actual_fee)
+				.map_err(|_| InvalidTransaction::Payment)?;
+			user_details
+				.fee_quota
+				.add(actual_fee)
+				.map_err(|_| InvalidTransaction::Payment)?;
+
 			Pot::<T>::insert(pot, &pot_details);
 			User::<T>::insert(pot, user, user_details);
 

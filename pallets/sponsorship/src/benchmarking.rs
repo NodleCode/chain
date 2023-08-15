@@ -39,16 +39,16 @@ mod benchmarks {
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
-			remained_fee_quota: 5u32.into(),
-			remained_reserve_quota: 7u32.into(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
 		#[extrinsic_call]
 		create_pot(
 			RawOrigin::Signed(caller),
 			pot,
 			pot_details.sponsorship_type.clone(),
-			pot_details.remained_fee_quota,
-			pot_details.remained_reserve_quota,
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit(),
 		);
 
 		assert_eq!(Pot::<T>::get(pot), Some(pot_details));
@@ -61,8 +61,8 @@ mod benchmarks {
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
-			remained_fee_quota: 5u32.into(),
-			remained_reserve_quota: 7u32.into(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 
@@ -81,8 +81,8 @@ mod benchmarks {
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
-			remained_fee_quota: 5u32.into(),
-			remained_reserve_quota: 7u32.into(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 
@@ -101,8 +101,8 @@ mod benchmarks {
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
-			remained_fee_quota: 5u32.into(),
-			remained_reserve_quota: 7u32.into(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 
@@ -137,8 +137,8 @@ mod benchmarks {
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
-			remained_fee_quota: 5u32.into(),
-			remained_reserve_quota: 7u32.into(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 
