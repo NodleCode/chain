@@ -1236,6 +1236,21 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 }
 
 #[test]
+fn debug_format_of_charge_sponsor() {
+	let charge_sponsor = ChargeSponsor::<Test>::default();
+	assert_eq!(
+		format!("{:?}", charge_sponsor),
+		"ChargeTransactionPayment<PhantomData<u64>>"
+	);
+}
+
+#[test]
+fn charging_sponsors_does_not_need_additional_signed_data() {
+	let charge_sponsor = ChargeSponsor::<Test>::default();
+	assert_eq!(charge_sponsor.additional_signed(), Ok(()));
+}
+
+#[test]
 fn sponsor_call_for_existing_pot_from_registered_user_with_enough_fee_limit_is_valid() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
@@ -1435,6 +1450,101 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 				fee,
 			}
 			.into(),
+		);
+		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota - fee);
+	});
+}
+
+#[test]
+fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 10_000_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
+			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let user_fee_quota = pot_fee_quota / 10;
+		let user_reserve_quota = pot_reserve_quota / 10;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+		let user_details = User::<Test>::get(pot, user).unwrap();
+
+		let right_call_type_but_wrong_pot = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
+			pot: 2,
+			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+				collection: 0u32.into(),
+				admin: user,
+			})),
+		}));
+		let pre_dispatch_details = ChargeSponsor::<Test>::default()
+			.pre_dispatch(
+				&user,
+				&right_call_type_but_wrong_pot,
+				&right_call_type_but_wrong_pot.get_dispatch_info(),
+				0,
+			)
+			.ok();
+		assert!(pre_dispatch_details.is_none());
+		assert_ok!(ChargeSponsor::<Test>::post_dispatch(
+			pre_dispatch_details,
+			&right_call_type_but_wrong_pot.get_dispatch_info(),
+			&().into(),
+			0,
+			&DispatchResult::Ok(())
+		));
+
+		let disallowed_call_type = Box::new(RuntimeCall::Balances(pallet_balances::Call::transfer_allow_death {
+			dest: user,
+			value: 1,
+		}));
+		let pre_dispatch_details = ChargeSponsor::<Test>::default()
+			.pre_dispatch(
+				&user,
+				&disallowed_call_type,
+				&disallowed_call_type.get_dispatch_info(),
+				0,
+			)
+			.ok();
+		assert!(pre_dispatch_details.is_some());
+		assert_ok!(ChargeSponsor::<Test>::post_dispatch(
+			pre_dispatch_details,
+			&disallowed_call_type.get_dispatch_info(),
+			&().into(),
+			0,
+			&DispatchResult::Ok(())
+		));
+
+		let user_details_post_dispatch = User::<Test>::get(pot, user).unwrap();
+		let pot_details_post_dispatch = Pot::<Test>::get(pot).unwrap();
+
+		let fee = pot_details_post_dispatch.fee_quota.balance() - pot_details.fee_quota.balance();
+		assert_eq!(fee, 0);
+		assert_eq!(
+			user_details_post_dispatch.fee_quota.balance() - user_details.fee_quota.balance(),
+			fee
 		);
 		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota - fee);
 	});
