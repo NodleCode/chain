@@ -296,18 +296,20 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_users(users.len() as u32))]
 		pub fn remove_users(origin: OriginFor<T>, pot: T::PotId, users: Vec<T::AccountId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
 				let user_details = User::<T>::get(pot, &user).ok_or(Error::<T>::UserNotRegistered)?;
-				Self::settle_user_accounts(
+				let repaid = Self::settle_user_accounts(
 					&pot_details.sponsor,
 					&user,
 					&user_details.proxy,
 					user_details.reserve_quota.balance(),
 				)?;
+				pot_details.reserve_quota.saturating_sub(repaid);
 				Self::remove_user(&pot, &user);
 			}
+			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::UsersRemoved { pot, users });
 			Ok(())
 		}
@@ -326,7 +328,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_inactive_users(u32::from(*limit)))]
 		pub fn remove_inactive_users(origin: OriginFor<T>, pot: T::PotId, limit: NonZeroU32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			let mut users_to_remove = Vec::<T::AccountId>::new();
 			let limit = u32::from(limit) as usize;
@@ -337,6 +339,7 @@ pub mod pallet {
 					&user_details.proxy,
 					user_details.reserve_quota.balance(),
 				)
+				.map(|repaid| pot_details.reserve_quota.saturating_sub(repaid))
 				.is_ok()
 				{
 					users_to_remove.push(user);
@@ -348,6 +351,7 @@ pub mod pallet {
 			for user in &users_to_remove {
 				Self::remove_user(&pot, user);
 			}
+			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::UsersRemoved {
 				pot,
 				users: users_to_remove,
@@ -447,13 +451,14 @@ impl<T: Config> Pallet<T> {
 	/// Transfer the left over balance from proxy to user and sponsor based on the given owing.
 	/// Let the account die afterwards.
 	///
-	/// Returns `Ok` if the proxy is removed successfully.
+	/// Returns `Ok(repay)` if the proxy is removed successfully. `repay` is the amount repaid to
+	/// the sponsor.
 	fn settle_user_accounts(
 		sponsor: &T::AccountId,
 		user: &T::AccountId,
 		proxy: &T::AccountId,
 		owing: BalanceOf<T>,
-	) -> DispatchResult {
+	) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
 		ensure!(
 			T::Currency::reserved_balance(proxy) == Zero::zero(),
 			Error::<T>::CannotRemoveProxy
@@ -463,7 +468,7 @@ impl<T: Config> Pallet<T> {
 		T::Currency::transfer(proxy, sponsor, repay, AllowDeath)?;
 		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(repay), AllowDeath)?;
 		frame_system::Pallet::<T>::dec_providers(proxy)?;
-		Ok(())
+		Ok(repay)
 	}
 	/// Remove the user from the pot.
 	fn remove_user(pot: &T::PotId, who: &T::AccountId) {

@@ -1063,6 +1063,97 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 }
 
 #[test]
+fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
+			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let user_fee_quota = pot_fee_quota / 100;
+		let user_reserve_quota = pot_reserve_quota / 100;
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		let user_1 = 2u64;
+		let user_2 = 21u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2],
+			user_fee_quota,
+			user_reserve_quota
+		));
+
+		let uniques_create_call_1 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 0u32.into(),
+			admin: user_1,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user_1),
+			pot,
+			uniques_create_call_1
+		));
+		let uniques_create_call_2 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 1u32.into(),
+			admin: user_2,
+		}));
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user_2),
+			pot,
+			uniques_create_call_2
+		));
+
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		let user_1_details = User::<Test>::get(pot, user_1).unwrap();
+		let user_2_details = User::<Test>::get(pot, user_2).unwrap();
+
+		let user_1_owing = user_1_details.reserve_quota.balance();
+		assert_eq!(user_1_owing, TestCollectionDeposit::get() + Balances::minimum_balance());
+		let user_2_owing = user_2_details.reserve_quota.balance();
+		assert_eq!(
+			pot_details.reserve_quota.available_margin(),
+			pot_reserve_quota - user_1_owing - user_2_owing
+		);
+
+		// Now for the sake of this test let's manipulate user's proxy account so we can remove this
+		// user from the pot.
+		Balances::unreserve(&user_1_details.proxy, user_1_owing - Balances::minimum_balance());
+		Balances::unreserve(&user_2_details.proxy, user_1_owing - Balances::minimum_balance());
+
+		assert_ok!(SponsorshipModule::remove_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1]
+		));
+
+		assert_ok!(SponsorshipModule::remove_inactive_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			NonZeroU32::new(1).unwrap()
+		));
+
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		assert_eq!(Balances::free_balance(&pot_details.sponsor), pot_reserve_quota);
+		assert_eq!(pot_details.reserve_quota.available_margin(), pot_reserve_quota);
+	});
+}
+
+#[test]
 fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_in_other_pots() {
 	new_test_ext().execute_with(|| {
 		let pot_1 = 3;
