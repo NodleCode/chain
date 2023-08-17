@@ -73,6 +73,26 @@ mod benchmarks {
 	}
 
 	#[benchmark]
+	fn update_pot_limits() {
+		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		#[extrinsic_call]
+		update_pot_limits(RawOrigin::Signed(caller.clone()), pot, 8u32.into(), 19u32.into());
+
+		let updated_pot = Pot::<T>::get(pot).unwrap();
+		assert_eq!(updated_pot.fee_quota.limit(), 8u32.into());
+		assert_eq!(updated_pot.reserve_quota.limit(), 19u32.into());
+	}
+
+	#[benchmark]
 	fn register_users(l: Linear<1, 1_000>) {
 		let caller: T::AccountId = whitelisted_caller();
 		let pot = 0u32.into();

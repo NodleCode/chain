@@ -162,6 +162,8 @@ pub mod pallet {
 		PotCreated { pot: T::PotId },
 		/// Event emitted when a pot is removed.
 		PotRemoved { pot: T::PotId },
+		/// Event emitted when a pot is updated.
+		PotUpdated { pot: T::PotId },
 		/// Event emitted when user/users are registered indicating the list of them
 		UsersRegistered { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when user/users are removed indicating the list of them
@@ -191,6 +193,10 @@ pub mod pallet {
 		CannotCreateProxy,
 		/// Balance leak is not allowed during a sponsored call.
 		BalanceLeak,
+		/// Cannot update the fee limit most likely due to being below the current commitment.
+		CannotUpdateFeeLimit,
+		/// Cannot update the reserve limit most likely due to being below the current commitment.
+		CannotUpdateReserveLimit,
 	}
 
 	#[pallet::call]
@@ -325,7 +331,7 @@ pub mod pallet {
 		/// Emits `UsersRemoved(pot, Vec<T::AccountId>)` with a list of those removed when
 		/// successful.
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::remove_inactive_users(u32::from(*limit)))]
+		#[pallet::weight(T::WeightInfo::remove_inactive_users(u32::from(* limit)))]
 		pub fn remove_inactive_users(origin: OriginFor<T>, pot: T::PotId, limit: NonZeroU32) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
@@ -383,8 +389,8 @@ pub mod pallet {
 		/// . Finally, the `paid` is limited by the remaining reserve quota for the pot too.
 		#[pallet::call_index(5)]
 		#[pallet::weight({
-			let dispatch_info = call.get_dispatch_info();
-			(dispatch_info.weight + <T as Config>::WeightInfo::sponsor_for(), dispatch_info.class, Pays::No)
+		let dispatch_info = call.get_dispatch_info();
+		(dispatch_info.weight + < T as Config >::WeightInfo::sponsor_for(), dispatch_info.class, Pays::No)
 		})]
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
@@ -433,6 +439,37 @@ pub mod pallet {
 
 			Self::deposit_event(Event::Sponsored { paid, repaid });
 			Ok(().into())
+		}
+
+		/// Update the pot details. Only the sponsor can do this. If the sponsor is lowering their
+		/// support, it can work only if the corresponding fee or reserve balance has enough
+		/// available margin. In other words, the sponsor cannot lower the limit for the fee below
+		/// what users have already taken from the pot. Similarly, the sponsor cannot lower the
+		/// reserve below what the users have already borrowed.
+		#[pallet::call_index(6)]
+		#[pallet::weight(< T as Config >::WeightInfo::update_pot_limits())]
+		pub fn update_pot_limits(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+
+			pot_details
+				.fee_quota
+				.update_limit(fee_quota)
+				.map_err(|_| Error::<T>::CannotUpdateFeeLimit)?;
+			pot_details
+				.reserve_quota
+				.update_limit(reserve_quota)
+				.map_err(|_| Error::<T>::CannotUpdateReserveLimit)?;
+
+			<Pot<T>>::insert(pot, pot_details);
+			Self::deposit_event(Event::PotUpdated { pot });
+			Ok(())
 		}
 	}
 }

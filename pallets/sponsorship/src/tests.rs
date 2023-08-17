@@ -151,6 +151,197 @@ fn only_sponsors_have_permission_to_remove_pots() {
 }
 
 #[test]
+fn updating_non_existing_pot_is_error() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_noop!(
+			SponsorshipModule::update_pot_limits(RuntimeOrigin::signed(pot_details.sponsor), pot, 6, 8),
+			Error::<Test>::PotNotExist
+		);
+	});
+}
+
+#[test]
+fn only_sponsors_have_permission_to_update_pots() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+		assert_noop!(
+			SponsorshipModule::update_pot_limits(RuntimeOrigin::signed(pot_details.sponsor + 1), pot, 6, 8),
+			Error::<Test>::NoPermission
+		);
+		assert_ok!(SponsorshipModule::update_pot_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			6,
+			8
+		));
+	});
+}
+
+#[test]
+fn sponsors_can_always_increase_pot_limits() {
+	new_test_ext().execute_with(|| {
+		let unused_pot = 3;
+		System::set_block_number(1);
+		let unused_pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		Pot::<Test>::insert(unused_pot, &unused_pot_details);
+		assert_ok!(SponsorshipModule::update_pot_limits(
+			RuntimeOrigin::signed(unused_pot_details.sponsor),
+			unused_pot,
+			unused_pot_details.fee_quota.limit() + 1,
+			unused_pot_details.reserve_quota.limit() + 1
+		));
+		System::assert_last_event(Event::PotUpdated { pot: unused_pot }.into());
+		let updated_pot = Pot::<Test>::get(unused_pot).unwrap();
+		assert_eq!(updated_pot.fee_quota.limit(), unused_pot_details.fee_quota.limit() + 1);
+		assert_eq!(
+			updated_pot.reserve_quota.limit(),
+			unused_pot_details.reserve_quota.limit() + 1
+		);
+
+		let fully_used_pot = 4;
+		let mut fully_used_pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		fully_used_pot_details.fee_quota.add(5).unwrap();
+		fully_used_pot_details.reserve_quota.add(7).unwrap();
+		Pot::<Test>::insert(fully_used_pot, &fully_used_pot_details);
+
+		assert_ok!(SponsorshipModule::update_pot_limits(
+			RuntimeOrigin::signed(fully_used_pot_details.sponsor),
+			fully_used_pot,
+			fully_used_pot_details.fee_quota.limit() + 1,
+			fully_used_pot_details.reserve_quota.limit() + 1
+		));
+		System::assert_last_event(Event::PotUpdated { pot: fully_used_pot }.into());
+		let updated_pot = Pot::<Test>::get(fully_used_pot).unwrap();
+		assert_eq!(
+			updated_pot.fee_quota.limit(),
+			fully_used_pot_details.fee_quota.limit() + 1
+		);
+		assert_eq!(
+			updated_pot.reserve_quota.limit(),
+			fully_used_pot_details.reserve_quota.limit() + 1
+		);
+	});
+}
+
+#[test]
+fn sponsors_can_set_same_limits_when_updating_pots() {
+	new_test_ext().execute_with(|| {
+		let unused_pot = 3;
+		System::set_block_number(1);
+		let unused_pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		Pot::<Test>::insert(unused_pot, &unused_pot_details);
+
+		assert_ok!(SponsorshipModule::update_pot_limits(
+			RuntimeOrigin::signed(unused_pot_details.sponsor),
+			unused_pot,
+			unused_pot_details.fee_quota.limit(),
+			unused_pot_details.reserve_quota.limit()
+		));
+
+		let updated_pot = Pot::<Test>::get(unused_pot).unwrap();
+		assert_eq!(updated_pot.fee_quota, unused_pot_details.fee_quota);
+		assert_eq!(updated_pot.reserve_quota, unused_pot_details.reserve_quota);
+	});
+}
+
+#[test]
+fn sponsors_can_decrease_pot_limits_only_when_available_margin_allows() {
+	new_test_ext().execute_with(|| {
+		let partially_used_pot = 4;
+		System::set_block_number(1);
+		let mut partially_used_pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		partially_used_pot_details.fee_quota.add(4).unwrap();
+		partially_used_pot_details.reserve_quota.add(3).unwrap();
+		Pot::<Test>::insert(partially_used_pot, &partially_used_pot_details);
+
+		assert_noop!(
+			SponsorshipModule::update_pot_limits(
+				RuntimeOrigin::signed(partially_used_pot_details.sponsor),
+				partially_used_pot,
+				partially_used_pot_details.fee_quota.limit()
+					- partially_used_pot_details.fee_quota.available_margin()
+					- 1,
+				partially_used_pot_details.reserve_quota.limit()
+			),
+			Error::<Test>::CannotUpdateFeeLimit
+		);
+
+		assert_noop!(
+			SponsorshipModule::update_pot_limits(
+				RuntimeOrigin::signed(partially_used_pot_details.sponsor),
+				partially_used_pot,
+				partially_used_pot_details.fee_quota.limit(),
+				partially_used_pot_details.reserve_quota.limit()
+					- partially_used_pot_details.reserve_quota.available_margin()
+					- 1
+			),
+			Error::<Test>::CannotUpdateReserveLimit
+		);
+
+		assert_ok!(SponsorshipModule::update_pot_limits(
+			RuntimeOrigin::signed(partially_used_pot_details.sponsor),
+			partially_used_pot,
+			partially_used_pot_details.fee_quota.limit() - partially_used_pot_details.fee_quota.available_margin(),
+			partially_used_pot_details.reserve_quota.limit()
+				- partially_used_pot_details.reserve_quota.available_margin()
+		));
+
+		System::assert_last_event(
+			Event::PotUpdated {
+				pot: partially_used_pot,
+			}
+			.into(),
+		);
+
+		let updated_pot = Pot::<Test>::get(partially_used_pot).unwrap();
+		assert_eq!(updated_pot.fee_quota.available_margin(), 0);
+		assert_eq!(updated_pot.reserve_quota.available_margin(), 0);
+	});
+}
+
+#[test]
 fn sponsors_cannot_remove_pots_with_users() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
