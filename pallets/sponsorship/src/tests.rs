@@ -624,6 +624,385 @@ fn only_sponsors_have_permission_to_remove_users() {
 }
 
 #[test]
+fn only_sponsors_have_permission_to_update_users_limits() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_noop!(
+			SponsorshipModule::update_users_limits(
+				RuntimeOrigin::signed(pot_details.sponsor + 1),
+				pot,
+				common_fee_quota + 1,
+				common_reserve_quota + 1,
+				vec![user_1, user_2]
+			),
+			Error::<Test>::NoPermission
+		);
+
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			common_fee_quota + 1,
+			common_reserve_quota + 1,
+			vec![user_1, user_2]
+		));
+		System::assert_last_event(
+			Event::UsersLimitsUpdated {
+				pot,
+				users: vec![user_1, user_2],
+			}
+			.into(),
+		);
+	});
+}
+
+#[test]
+fn updating_user_limits_for_non_existing_pots_is_error() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+
+		assert_noop!(
+			SponsorshipModule::register_users(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				vec![user_1],
+				common_fee_quota,
+				common_reserve_quota
+			),
+			Error::<Test>::PotNotExist
+		);
+	});
+}
+
+#[test]
+fn updating_users_limits_only_impacts_the_given_list() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			common_fee_quota + 1,
+			common_reserve_quota + 1,
+			vec![user_1, user_3]
+		),);
+
+		let user_1_details = <User<Test>>::get(pot, user_1).unwrap();
+		let user_2_details = <User<Test>>::get(pot, user_2).unwrap();
+		let user_3_details = <User<Test>>::get(pot, user_3).unwrap();
+
+		assert_eq!(user_1_details.fee_quota.limit(), common_fee_quota + 1);
+		assert_eq!(user_1_details.reserve_quota.limit(), common_reserve_quota + 1);
+		assert_eq!(user_2_details.fee_quota.limit(), common_fee_quota);
+		assert_eq!(user_2_details.reserve_quota.limit(), common_reserve_quota);
+		assert_eq!(user_3_details.fee_quota.limit(), common_fee_quota + 1);
+		assert_eq!(user_3_details.reserve_quota.limit(), common_reserve_quota + 1);
+	});
+}
+
+#[test]
+fn sponsors_can_always_set_user_limits_to_an_amount_equal_or_greater_than_before() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_2],
+			common_fee_quota - 1,
+			common_reserve_quota - 1
+		));
+
+		let mut user_1_details = <User<Test>>::get(pot, user_1).unwrap();
+		let mut user_2_details = <User<Test>>::get(pot, user_2).unwrap();
+		user_1_details.fee_quota.add(common_fee_quota).unwrap();
+		user_1_details.reserve_quota.add(common_reserve_quota).unwrap();
+		user_2_details.fee_quota.add(common_fee_quota - 1).unwrap();
+		user_2_details.reserve_quota.add(common_reserve_quota - 1).unwrap();
+		<User<Test>>::insert(pot, user_1, user_1_details);
+		<User<Test>>::insert(pot, user_2, user_2_details);
+
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			common_fee_quota + 1,
+			common_reserve_quota + 1,
+			vec![user_1, user_2]
+		),);
+		System::assert_last_event(
+			Event::UsersLimitsUpdated {
+				pot,
+				users: vec![user_1, user_2],
+			}
+			.into(),
+		);
+
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			common_fee_quota + 1,
+			common_reserve_quota + 1,
+			vec![user_1, user_2]
+		),);
+
+		let user_1_details = <User<Test>>::get(pot, user_1).unwrap();
+		let user_2_details = <User<Test>>::get(pot, user_2).unwrap();
+
+		assert_eq!(user_1_details.fee_quota.limit(), common_fee_quota + 1);
+		assert_eq!(user_1_details.reserve_quota.limit(), common_reserve_quota + 1);
+		assert_eq!(user_2_details.fee_quota.limit(), common_fee_quota + 1);
+		assert_eq!(user_2_details.reserve_quota.limit(), common_reserve_quota + 1);
+	});
+}
+
+#[test]
+fn sponsors_can_reduce_user_limits_when_available_margin_allows() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		let mut user_1_details = <User<Test>>::get(pot, user_1).unwrap();
+		user_1_details.fee_quota.add(common_fee_quota / 2).unwrap();
+		user_1_details.reserve_quota.add(common_reserve_quota / 2).unwrap();
+		<User<Test>>::insert(pot, user_1, user_1_details.clone());
+
+		let lowest_fee_limit = user_1_details.fee_quota.limit() - user_1_details.fee_quota.available_margin();
+		let lowest_reserve_limit =
+			user_1_details.reserve_quota.limit() - user_1_details.reserve_quota.available_margin();
+
+		assert_noop!(
+			SponsorshipModule::update_users_limits(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				lowest_fee_limit - 1,
+				lowest_reserve_limit,
+				vec![user_1, user_2]
+			),
+			Error::<Test>::CannotUpdateFeeLimit
+		);
+
+		assert_noop!(
+			SponsorshipModule::update_users_limits(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				lowest_fee_limit,
+				lowest_reserve_limit - 1,
+				vec![user_1, user_2]
+			),
+			Error::<Test>::CannotUpdateReserveLimit
+		);
+
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			lowest_fee_limit,
+			lowest_reserve_limit,
+			vec![user_1]
+		),);
+		System::assert_last_event(
+			Event::UsersLimitsUpdated {
+				pot,
+				users: vec![user_1],
+			}
+			.into(),
+		);
+
+		// User 2 has bigger available margin, so it can be updated to lower limits separately
+		assert_ok!(SponsorshipModule::update_users_limits(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			lowest_fee_limit - 1,
+			lowest_reserve_limit - 1,
+			vec![user_2]
+		),);
+		System::assert_last_event(
+			Event::UsersLimitsUpdated {
+				pot,
+				users: vec![user_2],
+			}
+			.into(),
+		);
+
+		let user_1_details = <User<Test>>::get(pot, user_1).unwrap();
+		assert_eq!(user_1_details.fee_quota.available_margin(), 0);
+		assert_eq!(user_1_details.reserve_quota.available_margin(), 0);
+	});
+}
+
+#[test]
+fn sponsors_can_update_user_limits_for_registered_users() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(5),
+			reserve_quota: LimitedBalance::with_limit(7),
+		};
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type.clone(),
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let common_fee_quota = 7;
+		let common_reserve_quota = 12;
+
+		let user_1 = 2u64;
+		let user_2 = 17u64;
+		let user_3 = 23u64;
+		let non_registered_user = 42u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user_1, user_2, user_3],
+			common_fee_quota,
+			common_reserve_quota
+		));
+
+		assert_noop!(
+			SponsorshipModule::update_users_limits(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				common_fee_quota + 1,
+				common_reserve_quota + 1,
+				vec![user_1, non_registered_user]
+			),
+			Error::<Test>::UserNotRegistered
+		);
+	});
+}
+
+#[test]
 fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;

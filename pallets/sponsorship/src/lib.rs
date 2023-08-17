@@ -168,6 +168,8 @@ pub mod pallet {
 		UsersRegistered { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when user/users are removed indicating the list of them
 		UsersRemoved { pot: T::PotId, users: Vec<T::AccountId> },
+		/// Event emitted when fee_quota or reserve_quota or both are updated for the given list
+		UsersLimitsUpdated { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
 		Sponsored { paid: BalanceOf<T>, repaid: BalanceOf<T> },
 		/// Event emitted when the transaction fee is paid showing the payer and the amount
@@ -451,8 +453,8 @@ pub mod pallet {
 		pub fn update_pot_limits(
 			origin: OriginFor<T>,
 			pot: T::PotId,
-			fee_quota: BalanceOf<T>,
-			reserve_quota: BalanceOf<T>,
+			new_fee_quota: BalanceOf<T>,
+			new_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
@@ -460,15 +462,49 @@ pub mod pallet {
 
 			pot_details
 				.fee_quota
-				.update_limit(fee_quota)
+				.update_limit(new_fee_quota)
 				.map_err(|_| Error::<T>::CannotUpdateFeeLimit)?;
 			pot_details
 				.reserve_quota
-				.update_limit(reserve_quota)
+				.update_limit(new_reserve_quota)
 				.map_err(|_| Error::<T>::CannotUpdateReserveLimit)?;
 
 			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::PotUpdated { pot });
+			Ok(())
+		}
+
+		/// Update limits for a number of users in a single call. Only the sponsor can do this. If
+		/// the sponsor is lowering their support, it can work only if the corresponding fee or
+		/// reserve balance of all those users have enough available margin.
+		#[pallet::call_index(7)]
+		#[pallet::weight(< T as Config >::WeightInfo::update_users_limits(users.len() as u32))]
+		pub fn update_users_limits(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			new_fee_quota: BalanceOf<T>,
+			new_reserve_quota: BalanceOf<T>,
+			users: Vec<T::AccountId>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+
+			for user in &users {
+				let mut user_details = User::<T>::get(pot, user).ok_or(Error::<T>::UserNotRegistered)?;
+				user_details
+					.fee_quota
+					.update_limit(new_fee_quota)
+					.map_err(|_| Error::<T>::CannotUpdateFeeLimit)?;
+				user_details
+					.reserve_quota
+					.update_limit(new_reserve_quota)
+					.map_err(|_| Error::<T>::CannotUpdateReserveLimit)?;
+				<User<T>>::insert(pot, &user, user_details);
+			}
+
+			<Pot<T>>::insert(pot, pot_details);
+			Self::deposit_event(Event::UsersLimitsUpdated { pot, users });
 			Ok(())
 		}
 	}

@@ -149,6 +149,38 @@ mod benchmarks {
 	}
 
 	#[benchmark]
+	fn update_users_limits(l: Linear<1, 1_000>) {
+		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let users: Vec<T::AccountId> = (0..l).map(|i| account("user", i, SEED)).collect();
+
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		assert_ok!(Pallet::<T>::register_users(
+			RawOrigin::Signed(caller.clone()).into(),
+			pot,
+			users.clone(),
+			5u32.into(),
+			11u32.into(),
+		),);
+
+		#[extrinsic_call]
+		update_users_limits(RawOrigin::Signed(caller), pot, 7u32.into(), 13u32.into(), users.clone());
+
+		for user in users {
+			let user_detail = User::<T>::get(pot, user).unwrap();
+			assert_eq!(user_detail.fee_quota.limit(), 7u32.into());
+			assert_eq!(user_detail.reserve_quota.limit(), 13u32.into());
+		}
+	}
+
+	#[benchmark]
 	fn remove_inactive_users(l: Linear<1, 1_000>) {
 		let caller: T::AccountId = whitelisted_caller();
 		let pot = 0u32.into();
