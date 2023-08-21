@@ -18,7 +18,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::num::NonZeroU32;
 use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, TypeInfo};
 use frame_support::{
 	dispatch::{DispatchInfo, DispatchResult, Dispatchable, GetDispatchInfo, Pays, PostDispatchInfo},
@@ -322,51 +321,6 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Remove inactive users from a pot.
-		/// Only pot sponsor can do this.
-		/// An inactive user is deemed to have no reserve balance in their proxy account.
-		/// Users receive the free balance in their proxy account back into their own accounts when
-		/// they are removed.
-		/// `limit` is the maximum number of users to remove. If there are fewer inactive users than
-		/// this, then all inactive users are removed.
-		///
-		/// Emits `UsersRemoved(pot, Vec<T::AccountId>)` with a list of those removed when
-		/// successful.
-		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::remove_inactive_users(u32::from(* limit)))]
-		pub fn remove_inactive_users(origin: OriginFor<T>, pot: T::PotId, limit: NonZeroU32) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
-			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
-			let mut users_to_remove = Vec::<T::AccountId>::new();
-			let limit = u32::from(limit) as usize;
-			for (user, user_details) in User::<T>::iter_prefix(pot) {
-				if Self::settle_user_accounts(
-					&pot_details.sponsor,
-					&user,
-					&user_details.proxy,
-					user_details.reserve_quota.balance(),
-				)
-				.map(|repaid| pot_details.reserve_quota.saturating_sub(repaid))
-				.is_ok()
-				{
-					users_to_remove.push(user);
-					if users_to_remove.len() == limit {
-						break;
-					}
-				}
-			}
-			for user in &users_to_remove {
-				Self::remove_user(&pot, user);
-			}
-			<Pot<T>>::insert(pot, pot_details);
-			Self::deposit_event(Event::UsersRemoved {
-				pot,
-				users: users_to_remove,
-			});
-			Ok(())
-		}
-
 		/// Sponsor me for the given call from the specified pot.
 		/// The caller must be registered for the pot.
 		/// The call must be consistent with the pot's sponsorship type.
@@ -389,7 +343,7 @@ pub mod pallet {
 		/// Also the `paid` might be less than what the limit for the user allows if the user can
 		/// support themselves partially or fully based on their free balance in their proxy account
 		/// . Finally, the `paid` is limited by the remaining reserve quota for the pot too.
-		#[pallet::call_index(5)]
+		#[pallet::call_index(4)]
 		#[pallet::weight({
 		let dispatch_info = call.get_dispatch_info();
 		(dispatch_info.weight + < T as Config >::WeightInfo::sponsor_for(), dispatch_info.class, Pays::No)
@@ -448,7 +402,7 @@ pub mod pallet {
 		/// available margin. In other words, the sponsor cannot lower the limit for the fee below
 		/// what users have already taken from the pot. Similarly, the sponsor cannot lower the
 		/// reserve below what the users have already borrowed.
-		#[pallet::call_index(6)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(< T as Config >::WeightInfo::update_pot_limits())]
 		pub fn update_pot_limits(
 			origin: OriginFor<T>,
@@ -477,7 +431,7 @@ pub mod pallet {
 		/// Update limits for a number of users in a single call. Only the sponsor can do this. If
 		/// the sponsor is lowering their support, it can work only if the corresponding fee or
 		/// reserve balance of all those users have enough available margin.
-		#[pallet::call_index(7)]
+		#[pallet::call_index(6)]
 		#[pallet::weight(< T as Config >::WeightInfo::update_users_limits(users.len() as u32))]
 		pub fn update_users_limits(
 			origin: OriginFor<T>,
@@ -500,7 +454,7 @@ pub mod pallet {
 					.reserve_quota
 					.update_limit(new_reserve_quota)
 					.map_err(|_| Error::<T>::CannotUpdateReserveLimit)?;
-				<User<T>>::insert(pot, &user, user_details);
+				<User<T>>::insert(pot, user, user_details);
 			}
 
 			<Pot<T>>::insert(pot, pot_details);

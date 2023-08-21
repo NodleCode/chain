@@ -180,40 +180,5 @@ mod benchmarks {
 		}
 	}
 
-	#[benchmark]
-	fn remove_inactive_users(l: Linear<1, 1_000>) {
-		let caller: T::AccountId = whitelisted_caller();
-		let pot = 0u32.into();
-		let users: Vec<T::AccountId> = (0..l).map(|i| account("user", i, SEED)).collect();
-
-		let pot_details = PotDetailsOf::<T> {
-			sponsor: caller.clone(),
-			sponsorship_type: T::SponsorshipType::default(),
-			fee_quota: LimitedBalance::with_limit(5u32.into()),
-			reserve_quota: LimitedBalance::with_limit(7u32.into()),
-		};
-		Pot::<T>::insert(pot, pot_details.clone());
-
-		assert_ok!(Pallet::<T>::register_users(
-			RawOrigin::Signed(caller.clone()).into(),
-			pot,
-			users.clone(),
-			5u32.into(),
-			11u32.into(),
-		),);
-
-		let user_free_balance = 100u32.into();
-		for user_detail in User::<T>::iter_prefix_values(pot) {
-			T::Currency::make_free_balance_be(&user_detail.proxy, user_free_balance);
-		}
-
-		#[extrinsic_call]
-		remove_inactive_users(RawOrigin::Signed(caller), pot, NonZeroU32::new(l).unwrap());
-
-		assert_eq!(User::<T>::iter_prefix_values(pot).count() as u32, 0);
-		for user in users {
-			assert_eq!(T::Currency::free_balance(&user), user_free_balance);
-		}
-	}
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }

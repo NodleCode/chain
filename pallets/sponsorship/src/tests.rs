@@ -29,7 +29,6 @@ use sp_runtime::{
 	transaction_validity::{InvalidTransaction, TransactionValidityError},
 	DispatchError, TokenError,
 };
-use std::num::NonZeroU32;
 use support::LimitedBalance;
 
 type NegativeImbalance =
@@ -592,31 +591,14 @@ fn only_sponsors_have_permission_to_remove_users() {
 		));
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1), 0);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1_proxy), 0);
-
-		assert_noop!(
-			SponsorshipModule::remove_inactive_users(
-				RuntimeOrigin::signed(pot_details.sponsor + 1),
-				pot,
-				NonZeroU32::new(10).unwrap()
-			),
-			Error::<Test>::NoPermission
-		);
-
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
 		let user_3_proxy = <User<Test>>::get(pot, user_3).unwrap().proxy;
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 1);
-		assert_ok!(SponsorshipModule::remove_inactive_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			NonZeroU32::new(10).unwrap()
-		));
-		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 0);
-		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 0);
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			vec![user_1, user_2, user_3],
+			vec![user_1, user_2],
 			common_fee_quota,
 			common_reserve_quota
 		));
@@ -1063,111 +1045,6 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 }
 
 #[test]
-fn sponsors_can_remove_inactive_users() {
-	new_test_ext().execute_with(|| {
-		let pot = 3;
-		System::set_block_number(1);
-		let pot_details = PotDetailsOf::<Test> {
-			sponsor: 1,
-			sponsorship_type: SponsorshipType::Uniques,
-			fee_quota: LimitedBalance::with_limit(5),
-			reserve_quota: LimitedBalance::with_limit(7),
-		};
-		assert_ok!(SponsorshipModule::create_pot(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			pot_details.sponsorship_type.clone(),
-			pot_details.fee_quota.limit(),
-			pot_details.reserve_quota.limit()
-		));
-
-		let common_fee_quota = 7;
-		let common_reserve_quota = 12;
-
-		let user_1 = 2u64;
-		let user_2 = 17u64;
-		let user_3 = 23u64;
-
-		assert_ok!(SponsorshipModule::register_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			vec![user_1, user_2, user_3],
-			common_fee_quota,
-			common_reserve_quota
-		));
-
-		let user_2_reserve = 19;
-		let user_2_details = User::<Test>::get(pot, user_2).unwrap();
-		Balances::make_free_balance_be(&user_2_details.proxy, user_2_reserve);
-		assert_ok!(Balances::reserve(&user_2_details.proxy, user_2_reserve - 1));
-
-		assert_ok!(SponsorshipModule::remove_inactive_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			NonZeroU32::new(10).unwrap()
-		));
-		System::assert_last_event(
-			Event::UsersRemoved {
-				pot,
-				users: vec![user_3, user_1],
-			}
-			.into(),
-		);
-		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
-	});
-}
-
-#[test]
-fn removing_inactive_users_respects_limit() {
-	new_test_ext().execute_with(|| {
-		let pot = 3;
-		System::set_block_number(1);
-		let pot_details = PotDetailsOf::<Test> {
-			sponsor: 1,
-			sponsorship_type: SponsorshipType::Uniques,
-			fee_quota: LimitedBalance::with_limit(5),
-			reserve_quota: LimitedBalance::with_limit(7),
-		};
-		assert_ok!(SponsorshipModule::create_pot(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			pot_details.sponsorship_type.clone(),
-			pot_details.fee_quota.limit(),
-			pot_details.reserve_quota.limit()
-		));
-
-		let common_fee_quota = 7;
-		let common_reserve_quota = 12;
-
-		let user_1 = 2u64;
-		let user_2 = 17u64;
-		let user_3 = 23u64;
-
-		assert_ok!(SponsorshipModule::register_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			vec![user_1, user_2, user_3],
-			common_fee_quota,
-			common_reserve_quota
-		));
-
-		assert_ok!(SponsorshipModule::remove_inactive_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			NonZeroU32::new(1).unwrap()
-		));
-		System::assert_last_event(
-			Event::UsersRemoved {
-				pot,
-				users: vec![user_3],
-			}
-			.into(),
-		);
-		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 2);
-	});
-}
-
-#[test]
 fn sponsors_cannot_remove_unregistered_user() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
@@ -1260,36 +1137,9 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 			vec![user_1, user_2, user_3],
 		));
 
+		assert_eq!(Balances::free_balance(&user_1), 0);
 		assert_eq!(Balances::free_balance(&user_2), user_2_free);
 		assert_eq!(Balances::free_balance(&user_3), user_3_free);
-
-		let user_4 = 29u64;
-		let user_5 = 37u64;
-
-		assert_ok!(SponsorshipModule::register_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			vec![user_4, user_5],
-			common_fee_quota,
-			common_reserve_quota
-		));
-
-		let user_4_free = 19;
-		let user_4_details = User::<Test>::get(pot, user_4).unwrap();
-		Balances::make_free_balance_be(&user_4_details.proxy, user_4_free);
-
-		let user_5_free = 29;
-		let user_5_details = User::<Test>::get(pot, user_5).unwrap();
-		Balances::make_free_balance_be(&user_5_details.proxy, user_5_free);
-
-		assert_ok!(SponsorshipModule::remove_inactive_users(
-			RuntimeOrigin::signed(pot_details.sponsor),
-			pot,
-			NonZeroU32::new(10).unwrap()
-		));
-
-		assert_eq!(Balances::free_balance(&user_4), user_4_free);
-		assert_eq!(Balances::free_balance(&user_5), user_5_free);
 	});
 }
 
@@ -1711,10 +1561,10 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 			vec![user_1]
 		));
 
-		assert_ok!(SponsorshipModule::remove_inactive_users(
+		assert_ok!(SponsorshipModule::remove_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			NonZeroU32::new(1).unwrap()
+			vec![user_2]
 		));
 
 		let pot_details = Pot::<Test>::get(pot).unwrap();
