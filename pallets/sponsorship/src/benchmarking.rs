@@ -93,6 +93,26 @@ mod benchmarks {
 	}
 
 	#[benchmark]
+	fn update_sponsorship_type() {
+		let caller: T::AccountId = whitelisted_caller();
+		let pot = 0u32.into();
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		#[extrinsic_call]
+		update_sponsorship_type(RawOrigin::Signed(caller.clone()), pot, T::SponsorshipType::default());
+
+		let updated_pot = Pot::<T>::get(pot).unwrap();
+		assert_eq!(updated_pot.fee_quota.limit(), 5u32.into());
+		assert_eq!(updated_pot.reserve_quota.limit(), 7u32.into());
+	}
+
+	#[benchmark]
 	fn register_users(l: Linear<1, 1_000>) {
 		let caller: T::AccountId = whitelisted_caller();
 		let pot = 0u32.into();

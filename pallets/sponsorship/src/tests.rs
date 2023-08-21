@@ -164,6 +164,14 @@ fn updating_non_existing_pot_is_error() {
 			SponsorshipModule::update_pot_limits(RuntimeOrigin::signed(pot_details.sponsor), pot, 6, 8),
 			Error::<Test>::PotNotExist
 		);
+		assert_noop!(
+			SponsorshipModule::update_sponsorship_type(
+				RuntimeOrigin::signed(pot_details.sponsor),
+				pot,
+				SponsorshipType::AnySafe
+			),
+			Error::<Test>::PotNotExist
+		);
 	});
 }
 
@@ -195,6 +203,21 @@ fn only_sponsors_have_permission_to_update_pots() {
 			6,
 			8
 		));
+		assert_noop!(
+			SponsorshipModule::update_sponsorship_type(
+				RuntimeOrigin::signed(pot_details.sponsor + 1),
+				pot,
+				SponsorshipType::Balances
+			),
+			Error::<Test>::NoPermission
+		);
+		assert_ok!(SponsorshipModule::update_sponsorship_type(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			SponsorshipType::Balances
+		));
+		let pot_details = Pot::<Test>::get(pot).unwrap();
+		assert_eq!(pot_details.sponsorship_type, SponsorshipType::Balances);
 	});
 }
 

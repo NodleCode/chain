@@ -163,6 +163,8 @@ pub mod pallet {
 		PotRemoved { pot: T::PotId },
 		/// Event emitted when a pot is updated.
 		PotUpdated { pot: T::PotId },
+		/// Event emitted when a pot is updated.
+		PotSponsorshipTypeUpdated { pot: T::PotId },
 		/// Event emitted when user/users are registered indicating the list of them
 		UsersRegistered { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when user/users are removed indicating the list of them
@@ -459,6 +461,28 @@ pub mod pallet {
 
 			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::UsersLimitsUpdated { pot, users });
+			Ok(())
+		}
+
+		/// Update the pot's sponsorship type. Only the sponsor can do this.
+		/// Emits `PotSponsorshipTypeUpdated` event when successful.
+		#[pallet::call_index(7)]
+		#[pallet::weight(< T as Config >::WeightInfo::update_sponsorship_type())]
+		pub fn update_sponsorship_type(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			sponsorship_type: T::SponsorshipType,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
+				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::PotNotExist)?;
+				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+				pot_details.sponsorship_type = sponsorship_type;
+				Ok(())
+			})?;
+
+			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot });
 			Ok(())
 		}
 	}

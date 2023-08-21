@@ -41,6 +41,7 @@ pub trait WeightInfo {
 	fn remove_users(l: u32) -> Weight;
 	fn sponsor_for() -> Weight;
 	fn update_pot_limits() -> Weight;
+	fn update_sponsorship_type() -> Weight;
 	fn update_users_limits(l: u32) -> Weight;
 }
 
@@ -63,6 +64,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		Weight::from_parts(0, 0)
 	}
 	fn update_pot_limits() -> Weight {
+		Weight::from_parts(0, 0)
+	}
+	fn update_sponsorship_type() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 	fn update_users_limits(_l: u32) -> Weight {
@@ -88,6 +92,9 @@ impl WeightInfo for () {
 		Weight::from_parts(0, 0)
 	}
 	fn update_pot_limits() -> Weight {
+		Weight::from_parts(0, 0)
+	}
+	fn update_sponsorship_type() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 	fn update_users_limits(_l: u32) -> Weight {
