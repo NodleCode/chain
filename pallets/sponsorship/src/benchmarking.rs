@@ -154,8 +154,9 @@ mod benchmarks {
 			11u32.into(),
 		),);
 
-		let user_free_balance = 100u32.into();
-		for user_detail in User::<T>::iter_prefix_values(pot) {
+		let user_free_balance = T::Currency::minimum_balance() * 100u32.into();
+		for user in &users {
+			let user_detail = User::<T>::get(pot, user).unwrap();
 			T::Currency::make_free_balance_be(&user_detail.proxy, user_free_balance);
 		}
 
@@ -163,8 +164,8 @@ mod benchmarks {
 		remove_users(RawOrigin::Signed(caller), pot, users.clone());
 
 		assert_eq!(User::<T>::iter_prefix_values(pot).count() as u32, 0);
-		for user in users {
-			assert_eq!(T::Currency::free_balance(&user), user_free_balance);
+		for user in &users {
+			assert_eq!(T::Currency::free_balance(user), user_free_balance);
 		}
 	}
 
