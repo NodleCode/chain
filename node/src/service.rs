@@ -153,8 +153,6 @@ where
        for col in [
                columns::META,
                columns::AUX,
-               columns::BODY,
-               columns::BODY_INDEX,
                columns::HEADER,
                columns::JUSTIFICATIONS,
                columns::STATE,
