@@ -43,7 +43,7 @@ use sc_consensus::ImportQueue;
 use sc_executor::WasmExecutor;
 use sc_network::NetworkBlock;
 use sc_network_sync::SyncingService;
-use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
+use sc_service::{Configuration, DatabaseSource, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::KeystorePtr;
@@ -86,7 +86,7 @@ impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
 pub fn new_partial<RuntimeApi, BIQ>(
-	config: &Configuration,
+	config: &mut Configuration,
 	build_import_queue: BIQ,
 ) -> Result<
 	PartialComponents<
@@ -120,6 +120,63 @@ where
 		&TaskManager,
 	) -> Result<sc_consensus::DefaultImportQueue<Block, ParachainClient<RuntimeApi>>, sc_service::Error>,
 {
+	let path = match &config.database {
+               DatabaseSource::Auto { rocksdb_path, .. } |
+               DatabaseSource::RocksDb { path: rocksdb_path, .. } => rocksdb_path.clone(),
+               _ => unimplemented!(),
+       };
+
+       pub(crate) mod columns {
+               pub const META: u32 = 0;
+               pub const STATE: u32 = 1;
+               pub const STATE_META: u32 = 2;
+               /// maps hashes to lookup keys and numbers to canon hashes.
+               pub const KEY_LOOKUP: u32 = 3;
+               pub const HEADER: u32 = 4;
+               pub const BODY: u32 = 5;
+               pub const JUSTIFICATIONS: u32 = 6;
+               pub const AUX: u32 = 8;
+               /// Offchain workers local storage
+               pub const OFFCHAIN: u32 = 9;
+               /// Transactions
+               pub const TRANSACTION: u32 = 11;
+               pub const BODY_INDEX: u32 = 12;
+       }
+       pub const NUM_COLUMNS: u32 = 13;
+       use sp_database::{Database, MemDb, Transaction};
+
+       let db_config = kvdb_rocksdb::DatabaseConfig::with_columns(NUM_COLUMNS);
+       let db = kvdb_rocksdb::Database::open(&db_config, path).unwrap();
+
+       let mut transaction = Transaction::<<Block as sp_runtime::traits::Block>::Hash>::default();
+
+       for col in [
+               columns::META,
+               columns::AUX,
+               columns::BODY,
+               columns::BODY_INDEX,
+               columns::HEADER,
+               columns::JUSTIFICATIONS,
+               columns::STATE,
+               columns::STATE_META,
+               columns::KEY_LOOKUP,
+               columns::OFFCHAIN,
+               columns::TRANSACTION,
+       ] {
+               for data in db.iter(col) {
+                       let (key, value) = data.unwrap();
+
+                       transaction.set_from_vec(col, &key, value);
+               }
+       }
+
+       let memory_db = MemDb::new();
+       memory_db.commit(transaction).unwrap();
+
+       config.database =
+               DatabaseSource::Custom { db: Arc::new(memory_db), require_create_flag: false };
+
+
 	let telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -230,9 +287,9 @@ where
 		bool,
 	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
-	let parachain_config = prepare_node_config(parachain_config);
+	let mut parachain_config = prepare_node_config(parachain_config);
 
-	let params = new_partial::<RuntimeApi, BIQ>(&parachain_config, build_import_queue)?;
+	let params = new_partial::<RuntimeApi, BIQ>(&mut parachain_config, build_import_queue)?;
 	let (block_import, mut telemetry, telemetry_worker_handle) = params.other;
 
 	let client = params.client.clone();

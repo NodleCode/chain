@@ -128,12 +128,12 @@ impl SubstrateCli for RelayChainCli {
 macro_rules! construct_async_run {
 	(|$components:ident, $cli:ident, $cmd:ident, $config:ident| $( $code:tt )* ) => {{
 		let runner = $cli.create_runner($cmd)?;
-		runner.async_run(|$config| {
+		runner.async_run(|mut $config| {
 			let $components = new_partial::<
 				RuntimeApi,
 				_
 			>(
-				&$config,
+				&mut $config,
 				parachain_build_import_queue,
 			)?;
 			let task_manager = $components.task_manager;
@@ -220,8 +220,8 @@ pub fn run() -> Result<()> {
 							.into())
 					}
 				}
-				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+				BenchmarkCmd::Block(cmd) => runner.sync_run(|mut config| {
+					let partials = new_partial::<RuntimeApi, _>(&mut config, parachain_build_import_queue)?;
 					cmd.run(partials.client)
 				}),
 				#[cfg(not(feature = "runtime-benchmarks"))]
