@@ -138,10 +138,10 @@ impl pallet_uniques::Config for Runtime {
 	type Locker = ();
 }
 
-impl pallet_nodle_uniques::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_nodle_uniques::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const DepositPerItem: Balance = constants::deposit(1, 0);
