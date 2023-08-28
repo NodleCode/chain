@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"runtime_eden":[["impl <a class=\"trait\" href=\"pallet_nodle_uniques/pallet/trait.Config.html\" title=\"trait pallet_nodle_uniques::pallet::Config\">Config</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.71.0/std/primitive.unit.html\">()</a>&gt; for <a class=\"struct\" href=\"runtime_eden/struct.Runtime.html\" title=\"struct runtime_eden::Runtime\">Runtime</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
