@@ -289,22 +289,22 @@ pub(crate) mod tests {
 	use sp_runtime::BuildStorage;
 
 	#[test]
-	fn test_create_development_chain_spec() {
+	fn create_development_chain_spec() {
 		assert!(development_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_local_chain_spec() {
+	fn create_local_chain_spec() {
 		assert!(local_testnet_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_production_spec() {
+	fn create_production_spec() {
 		assert!(production_config().build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_testing_spec() {
+	fn create_testing_spec() {
 		assert!(testing_config().build_storage().is_ok());
 	}
 }
