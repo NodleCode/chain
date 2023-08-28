@@ -63,8 +63,6 @@ mod version;
 mod weights;
 mod xcm_config;
 
-mod migrations;
-
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
@@ -112,9 +110,8 @@ construct_runtime! {
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
-		Uniques: pallet_nodle_uniques = 42,
+		Uniques: pallet_uniques = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
-		SubstrateUniques: pallet_uniques::{Pallet, Storage, Event<T>} = 44,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -156,14 +153,9 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	migrations::MovePalletUniquesToSubstrateUniques,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
@@ -374,8 +366,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_multisig, Multisig);
 			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
 			list_benchmark!(list, extra, pallet_grants, Vesting);
-			list_benchmark!(list, extra, pallet_uniques, SubstrateUniques);
-			list_benchmark!(list, extra, pallet_nodle_uniques, Uniques);
+			list_benchmark!(list, extra, pallet_uniques, Uniques);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
@@ -416,8 +407,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_multisig, Multisig);
 			add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
 			add_benchmark!(params, batches, pallet_grants, Vesting);
-			add_benchmark!(params, batches, pallet_uniques, SubstrateUniques);
-			add_benchmark!(params, batches, pallet_nodle_uniques, Uniques);
+			add_benchmark!(params, batches, pallet_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);

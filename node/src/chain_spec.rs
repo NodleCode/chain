@@ -286,25 +286,43 @@ pub fn testing_config() -> ChainSpec {
 #[cfg(test)]
 pub(crate) mod tests {
 	use super::*;
+	use hex_literal::hex;
+	use sc_chain_spec::ChainSpec;
+	use sp_core::blake2_256;
 	use sp_runtime::BuildStorage;
 
 	#[test]
-	fn test_create_development_chain_spec() {
-		development_config(ParaId::from(1000u32)).build_storage().unwrap();
+	fn create_development_chain_spec() {
+		assert!(development_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_local_chain_spec() {
-		local_testnet_config(ParaId::from(1000u32)).build_storage().unwrap();
+	fn create_local_chain_spec() {
+		assert!(local_testnet_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_production_spec() {
-		production_config().build_storage().unwrap();
+	fn create_production_spec() {
+		assert!(production_config().build_storage().is_ok());
 	}
 
 	#[test]
-	fn test_create_testing_spec() {
-		testing_config().build_storage().unwrap();
+	fn production_has_substitutes_set() {
+		// see https://github.com/NodleCode/chain/releases/tag/2.2.2-hotfix
+		assert!(production_config().code_substitutes().contains_key("3351852"));
+		assert_eq!(
+			blake2_256(
+				production_config()
+					.code_substitutes()
+					.get("3351852")
+					.expect("we already tested for existence"),
+			),
+			hex!("207767fb73e1fcf8ae32455843419e51c94987228a4b77857aff7653d103cac3"),
+		);
+	}
+
+	#[test]
+	fn create_testing_spec() {
+		assert!(testing_config().build_storage().is_ok());
 	}
 }
