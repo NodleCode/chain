@@ -286,10 +286,10 @@ pub fn testing_config() -> ChainSpec {
 #[cfg(test)]
 pub(crate) mod tests {
 	use super::*;
+	use hex_literal::hex;
 	use sc_chain_spec::ChainSpec;
 	use sp_core::blake2_256;
 	use sp_runtime::BuildStorage;
-	use hex_literal::hex;
 
 	#[test]
 	fn create_development_chain_spec() {
@@ -312,7 +312,10 @@ pub(crate) mod tests {
 		assert!(production_config().code_substitutes().contains_key("3351852"));
 		assert_eq!(
 			blake2_256(
-				production_config().code_substitutes().get("3351852").expect("we already tested for existence"),
+				production_config()
+					.code_substitutes()
+					.get("3351852")
+					.expect("we already tested for existence"),
 			),
 			hex!("207767fb73e1fcf8ae32455843419e51c94987228a4b77857aff7653d103cac3"),
 		);
