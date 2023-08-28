@@ -48,7 +48,7 @@ fn creator_of_pot_becomes_sponsor() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -102,7 +102,7 @@ fn sponsors_can_remove_user_free_pots() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -116,7 +116,7 @@ fn sponsors_can_remove_user_free_pots() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -137,7 +137,7 @@ fn only_sponsors_have_permission_to_remove_pots() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -189,7 +189,7 @@ fn only_sponsors_have_permission_to_update_pots() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -377,7 +377,7 @@ fn sponsors_cannot_remove_pots_with_users() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -409,7 +409,7 @@ fn sponsors_can_register_new_users() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -494,7 +494,7 @@ fn sponsors_cannot_register_users_more_than_once() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -550,7 +550,7 @@ fn only_sponsors_have_permission_to_register_users() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -575,7 +575,7 @@ fn only_sponsors_have_permission_to_remove_users() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -642,7 +642,7 @@ fn only_sponsors_have_permission_to_update_users_limits() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -734,7 +734,7 @@ fn updating_users_limits_only_impacts_the_given_list() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -789,7 +789,7 @@ fn sponsors_can_always_set_user_limits_to_an_amount_equal_or_greater_than_before
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -872,7 +872,7 @@ fn sponsors_can_reduce_user_limits_when_available_margin_allows() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -973,7 +973,7 @@ fn sponsors_can_update_user_limits_for_registered_users() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1021,7 +1021,7 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1081,7 +1081,7 @@ fn sponsors_cannot_remove_unregistered_user() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1126,7 +1126,7 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1160,9 +1160,9 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 			vec![user_1, user_2, user_3],
 		));
 
-		assert_eq!(Balances::free_balance(&user_1), 0);
-		assert_eq!(Balances::free_balance(&user_2), user_2_free);
-		assert_eq!(Balances::free_balance(&user_3), user_3_free);
+		assert_eq!(Balances::free_balance(user_1), 0);
+		assert_eq!(Balances::free_balance(user_2), user_2_free);
+		assert_eq!(Balances::free_balance(user_3), user_3_free);
 	});
 }
 
@@ -1182,7 +1182,7 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1203,7 +1203,7 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 		));
 
 		let uniques_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 0u32.into(),
+			collection: 0u32,
 			admin: user,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1228,7 +1228,7 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 			SponsorshipModule::sponsor_for(RuntimeOrigin::signed(user), pot, balances_call),
 			frame_system::Error::<Test>::CallFiltered
 		);
-		assert_eq!(Balances::free_balance(&user), 0);
+		assert_eq!(Balances::free_balance(user), 0);
 	});
 }
 
@@ -1248,7 +1248,7 @@ fn sponsor_for_calls_will_fail_if_call_itself_should_fail() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1277,7 +1277,7 @@ fn sponsor_for_calls_will_fail_if_call_itself_should_fail() {
 			DispatchError::Token(TokenError::FundsUnavailable)
 		);
 
-		assert_eq!(Balances::free_balance(&user), 0);
+		assert_eq!(Balances::free_balance(user), 0);
 	});
 }
 
@@ -1297,7 +1297,7 @@ fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1326,7 +1326,7 @@ fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
 			Error::<Test>::BalanceLeak
 		);
 
-		assert_eq!(Balances::free_balance(&user), 0);
+		assert_eq!(Balances::free_balance(user), 0);
 	});
 }
 
@@ -1346,7 +1346,7 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1367,7 +1367,7 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 		));
 
 		let uniques_create_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 0u32.into(),
+			collection: 0u32,
 			admin: user,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1377,8 +1377,8 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 		));
 		let user_details = User::<Test>::get(pot, user).unwrap();
 		let uniques_call_reserve = user_details.reserve_quota.balance() - Balances::minimum_balance();
-		assert_eq!(Balances::free_balance(&user_details.proxy), Balances::minimum_balance());
-		assert_eq!(Balances::reserved_balance(&user_details.proxy), uniques_call_reserve);
+		assert_eq!(Balances::free_balance(user_details.proxy), Balances::minimum_balance());
+		assert_eq!(Balances::reserved_balance(user_details.proxy), uniques_call_reserve);
 		let pot_details = Pot::<Test>::get(pot).unwrap();
 		assert_eq!(
 			pot_details.reserve_quota.available_margin(),
@@ -1386,7 +1386,7 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 		);
 
 		let uniques_destroy_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::destroy {
-			collection: 0u32.into(),
+			collection: 0u32,
 			witness: pallet_uniques::DestroyWitness {
 				items: 0,
 				item_metadatas: 0,
@@ -1405,10 +1405,10 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 			}
 			.into(),
 		);
-		assert_eq!(Balances::free_balance(&user_details.proxy), Balances::minimum_balance());
-		assert_eq!(Balances::reserved_balance(&user_details.proxy), 0);
+		assert_eq!(Balances::free_balance(user_details.proxy), Balances::minimum_balance());
+		assert_eq!(Balances::reserved_balance(user_details.proxy), 0);
 		assert_eq!(
-			Balances::free_balance(&pot_details.sponsor),
+			Balances::free_balance(pot_details.sponsor),
 			pot_reserve_quota - Balances::minimum_balance()
 		);
 		let pot_details = Pot::<Test>::get(pot).unwrap();
@@ -1440,7 +1440,7 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1461,7 +1461,7 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 		));
 
 		let uniques_create_call_1 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 0u32.into(),
+			collection: 0u32,
 			admin: user,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1479,7 +1479,7 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 		Balances::make_free_balance_be(&user_details.proxy, user_free_balance_after_earning);
 
 		let uniques_create_call_2 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 1u32.into(),
+			collection: 1u32,
 			admin: user,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1497,7 +1497,7 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 		);
 
 		let pot_details = Pot::<Test>::get(pot).unwrap();
-		assert_eq!(Balances::free_balance(&pot_details.sponsor), pot_reserve_quota);
+		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota);
 		assert_eq!(pot_details.reserve_quota.available_margin(), pot_reserve_quota);
 
 		let user_details = User::<Test>::get(pot, user).unwrap();
@@ -1521,7 +1521,7 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1543,7 +1543,7 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 		));
 
 		let uniques_create_call_1 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 0u32.into(),
+			collection: 0u32,
 			admin: user_1,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1552,7 +1552,7 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 			uniques_create_call_1
 		));
 		let uniques_create_call_2 = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 1u32.into(),
+			collection: 1u32,
 			admin: user_2,
 		}));
 		assert_ok!(SponsorshipModule::sponsor_for(
@@ -1591,7 +1591,7 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 		));
 
 		let pot_details = Pot::<Test>::get(pot).unwrap();
-		assert_eq!(Balances::free_balance(&pot_details.sponsor), pot_reserve_quota);
+		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota);
 		assert_eq!(pot_details.reserve_quota.available_margin(), pot_reserve_quota);
 	});
 }
@@ -1613,7 +1613,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details_1.sponsor),
 			pot_1,
-			pot_details_1.sponsorship_type.clone(),
+			pot_details_1.sponsorship_type,
 			pot_details_1.fee_quota.limit(),
 			pot_details_1.reserve_quota.limit()
 		));
@@ -1627,7 +1627,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details_2.sponsor),
 			pot_2,
-			pot_details_2.sponsorship_type.clone(),
+			pot_details_2.sponsorship_type,
 			pot_details_2.fee_quota.limit(),
 			pot_details_2.reserve_quota.limit()
 		));
@@ -1709,7 +1709,7 @@ fn sponsor_call_for_existing_pot_from_registered_user_with_enough_fee_limit_is_v
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1732,7 +1732,7 @@ fn sponsor_call_for_existing_pot_from_registered_user_with_enough_fee_limit_is_v
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -1765,7 +1765,7 @@ fn valid_sponsor_call_for_yields_correct_pre_dispatch_details() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1789,7 +1789,7 @@ fn valid_sponsor_call_for_yields_correct_pre_dispatch_details() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -1831,7 +1831,7 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1855,7 +1855,7 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -1914,7 +1914,7 @@ fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -1938,7 +1938,7 @@ fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
 		let right_call_type_but_wrong_pot = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 2,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -2001,7 +2001,7 @@ fn non_sponsor_calls_is_not_the_sponsorship_module_business() {
 		let user = 2u64;
 
 		let uniques_create_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-			collection: 0u32.into(),
+			collection: 0u32,
 			admin: user,
 		}));
 
@@ -2038,7 +2038,7 @@ fn sponsor_call_for_non_existing_pot_is_invalid() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -2061,7 +2061,7 @@ fn sponsor_call_for_non_existing_pot_is_invalid() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 4, // non existing pot
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -2106,7 +2106,7 @@ fn sponsor_call_for_not_registered_user_is_invalid() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -2130,7 +2130,7 @@ fn sponsor_call_for_not_registered_user_is_invalid() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -2175,7 +2175,7 @@ fn sponsor_call_is_invalid_if_pot_is_running_low() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -2198,7 +2198,7 @@ fn sponsor_call_is_invalid_if_pot_is_running_low() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -2243,7 +2243,7 @@ fn sponsor_call_is_invalid_if_user_limit_is_not_enough() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -2266,7 +2266,7 @@ fn sponsor_call_is_invalid_if_user_limit_is_not_enough() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
@@ -2311,7 +2311,7 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
-			pot_details.sponsorship_type.clone(),
+			pot_details.sponsorship_type,
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
@@ -2334,7 +2334,7 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
 			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32.into(),
+				collection: 0u32,
 				admin: user,
 			})),
 		}));
