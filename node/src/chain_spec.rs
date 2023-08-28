@@ -290,21 +290,21 @@ pub(crate) mod tests {
 
 	#[test]
 	fn test_create_development_chain_spec() {
-		development_config(ParaId::from(1000u32)).build_storage().unwrap();
+		assert!(development_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
 	fn test_create_local_chain_spec() {
-		local_testnet_config(ParaId::from(1000u32)).build_storage().unwrap();
+		assert!(local_testnet_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
 	fn test_create_production_spec() {
-		production_config().build_storage().unwrap();
+		assert!(production_config().build_storage().is_ok());
 	}
 
 	#[test]
 	fn test_create_testing_spec() {
-		testing_config().build_storage().unwrap();
+		assert!(testing_config().build_storage().is_ok());
 	}
 }
