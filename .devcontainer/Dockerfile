@@ -29,4 +29,6 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
     export PATH=$PATH:$HOME/.cargo/bin && \
     /tmp/init.sh && \
     export SUBWASM_VERSION=`/version chevdor subwasm` && \
-    cargo install --locked --git https://github.com/chevdor/subwasm --tag ${SUBWASM_VERSION}
+    cargo install --locked --git https://github.com/chevdor/subwasm --tag ${SUBWASM_VERSION} && \
+    export TRY_RUNTIME_VERSION=`/version paritytech try-runtime-cli` && \
+    cargo install --locked --git https://github.com/paritytech/try-runtime-cli --tag ${TRY_RUNTIME_VERSION}
