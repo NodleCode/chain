@@ -122,24 +122,18 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
           target: ${{ env.target }}
-      - name: Cache a dir
+      - name: Build runtime
+        run: cargo build --release --features=try-runtime -p runtime-eden
+      - name: Setup cache
         uses: actions/cache@v3
         id: cachedir
         with:
           path: snapshots
           key: ${{steps.get_version.outputs.eden_rev}}
-      - name: Install try-runtime
-        run: cargo install --git https://github.com/paritytech/try-runtime-cli --locked
-      - name: Cargo build
-        run: cargo build --release --features=try-runtime -p runtime-eden
-      - name: Fetch snapshot
-        if: steps.cachedir.outputs.cache-hit != 'true'
-        continue-on-error: true
-        run: |
-            install -d snapshots
-            date > snapshots/created_at
-            try-runtime --runtime existing create-snapshot --uri ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}} snapshots/eden-snapshot-full
-      - name: Try runtime reuse snap
-        run: |
-            cat snapshots/created_at
-            try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm on-runtime-upgrade --checks=all snap --path snapshots/eden-snapshot-full
+      - name: Run try-runtime
+        uses: NodleCode/action-try-runtime
+        with:
+          url: ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
+          snap: snapshots/eden-snapshot-full
+          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm on-runtime-upgrade
+          checks: all
