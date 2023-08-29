@@ -1698,7 +1698,7 @@ fn sponsor_call_for_existing_pot_from_registered_user_with_enough_fee_limit_is_v
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
-		let pot_fee_quota = 10_000_000_000;
+		let pot_fee_quota = 100_000_000_000;
 		let pot_reserve_quota = 100_000_000_000;
 		let pot_details = PotDetailsOf::<Test> {
 			sponsor: 1,
@@ -1754,7 +1754,7 @@ fn valid_sponsor_call_for_yields_correct_pre_dispatch_details() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
-		let pot_fee_quota = 10_000_000_000;
+		let pot_fee_quota = 100_000_000_000;
 		let pot_reserve_quota = 100_000_000_000;
 		let pot_details = PotDetailsOf::<Test> {
 			sponsor: 1,
@@ -1820,7 +1820,7 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 	new_test_ext().execute_with(|| {
 		let pot = 3;
 		System::set_block_number(1);
-		let pot_fee_quota = 10_000_000_000;
+		let pot_fee_quota = 100_000_000_000;
 		let pot_reserve_quota = 100_000_000_000;
 		let pot_details = PotDetailsOf::<Test> {
 			sponsor: 1,
