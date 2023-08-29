@@ -226,8 +226,10 @@ mod benchmarks {
 			T::Currency::minimum_balance() * 13_000u32.into(),
 		),);
 
-		#[extrinsic_call]
-		pre_sponsor(RawOrigin::Signed(user), pot);
+		#[block]
+		{
+			assert!(pallet::Pallet::<T>::pre_sponsor_for(user, pot).is_ok());
+		}
 	}
 
 	#[benchmark]
@@ -265,15 +267,17 @@ mod benchmarks {
 		let new_proxy_balance = T::Currency::minimum_balance() * 12_000u32.into();
 		T::Currency::make_free_balance_be(&user_details.proxy, new_proxy_balance);
 
-		#[extrinsic_call]
-		post_sponsor(
-			RawOrigin::Signed(user.clone()),
-			pot,
-			pot_details,
-			user_details,
-			paid,
-			proxy_balance,
-		);
+		#[block]
+		{
+			assert_ok!(pallet::Pallet::<T>::post_sponsor_for(
+				user.clone(),
+				pot,
+				pot_details,
+				user_details,
+				paid,
+				proxy_balance
+			));
+		}
 
 		let user_detail = User::<T>::get(pot, &user).unwrap();
 		assert_eq!(user_detail.reserve_quota.balance(), T::Currency::minimum_balance());

@@ -462,33 +462,6 @@ pub mod pallet {
 			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot });
 			Ok(())
 		}
-
-		/// Used in benchmarking pre_sponsor_for function.
-		#[cfg(feature = "runtime-benchmarks")]
-		#[pallet::call_index(8)]
-		#[pallet::weight(< T as Config >::WeightInfo::pre_sponsor())]
-		pub fn pre_sponsor(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::pre_sponsor_for(who, pot)?;
-			Ok(())
-		}
-
-		/// Used in benchmarking post_sponsor_for function.
-		#[cfg(feature = "runtime-benchmarks")]
-		#[pallet::call_index(9)]
-		#[pallet::weight(< T as Config >::WeightInfo::post_sponsor())]
-		pub fn post_sponsor(
-			origin: OriginFor<T>,
-			pot: T::PotId,
-			pot_details: PotDetailsOf<T>,
-			user_details: UserDetailsOf<T>,
-			paid: BalanceOf<T>,
-			proxy_balance: BalanceOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::post_sponsor_for(who, pot, pot_details, user_details, paid, proxy_balance)?;
-			Ok(())
-		}
 	}
 }
 
