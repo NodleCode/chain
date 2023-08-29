@@ -122,22 +122,23 @@ jobs:
         with:
           toolchain: ${{ env.toolchain }}
           target: ${{ env.target }}
-      - name: Cache a dir
+      - name: Build runtime
+        run: cargo build --release --features=try-runtime -p runtime-eden
+      - name: Setup cache
         uses: actions/cache@v3
         id: cachedir
         with:
           path: snapshots
           key: ${{steps.get_version.outputs.eden_rev}}
-      - name: Cargo build
-        run: cargo build --release --features=try-runtime --bin nodle-parachain
-      - name: Fetch snapshot
+      - name: Ensure cache directory is created
         if: steps.cachedir.outputs.cache-hit != 'true'
-        continue-on-error: true
         run: |
-            install -d snapshots
-            date > snapshots/created_at
-            ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/eden-snapshot-full" -u ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
-      - name: Try runtime reuse snap
-        run: |
-            cat snapshots/created_at
-            ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm -lruntime=debug --chain ${{ env.try-runtime-chain }} on-runtime-upgrade --checks=all snap -s snapshots/eden-snapshot-full
+          install -d snapshots
+          date > snapshots/created_at
+      - name: Run try-runtime
+        uses: NodleCode/action-try-runtime@v0
+        with:
+          url: ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
+          snap: snapshots/eden-snapshot-full
+          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
+          checks: all
