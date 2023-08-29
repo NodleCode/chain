@@ -128,16 +128,18 @@ jobs:
         with:
           path: snapshots
           key: ${{steps.get_version.outputs.eden_rev}}
+      - name: Install try-runtime
+        run: cargo install --git https://github.com/paritytech/try-runtime-cli --locked
       - name: Cargo build
-        run: cargo build --release --features=try-runtime --bin nodle-parachain
+        run: cargo build --release --features=try-runtime -p runtime-eden
       - name: Fetch snapshot
         if: steps.cachedir.outputs.cache-hit != 'true'
         continue-on-error: true
         run: |
             install -d snapshots
             date > snapshots/created_at
-            ./target/release/nodle-parachain try-runtime --runtime existing -lruntime=debug --chain ${{ env.try-runtime-chain }} create-snapshot "snapshots/eden-snapshot-full" -u ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
+            try-runtime --runtime existing -lruntime=debug create-snapshot --uri ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}} snapshots/eden-snapshot-full
       - name: Try runtime reuse snap
         run: |
             cat snapshots/created_at
-            ./target/release/nodle-parachain try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm -lruntime=debug --chain ${{ env.try-runtime-chain }} on-runtime-upgrade --checks=all snap -s snapshots/eden-snapshot-full
+            try-runtime --runtime target/release/wbuild/runtime-eden/runtime_eden.wasm -lruntime=debug on-runtime-upgrade --checks=all snap -s snapshots/eden-snapshot-full
