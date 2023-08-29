@@ -139,11 +139,6 @@ impl pallet_uniques::Config for Runtime {
 	type Locker = ();
 }
 
-impl pallet_nodle_uniques::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
-}
-
 #[derive(
 	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
 )]
