@@ -201,5 +201,83 @@ mod benchmarks {
 		}
 	}
 
+	#[benchmark]
+	fn pre_sponsor() {
+		let sponsor: T::AccountId = account("sponsor", 0, SEED);
+		let pot = 11u32.into();
+		let user: T::AccountId = account("user", 0, SEED);
+
+		let sponsor_free_balance = T::Currency::minimum_balance() * 18_000_000u32.into();
+		T::Currency::make_free_balance_be(&sponsor, sponsor_free_balance);
+
+		let pot_details = PotDetailsOf::<T> {
+			sponsor: sponsor.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
+			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		assert_ok!(Pallet::<T>::register_users(
+			RawOrigin::Signed(sponsor).into(),
+			pot,
+			vec![user.clone()],
+			T::Currency::minimum_balance() * 5_000u32.into(),
+			T::Currency::minimum_balance() * 13_000u32.into(),
+		),);
+
+		#[extrinsic_call]
+		pre_sponsor(RawOrigin::Signed(user), pot);
+	}
+
+	#[benchmark]
+	fn post_sponsor() {
+		let sponsor: T::AccountId = account("sponsor", 0, SEED);
+		let pot = 11u32.into();
+		let user: T::AccountId = account("user", 0, SEED);
+
+		let sponsor_free_balance = T::Currency::minimum_balance() * 18_000_000u32.into();
+		T::Currency::make_free_balance_be(&sponsor, sponsor_free_balance);
+
+		let mut pot_details = PotDetailsOf::<T> {
+			sponsor: sponsor.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
+			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+		};
+		Pot::<T>::insert(pot, pot_details.clone());
+
+		assert_ok!(Pallet::<T>::register_users(
+			RawOrigin::Signed(sponsor).into(),
+			pot,
+			vec![user.clone()],
+			T::Currency::minimum_balance() * 5_000u32.into(),
+			T::Currency::minimum_balance() * 13_000u32.into(),
+		),);
+
+		let mut user_details = User::<T>::get(pot, &user).unwrap();
+
+		let paid = T::Currency::minimum_balance() * 12_000u32.into();
+		pot_details.reserve_quota.saturating_add(paid.clone());
+		user_details.reserve_quota.saturating_add(paid.clone());
+
+		let proxy_balance = T::Currency::minimum_balance() * 11_000u32.into();
+		let new_proxy_balance = T::Currency::minimum_balance() * 12_000u32.into();
+		T::Currency::make_free_balance_be(&user_details.proxy, new_proxy_balance);
+
+		#[extrinsic_call]
+		post_sponsor(
+			RawOrigin::Signed(user.clone()),
+			pot,
+			pot_details,
+			user_details,
+			paid,
+			proxy_balance,
+		);
+
+		let user_detail = User::<T>::get(pot, &user).unwrap();
+		assert_eq!(user_detail.reserve_quota.balance(), T::Currency::minimum_balance());
+	}
+
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }

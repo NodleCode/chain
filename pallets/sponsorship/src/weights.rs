@@ -53,8 +53,8 @@ pub trait WeightInfo {
 	fn register_users(l: u32, ) -> Weight;
 	fn remove_users(l: u32, ) -> Weight;
 	fn update_users_limits(l: u32, ) -> Weight;
-	// TODO add the benchmark for this
-	fn sponsor_for() -> Weight;
+	fn pre_sponsor() -> Weight;
+	fn post_sponsor() -> Weight;
 }
 
 /// Weight functions for `pallet_sponsorship`.
@@ -202,7 +202,11 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(l as u64)))
 	}
 
-	fn sponsor_for() -> Weight {
+	fn pre_sponsor() -> Weight {
+		Weight::from_parts(0, 0)
+	}
+
+	fn post_sponsor() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 }
@@ -350,7 +354,11 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(l as u64)))
 	}
 
-	fn sponsor_for() -> Weight {
+	fn pre_sponsor() -> Weight {
+		Weight::from_parts(0, 0)
+	}
+
+	fn post_sponsor() -> Weight {
 		Weight::from_parts(0, 0)
 	}
 }

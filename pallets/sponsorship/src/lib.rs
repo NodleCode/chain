@@ -107,7 +107,6 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use scale_info::prelude::{boxed::Box, vec::Vec};
-	use sp_runtime::Saturating;
 
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
@@ -345,10 +344,14 @@ pub mod pallet {
 		/// Also the `paid` might be less than what the limit for the user allows if the user can
 		/// support themselves partially or fully based on their free balance in their proxy account
 		/// . Finally, the `paid` is limited by the remaining reserve quota for the pot too.
+		///
+		/// Note: The addition of `T::DbWeight::get().reads_writes(2, 2)` to the weight is to account
+		/// for the reads and writes of the `pot_details` and `user_details` storage items which
+		/// are needed during pre and post dispatching this call.
 		#[pallet::call_index(4)]
 		#[pallet::weight({
 		let dispatch_info = call.get_dispatch_info();
-		(dispatch_info.weight + < T as Config >::WeightInfo::sponsor_for(), dispatch_info.class, Pays::No)
+		(dispatch_info.weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_info.class, Pays::No)
 		})]
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
@@ -356,46 +359,14 @@ pub mod pallet {
 			call: Box<<T as Config>::RuntimeCall>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
-			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
-			let mut user_details = User::<T>::get(pot, &who).ok_or(Error::<T>::UserNotRegistered)?;
-			let mut proxy_origin: T::RuntimeOrigin = frame_system::RawOrigin::Signed(user_details.proxy.clone()).into();
-			let sponsorship = pot_details.sponsorship_type.clone();
 
-			proxy_origin.add_filter(move |c: &<T as frame_system::Config>::RuntimeCall| {
-				let c = <T as Config>::RuntimeCall::from_ref(c);
-				sponsorship.filter(c)
-			});
+			let (pot, pot_details, user_details, proxy_origin, paid, proxy_balance) =
+				Self::pre_sponsor_for(who.clone(), pot)?;
 
-			let fund_for_reserve = user_details
-				.reserve_quota
-				.available_margin()
-				.min(pot_details.reserve_quota.available_margin());
-			let paid = user_details
-				.reserve_quota
-				.limit()
-				.saturating_sub(T::Currency::free_balance(&user_details.proxy))
-				.min(fund_for_reserve);
-			T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, paid, KeepAlive)?;
-			pot_details.reserve_quota.saturating_add(paid);
-			user_details.reserve_quota.saturating_add(paid);
-
-			let proxy_balance = T::Currency::total_balance(&user_details.proxy);
 			call.dispatch(proxy_origin).map_err(|e| e.error)?;
-			let new_proxy_balance = T::Currency::total_balance(&user_details.proxy);
-			ensure!(new_proxy_balance >= proxy_balance, Error::<T>::BalanceLeak);
 
-			let repayable =
-				T::Currency::free_balance(&user_details.proxy).saturating_sub(T::Currency::minimum_balance());
-			let repaid = repayable.min(user_details.reserve_quota.balance());
-			T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, repaid, KeepAlive)?;
+			Self::post_sponsor_for(who, pot, pot_details, user_details, paid, proxy_balance)?;
 
-			user_details.reserve_quota.saturating_sub(repaid);
-			pot_details.reserve_quota.saturating_sub(repaid);
-
-			Pot::<T>::insert(pot, pot_details);
-			User::<T>::insert(pot, &who, user_details);
-
-			Self::deposit_event(Event::Sponsored { paid, repaid });
 			Ok(().into())
 		}
 
@@ -485,6 +456,33 @@ pub mod pallet {
 			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot });
 			Ok(())
 		}
+
+		/// Used in benchmarking pre_sponsor_for function.
+		#[cfg(feature = "runtime-benchmarks")]
+		#[pallet::call_index(8)]
+		#[pallet::weight(< T as Config >::WeightInfo::pre_sponsor())]
+		pub fn pre_sponsor(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			Self::pre_sponsor_for(who, pot)?;
+			Ok(())
+		}
+
+		/// Used in benchmarking post_sponsor_for function.
+		#[cfg(feature = "runtime-benchmarks")]
+		#[pallet::call_index(9)]
+		#[pallet::weight(< T as Config >::WeightInfo::post_sponsor())]
+		pub fn post_sponsor(
+			origin: OriginFor<T>,
+			pot: T::PotId,
+			pot_details: PotDetailsOf<T>,
+			user_details: UserDetailsOf<T>,
+			paid: BalanceOf<T>,
+			proxy_balance: BalanceOf<T>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			Self::post_sponsor_for(who, pot, pot_details, user_details, paid, proxy_balance)?;
+			Ok(())
+		}
 	}
 }
 
@@ -531,6 +529,72 @@ impl<T: Config> Pallet<T> {
 	/// Check if the account is registered for any pots.
 	fn registered_for_any_pots(who: &T::AccountId) -> bool {
 		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
+	}
+
+	fn pre_sponsor_for(
+		who: T::AccountId,
+		pot: T::PotId,
+	) -> Result<
+		(
+			T::PotId,
+			PotDetailsOf<T>,
+			UserDetailsOf<T>,
+			T::RuntimeOrigin,
+			BalanceOf<T>,
+			BalanceOf<T>,
+		),
+		sp_runtime::DispatchError,
+	> {
+		let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
+		let mut user_details = User::<T>::get(pot, &who).ok_or(Error::<T>::UserNotRegistered)?;
+		let mut proxy_origin: T::RuntimeOrigin = frame_system::RawOrigin::Signed(user_details.proxy.clone()).into();
+		let sponsorship = pot_details.sponsorship_type.clone();
+
+		proxy_origin.add_filter(move |c: &<T as frame_system::Config>::RuntimeCall| {
+			let c = <T as Config>::RuntimeCall::from_ref(c);
+			sponsorship.filter(c)
+		});
+
+		let fund_for_reserve = user_details
+			.reserve_quota
+			.available_margin()
+			.min(pot_details.reserve_quota.available_margin());
+		let paid = user_details
+			.reserve_quota
+			.limit()
+			.saturating_sub(T::Currency::free_balance(&user_details.proxy))
+			.min(fund_for_reserve);
+		T::Currency::transfer(&pot_details.sponsor, &user_details.proxy, paid, KeepAlive)?;
+		pot_details.reserve_quota.saturating_add(paid);
+		user_details.reserve_quota.saturating_add(paid);
+
+		let proxy_balance = T::Currency::total_balance(&user_details.proxy);
+		Ok((pot, pot_details, user_details, proxy_origin, paid, proxy_balance))
+	}
+
+	fn post_sponsor_for(
+		who: T::AccountId,
+		pot: T::PotId,
+		mut pot_details: PotDetailsOf<T>,
+		mut user_details: UserDetailsOf<T>,
+		paid: BalanceOf<T>,
+		proxy_balance: BalanceOf<T>,
+	) -> Result<(), sp_runtime::DispatchError> {
+		let new_proxy_balance = T::Currency::total_balance(&user_details.proxy);
+		ensure!(new_proxy_balance >= proxy_balance, Error::<T>::BalanceLeak);
+
+		let repayable = T::Currency::free_balance(&user_details.proxy).saturating_sub(T::Currency::minimum_balance());
+		let repaid = repayable.min(user_details.reserve_quota.balance());
+		T::Currency::transfer(&user_details.proxy, &pot_details.sponsor, repaid, KeepAlive)?;
+
+		user_details.reserve_quota.saturating_sub(repaid);
+		pot_details.reserve_quota.saturating_sub(repaid);
+
+		Pot::<T>::insert(pot, pot_details);
+		User::<T>::insert(pot, &who, user_details);
+
+		Self::deposit_event(Event::Sponsored { paid, repaid });
+		Ok(())
 	}
 }
 
