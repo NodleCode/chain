@@ -11,12 +11,16 @@ env:
   target: wasm32-unknown-unknown
   try-runtime-chain: dev
   try-runtime-uri: wss://eden-rpc.dwellir.com:443/
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
 
 jobs:
   lints:
     runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.toolchain }}
@@ -45,33 +49,10 @@ jobs:
       - name: Install protobuf-compiler
         run: |
          sudo apt-get install protobuf-compiler
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-index-
-
-      - name: Cache cargo build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-target-
-
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Build
         run: cargo build --release --bin nodle-parachain
-
       - name: Unit tests
         run: cargo test --all-features
 
@@ -87,6 +68,8 @@ jobs:
       - name: Install protobuf-compiler
         run: |
          sudo apt-get install protobuf-compiler
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Test and gather coverage
@@ -135,6 +118,10 @@ jobs:
         run: |
           install -d snapshots
           date > snapshots/created_at
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
+      - name: Cargo build
+        run: cargo build --release --features=try-runtime --bin nodle-parachain
       - name: Run try-runtime
         uses: NodleCode/action-try-runtime@v0
         with:
