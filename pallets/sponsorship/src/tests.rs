@@ -1682,7 +1682,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 fn debug_format_of_charge_sponsor() {
 	let charge_sponsor = ChargeSponsor::<Test>::default();
 	assert_eq!(
-		format!("{:?}", charge_sponsor),
+		format!("{charge_sponsor:?}"),
 		"ChargeTransactionPayment<PhantomData<u64>>"
 	);
 }

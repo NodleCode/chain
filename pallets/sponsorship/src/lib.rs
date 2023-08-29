@@ -360,12 +360,18 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
-			let (pot, pot_details, user_details, proxy_origin, paid, proxy_balance) =
-				Self::pre_sponsor_for(who.clone(), pot)?;
+			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
-			call.dispatch(proxy_origin).map_err(|e| e.error)?;
+			call.dispatch(preps.proxy_origin).map_err(|e| e.error)?;
 
-			Self::post_sponsor_for(who, pot, pot_details, user_details, paid, proxy_balance)?;
+			Self::post_sponsor_for(
+				who,
+				pot,
+				preps.pot_details,
+				preps.user_details,
+				preps.paid,
+				preps.proxy_balance,
+			)?;
 
 			Ok(().into())
 		}
@@ -486,6 +492,21 @@ pub mod pallet {
 	}
 }
 
+/// The pre-sponsor call preps are the details returned from `pre_sponsor_for` that are needed
+/// in `post_sponsor_for`.
+struct SponsorCallPreps<T: Config> {
+	/// The pot details.
+	pot_details: PotDetailsOf<T>,
+	/// The user details.
+	user_details: UserDetailsOf<T>,
+	/// The proxy origin after the right filter is installed for it.
+	proxy_origin: <T as frame_system::Config>::RuntimeOrigin,
+	/// The amount paid by the sponsor to be used as reserve.
+	paid: BalanceOf<T>,
+	/// The total balance of the user's proxy account after the sponsor has paid.
+	proxy_balance: BalanceOf<T>,
+}
+
 impl<T: Config> Pallet<T> {
 	/// Calculate the address of a pure account.
 	///
@@ -531,20 +552,7 @@ impl<T: Config> Pallet<T> {
 		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
 	}
 
-	fn pre_sponsor_for(
-		who: T::AccountId,
-		pot: T::PotId,
-	) -> Result<
-		(
-			T::PotId,
-			PotDetailsOf<T>,
-			UserDetailsOf<T>,
-			T::RuntimeOrigin,
-			BalanceOf<T>,
-			BalanceOf<T>,
-		),
-		sp_runtime::DispatchError,
-	> {
+	fn pre_sponsor_for(who: T::AccountId, pot: T::PotId) -> Result<SponsorCallPreps<T>, sp_runtime::DispatchError> {
 		let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 		let mut user_details = User::<T>::get(pot, &who).ok_or(Error::<T>::UserNotRegistered)?;
 		let mut proxy_origin: T::RuntimeOrigin = frame_system::RawOrigin::Signed(user_details.proxy.clone()).into();
@@ -569,7 +577,13 @@ impl<T: Config> Pallet<T> {
 		user_details.reserve_quota.saturating_add(paid);
 
 		let proxy_balance = T::Currency::total_balance(&user_details.proxy);
-		Ok((pot, pot_details, user_details, proxy_origin, paid, proxy_balance))
+		Ok(SponsorCallPreps {
+			pot_details,
+			user_details,
+			proxy_origin,
+			paid,
+			proxy_balance,
+		})
 	}
 
 	fn post_sponsor_for(

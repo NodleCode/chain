@@ -64,10 +64,10 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		#[extrinsic_call]
-		remove_pot(RawOrigin::Signed(caller.clone()), pot);
+		remove_pot(RawOrigin::Signed(caller), pot);
 
 		assert_eq!(Pot::<T>::get(pot), None);
 	}
@@ -82,10 +82,10 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		#[extrinsic_call]
-		update_pot_limits(RawOrigin::Signed(caller.clone()), pot, 8u32.into(), 19u32.into());
+		update_pot_limits(RawOrigin::Signed(caller), pot, 8u32.into(), 19u32.into());
 
 		let updated_pot = Pot::<T>::get(pot).unwrap();
 		assert_eq!(updated_pot.fee_quota.limit(), 8u32.into());
@@ -102,10 +102,10 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		#[extrinsic_call]
-		update_sponsorship_type(RawOrigin::Signed(caller.clone()), pot, T::SponsorshipType::default());
+		update_sponsorship_type(RawOrigin::Signed(caller), pot, T::SponsorshipType::default());
 
 		let updated_pot = Pot::<T>::get(pot).unwrap();
 		assert_eq!(updated_pot.fee_quota.limit(), 5u32.into());
@@ -124,7 +124,7 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		#[extrinsic_call]
 		register_users(RawOrigin::Signed(caller), pot, users, 8u32.into(), 19u32.into());
@@ -144,7 +144,7 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -181,7 +181,7 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -216,7 +216,7 @@ mod benchmarks {
 			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
 			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
 		};
-		Pot::<T>::insert(pot, pot_details.clone());
+		Pot::<T>::insert(pot, pot_details);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(sponsor).into(),
@@ -258,8 +258,8 @@ mod benchmarks {
 		let mut user_details = User::<T>::get(pot, &user).unwrap();
 
 		let paid = T::Currency::minimum_balance() * 12_000u32.into();
-		pot_details.reserve_quota.saturating_add(paid.clone());
-		user_details.reserve_quota.saturating_add(paid.clone());
+		pot_details.reserve_quota.saturating_add(paid);
+		user_details.reserve_quota.saturating_add(paid);
 
 		let proxy_balance = T::Currency::minimum_balance() * 11_000u32.into();
 		let new_proxy_balance = T::Currency::minimum_balance() * 12_000u32.into();
