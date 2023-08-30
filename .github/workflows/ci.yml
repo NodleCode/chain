@@ -84,17 +84,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Check Version
-        run: |
-         echo -n "eden_rev=" >> $GITHUB_OUTPUT
-         curl -s --request POST   --url https://nodle-parachain.api.onfinality.io/public   --header 'Content-Type: application/json'   --data '{
-             "jsonrpc": "2.0", 
-              "method": "system_version",    
-              "params": [],
-              "id": 1
-            }' | jq '{"result"}[]'| sed 's/^"/"try-runtime-snap-eden/' >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
-        id: get_version
       - name: Install protobuf-compiler
         run: |
          sudo apt-get install protobuf-compiler
@@ -123,6 +112,17 @@ jobs:
         with:
           name: try_runtime.wasm
           path: try_runtime.wasm
+      - name: Check Version
+        run: |
+         echo -n "eden_rev=" >> $GITHUB_OUTPUT
+         curl -s --request POST   --url https://nodle-parachain.api.onfinality.io/public   --header 'Content-Type: application/json'   --data '{
+             "jsonrpc": "2.0", 
+              "method": "system_version",    
+              "params": [],
+              "id": 1
+            }' | jq '{"result"}[]'| sed 's/^"/"try-runtime-snap-eden/' >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+        id: get_version
       - name: Setup cache
         uses: actions/cache@v3
         id: cachedir
