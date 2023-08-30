@@ -98,7 +98,6 @@ construct_runtime! {
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
 
-
 		// Parachain
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
 		ParachainInfo: parachain_info = 31,
@@ -107,11 +106,13 @@ construct_runtime! {
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
+
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
 		Uniques: pallet_uniques = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
+		Sponsorship: pallet_sponsorship = 45,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -144,6 +145,7 @@ pub type SignedExtra = (
 	frame_system::CheckNonce<Runtime>,
 	frame_system::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+	pallet_sponsorship::ChargeSponsor<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
@@ -367,6 +369,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
+			list_benchmark!(list, extra, pallet_sponsorship, Sponsorship);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
@@ -408,6 +411,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
+			add_benchmark!(params, batches, pallet_sponsorship, Sponsorship);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
