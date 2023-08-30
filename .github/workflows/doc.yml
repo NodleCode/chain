@@ -1,39 +1,25 @@
 name: Rust AutoDoc
 
+env:
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+
+
 on:
   push:
     branches: master
+
 jobs:
   autodoc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: rustup show
-      
       - name: Install protobuf-compiler
         run: |
           sudo apt-get install protobuf-compiler
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-index-
-      - name: Cache cargo build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-target-
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Build the docs
         run: cargo doc --all --no-deps
       - name: Deploy the docs
