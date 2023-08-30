@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_pot","register_users","remove_pot","remove_users","sponsor_for","update_pot_limits","update_sponsorship_type","update_users_limits"]};

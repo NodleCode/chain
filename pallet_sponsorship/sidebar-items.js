@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["pallet","weights"],"struct":["ChargeSponsor","PotDetails","PreDispatchSponsorCallData","UserDetails"],"type":["Pre"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["WithAccountId"]};
+window.SIDEBAR_ITEMS = {"enum":["LimitedBalanceError"],"struct":["LimitedBalance"],"trait":["WithAccountId"]};

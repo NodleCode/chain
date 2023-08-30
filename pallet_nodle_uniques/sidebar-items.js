@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ExtraDepositHandlingError"],"mod":["pallet","weights"],"struct":["ExtraDepositDetails"],"type":["BalanceOf"]};
+window.SIDEBAR_ITEMS = {"mod":["pallet","weights"],"type":["BalanceOf"]};
