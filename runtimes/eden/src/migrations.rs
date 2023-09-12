@@ -42,16 +42,16 @@ impl OnRuntimeUpgrade for ReverseMigrateMovePalletSubstrateUniquesToUniques {
 	fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
 		let previous_collection_details: Vec<(CollectionId, CollectionDetails<AccountId, Balance>)> =
 			Decode::decode(&mut state.as_slice()).map_err(|_| "Unable to decode previous collection details")?;
-
-		let current_collection_details = migration::storage_key_iter::<
-			CollectionId,
-			CollectionDetails<AccountId, Balance>,
-			Blake2_128Concat,
-		>(NEW_UNIQUES_PALLET_NAME, UNIQUES_CLASS_PREFIX)
-		.collect::<Vec<_>>();
-
-		if current_collection_details != previous_collection_details {
-			return Err("Pallet Uniques Migration: Collection details do not match");
+		if previous_collection_details.len() > 0 {            
+                    let current_collection_details = migration::storage_key_iter::<
+                        CollectionId,
+                        CollectionDetails<AccountId, Balance>,
+                        Blake2_128Concat,
+                    >(NEW_UNIQUES_PALLET_NAME, UNIQUES_CLASS_PREFIX)
+                    .collect::<Vec<_>>();
+                    if current_collection_details != previous_collection_details {
+                        return Err("Pallet Uniques Migration: Collection details do not match");
+                    }
 		}
 		Ok(())
 	}
