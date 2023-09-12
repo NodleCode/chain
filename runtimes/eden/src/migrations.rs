@@ -20,8 +20,8 @@ const UNIQUES_CLASS_PREFIX: &[u8] = b"Class";
 const NEW_UNIQUES_PALLET_NAME: &[u8] = b"Uniques";
 const OLD_UNIQUES_PALLET_NAME: &[u8] = b"SubstrateUniques";
 
-pub struct MovePalletUniquesToSubstrateUniques;
-impl OnRuntimeUpgrade for MovePalletUniquesToSubstrateUniques {
+pub struct ReverseMigrateMovePalletSubstrateUniquesToUniques;
+impl OnRuntimeUpgrade for ReverseMigrateMovePalletSubstrateUniquesToUniques {
 	fn on_runtime_upgrade() -> Weight {
 		migration::move_pallet(OLD_UNIQUES_PALLET_NAME, NEW_UNIQUES_PALLET_NAME);
 		<Runtime as frame_system::Config>::BlockWeights::get().max_block
