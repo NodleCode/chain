@@ -1852,12 +1852,14 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 		));
 		let user_details = User::<Test>::get(pot, user).unwrap();
 
+		let unique_create_call = Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+			collection: 0u32,
+			admin: user,
+		}));
+
 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 			pot: 3,
-			call: Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 0u32,
-				admin: user,
-			})),
+			call: unique_create_call.clone(),
 		}));
 
 		let pre_dispatch_details = ChargeSponsor::<Test>::default()
@@ -1868,6 +1870,12 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 				0,
 			)
 			.ok();
+
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			unique_create_call
+		));
 
 		assert_ok!(ChargeSponsor::<Test>::post_dispatch(
 			pre_dispatch_details,
@@ -1887,6 +1895,9 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 			fee
 		);
 
+		assert_eq!(user_details_post_dispatch.reserve_quota.balance(), 3);
+		assert_eq!(pot_details_post_dispatch.reserve_quota.balance(), 3);
+
 		System::assert_last_event(
 			Event::TransactionFeePaid {
 				sponsor: pot_details.sponsor,
@@ -1894,7 +1905,14 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 			}
 			.into(),
 		);
-		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota - fee);
+		assert_eq!(
+			Balances::free_balance(pot_details.sponsor),
+			pot_reserve_quota - fee - user_details_post_dispatch.reserve_quota.balance()
+		);
+		assert_eq!(
+			Balances::total_balance(&user_details.proxy),
+			user_details_post_dispatch.reserve_quota.balance()
+		);
 	});
 }
 
