@@ -741,8 +741,18 @@ where
 				.add(actual_fee)
 				.map_err(|_| InvalidTransaction::Payment)?;
 
-			Pot::<T>::insert(pot, &pot_details);
-			User::<T>::insert(pot, user, user_details);
+			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
+				let pot_details_to_overwrite = maybe_pot_details.as_mut().ok_or(Error::<T>::PotNotExist)?;
+				pot_details_to_overwrite.fee_quota = pot_details.fee_quota.clone();
+				Ok(())
+			})
+			.map_err(|_| InvalidTransaction::Call)?;
+			User::<T>::try_mutate(pot, &user, |maybe_user_details| -> DispatchResult {
+				let user_details_to_overwrite = maybe_user_details.as_mut().ok_or(Error::<T>::UserNotRegistered)?;
+				user_details_to_overwrite.fee_quota = user_details.fee_quota.clone();
+				Ok(())
+			})
+			.map_err(|_| InvalidTransaction::Call)?;
 
 			Pallet::<T>::deposit_event(Event::<T>::TransactionFeePaid {
 				sponsor: pot_details.sponsor,
