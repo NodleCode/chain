@@ -752,6 +752,16 @@
 <a href="#752" id="752">752</a>
 <a href="#753" id="753">753</a>
 <a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -1495,8 +1505,18 @@
 				.add(actual_fee)
 				.map_err(|<span class="kw">_</span>| InvalidTransaction::Payment)<span class="question-mark">?</span>;
 
-			Pot::&lt;T&gt;::insert(pot, <span class="kw-2">&amp;</span>pot_details);
-			User::&lt;T&gt;::insert(pot, user, user_details);
+			Pot::&lt;T&gt;::try_mutate(pot, |maybe_pot_details| -&gt; DispatchResult {
+				<span class="kw">let </span>pot_details_to_overwrite = maybe_pot_details.as_mut().ok_or(Error::&lt;T&gt;::PotNotExist)<span class="question-mark">?</span>;
+				pot_details_to_overwrite.fee_quota = pot_details.fee_quota.clone();
+				<span class="prelude-val">Ok</span>(())
+			})
+			.map_err(|<span class="kw">_</span>| InvalidTransaction::Call)<span class="question-mark">?</span>;
+			User::&lt;T&gt;::try_mutate(pot, <span class="kw-2">&amp;</span>user, |maybe_user_details| -&gt; DispatchResult {
+				<span class="kw">let </span>user_details_to_overwrite = maybe_user_details.as_mut().ok_or(Error::&lt;T&gt;::UserNotRegistered)<span class="question-mark">?</span>;
+				user_details_to_overwrite.fee_quota = user_details.fee_quota.clone();
+				<span class="prelude-val">Ok</span>(())
+			})
+			.map_err(|<span class="kw">_</span>| InvalidTransaction::Call)<span class="question-mark">?</span>;
 
 			Pallet::&lt;T&gt;::deposit_event(Event::&lt;T&gt;::TransactionFeePaid {
 				sponsor: pot_details.sponsor,
