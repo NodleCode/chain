@@ -61,11 +61,11 @@ enum Releases {
 }
 
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-pub type VestingScheduleOf<T> = VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
+pub type VestingScheduleOf<T> = VestingSchedule<BlockNumberFor<<T as frame_system::Config>>, BalanceOf<T>>;
 pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
 pub type ScheduledGrant<T> = (
-	<T as frame_system::Config>::BlockNumber,
-	<T as frame_system::Config>::BlockNumber,
+	BlockNumberFor<<T as frame_system::Config>>,
+	BlockNumberFor<<T as frame_system::Config>>,
 	u32,
 	BalanceOf<T>,
 );
@@ -121,7 +121,7 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+		type Currency: LockableCurrency<Self::AccountId, Moment = BlockNumberFor<Self>>;
 		type CancelOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The maximum number of vesting schedule.
 		#[pallet::constant]
@@ -129,7 +129,7 @@ pub mod pallet {
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 		// The block number provider
-		type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
+		type BlockNumberProvider: BlockNumberProvider<BlockNumber = BlockNumberFor<Self>>;
 	}
 
 	#[pallet::pallet]
