@@ -243,6 +243,52 @@ fn local_config_genesis(id: ParaId) -> GenesisConfig {
 	)
 }
 
+pub fn eden_shell_config(id: ParaId) -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "NODL2".into());
+	properties.insert("tokenDecimals".into(), 11.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	use sp_core::crypto::Ss58Codec;
+	use std::str::FromStr;
+
+	const COLLATORS: [&str; 2] = [
+		"4nM8n8oYof8a8pyHy1i3ja89SkYhrYxnWQNjwo8iQnuuCJXL",
+		"4iE5w6ooFXRJ1GriLSH79gPo9qS7PTgVdBAa4kpBjJ3Zv5nt",
+	];
+	let root = AccountId::from_str("4mcS2MRypgbjgjdzac9E6tpJpABK2VaiD74fXPJe6r6N25bp").unwrap();
+	let collators = COLLATORS
+		.iter()
+		.map(|x| (AccountId::from_str(x).unwrap(), AuraId::from_ss58check(x).unwrap()))
+		.collect::<Vec<_>>();
+	let endowed_accounts = vec![root.clone(), collators[0].0.clone(), collators[1].0.clone()];
+
+	ChainSpec::from_genesis(
+		// Name
+		"Eden Shell",
+		// ID
+		"eden_shell",
+		ChainType::Live,
+		move || eden_testnet_genesis(root.clone(), collators.clone(), Some(endowed_accounts.clone()), id),
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
+		None,
+		// Protocol ID
+		Some("eden-shell"),
+		// Fork ID
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		Extensions {
+			relay_chain: "polkadot".into(),
+			para_id: id.into(),
+		},
+	)
+}
+
 pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
