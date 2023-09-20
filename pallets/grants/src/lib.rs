@@ -28,11 +28,10 @@ mod tests;
 
 use codec::{Decode, Encode};
 use frame_support::{
-	DefaultNoBound,
 	ensure,
 	pallet_prelude::{MaxEncodedLen, TypeInfo},
 	traits::{Currency, ExistenceRequirement, GenesisBuild, LockIdentifier, LockableCurrency, WithdrawReasons},
-	BoundedVec,
+	BoundedVec, DefaultNoBound,
 };
 use sp_runtime::{
 	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
@@ -63,12 +62,7 @@ enum Releases {
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 pub type VestingScheduleOf<T> = VestingSchedule<BlockNumberFor<T>, BalanceOf<T>>;
 pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
-pub type ScheduledGrant<T> = (
-	BlockNumberFor<T>,
-	BlockNumberFor<T>,
-	u32,
-	BalanceOf<T>,
-);
+pub type ScheduledGrant<T> = (BlockNumberFor<T>, BlockNumberFor<T>, u32, BalanceOf<T>);
 pub type ScheduledItem<T> = (<T as frame_system::Config>::AccountId, Vec<ScheduledGrant<T>>);
 
 /// The vesting schedule.

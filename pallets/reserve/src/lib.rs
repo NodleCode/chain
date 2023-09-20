@@ -27,13 +27,12 @@ mod tests;
 
 use frame_support::{
 	dispatch::GetDispatchInfo,
-	traits::{Currency, ExistenceRequirement,GenesisBuild, Get, Imbalance, OnUnbalanced},
+	traits::{Currency, ExistenceRequirement, GenesisBuild, Get, Imbalance, OnUnbalanced},
 	PalletId,
 };
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};
 use sp_std::prelude::Box;
 use support::WithAccountId;
-
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -48,9 +47,9 @@ type NegativeImbalanceOf<T, I> =
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::GenesisBuild;
 	use frame_support::DefaultNoBound;
 	use frame_system::pallet_prelude::*;
-	use frame_support::traits::GenesisBuild;
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {

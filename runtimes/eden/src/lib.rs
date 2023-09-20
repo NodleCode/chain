@@ -162,10 +162,8 @@ pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime>;
 
-type EventRecord = frame_system::EventRecord<
-	<Runtime as frame_system::Config>::RuntimeEvent,
-	<Runtime as frame_system::Config>::Hash,
->;
+type EventRecord =
+	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {

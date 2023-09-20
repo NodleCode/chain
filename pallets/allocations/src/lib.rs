@@ -131,7 +131,11 @@ impl<T: Config> MintCurve<T> {
 	}
 
 	/// Helper function to calculate the very next schedule based on the current block number.
-	fn next_schedule(n: BlockNumberFor<T>, curve_start: BlockNumberFor<T>, period: BlockNumberFor<T>) -> BlockNumberFor<T> {
+	fn next_schedule(
+		n: BlockNumberFor<T>,
+		curve_start: BlockNumberFor<T>,
+		period: BlockNumberFor<T>,
+	) -> BlockNumberFor<T> {
 		if n >= curve_start {
 			n.saturating_sub(curve_start)
 				.checked_div(&period)
