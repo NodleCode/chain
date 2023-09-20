@@ -78,7 +78,6 @@ impl pallet_collator_selection::Config for Runtime {
 	type UpdateOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 	type PotId = PotId;
 	type MaxCandidates = MaxCandidates;
-	type MinCandidates = MinCandidates;
 	type MaxInvulnerables = MaxInvulnerables;
 	type KickThreshold = Period;
 	type ValidatorId = AccountId;
