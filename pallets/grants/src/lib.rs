@@ -28,9 +28,10 @@ mod tests;
 
 use codec::{Decode, Encode};
 use frame_support::{
+	DefaultNoBound,
 	ensure,
 	pallet_prelude::{MaxEncodedLen, TypeInfo},
-	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, GenesisBuild, LockIdentifier, LockableCurrency, WithdrawReasons},
 	BoundedVec,
 };
 use sp_runtime::{
@@ -43,8 +44,6 @@ use sp_std::{
 };
 
 use frame_system::pallet_prelude::BlockNumberFor;
-#[cfg(feature = "std")]
-use frame_support::traits::GenesisBuild;
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -266,17 +265,9 @@ pub mod pallet {
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 
 	#[pallet::genesis_config]
+	#[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
 		pub vesting: Vec<ScheduledItem<T>>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self {
-				vesting: Default::default(),
-			}
-		}
 	}
 
 	#[pallet::genesis_build]

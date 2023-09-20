@@ -27,15 +27,13 @@ mod tests;
 
 use frame_support::{
 	dispatch::GetDispatchInfo,
-	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
+	traits::{Currency, ExistenceRequirement,GenesisBuild, Get, Imbalance, OnUnbalanced},
 	PalletId,
 };
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};
 use sp_std::prelude::Box;
 use support::WithAccountId;
 
-#[cfg(feature = "std")]
-use frame_support::traits::GenesisBuild;
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -50,6 +48,7 @@ type NegativeImbalanceOf<T, I> =
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::DefaultNoBound;
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::GenesisBuild;
 
@@ -133,17 +132,9 @@ pub mod pallet {
 	}
 
 	#[pallet::genesis_config]
+	#[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
 		pub phantom: sp_std::marker::PhantomData<(T, I)>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
-		fn default() -> Self {
-			Self {
-				phantom: Default::default(),
-			}
-		}
 	}
 
 	#[pallet::genesis_build]
