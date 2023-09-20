@@ -42,6 +42,7 @@ use sp_std::{
 	vec::Vec,
 };
 
+use frame_system::pallet_prelude::BlockNumberFor;
 #[cfg(feature = "std")]
 use frame_support::traits::GenesisBuild;
 
@@ -61,11 +62,11 @@ enum Releases {
 }
 
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-pub type VestingScheduleOf<T> = VestingSchedule<BlockNumberFor<<T as frame_system::Config>>, BalanceOf<T>>;
+pub type VestingScheduleOf<T> = VestingSchedule<BlockNumberFor<T>, BalanceOf<T>>;
 pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
 pub type ScheduledGrant<T> = (
-	BlockNumberFor<<T as frame_system::Config>>,
-	BlockNumberFor<<T as frame_system::Config>>,
+	BlockNumberFor<T>,
+	BlockNumberFor<T>,
 	u32,
 	BalanceOf<T>,
 );
