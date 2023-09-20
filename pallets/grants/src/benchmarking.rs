@@ -35,7 +35,7 @@ struct BenchmarkConfig<T: Config> {
 	grantee: T::AccountId,
 	grantee_lookup: <T::Lookup as StaticLookup>::Source,
 	collector_lookup: <T::Lookup as StaticLookup>::Source,
-	schedule: VestingSchedule<T::BlockNumber, BalanceOf<T>>,
+	schedule: VestingSchedule<BlockNumberFor<T>, BalanceOf<T>>,
 }
 
 fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {

@@ -37,7 +37,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Header, Index, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -96,7 +96,7 @@ construct_runtime! {
 		Authorship: pallet_authorship = 20,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
+		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config<T>, Storage} = 25,
 
 		// Parachain
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
@@ -104,7 +104,7 @@ construct_runtime! {
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
-		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
+		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 35,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
 
 		// Neat things
@@ -129,6 +129,7 @@ construct_runtime! {
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 
+/// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 
 /// A Block signed with a Justification
@@ -161,6 +162,10 @@ pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime>;
 
+type EventRecord = frame_system::EventRecord<
+	<Runtime as frame_system::Config>::RuntimeEvent,
+	<Runtime as frame_system::Config>::Hash,
+>;
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
@@ -278,7 +283,7 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash>
+	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord>
 		for Runtime
 	{
 		fn call(
@@ -288,7 +293,7 @@ sp_api::impl_runtime_apis! {
 			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+		) -> pallet_contracts_primitives::ContractExecResult<Balance,EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_call(
 				origin,
@@ -310,7 +315,7 @@ sp_api::impl_runtime_apis! {
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
 			salt: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance> {
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_instantiate(
 				origin,
