@@ -73,6 +73,8 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	/// The type for storing how many extrinsics an account has signed.
+	type Nonce = Self::Nonce;
 }
 
 parameter_types! {
