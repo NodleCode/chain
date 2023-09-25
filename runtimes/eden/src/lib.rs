@@ -45,7 +45,7 @@ pub use sp_runtime::BuildStorage;
 
 use sp_runtime::{
 	generic,
-	traits::{BlakeTwo256, Extrinsic, Block as BlockT},
+	traits::{BlakeTwo256, Block as BlockT, Extrinsic},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult,
 };
@@ -133,6 +133,7 @@ pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 pub type SignedBlock = generic::SignedBlock<Block>;
 /// BlockId type as expected by this runtime.
 pub type BlockId = generic::BlockId<Block>;
+
 /// Index of a transaction in the chain.
 pub type Nonce = u32;
 /// The SignedExtension to the basic transaction logic.
@@ -163,7 +164,6 @@ pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime
 
 type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
-
 
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
