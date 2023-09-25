@@ -32,11 +32,7 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
+	pub enum Test {
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		PalletBalances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Vesting: vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
@@ -54,8 +50,6 @@ impl frame_system::Config for Test {
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
-	type Index = u64;
-	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = ::sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
@@ -68,6 +62,7 @@ impl frame_system::Config for Test {
 	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
+	type Block = Block;
 	type DbWeight = ();
 	type BaseCallFilter = frame_support::traits::Everything;
 	type OnSetCode = ();
