@@ -55,13 +55,10 @@ impl frame_system::Config for Runtime {
 	type DbWeight = RocksDbWeight;
 	type RuntimeOrigin = RuntimeOrigin;
 	type RuntimeCall = RuntimeCall;
-	// type Index = Index;
-	// type BlockNumber = BlockNumber;
 	type Hash = Hash;
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = AccountIdLookup<AccountId, ()>;
-	// type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = Version;
@@ -107,7 +104,6 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
 	type MaxHolds = ConstU32<0>;
 	type MaxFreezes = ConstU32<0>;
-	// type HoldIdentifier = ();
 	type FreezeIdentifier = ();
 }
 
