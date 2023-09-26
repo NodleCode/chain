@@ -20,7 +20,7 @@ use crate::{
 	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Aura, Balances, CollatorSelection, Runtime,
 	RuntimeEvent, Session,
 };
-use frame_support::{parameter_types, PalletId, traits::ConstBool};
+use frame_support::{parameter_types, traits::ConstBool, PalletId};
 use primitives::{AccountId, AuraId};
 use sp_runtime::impl_opaque_keys;
 use sp_std::prelude::*;

@@ -133,7 +133,6 @@ pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 pub type SignedBlock = generic::SignedBlock<Block>;
 /// BlockId type as expected by this runtime.
 pub type BlockId = generic::BlockId<Block>;
-
 /// Index of a transaction in the chain.
 pub type Nonce = u32;
 /// The SignedExtension to the basic transaction logic.
