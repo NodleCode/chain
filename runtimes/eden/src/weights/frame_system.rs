@@ -112,4 +112,9 @@ impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(p as u64)))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(p as u64)))
 	}
+
+	fn set_code() -> Weight {
+			
+			Default::default()
+		}
 }

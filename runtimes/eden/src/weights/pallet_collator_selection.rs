@@ -203,4 +203,12 @@ impl<T: frame_system::Config> pallet_collator_selection::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(c as u64)))
 	}
+
+fn add_invulnerable(_b: u32, _c: u32) -> Weight {
+        Default::default()
+    }
+
+fn remove_invulnerable(_b: u32) -> Weight {
+        Default::default()
+    }
 }

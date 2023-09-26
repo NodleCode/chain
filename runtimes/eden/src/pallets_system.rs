@@ -72,6 +72,9 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	/// The type for storing how many extrinsics an account has signed.
 	type Nonce = crate::Nonce;
+	#[doc = " The Block type used by the runtime. This is used by `construct_runtime` to retrieve the"]
+	#[doc = " extrinsics or other block specific data as needed."]
+	type Block = crate::Block;
 }
 
 parameter_types! {
@@ -105,6 +108,9 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ConstU32<0>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
+
+	#[doc = " The overarching hold reason."]
+	type RuntimeHoldReason = ();
 }
 
 parameter_types! {

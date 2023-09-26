@@ -1797,4 +1797,48 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
 
+fn v9_migration_step(c: u32, ) -> Weight {
+        Default::default()
+    }
+
+fn v10_migration_step() -> Weight {
+        Default::default()
+    }
+
+fn v11_migration_step(k: u32, ) -> Weight {
+        Default::default()
+    }
+
+fn v12_migration_step(c: u32, ) -> Weight {
+        Default::default()
+    }
+
+fn migration_noop() -> Weight {
+        Default::default()
+    }
+
+fn migrate() -> Weight {
+        Default::default()
+    }
+
+fn on_runtime_upgrade_noop() -> Weight {
+        Default::default()
+    }
+
+fn on_runtime_upgrade_in_progress() -> Weight {
+        Default::default()
+    }
+
+fn on_runtime_upgrade() -> Weight {
+        Default::default()
+    }
+
+fn seal_caller_is_root(r: u32, ) -> Weight {
+        Default::default()
+    }
+
+fn instr_i64const(r: u32, ) -> Weight {
+        Default::default()
+    }
+
 }

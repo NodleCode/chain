@@ -159,6 +159,8 @@ impl xcm_executor::Config for XcmConfig {
 	type UniversalAliases = Nothing;
 	type CallDispatcher = RuntimeCall;
 	type SafeCallFilter = Everything;
+
+	type Aliasers = Nothing ; // TODO check if it should be type Aliasers = AliasForeignAccountId32<OnlyParachains>;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -190,6 +192,12 @@ impl pallet_xcm::Config for Runtime {
 	type WeightInfo = crate::weights::pallet_xcm::WeightInfo<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ReachableDest = ReachableDest;
+
+	#[doc = " The maximum number of consumers a single remote lock may have."]
+	type MaxRemoteLockConsumers = ConstU32<0>;
+
+	#[doc = " The ID type for local consumers of remote locks."]
+	type RemoteLockConsumerIdentifier = ();
 }
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
