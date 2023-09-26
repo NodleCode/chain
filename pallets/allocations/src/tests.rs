@@ -64,7 +64,6 @@ impl frame_system::Config for Test {
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -76,6 +75,7 @@ impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
 	type OnSetCode = ();
 	type SystemWeightInfo = ();
+	type Nonce = u32;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
@@ -92,11 +92,14 @@ impl pallet_balances::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
+	// type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
 
 	type WeightInfo = ();
+
+	#[doc = " The overarching hold reason."]
+	type RuntimeHoldReason = ();
 }
 
 const THREE_INFLATION_STEPS: &[Perbill] = &[

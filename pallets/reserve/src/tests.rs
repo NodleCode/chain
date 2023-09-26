@@ -30,12 +30,12 @@ use sp_runtime::{
 };
 use sp_std::prelude::Box;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+// type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
 	pub enum Test {
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		TestModule: pallet_reserve::{Pallet, Call, Storage, Event<T>},
 	}
@@ -82,7 +82,7 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
+	// type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
 }
@@ -106,7 +106,7 @@ type TestCurrency = <Test as Config>::Currency;
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
+	frame_system::GenesisConfig::default().into()
 }
 
 #[test]

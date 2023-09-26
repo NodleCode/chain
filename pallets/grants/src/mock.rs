@@ -33,7 +33,7 @@ type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
 	pub enum Test {
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		PalletBalances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Vesting: vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
 	}
@@ -54,7 +54,6 @@ impl frame_system::Config for Test {
 	type Hashing = ::sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -68,6 +67,8 @@ impl frame_system::Config for Test {
 	type OnSetCode = ();
 	type SystemWeightInfo = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	#[doc = " This stores the number of previous transactions associated with a sender account."]
+	type Nonce = u32;
 }
 
 type Balance = u64;
@@ -88,7 +89,7 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
+	// type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
 }
