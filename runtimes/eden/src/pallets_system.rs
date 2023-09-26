@@ -71,7 +71,7 @@ impl frame_system::Config for Runtime {
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	/// The type for storing how many extrinsics an account has signed.
-	type Nonce = Self::Nonce;
+	type Nonce = crate::Nonce;
 }
 
 parameter_types! {
