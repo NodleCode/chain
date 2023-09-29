@@ -50,7 +50,6 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::BuildGenesisConfig;
 	use frame_support::DefaultNoBound;
-	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {
@@ -149,7 +148,7 @@ pub mod pallet {
 	}
 }
 
-use crate::pallet::{Config, Pallet};
+pub use crate::pallet::{Config, Pallet};
 
 impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
 	fn account_id() -> T::AccountId {
