@@ -30,8 +30,8 @@ use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	pallet_prelude::{MaxEncodedLen, TypeInfo},
-	traits::{Currency, ExistenceRequirement, GenesisBuild, LockIdentifier, LockableCurrency, WithdrawReasons},
-	BoundedVec, DefaultNoBound,
+	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
+	BoundedVec,
 };
 use sp_runtime::{
 	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
@@ -259,13 +259,19 @@ pub mod pallet {
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 
 	#[pallet::genesis_config]
-	#[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
 		pub vesting: Vec<ScheduledItem<T>>,
 	}
 
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self {
+				vesting: Default::default(),
+			}
+		}
+	}
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			self.vesting.iter().for_each(|(ref who, schedules)| {
 				let vesting_schedule: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule> = schedules

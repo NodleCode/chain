@@ -45,7 +45,7 @@ pub use sp_runtime::BuildStorage;
 
 use sp_runtime::{
 	generic,
-	traits::{BlakeTwo256, Block as BlockT, Extrinsic},
+	traits::{BlakeTwo256, Block as BlockT},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult,
 };
@@ -293,7 +293,7 @@ sp_api::impl_runtime_apis! {
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult<Balance,EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
-			Contracts::bare_call(
+					Contracts::bare_call(
 				origin,
 				dest,
 				value,
@@ -301,6 +301,7 @@ sp_api::impl_runtime_apis! {
 				storage_deposit_limit,
 				input_data,
 				constants::CONTRACTS_DEBUG_OUTPUT,
+				pallet_contracts::CollectEvents::UnsafeCollect,
 				pallet_contracts::Determinism::Enforced,
 			)
 		}
@@ -324,7 +325,9 @@ sp_api::impl_runtime_apis! {
 				data,
 				salt,
 				constants::CONTRACTS_DEBUG_OUTPUT,
+				pallet_contracts::CollectEvents::UnsafeCollect,
 			)
+
 		}
 
 		fn upload_code(

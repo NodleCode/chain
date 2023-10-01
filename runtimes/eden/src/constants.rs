@@ -25,6 +25,7 @@ use frame_support::{
 	},
 };
 use frame_system::limits::BlockWeights;
+use pallet_contracts::DebugInfo;
 use primitives::{Balance, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 use static_assertions::const_assert;
@@ -112,7 +113,7 @@ parameter_types! {
 
 // Prints debug output of the `contracts` pallet to stdout if the node is
 // started with `-lruntime::contracts=debug`.
-pub const CONTRACTS_DEBUG_OUTPUT: bool = true;
+pub const CONTRACTS_DEBUG_OUTPUT: DebugInfo = DebugInfo::UnsafeDebug;
 
 #[cfg(test)]
 mod tests {
