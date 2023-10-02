@@ -324,6 +324,10 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		// Eden doesn't support locking/unlocking assets
 		Err(BenchmarkError::Skip)
 	}
+
+	fn alias_origin() -> Result<(MultiLocation, MultiLocation), BenchmarkError> {
+		Err(BenchmarkError::Skip)
+	}
 }
 
 #[cfg(feature = "runtime-benchmarks")]
