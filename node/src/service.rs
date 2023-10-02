@@ -66,6 +66,12 @@ type ParachainBlockImport<RuntimeApi> =
 	TParachainBlockImport<Block, Arc<ParachainClient<RuntimeApi>>, ParachainBackend>;
 
 pub struct TemplateRuntimeExecutor;
+// impl sc_executor::sp_wasm_interface::HostFunctions for TemplateRuntimeExecutor {
+
+// 	fn host_functions() -> Vec<&'static (dyn Function + 'static)> { todo!() }
+// 	fn register_static<T>(_: &mut T) -> Result<(), <T as HostFunctionRegistry>::Error> where T: HostFunctionRegistry { todo!() }
+// }
+
 impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
 	#[cfg(feature = "runtime-benchmarks")]
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
