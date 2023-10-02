@@ -117,6 +117,7 @@ fn eden_testnet_genesis(
 			code: WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
+			_config: Default::default(),
 		},
 		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
@@ -144,7 +145,10 @@ fn eden_testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		parachain_info: ParachainInfoConfig { parachain_id: id },
+		parachain_info: ParachainInfoConfig {
+			parachain_id: id,
+			_config: Default::default(),
+		},
 		transaction_payment: Default::default(),
 
 		// Governance
@@ -165,6 +169,7 @@ fn eden_testnet_genesis(
 
 		polkadot_xcm: PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
+			_config: Default::default(),
 		},
 	}
 }

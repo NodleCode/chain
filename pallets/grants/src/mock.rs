@@ -92,6 +92,7 @@ impl pallet_balances::Config for Test {
 	// type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
+	type RuntimeHoldReason = ();
 }
 
 ord_parameter_types! {
