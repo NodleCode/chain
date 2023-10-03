@@ -153,7 +153,7 @@ impl ExtBuilder {
 		sp_tracing::try_init_simple();
 
 		let mut storage = frame_system::GenesisConfig::default()
-			.build_storage::<Test>()
+			.build_storage()
 			.unwrap_or_else(|err| {
 				panic!(
 					"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
