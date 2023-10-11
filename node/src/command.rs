@@ -34,7 +34,7 @@ use std::net::SocketAddr;
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, parachain_build_import_queue, TemplateRuntimeExecutor},
+	service::{new_partial, parachain_build_import_queue, ParachainNativeExecutor},
 };
 
 // default to Nodle parachain id
@@ -122,10 +122,7 @@ macro_rules! construct_async_run {
 	(|$components:ident, $cli:ident, $cmd:ident, $config:ident| $( $code:tt )* ) => {{
 		let runner = $cli.create_runner($cmd)?;
 		runner.async_run(|$config| {
-			let $components = new_partial::<
-				RuntimeApi,
-				_
-			>(
+			let $components = new_partial(
 				&$config,
 				parachain_build_import_queue,
 			)?;
@@ -185,13 +182,21 @@ pub fn run() -> Result<()> {
 		}
 		Some(Subcommand::ExportGenesisState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|_config| {
-				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
-				// let client = Default::default();
-				// cmd.run::<crate::service::Block>(&*spec, client)
-				Ok(()) //TODO FIXME
+			runner.sync_run(|config| {
+				let partials = new_partial(&config)?;
+
+				cmd.run(&*config.chain_spec, &*partials.client)
 			})
 		}
+		// Some(Subcommand::ExportGenesisState(cmd)) => {
+		// 	let runner = cli.create_runner(cmd)?;
+		// 	runner.sync_run(|_config| {
+		// 		let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
+		// 		// let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+		// 		// cmd.run::<crate::service::Block>(&*spec, &partials.client)
+		// 		cmd.run(components.client, &spec)
+		// 	})
+		// }
 		Some(Subcommand::ExportGenesisWasm(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|_config| {
@@ -207,8 +212,7 @@ pub fn run() -> Result<()> {
 			match cmd {
 				BenchmarkCmd::Pallet(cmd) => {
 					if cfg!(feature = "runtime-benchmarks") {
-						//TODO runner.sync_run(|config| cmd.run::<Block, TemplateRuntimeExecutor>(config))
-						Ok(())
+						runner.sync_run(|config| cmd.run::<Block, ()>(config))
 					} else {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
@@ -216,18 +220,21 @@ pub fn run() -> Result<()> {
 					}
 				}
 				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+					let partials = new_partial(&config)?;
 					cmd.run(partials.client)
 				}),
 				#[cfg(not(feature = "runtime-benchmarks"))]
-				BenchmarkCmd::Storage(_) => Err(sc_cli::Error::Input(
-					"Compile with --features=runtime-benchmarks \
+				BenchmarkCmd::Storage(_) => {
+					return Err(sc_cli::Error::Input(
+						"Compile with --features=runtime-benchmarks \
 						to enable storage benchmarks."
-						.into(),
-				)),
+							.into(),
+					)
+					.into())
+				}
 				#[cfg(feature = "runtime-benchmarks")]
 				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+					let partials = new_partial(&config)?;
 					let db = partials.backend.expose_db();
 					let storage = partials.backend.expose_storage();
 
@@ -242,7 +249,7 @@ pub fn run() -> Result<()> {
 				_ => Err("Benchmarking sub-command unsupported".into()),
 			}
 		}
-		Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
+		//	Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
 			let collator_options = cli.run.collator_options();
@@ -269,12 +276,12 @@ pub fn run() -> Result<()> {
 				let id = ParaId::from(para_id);
 
 				let parachain_account =
-					AccountIdConversion::<polkadot_primitives::v5::AccountId>::into_account_truncating(&id);
+					AccountIdConversion::<polkadot_primitives::AccountId>::into_account_truncating(&id);
 
-				let state_version = StateVersion::V1; // TODO Fixme
-				let block: Block =
-					generate_genesis_block(&*config.chain_spec, state_version).map_err(|e| format!("{e:?}"))?;
-				let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
+				// let state_version = StateVersion::V1; // TODO Fixme
+				// let block: Block =
+				// 	generate_genesis_block(&*config.chain_spec, state_version).map_err(|e| format!("{e:?}"))?;
+				// let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
 
 				let tokio_handle = config.tokio_handle.clone();
 				let polkadot_config = SubstrateCli::create_configuration(&polkadot_cli, &polkadot_cli, tokio_handle)
