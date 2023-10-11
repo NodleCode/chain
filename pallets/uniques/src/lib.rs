@@ -107,8 +107,9 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I>
-	where T::CollectionId: Copy
-	 {
+	where
+		T::CollectionId: Copy,
+	{
 		/// Issue a new collection of non-fungible items from a public origin.
 		///
 		/// This new collection has no items initially and its owner is the origin.

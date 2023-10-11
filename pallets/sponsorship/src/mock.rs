@@ -170,8 +170,5 @@ impl pallet_sponsorship::Config for Test {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage()
-		.unwrap()
-		.into()
+	frame_system::GenesisConfig::default().build_storage().unwrap().into()
 }
