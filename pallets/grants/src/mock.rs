@@ -26,7 +26,7 @@ use frame_support::{ord_parameter_types, parameter_types};
 use frame_system::EnsureSignedBy;
 
 use sp_core::H256;
-use sp_runtime::{testing::Header, traits::IdentityLookup, BuildStorage};
+use sp_runtime::{traits::IdentityLookup, BuildStorage};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;

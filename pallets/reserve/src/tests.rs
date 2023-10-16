@@ -22,9 +22,8 @@ use super::*;
 use crate::{self as pallet_reserve};
 use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::ConstU64, traits::Currency};
 use frame_system::{EnsureSignedBy, RawOrigin};
-use sp_core::{Blake2Hasher, H256};
+use sp_core::H256;
 use sp_runtime::{
-	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 	DispatchError::BadOrigin,
 };

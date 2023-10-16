@@ -262,7 +262,7 @@ where
 	let transaction_pool = params.transaction_pool.clone();
 	let import_queue_service = params.import_queue.service();
 	// TODO there should be more here:
-	let mut net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
+	let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
 		build_network(BuildNetworkParams {

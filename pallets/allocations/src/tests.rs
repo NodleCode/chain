@@ -31,7 +31,6 @@ use frame_system::EnsureSignedBy;
 use lazy_static::lazy_static;
 use sp_core::H256;
 use sp_runtime::{
-	testing::Header,
 	traits::{BadOrigin, BlakeTwo256, IdentityLookup},
 	BuildStorage, Perbill,
 };
@@ -168,7 +167,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	sp_tracing::try_init_simple();
 
 	let mut storage = frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
+		.build_storage()
 		.unwrap_or_else(|err| {
 			panic!(
 				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",

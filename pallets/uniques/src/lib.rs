@@ -189,7 +189,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
-			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection.clone())
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
 				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
 			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection) {
 				let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item)
