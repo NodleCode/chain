@@ -49,7 +49,7 @@ type NegativeImbalanceOf<T, I> =
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::{dispatch::PostDispatchInfo, pallet_prelude::*};
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -57,7 +57,9 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type ExternalOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		type Currency: Currency<Self::AccountId>;
-		type RuntimeCall: Parameter + Dispatchable<RuntimeOrigin = Self::RuntimeOrigin> + GetDispatchInfo;
+		type RuntimeCall: Parameter
+			+ Dispatchable<RuntimeOrigin = Self::RuntimeOrigin, PostInfo = PostDispatchInfo>
+			+ GetDispatchInfo;
 		type PalletId: Get<PalletId>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -110,9 +112,8 @@ pub mod pallet {
 		pub fn apply_as(origin: OriginFor<T>, call: Box<<T as Config<I>>::RuntimeCall>) -> DispatchResultWithPostInfo {
 			T::ExternalOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
-			let res = call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into());
-
-			Self::deposit_event(Event::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
+			call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into())?;
+			Self::deposit_event(Event::ReserveOpExecuted);
 
 			Ok(().into())
 		}
@@ -128,7 +129,7 @@ pub mod pallet {
 		/// Someone tipped the company reserve
 		TipReceived(T::AccountId, BalanceOf<T, I>),
 		/// We executed a call coming from the company reserve account
-		ReserveOp(DispatchResult),
+		ReserveOpExecuted,
 	}
 
 	#[pallet::genesis_config]
