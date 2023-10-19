@@ -107,8 +107,9 @@ construct_runtime! {
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
-		Uniques: pallet_uniques = 42,
+		Uniques: pallet_uniques::{Pallet, Storage, Event<T>} = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
+		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
 
 		// Nodle Stack
@@ -373,6 +374,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
+			list_benchmark!(list, extra, pallet_nodle_uniques, NodleUniques);
 			list_benchmark!(list, extra, pallet_sponsorship, Sponsorship);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
@@ -415,6 +417,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
+			add_benchmark!(params, batches, pallet_nodle_uniques, NodleUniques);
 			add_benchmark!(params, batches, pallet_sponsorship, Sponsorship);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);

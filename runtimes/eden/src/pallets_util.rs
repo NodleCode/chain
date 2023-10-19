@@ -150,7 +150,7 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
 			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Utility { .. }),
-			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
+			SponsorshipType::Uniques => matches!(c, RuntimeCall::NodleUniques { .. }),
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
@@ -170,6 +170,11 @@ impl pallet_sponsorship::Config for Runtime {
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
 	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_nodle_uniques::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
