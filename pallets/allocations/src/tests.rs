@@ -34,7 +34,6 @@ use sp_runtime::{
 
 pub(crate) type AccountId = u64;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
@@ -163,7 +162,7 @@ type Errors = Error<Test>;
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	sp_tracing::try_init_simple();
 
-	let mut storage = frame_system::GenesisConfig::default()
+	let mut storage = frame_system::GenesisConfig::<Test>::default()
 		.build_storage()
 		.unwrap_or_else(|err| {
 			panic!(

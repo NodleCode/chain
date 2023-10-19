@@ -28,7 +28,6 @@ use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{traits::IdentityLookup, BuildStorage};
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
@@ -152,7 +151,7 @@ impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
 		sp_tracing::try_init_simple();
 
-		let mut storage = frame_system::GenesisConfig::default()
+		let mut storage = frame_system::GenesisConfig::<Test>::default()
 			.build_storage()
 			.unwrap_or_else(|err| {
 				panic!(

@@ -25,6 +25,7 @@ use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
+	BuildStorage,
 	DispatchError::BadOrigin,
 };
 use sp_std::prelude::Box;
@@ -107,7 +108,8 @@ type TestCurrency = <Test as Config>::Currency;
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let t: frame_system::GenesisConfig<Test> = frame_system::GenesisConfig::default();
+	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
+
 	sp_io::TestExternalities::new(t.into())
 }
 
