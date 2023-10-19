@@ -35,7 +35,7 @@ fn get_config<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, Acc
 	let collection_owner: T::AccountId = account("collection_owner", 0, SEED);
 	let collection_owner_lookup = T::Lookup::unlookup(collection_owner.clone());
 	let collection_id = <T as pallet_uniques::Config<I>>::Helper::collection(0);
-	(collection_id, collection_owner, collection_owner_lookup)
+	(collection_id.clone(), collection_owner, collection_owner_lookup)
 }
 
 fn create_collection<T: Config<I>, I: 'static>(
@@ -45,11 +45,11 @@ fn create_collection<T: Config<I>, I: 'static>(
 	T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
 	assert_ok!(Uniques::<T, I>::create_with_extra_deposit_limit(
 		SystemOrigin::Signed(collection_owner.clone()).into(),
-		collection_id,
+		collection_id.clone(),
 		collection_owner_lookup.clone(),
 		extra_deposit_limit
 	));
-	(collection_id, collection_owner, collection_owner_lookup)
+	(collection_id.clone(), collection_owner, collection_owner_lookup)
 }
 fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
 	let (.., collection_owner, collection_owner_lookup) = get_config::<T, I>();
@@ -104,7 +104,7 @@ fn mint_item_with_extra_deposit<T: Config<I>, I: 'static>(
 	let item = T::Helper::item(index);
 	assert!(Uniques::<T, I>::mint_with_extra_deposit(
 		SystemOrigin::Signed(collection_owner.clone()).into(),
-		collection_id,
+		collection_id.clone(),
 		item,
 		collection_owner_lookup.clone(),
 		deposit,
@@ -144,23 +144,23 @@ benchmarks_instance_pallet! {
 			item_metadatas: m,
 			attributes: a,
 		};
-	}: _(SystemOrigin::Signed(collection_owner), collection_id, witness)
+	}: _(SystemOrigin::Signed(collection_owner), collection_id.clone(), witness)
 
 	mint_with_extra_deposit {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
 		let item = T::Helper::item(0);
 		let deposit = 5u32.into();
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, collection_owner_lookup, deposit)
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id.clone(), item, collection_owner_lookup, deposit)
 
 	burn {
 		let (collection_id, collection_owner, collection_owner_lookup) = create_collection::<T,I>(BalanceOf::<T, I>::max_value());
 		let (item, ..) = mint_item_with_extra_deposit::<T, I>(0, T::Currency::minimum_balance());
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, item, Some(collection_owner_lookup))
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id.clone(), item, Some(collection_owner_lookup))
 
 	create_with_extra_deposit_limit {
 		let (collection_id, collection_owner, collection_owner_lookup) = get_config::<T, I>();
 		T::Currency::make_free_balance_be(&collection_owner, BalanceOf::<T, I>::max_value());
-	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id, collection_owner_lookup, BalanceOf::<T, I>::max_value())
+	}: _(SystemOrigin::Signed(collection_owner.clone()), collection_id.clone(), collection_owner_lookup, BalanceOf::<T, I>::max_value())
 	verify {
 		let event: <T as pallet_uniques::Config<I>>::RuntimeEvent = pallet_uniques::Event::Created { collection: <T as pallet_uniques::Config<I>>::Helper::collection(0), creator: collection_owner.clone(), owner: collection_owner }.into();
 		assert_last_event::<T, I>(event.into());
@@ -172,8 +172,8 @@ benchmarks_instance_pallet! {
 		let target_lookup = T::Lookup::unlookup(target.clone());
 		T::Currency::make_free_balance_be(&target, T::Currency::minimum_balance());
 		let origin = SystemOrigin::Signed(target.clone()).into();
-		Uniques::<T, I>::set_accept_ownership(origin, Some(collection))?;
-	}: _(SystemOrigin::Signed(collection_owner), collection, target_lookup)
+		Uniques::<T, I>::set_accept_ownership(origin, Some(collection.clone()))?;
+	}: _(SystemOrigin::Signed(collection_owner), collection.clone(), target_lookup)
 	verify {
 		let event: <T as pallet_uniques::Config<I>>::RuntimeEvent = pallet_uniques::Event::OwnerChanged { collection, new_owner: target }.into();
 		assert_last_event::<T, I>(event.into());
@@ -181,7 +181,7 @@ benchmarks_instance_pallet! {
 
 	update_extra_deposit_limit {
 		let (collection, collection_owner, _) = create_collection::<T, I>(BalanceOf::<T, I>::max_value());
-	}: _(SystemOrigin::Signed(collection_owner), collection, BalanceOf::<T, I>::min_value())
+	}: _(SystemOrigin::Signed(collection_owner), collection.clone(), BalanceOf::<T, I>::min_value())
 	verify {
 		let event: <T as Config<I>>::RuntimeEvent = Event::ExtraDepositLimitUpdated { collection, limit: BalanceOf::<T, I>::min_value() }.into();
 		assert_last_event::<T, I>(event.into());
