@@ -23,7 +23,7 @@ use log::info;
 use runtime_eden::{Block, RuntimeApi};
 use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams, NetworkParams, Result,
-	RuntimeVersion, SharedParams, SubstrateCli,
+	SharedParams, SubstrateCli,
 };
 use sc_service::config::{BasePath, PrometheusConfig};
 use sp_core::hexdisplay::HexDisplay;
@@ -34,7 +34,7 @@ use std::net::SocketAddr;
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, parachain_build_import_queue, TemplateRuntimeExecutor},
+	service::{new_partial, parachain_build_import_queue},
 };
 
 // default to Nodle parachain id

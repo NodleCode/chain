@@ -19,7 +19,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 // std
-use std::{default, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 // rpc
 use jsonrpsee::RpcModule;

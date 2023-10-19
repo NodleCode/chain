@@ -21,10 +21,7 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-	assert_noop, assert_ok, bounded_vec,
-	dispatch::Pays,
-	ord_parameter_types, parameter_types,
-	traits::{ConstU32, GenesisBuild},
+	assert_noop, assert_ok, bounded_vec, dispatch::Pays, ord_parameter_types, parameter_types, traits::ConstU32,
 	PalletId,
 };
 use frame_system::EnsureSignedBy;

@@ -23,7 +23,7 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, PolkadotXcmConfig,
+	AuraId, BalancesConfig, CollatorSelectionConfig, ParachainInfoConfig, PolkadotXcmConfig, RuntimeGenesisConfig,
 	SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
@@ -37,7 +37,7 @@ use sp_runtime::{
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -87,13 +87,13 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
 	SessionKeys { aura: keys }
 }
 
-/// Helper function to create GenesisConfig for testing
+/// Helper function to create RuntimeGenesisConfig for testing
 fn eden_testnet_genesis(
 	root_key: AccountId,
 	collators: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Option<Vec<AccountId>>,
 	id: ParaId,
-) -> GenesisConfig {
+) -> RuntimeGenesisConfig {
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
 		vec![
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -111,7 +111,7 @@ fn eden_testnet_genesis(
 
 	const ENDOWMENT: Balance = 10_000 * NODL;
 
-	GenesisConfig {
+	RuntimeGenesisConfig {
 		// Core
 		system: SystemConfig {
 			code: WASM_BINARY
@@ -174,7 +174,7 @@ fn eden_testnet_genesis(
 	}
 }
 
-fn development_config_genesis(id: ParaId) -> GenesisConfig {
+fn development_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 	eden_testnet_genesis(
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
 		vec![
@@ -218,7 +218,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	)
 }
 
-fn local_config_genesis(id: ParaId) -> GenesisConfig {
+fn local_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 	eden_testnet_genesis(
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
 		vec![
