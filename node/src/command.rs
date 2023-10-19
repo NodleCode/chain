@@ -186,28 +186,8 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::ExportGenesisState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| {
-				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
-				// let telemetry = config
-				// .telemetry_endpoints
-				// .clone()
-				// .filter(|x| !x.is_empty())
-				// .map(|endpoints| -> Result<_, sc_telemetry::Error> {
-				// 	let worker = TelemetryWorker::new(16)?;
-				// 	let telemetry = worker.handle().new_telemetry(endpoints);
-				// 	Ok((worker, telemetry))
-				// })
-				// .transpose()?;
-
-				// let (client, backend, keystore_container, task_manager) =
-				// sc_service::new_full_parts::<Block, RuntimeApi, _>(
-				// 	config,
-				// 	telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
-				// 	executor,
-				// )?;
 				let partials = new_partial(&config, parachain_build_import_queue)?;
-
 				cmd.run(&*config.chain_spec, &*partials.client)
-				// cmd.run(&*config.chain_spec, client)
 			})
 		}
 		Some(Subcommand::ExportGenesisWasm(cmd)) => {
