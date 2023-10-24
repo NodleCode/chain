@@ -34,6 +34,8 @@ RUN mv /usr/share/ca* /tmp && \
 	chown -R nodle-chain:nodle-chain /nodle-chain/.local && \
 	ln -s /nodle-chain/.local/share/nodle-chain /data
 
+ADD ./eden-shell.json /eden-shell.json
+
 USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
