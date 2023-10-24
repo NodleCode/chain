@@ -483,7 +483,7 @@ sp_api::impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			log::debug!("on_runtime_upgrade");
-			let weight = Executive::try_runtime_upgrade(checks).unwrap_or_default();
+			let weight = Executive::try_runtime_upgrade(checks).unwrap();
 			(weight, constants::RuntimeBlockWeights::get().max_block)
 		}
 
