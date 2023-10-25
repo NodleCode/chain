@@ -214,3 +214,20 @@ fn try_root_if_not_admin() {
 		assert_ok!(TestModule::apply_as(RawOrigin::Root.into(), make_call(1)));
 	})
 }
+
+#[test]
+fn forward_error_if_call_error() {
+	new_test_ext().execute_with(|| {
+		// this call will fail as it expects to be called by `Root`, yet the pallet will
+		// dispatch with the reserve's address as the origin. The error should be `BadOrigin`
+		// and forwarded to the caller (us).
+		let failing = Box::new(RuntimeCall::System(frame_system::Call::<Test>::set_code {
+			code: vec![],
+		}));
+
+		assert_noop!(
+			TestModule::apply_as(RuntimeOrigin::signed(Admin::get()), failing),
+			BadOrigin
+		);
+	})
+}
