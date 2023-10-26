@@ -77,7 +77,9 @@ where
 
 	// TODO: remove once migration is done
 	use state_trie_migration_rpc::{StateMigration, StateMigrationApiServer};
-	module.merge(StateMigration::new(client, backend, deny_unsafe).into_rpc())?;
+	module.merge(StateMigration::new(client.clone(), backend.clone(), deny_unsafe).into_rpc())?;
+	use nodle_rpc_utils::{StateMigration as UtilsStateMigration, StateMigrationApiServer as UtilsStateMigrationApiServer};
+	module.merge(UtilsStateMigration::new(client, backend, deny_unsafe).into_rpc())?;
 
 	Ok(module)
 }
