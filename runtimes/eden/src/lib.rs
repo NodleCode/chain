@@ -426,7 +426,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
 
-			add_benchmark!(list, extra, pallet_state_trie_migration, StateTrieMigration);
+			add_benchmark!(params, batches, pallet_state_trie_migration, StateTrieMigration);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
