@@ -43,7 +43,7 @@ pub struct FullDeps<C, P> {
 }
 
 /// Instantiate all RPC extensions.
-pub fn create_full<C, P>(deps: FullDeps<C, P>) -> Result<RpcExtension, Box<dyn std::error::Error + Send + Sync>>
+pub fn create_full<C, P, B>(deps: FullDeps<C, P>, backend: Arc<B>) -> Result<RpcExtension, Box<dyn std::error::Error + Send + Sync>>
 where
 	C: ProvideRuntimeApi<Block>
 		+ HeaderBackend<Block>
@@ -56,6 +56,8 @@ where
 	C::Api: frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	C::Api: BlockBuilder<Block>,
 	P: TransactionPool + Sync + Send + 'static,
+	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
+	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
 	use frame_rpc_system::{System, SystemApiServer};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
@@ -68,7 +70,11 @@ where
 	} = deps;
 
 	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
-	module.merge(TransactionPayment::new(client).into_rpc())?;
+	module.merge(TransactionPayment::new(client.clone()).into_rpc())?;
+
+	// TODO: remove once migration is done
+	use state_trie_migration_rpc::{StateMigration, StateMigrationApiServer};
+	module.merge(StateMigration::new(client, backend, deny_unsafe).into_rpc())?;
 
 	Ok(module)
 }
