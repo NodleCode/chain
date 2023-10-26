@@ -188,9 +188,12 @@ where
 
 // TODO: remove this once state trie migration is done.
 parameter_types! {
-	// The deposit configuration for the singed migration. Specially if you want to allow any signed account to do the migration (see `SignedFilter`, these deposits should be high)
+	// The deposit configuration for the singed migration. These deposits are futile given we only
+	// allow Technical Committee members to kick-in the migration, as such we can safely lower them.
+	//
+	// I have not set them to 0 in case of any unexpected behavior in the code.
 	pub const MigrationSignedDepositPerItem: Balance = 1 * constants::NANO_NODL;
-	pub const MigrationSignedDepositBase: Balance = 20 * constants::NODL;
+	pub const MigrationSignedDepositBase: Balance = 1 * constants::NANO_NODL;
 
 	// TODO: define via https://github.com/paritytech/substrate/issues/11642
 	pub const MaxKeyLen: u32 = 512;
