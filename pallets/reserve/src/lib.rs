@@ -49,7 +49,6 @@ type NegativeImbalanceOf<T, I> =
 pub mod pallet {
 	use super::*;
 	use frame_support::{dispatch::PostDispatchInfo, pallet_prelude::*};
-	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {

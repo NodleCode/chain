@@ -35,7 +35,7 @@ where
 		+ pallet_xcm::Config
 		+ pallet_preimage::Config
 		+ pallet_multisig::Config
-		+ pallet_contracts::Config
+		+ pallet_contracts::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
 		// Pallets with no data to migrate, just update storage version block
