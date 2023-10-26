@@ -124,6 +124,10 @@ construct_runtime! {
 
 		// Smart Contracts.
 		Contracts: pallet_contracts = 62,
+
+		// TODO: remove once state trie migration is done
+		// Temporary
+		StateTrieMigration: pallet_state_trie_migration = 99,
 	}
 }
 /// The address format for describing accounts.
@@ -378,6 +382,8 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
 			list_benchmark!(list, extra, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
 
+			list_benchmark!(list, extra, pallet_state_trie_migration, StateTrieMigration);
+
 			let storage_info = AllPalletsWithSystem::storage_info();
 
 			(list, storage_info)
@@ -419,6 +425,8 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_xcm, PolkadotXcm);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
+
+			add_benchmark!(list, extra, pallet_state_trie_migration, StateTrieMigration);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

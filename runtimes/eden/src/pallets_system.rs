@@ -185,3 +185,30 @@ where
 	type OverarchingCall = RuntimeCall;
 	type Extrinsic = UncheckedExtrinsic;
 }
+
+// TODO: remove this once state trie migration is done.
+parameter_types! {
+	// The deposit configuration for the singed migration. Specially if you want to allow any signed account to do the migration (see `SignedFilter`, these deposits should be high)
+	pub const MigrationSignedDepositPerItem: Balance = 1 * constants::NANO_NODL;
+	pub const MigrationSignedDepositBase: Balance = 20 * constants::NODL;
+
+	// TODO: define via https://github.com/paritytech/substrate/issues/11642
+	pub const MaxKeyLen: u32 = 512;
+}
+impl pallet_state_trie_migration::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type SignedDepositPerItem = MigrationSignedDepositPerItem;
+	type SignedDepositBase = MigrationSignedDepositBase;
+	type MaxKeyLen = MaxKeyLen;
+
+	// The configuration below allows ANY member from the Technical Committee
+	// to trigger the migration.
+	// This is considered safe as the migration is temporary and needs manual
+	// activation through a series of extrinsic calls to make it progress.
+	type ControlOrigin = pallet_collective::EnsureMember<AccountId, pallet_collective::Instance1>;
+	type SignedFilter = pallet_collective::EnsureMember<AccountId, pallet_collective::Instance1>;
+
+	// Replace this with weight based on your runtime.
+	type WeightInfo = (); // TODO: add weight for migration
+}

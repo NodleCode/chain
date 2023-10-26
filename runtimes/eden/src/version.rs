@@ -54,7 +54,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	transaction_version: 5,
 
 	apis: RUNTIME_API_VERSIONS,
-	state_version: 0,
+	state_version: 1,
 };
 
 /// The version infromation used to identify this runtime when compiled natively.
