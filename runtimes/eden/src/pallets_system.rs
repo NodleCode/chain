@@ -195,8 +195,10 @@ parameter_types! {
 	pub const MigrationSignedDepositPerItem: Balance = 1 * constants::NANO_NODL;
 	pub const MigrationSignedDepositBase: Balance = 1 * constants::NANO_NODL;
 
-	// TODO: define via https://github.com/paritytech/substrate/issues/11642
-	pub const MaxKeyLen: u32 = 512;
+	// To obtain this value, run a node via `cargo run --release -- --tmp --sync=warp --rpc-methods=unsafe -- --tmp --sync=warp`
+	// and trigger the appropriate RPC `utils_trieMigrationStatus` call.
+	// `echo '{"id":1,"jsonrpc":"2.0","method":"utils_trieMigrationStatus","params":[]}' | websocat -n1 -B 99999999 ws://127.0.0.1:9944`
+	pub const MaxKeyLen: u32 = 120;
 }
 impl pallet_state_trie_migration::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
