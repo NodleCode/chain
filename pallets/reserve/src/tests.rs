@@ -110,7 +110,7 @@ type TestCurrency = <Test as Config>::Currency;
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
 
-	sp_io::TestExternalities::new(t.into())
+	sp_io::TestExternalities::new(t)
 }
 
 #[test]

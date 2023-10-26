@@ -1,9 +1,6 @@
-use core::marker::PhantomData;
-
 use crate::Runtime;
 use frame_support::{
-	migration,
-	traits::{OnRuntimeUpgrade, PalletInfoAccess, StorageVersion},
+	traits::{OnRuntimeUpgrade, StorageVersion},
 	weights::Weight,
 };
 
@@ -39,12 +36,7 @@ where
 		+ pallet_preimage::Config
 		+ pallet_multisig::Config
 		+ pallet_contracts::Config
-
-
-
-
-
-		{
+{
 	fn on_runtime_upgrade() -> Weight {
 		// Pallets with no data to migrate, just update storage version block
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
@@ -57,7 +49,6 @@ where
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_multisig::Pallet<T>>();
 		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
-
 
 		<Runtime as frame_system::Config>::BlockWeights::get().base_block
 	}
