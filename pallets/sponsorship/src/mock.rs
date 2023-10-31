@@ -82,7 +82,6 @@ impl pallet_balances::Config for Test {
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
 	type MaxHolds = ();
-	#[doc = " The overarching hold reason."]
 	type RuntimeHoldReason = ();
 }
 

@@ -35,7 +35,7 @@ fn get_config<T: Config<I>, I: 'static>() -> (T::CollectionId, T::AccountId, Acc
 	let collection_owner: T::AccountId = account("collection_owner", 0, SEED);
 	let collection_owner_lookup = T::Lookup::unlookup(collection_owner.clone());
 	let collection_id = <T as pallet_uniques::Config<I>>::Helper::collection(0);
-	(collection_id.clone(), collection_owner, collection_owner_lookup)
+	(collection_id, collection_owner, collection_owner_lookup)
 }
 
 fn create_collection<T: Config<I>, I: 'static>(
