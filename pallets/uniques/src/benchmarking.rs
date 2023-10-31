@@ -49,7 +49,7 @@ fn create_collection<T: Config<I>, I: 'static>(
 		collection_owner_lookup.clone(),
 		extra_deposit_limit
 	));
-	(collection_id.clone(), collection_owner, collection_owner_lookup)
+	(collection_id, collection_owner, collection_owner_lookup)
 }
 fn add_collection_metadata<T: Config<I>, I: 'static>() -> (T::AccountId, AccountIdLookupOf<T>) {
 	let (.., collection_owner, collection_owner_lookup) = get_config::<T, I>();
