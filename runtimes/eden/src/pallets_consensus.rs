@@ -61,18 +61,6 @@ impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
 	type MaxAuthorities = MaxAuthorities;
-	#[doc = " Whether to allow block authors to create multiple blocks per slot."]
-	#[doc = ""]
-	#[doc = " If this is `true`, the pallet will allow slots to stay the same across sequential"]
-	#[doc = " blocks. If this is `false`, the pallet will require that subsequent blocks always have"]
-	#[doc = " higher slots than previous ones."]
-	#[doc = ""]
-	#[doc = " Regardless of the setting of this storage value, the pallet will always enforce the"]
-	#[doc = " invariant that slots don\\'t move backwards as the chain progresses."]
-	#[doc = ""]
-	#[doc = " The typical value for this should be \\'false\\' unless this pallet is being augmented by"]
-	#[doc = " another pallet which enforces some limitation on the number of blocks authors can create"]
-	#[doc = " using the same slot."]
 	type AllowMultipleBlocksPerSlot = ConstBool<false>;
 }
 
@@ -97,8 +85,5 @@ impl pallet_collator_selection::Config for Runtime {
 	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
 	type ValidatorRegistration = Session;
 	type WeightInfo = crate::weights::pallet_collator_selection::WeightInfo<Runtime>;
-	#[doc = " Minimum number eligible collators. Should always be greater than zero. This includes"]
-	#[doc = " Invulnerable collators. This ensures that there will always be one collator who can"]
-	#[doc = " produce a block."]
 	type MinEligibleCollators = MinEligibleCollators;
 }

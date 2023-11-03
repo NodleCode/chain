@@ -193,10 +193,8 @@ impl pallet_xcm::Config for Runtime {
 	#[cfg(feature = "runtime-benchmarks")]
 	type ReachableDest = ReachableDest;
 
-	#[doc = " The maximum number of consumers a single remote lock may have."]
 	type MaxRemoteLockConsumers = ConstU32<0>;
 
-	#[doc = " The ID type for local consumers of remote locks."]
 	type RemoteLockConsumerIdentifier = ();
 }
 

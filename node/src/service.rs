@@ -65,28 +65,6 @@ type ParachainBackend = TFullBackend<Block>;
 type ParachainBlockImport<RuntimeApi> =
 	TParachainBlockImport<Block, Arc<ParachainClient<RuntimeApi>>, ParachainBackend>;
 
-pub struct TemplateRuntimeExecutor;
-// impl sc_executor::sp_wasm_interface::HostFunctions for TemplateRuntimeExecutor {
-
-// 	fn host_functions() -> Vec<&'static (dyn Function + 'static)> { todo!() }
-// 	fn register_static<T>(_: &mut T) -> Result<(), <T as HostFunctionRegistry>::Error> where T: HostFunctionRegistry { todo!() }
-// }
-
-impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
-	#[cfg(feature = "runtime-benchmarks")]
-	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	type ExtendHostFunctions = ();
-
-	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		runtime_eden::api::dispatch(method, data)
-	}
-
-	fn native_version() -> sc_executor::NativeVersion {
-		runtime_eden::native_version()
-	}
-}
-
 /// Starts a `ServiceBuilder` for a full service.
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to

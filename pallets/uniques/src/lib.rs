@@ -130,7 +130,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			admin: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::create(origin, collection.clone(), admin)
+			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
 		}
 		/// Issue a new collection of non-fungible items from a privileged origin.
 		///
@@ -157,7 +157,7 @@ pub mod pallet {
 			owner: AccountIdLookupOf<T>,
 			free_holding: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::force_create(origin, collection.clone(), owner, free_holding)
+			pallet_uniques::Pallet::<T, I>::force_create(origin, collection, owner, free_holding)
 		}
 
 		/// Destroy a collection of fungible items.
@@ -222,7 +222,7 @@ pub mod pallet {
 			item: T::ItemId,
 			owner: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::mint(origin, collection.clone(), item, owner)
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)
 		}
 
 		/// Destroy a single item.
@@ -253,7 +253,7 @@ pub mod pallet {
 			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection.clone(), item)
 				.ok_or(Error::<T, I>::FailedToRetrieveItemOwner)?;
 			pallet_uniques::Pallet::<T, I>::burn(origin, collection.clone(), item, check_owner)?;
-			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection.clone(), item).unwrap_or_else(Zero::zero);
+			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection, item).unwrap_or_else(Zero::zero);
 			if !extra_deposit.is_zero() {
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
@@ -292,7 +292,7 @@ pub mod pallet {
 			item: T::ItemId,
 			dest: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::transfer(origin, collection.clone(), item, dest)
+			pallet_uniques::Pallet::<T, I>::transfer(origin, collection, item, dest)
 		}
 
 		/// Reevaluate the deposits on some items.
@@ -315,7 +315,7 @@ pub mod pallet {
 		#[pallet::call_index(6)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::redeposit(items.len() as u32))]
 		pub fn redeposit(origin: OriginFor<T>, collection: T::CollectionId, items: Vec<T::ItemId>) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::redeposit(origin, collection.clone(), items)
+			pallet_uniques::Pallet::<T, I>::redeposit(origin, collection, items)
 		}
 
 		/// Disallow further unprivileged transfer of an item.
@@ -331,7 +331,7 @@ pub mod pallet {
 		#[pallet::call_index(7)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::freeze())]
 		pub fn freeze(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::freeze(origin, collection.clone(), item)
+			pallet_uniques::Pallet::<T, I>::freeze(origin, collection, item)
 		}
 
 		/// Re-allow unprivileged transfer of an item.
@@ -347,7 +347,7 @@ pub mod pallet {
 		#[pallet::call_index(8)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::thaw())]
 		pub fn thaw(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::thaw(origin, collection.clone(), item)
+			pallet_uniques::Pallet::<T, I>::thaw(origin, collection, item)
 		}
 
 		/// Disallow further unprivileged transfers for a whole collection.
@@ -362,7 +362,7 @@ pub mod pallet {
 		#[pallet::call_index(9)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::freeze_collection())]
 		pub fn freeze_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::freeze_collection(origin, collection.clone())
+			pallet_uniques::Pallet::<T, I>::freeze_collection(origin, collection)
 		}
 
 		/// Re-allow unprivileged transfers for a whole collection.
@@ -377,7 +377,7 @@ pub mod pallet {
 		#[pallet::call_index(10)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::thaw_collection())]
 		pub fn thaw_collection(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::thaw_collection(origin, collection.clone())
+			pallet_uniques::Pallet::<T, I>::thaw_collection(origin, collection)
 		}
 
 		/// Change the Owner of a collection.
@@ -402,7 +402,7 @@ pub mod pallet {
 			let old_owner = ensure_signed(origin)?;
 			let new_owner = T::Lookup::lookup(owner)?;
 			if old_owner != new_owner {
-				let total_extra_deposit = CollectionExtraDepositDetails::<T, I>::get(collection.clone())
+				let total_extra_deposit = CollectionExtraDepositDetails::<T, I>::get(collection)
 					.unwrap_or_default()
 					.balance();
 				T::Currency::repatriate_reserved(&old_owner, &new_owner, total_extra_deposit, Reserved)?;
@@ -431,7 +431,7 @@ pub mod pallet {
 			admin: AccountIdLookupOf<T>,
 			freezer: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::set_team(origin, collection.clone(), issuer, admin, freezer)
+			pallet_uniques::Pallet::<T, I>::set_team(origin, collection, issuer, admin, freezer)
 		}
 
 		/// Approve an item to be transferred by a delegated third-party account.
@@ -607,7 +607,7 @@ pub mod pallet {
 			data: BoundedVec<u8, T::StringLimit>,
 			is_frozen: bool,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::set_metadata(origin, collection.clone(), item, data, is_frozen)
+			pallet_uniques::Pallet::<T, I>::set_metadata(origin, collection, item, data, is_frozen)
 		}
 
 		/// Clear the metadata for an item.
@@ -626,7 +626,7 @@ pub mod pallet {
 		#[pallet::call_index(19)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::clear_metadata())]
 		pub fn clear_metadata(origin: OriginFor<T>, collection: T::CollectionId, item: T::ItemId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::clear_metadata(origin, collection.clone(), item)
+			pallet_uniques::Pallet::<T, I>::clear_metadata(origin, collection, item)
 		}
 
 		/// Set the metadata for a collection.
@@ -671,7 +671,7 @@ pub mod pallet {
 		#[pallet::call_index(21)]
 		#[pallet::weight(<T as pallet_uniques::Config<I>>::WeightInfo::clear_collection_metadata())]
 		pub fn clear_collection_metadata(origin: OriginFor<T>, collection: T::CollectionId) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::clear_collection_metadata(origin, collection.clone())
+			pallet_uniques::Pallet::<T, I>::clear_collection_metadata(origin, collection)
 		}
 
 		/// Set (or reset) the acceptance of ownership for a particular account.
@@ -823,7 +823,7 @@ pub mod pallet {
 				.map_err(|_| Error::<T, I>::FailedToIncreaseTotalExtraDeposit)?;
 			<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
 			ItemExtraDeposits::<T, I>::insert(collection.clone(), item, deposit);
-			CollectionExtraDepositDetails::<T, I>::insert(collection.clone(), extra_deposit_details);
+			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
 			Ok(())
 		}
 

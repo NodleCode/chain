@@ -58,13 +58,8 @@ impl pallet_balances::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
-	// #[doc = " The ID type for holds."]
-	// type HoldIdentifier = [u8; 8];
-	#[doc = " The ID type for freezes."]
 	type FreezeIdentifier = [u8; 8];
-	#[doc = " The maximum number of holds that can exist on an account at any time."]
 	type MaxHolds = ();
-	#[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
 	type MaxFreezes = ();
 	type RuntimeHoldReason = ();
 }
