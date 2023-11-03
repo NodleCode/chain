@@ -113,6 +113,7 @@ construct_runtime! {
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
+		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 46,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -423,6 +424,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
+			list_benchmark!(list, extra, pallet_identity, Identity);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
 			list_benchmark!(list, extra, pallet_xcm, PolkadotXcm);
 			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
@@ -466,6 +468,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
+			add_benchmark!(params, batches, pallet_identity, Identity);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
 			add_benchmark!(params, batches, pallet_xcm, PolkadotXcm);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);

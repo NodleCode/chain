@@ -17,10 +17,10 @@
  */
 #![allow(clippy::identity_op)]
 
-use crate::constants::deposit;
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
+	Timestamp,
 };
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
@@ -180,7 +180,7 @@ impl pallet_nodle_uniques::Config for Runtime {
 parameter_types! {
 	pub const DepositPerItem: Balance = constants::deposit(1, 0);
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
-	pub const DefaultDepositLimit: Balance = deposit(1024, 1024 * 1024);
+	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 }
 
@@ -214,4 +214,27 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 	type Migrations = ();
+}
+
+parameter_types! {
+	pub const BasicDeposit: Balance = 1000 * constants::NODL;       // 258 bytes on-chain
+	pub const FieldDeposit: Balance = 200 * constants::NODL;        // 66 bytes on-chain
+	pub const SubAccountDeposit: Balance = 200 * constants::NODL;   // 53 bytes on-chain
+	pub const MaxSubAccounts: u32 = 100;
+	pub const MaxAdditionalFields: u32 = 100;
+	pub const MaxRegistrars: u32 = 20;
+}
+impl pallet_identity::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type BasicDeposit = BasicDeposit;
+	type FieldDeposit = FieldDeposit;
+	type SubAccountDeposit = SubAccountDeposit;
+	type MaxSubAccounts = MaxSubAccounts;
+	type MaxAdditionalFields = MaxAdditionalFields;
+	type MaxRegistrars = MaxRegistrars;
+	type Slashed = DaoReserve;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
+	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
 }
