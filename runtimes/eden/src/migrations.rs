@@ -1,4 +1,3 @@
-use crate::Runtime;
 use frame_support::{
 	traits::{OnRuntimeUpgrade, StorageVersion},
 	weights::Weight,
@@ -22,18 +21,26 @@ where
 		+ pallet_contracts::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
-		// Pallets with no data to migrate, just update storage version block
+		// Pallets with no data to migrate, just update storage version block goes here:
+
+		//TODO check  1 key
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
+
+		//TODO check 2 keys
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
+
+		//TODO check Found 4 keys (0.19s)
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
 		// https://github.com/paritytech/substrate/pull/12813
 		// moves funds to inactive if we don't need that this is OK.
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
-		StorageVersion::new(1).put::<pallet_collator_selection::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
+
+		// Size of onchain storage is 0 safe to upgrade storage version
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
-		StorageVersion::new(1).put::<pallet_multisig::Pallet<T>>();
+
+		// TODO check 43 keys
 		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
 
 		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
