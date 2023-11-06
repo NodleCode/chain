@@ -27,6 +27,8 @@ where
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
+		// https://github.com/paritytech/substrate/pull/12813
+		// moves funds to inactive if we don't need that this is OK.
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_collator_selection::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
@@ -34,7 +36,10 @@ where
 		StorageVersion::new(1).put::<pallet_multisig::Pallet<T>>();
 		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
 
-		<Runtime as frame_system::Config>::BlockWeights::get().base_block
+		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
+		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
+		// // .set_ref_time(100);
+		Weight::from_parts(43, 34)
 	}
 
 	#[cfg(feature = "try-runtime")]
