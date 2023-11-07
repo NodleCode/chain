@@ -47,7 +47,6 @@ where
 		StorageVersion::new(1).put::<pallet_collator_selection::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
-		StorageVersion::new(1).put::<pallet_multisig::Pallet<T>>();
 		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
 
 		<Runtime as frame_system::Config>::BlockWeights::get().base_block
