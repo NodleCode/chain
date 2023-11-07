@@ -169,7 +169,6 @@ pub type Migrations = (
 	// pallet_collective::migrations::v4,
 	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
 
-
 	// pallet_scheduler::migration::v3::MigrateToV4<Runtime>,
 	// pallet_scheduler::migration::v4::CleanupAgendas<Runtime>,
 

@@ -36,6 +36,8 @@ where
 		// https://github.com/paritytech/substrate/pull/12813
 		// moves funds to inactive if we don't need that this is OK.
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
+
+		// Check is key failed to decode a sign storage is already migrated?
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
 
 		// Size of onchain storage is 0 safe to upgrade storage version
