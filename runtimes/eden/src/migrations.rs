@@ -1,10 +1,11 @@
 use frame_support::{
 	traits::{OnRuntimeUpgrade, StorageVersion},
-	weights::Weight,
 };
 
 #[cfg(feature = "try-runtime")]
 use {sp_runtime::TryRuntimeError, sp_std::prelude::*};
+use crate::Runtime;
+use frame_support::{traits::Get, weights::{Weight}};
 
 pub struct MultiMigration<T>(sp_std::marker::PhantomData<T>);
 
@@ -26,10 +27,10 @@ where
 		//TODO check  1 key
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
 
-		//TODO check 2 keys
+		//TODO TechnicalMembership check 2 keys
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 
-		//TODO check Found 4 keys (0.19s)
+		//TODO TechnicalCommittee:: check Found 4 keys (0.19s)
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
 		// https://github.com/paritytech/substrate/pull/12813
@@ -46,7 +47,8 @@ where
 		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
 		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
 		// // .set_ref_time(100);
-		Weight::from_parts(43, 34)
+		Weight::from_parts(430000000, 340000000)
+
 	}
 
 	#[cfg(feature = "try-runtime")]
