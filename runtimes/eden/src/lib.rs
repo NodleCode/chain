@@ -156,35 +156,6 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 pub type Migrations = (
-	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-	// pallet_balances::migration::ResetInactive<Runtime>,
-	// pallet_balances::migration::MigrateToTrackInactive<Runtime, xcm_config::NodlLocation>,
-	// pallet_xcm::migration::v1::MigrateToV1<Runtime>,
-	// pallet_collective::migrations::v4,
-	// pallet_membership::migrations::v4,
-
-	// pallet_scheduler::migration::v3::MigrateToV4<Runtime>,
-	// pallet_scheduler::migration::v4::CleanupAgendas<Runtime>,
-
-	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-
-	// TODO begin
-	// [2023-10-23T05:32:53Z INFO  remote-ext] initialized state externalities with storage root 0x953ab4b56c3cbb2d920e4d8fbf4d0c8303159c267cd05c6b9149ae579a055737 and state_version V0
-	// [2023-10-23T05:32:53Z INFO  try-runtime::cli] Original runtime [Name: RuntimeString::Owned("nodle-para")] [Version: 23] [Code hash: 0xae58...e0f9]
-	// [2023-10-23T05:32:53Z INFO  try-runtime::cli] New runtime      [Name: RuntimeString::Owned("nodle-para")] [Version: 25] [Code hash: 0x5733...c563]
-	// [2023-10-23T05:32:53Z INFO  try_runtime_core::commands::on_runtime_upgrade] 🔬 Running TryRuntime_on_runtime_upgrade with checks: PreAndPost
-	// [2023-10-23T05:32:54Z ERROR frame_support::storage] (key, value) failed to decode at [216, 243, 20, 183, 244, 230, 176, 149, 240, 248, 238, 70, 86, 164, 72, 37, 85, 177, 174, 142, 206, 213, 82, 47, 60, 64, 73, 188, 132, 237, 164, 168, 87, 175, 119, 5, 201, 47, 28, 155, 36, 186, 153, 42, 108, 45, 60, 199, 99, 26, 228, 85, 227, 226, 235, 228, 70, 138, 224, 133, 251, 109, 155, 122]: Error
-	// [2023-10-23T05:32:54Z ERROR frame_support::storage] (key, value) failed to decode at [216, 243, 20, 183, 244, 230, 176, 149, 240, 248, 238, 70, 86, 164, 72, 37, 85, 177, 174, 142, 206, 213, 82, 47, 60, 64, 73, 188, 132, 237, 164, 168, 253, 156, 18, 0, 89, 147, 179, 179, 32, 25, 39, 231, 154, 117, 245, 241, 8, 178, 44, 237, 221, 168, 89, 130, 78, 220, 92, 140, 60, 127, 229, 168]: Error
-	// [2023-10-23T05:32:54Z ERROR runtime] panicked at 'v0 storage corrupted', /home/simson/.cargo/git/checkouts/substrate-7e08433d4c370a21/948fbd2/frame/preimage/src/migration.rs:89:49
-	// TODO fails:
-	// pallet_preimage::migration::v1::Migration<Runtime>,
-
-	// pallet_xcm::migration::v1::MigrateToV1<Runtime>,
-	// pallet_contracts::migration::v10::Migration<Runtime>,
-	// pallet_contracts::migration::v11::Migration<Runtime>,
-	// pallet_contracts::migration::v12::Migration<Runtime>,
-	// pallet_contracts::Migration<Runtime,true>,
 	migrations::MultiMigration<Runtime>,
 );
 
