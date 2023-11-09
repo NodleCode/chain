@@ -37,7 +37,15 @@ where
 		// moves funds to inactive if we don't need that this is OK.
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
 
-		// Check is key failed to decode a sign storage is already migrated?
+		// Two keys already migrated.
+		// The call to pallet_xcm::migration::v1::MigrateToV1::<Runtime>::on_runtime_upgrade() fails.
+		// That migration code supposes that the value in the storage is of the old type which is not true,
+		// because two new values of the new type were inserted in the VersionNotifyTargets map which is 
+		// the subject of that migration. One of the new values are for Moonbeam which got inserted in 
+		// the block 3351853 which is the first block after the parachain restart and the second one is
+		// for Polkadot which got inserted in 3614349 16 days ago. I believe we don’t need this migration. 
+		// If in the future there was any issue in any XCM interactions with Moonbeam we can force set the
+		// storage entry for that single value to use proof_size = 65536 (the new default).
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
 
 		// Size of onchain storage is 0 safe to upgrade storage version

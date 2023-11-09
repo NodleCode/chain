@@ -162,7 +162,6 @@ pub type Migrations = (
 	// TODO https://github.com/paritytech/substrate/pull/12813
 	// TODO this is related to XCM migration. 
 	// pallet_balances::migration::MigrateToTrackInactive<Runtime, xcm_config::NodlLocation>,
-	// pallet_xcm::migration::v1::MigrateToV1<Runtime>,
 
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 
