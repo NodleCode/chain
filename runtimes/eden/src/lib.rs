@@ -158,13 +158,10 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-
 	// TODO https://github.com/paritytech/substrate/pull/12813
-	// TODO this is related to XCM migration. 
+	// TODO this is related to XCM migration.
 	// pallet_balances::migration::MigrateToTrackInactive<Runtime, xcm_config::NodlLocation>,
-
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-
 	// pallet_collective::migrations::v4,
 	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
 
@@ -173,7 +170,6 @@ pub type Migrations = (
 
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-
 
 	// pallet_xcm::migration::v1::MigrateToV1<Runtime>,
 	// pallet_contracts::migration::v10::Migration<Runtime>,

@@ -1,11 +1,9 @@
-use frame_support::{
-	traits::{OnRuntimeUpgrade, StorageVersion},
-};
+use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 
+use crate::Runtime;
+use frame_support::{traits::Get, weights::Weight};
 #[cfg(feature = "try-runtime")]
 use {sp_runtime::TryRuntimeError, sp_std::prelude::*};
-use crate::Runtime;
-use frame_support::{traits::Get, weights::{Weight}};
 
 pub struct MultiMigration<T>(sp_std::marker::PhantomData<T>);
 
@@ -40,10 +38,10 @@ where
 		// Two keys already migrated.
 		// The call to pallet_xcm::migration::v1::MigrateToV1::<Runtime>::on_runtime_upgrade() fails.
 		// That migration code supposes that the value in the storage is of the old type which is not true,
-		// because two new values of the new type were inserted in the VersionNotifyTargets map which is 
-		// the subject of that migration. One of the new values are for Moonbeam which got inserted in 
+		// because two new values of the new type were inserted in the VersionNotifyTargets map which is
+		// the subject of that migration. One of the new values are for Moonbeam which got inserted in
 		// the block 3351853 which is the first block after the parachain restart and the second one is
-		// for Polkadot which got inserted in 3614349 16 days ago. I believe we don’t need this migration. 
+		// for Polkadot which got inserted in 3614349 16 days ago. I believe we don’t need this migration.
 		// If in the future there was any issue in any XCM interactions with Moonbeam we can force set the
 		// storage entry for that single value to use proof_size = 65536 (the new default).
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
@@ -58,7 +56,6 @@ where
 		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
 		// // .set_ref_time(100);
 		Weight::from_parts(430000000, 340000000)
-
 	}
 
 	#[cfg(feature = "try-runtime")]
