@@ -157,19 +157,42 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Event emitted when a new pot is created.
-		PotCreated { pot: T::PotId },
+		PotCreated {
+			pot: T::PotId,
+			sponsor: T::AccountId,
+			sponsorship_type: T::SponsorshipType,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		},
 		/// Event emitted when a pot is removed.
 		PotRemoved { pot: T::PotId },
 		/// Event emitted when a pot is updated.
-		PotUpdated { pot: T::PotId },
+		PotUpdated {
+			pot: T::PotId,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		},
 		/// Event emitted when a pot is updated.
-		PotSponsorshipTypeUpdated { pot: T::PotId },
+		PotSponsorshipTypeUpdated {
+			pot: T::PotId,
+			sponsorship_type: T::SponsorshipType,
+		},
 		/// Event emitted when user/users are registered indicating the list of them
-		UsersRegistered { pot: T::PotId, users: Vec<T::AccountId> },
+		UsersRegistered {
+			pot: T::PotId,
+			users: Vec<T::AccountId>,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		},
 		/// Event emitted when user/users are removed indicating the list of them
 		UsersRemoved { pot: T::PotId, users: Vec<T::AccountId> },
 		/// Event emitted when fee_quota or reserve_quota or both are updated for the given list
-		UsersLimitsUpdated { pot: T::PotId, users: Vec<T::AccountId> },
+		UsersLimitsUpdated {
+			pot: T::PotId,
+			users: Vec<T::AccountId>,
+			fee_quota: BalanceOf<T>,
+			reserve_quota: BalanceOf<T>,
+		},
 		/// Event emitted when a sponsor_me call has been successful indicating the reserved amount
 		Sponsored { paid: BalanceOf<T>, repaid: BalanceOf<T> },
 		/// Event emitted when the transaction fee is paid showing the payer and the amount
@@ -222,14 +245,20 @@ pub mod pallet {
 			<Pot<T>>::insert(
 				pot,
 				PotDetailsOf::<T> {
-					sponsor: who,
-					sponsorship_type,
+					sponsor: who.clone(),
+					sponsorship_type: sponsorship_type.clone(),
 					fee_quota: LimitedBalance::with_limit(fee_quota),
 					reserve_quota: LimitedBalance::with_limit(reserve_quota),
 				},
 			);
 
-			Self::deposit_event(Event::PotCreated { pot });
+			Self::deposit_event(Event::PotCreated {
+				pot,
+				sponsor: who,
+				sponsorship_type,
+				fee_quota,
+				reserve_quota,
+			});
 			Ok(())
 		}
 
@@ -287,7 +316,12 @@ pub mod pallet {
 					},
 				);
 			}
-			Self::deposit_event(Event::UsersRegistered { pot, users });
+			Self::deposit_event(Event::UsersRegistered {
+				pot,
+				users,
+				fee_quota: common_fee_quota,
+				reserve_quota: common_reserve_quota,
+			});
 			Ok(())
 		}
 
@@ -403,7 +437,11 @@ pub mod pallet {
 				.map_err(|_| Error::<T>::CannotUpdateReserveLimit)?;
 
 			<Pot<T>>::insert(pot, pot_details);
-			Self::deposit_event(Event::PotUpdated { pot });
+			Self::deposit_event(Event::PotUpdated {
+				pot,
+				fee_quota: new_fee_quota,
+				reserve_quota: new_reserve_quota,
+			});
 			Ok(())
 		}
 
@@ -437,7 +475,12 @@ pub mod pallet {
 			}
 
 			<Pot<T>>::insert(pot, pot_details);
-			Self::deposit_event(Event::UsersLimitsUpdated { pot, users });
+			Self::deposit_event(Event::UsersLimitsUpdated {
+				pot,
+				users,
+				fee_quota: new_fee_quota,
+				reserve_quota: new_reserve_quota,
+			});
 			Ok(())
 		}
 
@@ -455,11 +498,11 @@ pub mod pallet {
 			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
 				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::PotNotExist)?;
 				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
-				pot_details.sponsorship_type = sponsorship_type;
+				pot_details.sponsorship_type = sponsorship_type.clone();
 				Ok(())
 			})?;
 
-			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot });
+			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot, sponsorship_type });
 			Ok(())
 		}
 	}
