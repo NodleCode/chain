@@ -185,3 +185,35 @@ where
 	type OverarchingCall = RuntimeCall;
 	type Extrinsic = UncheckedExtrinsic;
 }
+
+// TODO: remove this once state trie migration is done.
+parameter_types! {
+	// The deposit configuration for the singed migration. These deposits are futile given we only
+	// allow Technical Committee members to kick-in the migration, as such we can safely lower them.
+	//
+	// I have not set them to 0 in case of any unexpected behavior in the code.
+	pub const MigrationSignedDepositPerItem: Balance = 1 * constants::NANO_NODL;
+	pub const MigrationSignedDepositBase: Balance = 1 * constants::NANO_NODL;
+
+	// To obtain this value, run a node via `cargo run --release -- --tmp --sync=warp --rpc-methods=unsafe -- --tmp --sync=warp`
+	// and trigger the appropriate RPC `utils_trieMigrationStatus` call.
+	// `echo '{"id":1,"jsonrpc":"2.0","method":"utils_trieMigrationStatus","params":[]}' | websocat -n1 -B 99999999 ws://127.0.0.1:9944`
+	pub const MaxKeyLen: u32 = 120;
+}
+impl pallet_state_trie_migration::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type SignedDepositPerItem = MigrationSignedDepositPerItem;
+	type SignedDepositBase = MigrationSignedDepositBase;
+	type MaxKeyLen = MaxKeyLen;
+
+	// The configuration below allows ANY member from the Technical Committee
+	// to trigger the migration.
+	// This is considered safe as the migration is temporary and needs manual
+	// activation through a series of extrinsic calls to make it progress.
+	type ControlOrigin = pallet_collective::EnsureMember<AccountId, pallet_collective::Instance1>;
+	type SignedFilter = pallet_collective::EnsureMember<AccountId, pallet_collective::Instance1>;
+
+	// Replace this with weight based on your runtime.
+	type WeightInfo = (); // TODO: add weight for migration
+}
