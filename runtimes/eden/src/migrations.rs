@@ -49,9 +49,6 @@ where
 		// Size of onchain storage is 0 safe to upgrade storage version
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
-		// TODO check 43 keys
-		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
-
 		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
 		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
 		// // .set_ref_time(100);

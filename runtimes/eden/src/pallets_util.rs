@@ -213,7 +213,13 @@ impl pallet_contracts::Config for Runtime {
 	type MaxStorageKeyLen = ConstU32<128>;
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	type Migrations = ();
+	type Migrations = (
+		// Todo investigate contracts 43 keys
+		pallet_contracts::migration::v10::Migration<Runtime>,
+		pallet_contracts::migration::v11::Migration<Runtime>,
+		pallet_contracts::migration::v12::Migration<Runtime>,
+		// pallet_contracts::Migration<Runtime,TEST_ALL_STEPS>,
+	);
 }
 
 parameter_types! {
