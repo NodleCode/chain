@@ -160,7 +160,9 @@ pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 	// TODO https://github.com/paritytech/substrate/pull/12813
 	// TODO this is related to XCM migration.
-	// pallet_balances::migration::MigrateToTrackInactive<Runtime, xcm_config::NodlLocation>,
+	// pallet_balances::migration::MigrateToTrackInactive<Runtime, AccountId>,
+
+	// Migrate data as designed
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// pallet_collective::migrations::v4,
 	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
@@ -171,16 +173,17 @@ pub type Migrations = (
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 
-	// pallet_xcm::migration::v1::MigrateToV1<Runtime>,
+	// Todo investigate contracts 43 keys
 	// pallet_contracts::migration::v10::Migration<Runtime>,
 	// pallet_contracts::migration::v11::Migration<Runtime>,
 	// pallet_contracts::migration::v12::Migration<Runtime>,
-	// pallet_contracts::Migration<Runtime,true>,
+	// pallet_contracts::Migration<Runtime,TEST_ALL_STEPS>,
 
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
 );
-
+const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
+// pallet_contracts::Migration::<T, TEST_ALL_STEPS>::on_runtime_upgrade();
 // pub type Migrations = (
 // 	 pallet_balances::migration::MigrateToTrackInactive<Runtime, <Runtime as pallet_balances::Config>::AccountStore>
 // 	);
@@ -478,8 +481,10 @@ sp_api::impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			log::debug!("on_runtime_upgrade");
-			let weight = Executive::try_runtime_upgrade(checks).unwrap();
-			(weight, constants::RuntimeBlockWeights::get().max_block)
+			log::info!("Hello: {checks:?}");
+			let weight = Executive::try_runtime_upgrade(checks);
+			log::info!("Hello: {weight:?}");
+			(weight.unwrap(), constants::RuntimeBlockWeights::get().max_block)
 		}
 
 		fn execute_block(block: Block, state_root_check: bool, signature_check: bool, select: frame_support::traits::TryStateSelect) -> Weight {

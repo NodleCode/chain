@@ -55,16 +55,18 @@ where
 		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
 		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
 		// // .set_ref_time(100);
-		Weight::from_parts(430000000, 340000000)
+		Weight::from_parts(100, 0x10000)
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
+		log::info!("Pre upgrade");
 		Ok(vec![])
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
+		log::info!("Post upgrade {_state:?}");
 		Ok(())
 	}
 }
