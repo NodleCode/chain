@@ -174,9 +174,9 @@ pub type Migrations = (
 	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 
 	// Todo investigate contracts 43 keys
-	// pallet_contracts::migration::v10::Migration<Runtime>,
-	// pallet_contracts::migration::v11::Migration<Runtime>,
-	// pallet_contracts::migration::v12::Migration<Runtime>,
+	pallet_contracts::migration::v10::Migration<Runtime>,
+	pallet_contracts::migration::v11::Migration<Runtime>,
+	pallet_contracts::migration::v12::Migration<Runtime>,
 	// pallet_contracts::Migration<Runtime,TEST_ALL_STEPS>,
 
 	// Run custom migrations
