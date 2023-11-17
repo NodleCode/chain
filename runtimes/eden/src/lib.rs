@@ -172,8 +172,10 @@ pub type Migrations = (
 
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
+	pallet_contracts::Migration<Runtime, true>,
 
 	// Run custom migrations
+
 	migrations::MultiMigration<Runtime>,
 );
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");

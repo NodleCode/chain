@@ -218,7 +218,6 @@ impl pallet_contracts::Config for Runtime {
 		pallet_contracts::migration::v10::Migration<Runtime>,
 		pallet_contracts::migration::v11::Migration<Runtime>,
 		pallet_contracts::migration::v12::Migration<Runtime>,
-		// pallet_contracts::Migration<Runtime,TEST_ALL_STEPS>,
 	);
 }
 
