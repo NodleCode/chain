@@ -172,17 +172,12 @@ pub type Migrations = (
 
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-	pallet_contracts::Migration<Runtime, true>,
-
+	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
-
 	migrations::MultiMigration<Runtime>,
 );
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
-// pallet_contracts::Migration::<T, TEST_ALL_STEPS>::on_runtime_upgrade();
-// pub type Migrations = (
-// 	 pallet_balances::migration::MigrateToTrackInactive<Runtime, <Runtime as pallet_balances::Config>::AccountStore>
-// 	);
+
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
