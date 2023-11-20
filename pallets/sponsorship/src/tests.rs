@@ -53,7 +53,16 @@ fn creator_of_pot_becomes_sponsor() {
 			pot_details.reserve_quota.limit()
 		));
 		assert_eq!(Pot::<Test>::get(pot), Some(pot_details));
-		System::assert_last_event(Event::PotCreated { pot }.into());
+		System::assert_last_event(
+			Event::PotCreated {
+				pot,
+				sponsor: 1,
+				sponsorship_type: SponsorshipType::Uniques,
+				fee_quota: 5,
+				reserve_quota: 7,
+			}
+			.into(),
+		);
 	});
 }
 
@@ -239,7 +248,14 @@ fn sponsors_can_always_increase_pot_limits() {
 			unused_pot_details.fee_quota.limit() + 1,
 			unused_pot_details.reserve_quota.limit() + 1
 		));
-		System::assert_last_event(Event::PotUpdated { pot: unused_pot }.into());
+		System::assert_last_event(
+			Event::PotUpdated {
+				pot: unused_pot,
+				fee_quota: 6,
+				reserve_quota: 8,
+			}
+			.into(),
+		);
 		let updated_pot = Pot::<Test>::get(unused_pot).unwrap();
 		assert_eq!(updated_pot.fee_quota.limit(), unused_pot_details.fee_quota.limit() + 1);
 		assert_eq!(
@@ -264,7 +280,14 @@ fn sponsors_can_always_increase_pot_limits() {
 			fully_used_pot_details.fee_quota.limit() + 1,
 			fully_used_pot_details.reserve_quota.limit() + 1
 		));
-		System::assert_last_event(Event::PotUpdated { pot: fully_used_pot }.into());
+		System::assert_last_event(
+			Event::PotUpdated {
+				pot: fully_used_pot,
+				fee_quota: 6,
+				reserve_quota: 8,
+			}
+			.into(),
+		);
 		let updated_pot = Pot::<Test>::get(fully_used_pot).unwrap();
 		assert_eq!(
 			updated_pot.fee_quota.limit(),
@@ -353,6 +376,8 @@ fn sponsors_can_decrease_pot_limits_only_when_available_margin_allows() {
 		System::assert_last_event(
 			Event::PotUpdated {
 				pot: partially_used_pot,
+				fee_quota: 4,
+				reserve_quota: 3,
 			}
 			.into(),
 		);
@@ -446,6 +471,8 @@ fn sponsors_can_register_new_users() {
 			Event::UsersRegistered {
 				pot,
 				users: vec![user_1, user_2],
+				fee_quota: common_fee_quota,
+				reserve_quota: common_reserve_quota,
 			}
 			.into(),
 		);
@@ -474,6 +501,8 @@ fn sponsors_can_register_new_users() {
 			Event::UsersRegistered {
 				pot,
 				users: vec![user_3],
+				fee_quota: user_3_fee_quota,
+				reserve_quota: user_3_reserve_quota,
 			}
 			.into(),
 		);
@@ -684,6 +713,8 @@ fn only_sponsors_have_permission_to_update_users_limits() {
 			Event::UsersLimitsUpdated {
 				pot,
 				users: vec![user_1, user_2],
+				fee_quota: common_fee_quota + 1,
+				reserve_quota: common_reserve_quota + 1,
 			}
 			.into(),
 		);
@@ -836,6 +867,8 @@ fn sponsors_can_always_set_user_limits_to_an_amount_equal_or_greater_than_before
 			Event::UsersLimitsUpdated {
 				pot,
 				users: vec![user_1, user_2],
+				fee_quota: common_fee_quota + 1,
+				reserve_quota: common_reserve_quota + 1,
 			}
 			.into(),
 		);
@@ -933,6 +966,8 @@ fn sponsors_can_reduce_user_limits_when_available_margin_allows() {
 			Event::UsersLimitsUpdated {
 				pot,
 				users: vec![user_1],
+				fee_quota: lowest_fee_limit,
+				reserve_quota: lowest_reserve_limit,
 			}
 			.into(),
 		);
@@ -949,6 +984,8 @@ fn sponsors_can_reduce_user_limits_when_available_margin_allows() {
 			Event::UsersLimitsUpdated {
 				pot,
 				users: vec![user_2],
+				fee_quota: lowest_fee_limit - 1,
+				reserve_quota: lowest_reserve_limit - 1,
 			}
 			.into(),
 		);
