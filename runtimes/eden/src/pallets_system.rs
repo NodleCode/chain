@@ -20,7 +20,7 @@
 
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
-	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic, RuntimeHoldReason
 };
 use codec::Encode;
 use frame_support::pallet_prelude::ConstU32;
@@ -107,7 +107,7 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
 
-	type RuntimeHoldReason = ();
+	type RuntimeHoldReason = RuntimeHoldReason;
 }
 
 parameter_types! {
