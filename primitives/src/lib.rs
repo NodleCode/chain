@@ -26,7 +26,7 @@ use sp_runtime::{
 	MultiSignature, OpaqueExtrinsic,
 };
 
-pub use polkadot_parachain::primitives::{
+pub use polkadot_parachain_primitives::primitives::{
 	DmpMessageHandler, Id as ParaId, UpwardMessage, ValidationParams, XcmpMessageFormat, XcmpMessageHandler,
 };
 

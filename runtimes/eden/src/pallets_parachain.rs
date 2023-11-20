@@ -21,7 +21,7 @@ use crate::{
 	RuntimeEvent, XcmpQueue,
 };
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
-use frame_support::{dispatch::Weight, match_types, parameter_types};
+use frame_support::{match_types, parameter_types};
 use xcm::latest::prelude::*;
 
 use xcm_executor::XcmExecutor;

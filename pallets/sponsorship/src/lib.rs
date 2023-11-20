@@ -20,7 +20,7 @@
 
 use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, TypeInfo};
 use frame_support::{
-	dispatch::{DispatchInfo, DispatchResult, Dispatchable, GetDispatchInfo, Pays, PostDispatchInfo},
+	dispatch::{DispatchInfo, DispatchResult, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
 		Currency,
 		ExistenceRequirement::{AllowDeath, KeepAlive},
@@ -30,6 +30,7 @@ use frame_support::{
 use pallet_transaction_payment::OnChargeTransaction;
 use sp_io::hashing::blake2_256;
 use sp_runtime::{
+	traits::Dispatchable,
 	traits::{DispatchInfoOf, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
 };

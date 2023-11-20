@@ -13,13 +13,13 @@ use frame_support::{
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
 	weights::IdentityFee,
 	weights::Weight,
-	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
 use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain::primitives::Sibling;
+use polkadot_parachain_primitives::primitives::Sibling;
 use scale_info::TypeInfo;
+use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
 #[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;

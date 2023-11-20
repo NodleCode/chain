@@ -182,6 +182,8 @@ parameter_types! {
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
+	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
+
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -213,7 +215,23 @@ impl pallet_contracts::Config for Runtime {
 	type MaxStorageKeyLen = ConstU32<128>;
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	type Migrations = ();
+	#[cfg(not(feature = "runtime-benchmarks"))]
+	type Migrations = (
+		pallet_contracts::migration::v10::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v11::Migration<Runtime>,
+		pallet_contracts::migration::v12::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v13::Migration<Runtime>,
+		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v15::Migration<Runtime>,
+	);
+	#[cfg(feature = "runtime-benchmarks")]
+	type Migrations = pallet_contracts::migration::codegen::BenchMigrations;
+	type MaxDelegateDependencies = ConstU32<32>;
+	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+	type Debug = ();
+	type Environment = ();
+	type RuntimeHoldReason = ();
+	// type Xcm = (); TODO maybe need this soon
 }
 
 parameter_types! {

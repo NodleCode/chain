@@ -1841,4 +1841,24 @@ fn instr_i64const(_: u32, ) -> Weight {
         Default::default()
     }
 
+fn v13_migration_step() -> Weight {
+        todo!()
+    }
+
+fn v14_migration_step() -> Weight {
+        todo!()
+    }
+
+fn v15_migration_step() -> Weight {
+        todo!()
+    }
+
+fn add_delegate_dependency(r: u32, ) -> Weight {
+        todo!()
+    }
+
+fn remove_delegate_dependency(r: u32, ) -> Weight {
+        todo!()
+    }
+
 }
