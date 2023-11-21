@@ -39,7 +39,6 @@ do
     --repeat=$REPEAT \
     --pallet=$PALLET \
     '--extrinsic=*' \
-    --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/external_pallet_weights.hbs \
     --output=runtimes/eden/src/weights
