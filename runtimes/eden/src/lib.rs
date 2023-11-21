@@ -156,6 +156,7 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
+const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 	// TODO https://github.com/paritytech/substrate/pull/12813
@@ -176,8 +177,6 @@ pub type Migrations = (
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
 );
-const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
-
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,

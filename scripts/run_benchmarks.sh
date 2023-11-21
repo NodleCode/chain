@@ -26,7 +26,6 @@ do
     --repeat=$REPEAT \
     --pallet=$PALLET \
     '--extrinsic=*' \
-    --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/internal_pallet_weights.hbs \
     --output=temp_weights
@@ -53,7 +52,6 @@ done
     --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::fungible \
     '--extrinsic=*' \
-    --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
@@ -64,7 +62,6 @@ done
     --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::generic \
     --extrinsic="$xcm_generic_extrinsic" \
-    --execution=wasm \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights

@@ -1,7 +1,6 @@
 use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 
-use crate::Runtime;
-use frame_support::{traits::Get, weights::Weight};
+use frame_support::weights::Weight;
 #[cfg(feature = "try-runtime")]
 use {sp_runtime::TryRuntimeError, sp_std::prelude::*};
 
