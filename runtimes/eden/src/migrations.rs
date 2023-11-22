@@ -48,10 +48,8 @@ where
 		// Size of onchain storage is 0 safe to upgrade storage version
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
-		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
-		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
-		// // .set_ref_time(100);
-		Weight::from_parts(100, 0x10000)
+		// give it some weight not zero
+		Weight::from_parts(10000, 0x10000)
 	}
 
 	#[cfg(feature = "try-runtime")]

@@ -203,7 +203,7 @@ impl pallet_contracts::Config for Runtime {
 	type CallStack = [Frame<Self>; 5];
 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
 	// TODO check 	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
-	type WeightInfo = crate::weights::pallet_contracts::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_contracts::WeightInfo<Self>;
 	type ChainExtension = ();
 
 	type Schedule = MySchedule;

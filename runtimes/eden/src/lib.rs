@@ -165,14 +165,13 @@ pub type Migrations = (
 
 	// Migrate data as designed
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// pallet_collective::migrations::v4,
+
 	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
 
 	// pallet_scheduler::migration::v3::MigrateToV4<Runtime>,
 	// pallet_scheduler::migration::v4::CleanupAgendas<Runtime>,
 
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
