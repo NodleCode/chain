@@ -140,6 +140,12 @@ pub mod pallet {
 			+ InstanceFilter<<Self as Config>::RuntimeCall>
 			+ MaxEncodedLen
 			+ Default;
+		/// The maximum number of users that can be registered per pot.
+		#[pallet::constant]
+		type RegisterLimit: Get<u32>;
+		/// The deposit that must be locked in order to create a pot.
+		#[pallet::constant]
+		type PotDeposit: Get<BalanceOf<Self>>;
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
 	}
@@ -152,6 +158,10 @@ pub mod pallet {
 	/// User details of a pot.
 	pub(super) type User<T: Config> =
 		StorageDoubleMap<_, Blake2_128Concat, T::PotId, Blake2_128Concat, T::AccountId, UserDetailsOf<T>, OptionQuery>;
+
+	/// Stores the number of individual pots a user is registered for.
+	#[pallet::storage]
+	pub(super) type UserRegistrationCount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -209,6 +219,8 @@ pub mod pallet {
 		PotNotExist,
 		/// The user is not registered for the pot.
 		UserNotRegistered,
+		/// The number of registered users will exceed the limit for a pot.
+		ExceedsPotLimit,
 		/// The user is already registered for the pot.
 		UserAlreadyRegistered,
 		/// The user is not removable due to holding some reserve.
@@ -241,6 +253,8 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			ensure!(!Pot::<T>::contains_key(pot), Error::<T>::InUse);
+
+			T::Currency::reserve(&who, T::PotDeposit::get())?;
 
 			<Pot<T>>::insert(
 				pot,
@@ -278,6 +292,7 @@ pub mod pallet {
 				*maybe_pot_details = None;
 				Ok(())
 			})?;
+			T::Currency::unreserve(&who, T::PotDeposit::get());
 			Self::deposit_event(Event::PotRemoved { pot });
 			Ok(())
 		}
@@ -299,13 +314,20 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
+			ensure!(
+				User::<T>::iter_prefix(pot).count() + users.len() <= T::RegisterLimit::get() as usize,
+				Error::<T>::ExceedsPotLimit
+			);
 			for user in users.clone() {
 				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::UserAlreadyRegistered);
+				UserRegistrationCount::<T>::mutate(&user, |count| {
+					if count.is_zero() {
+						frame_system::Pallet::<T>::inc_providers(&user);
+					}
+					count.saturating_inc();
+				});
 				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
 				frame_system::Pallet::<T>::inc_providers(&proxy);
-				if !Self::registered_for_any_pots(&user) {
-					frame_system::Pallet::<T>::inc_providers(&user);
-				}
 				<User<T>>::insert(
 					pot,
 					user,
@@ -349,7 +371,13 @@ pub mod pallet {
 					user_details.reserve_quota.balance(),
 				)?;
 				pot_details.reserve_quota.saturating_sub(repaid);
-				Self::remove_user(&pot, &user);
+				UserRegistrationCount::<T>::mutate(&user, |count| {
+					count.saturating_dec();
+					if count.is_zero() {
+						let _ = frame_system::Pallet::<T>::dec_providers(&user);
+					}
+				});
+				<User<T>>::remove(pot, user);
 			}
 			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::UsersRemoved { pot, users });
@@ -555,17 +583,6 @@ impl<T: Config> Pallet<T> {
 		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(repay), AllowDeath)?;
 		frame_system::Pallet::<T>::dec_providers(proxy)?;
 		Ok(repay)
-	}
-	/// Remove the user from the pot.
-	fn remove_user(pot: &T::PotId, who: &T::AccountId) {
-		<User<T>>::remove(pot, who);
-		if !Self::registered_for_any_pots(who) {
-			let _ = frame_system::Pallet::<T>::dec_providers(who);
-		}
-	}
-	/// Check if the account is registered for any pots.
-	fn registered_for_any_pots(who: &T::AccountId) -> bool {
-		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
 	}
 
 	fn pre_sponsor_for(who: T::AccountId, pot: T::PotId) -> Result<SponsorCallPreps<T>, sp_runtime::DispatchError> {

@@ -158,19 +158,27 @@ impl Default for SponsorshipType {
 	}
 }
 
+parameter_types! {
+	pub TestPotDeposit:  u64 = 3;
+}
 impl pallet_sponsorship::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
+	type PotDeposit = TestPotDeposit;
+	type RegisterLimit = ConstU32<1000>;
 	type WeightInfo = ();
 }
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap()
-		.into()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	pallet_balances::GenesisConfig::<Test> {
+		balances: vec![(1, 14), (2, 14)],
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
+	t.into()
 }

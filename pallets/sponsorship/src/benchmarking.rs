@@ -23,7 +23,7 @@ use super::*;
 #[allow(unused)]
 use crate::Pallet as Sponsorship;
 use frame_benchmarking::v2::*;
-use frame_support::assert_ok;
+use frame_support::{assert_ok, traits::Get};
 use frame_system::RawOrigin;
 
 const SEED: u32 = 0;
@@ -35,6 +35,7 @@ mod benchmarks {
 	#[benchmark]
 	fn create_pot() {
 		let caller: T::AccountId = whitelisted_caller();
+		let _ = T::Currency::make_free_balance_be(&caller, T::Currency::minimum_balance() + T::PotDeposit::get());
 		let pot = 0u32.into();
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),

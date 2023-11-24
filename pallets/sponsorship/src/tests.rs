@@ -612,7 +612,7 @@ fn only_sponsors_have_permission_to_remove_users() {
 		let common_fee_quota = 7;
 		let common_reserve_quota = 12;
 
-		let user_1 = 2u64;
+		let user_1 = 5u64;
 		let user_2 = 17u64;
 		let user_3 = 23u64;
 
@@ -1171,7 +1171,7 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 		let common_fee_quota = 7;
 		let common_reserve_quota = 12;
 
-		let user_1 = 2u64;
+		let user_1 = 5u64;
 		let user_2 = 17u64;
 		let user_3 = 23u64;
 
@@ -1229,7 +1229,7 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 
 		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
-		let user = 2u64;
+		let user = 5u64;
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1295,7 +1295,7 @@ fn sponsor_for_calls_will_fail_if_call_itself_should_fail() {
 
 		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
-		let user = 2u64;
+		let user = 5u64;
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1344,7 +1344,7 @@ fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
 
 		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
-		let user = 2u64;
+		let user = 5u64;
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
