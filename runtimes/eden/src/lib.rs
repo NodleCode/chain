@@ -425,11 +425,20 @@ sp_api::impl_runtime_apis! {
 			// specific and were causing some issues at compile time as they depend on the
 			// presence of the staking and elections pallets.
 
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
+			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, TrackedStorageKey, add_benchmark};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 
-			impl frame_system_benchmarking::Config for Runtime {}
+			impl frame_system_benchmarking::Config for Runtime {
+				fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
+					ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
+					Ok(())
+				}
+
+				fn verify_set_code() {
+					System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+				}
+			}
 
 
 			let whitelist: Vec<TrackedStorageKey> = vec![];

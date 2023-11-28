@@ -4,7 +4,7 @@
 STEPS="${1:-50}"
 REPEAT="${2:-20}"
 
-export external="frame_system pallet_balances pallet_collator_selection pallet_contracts pallet_membership\
+export external="frame_system pallet_balances pallet_collator_selection pallet_contracts pallet_membership \
  pallet_multisig pallet_preimage pallet_scheduler pallet_timestamp pallet_uniques pallet_utility pallet_xcm pallet_identity pallet_scheduler"
 export internal="pallet_allocations pallet_grants pallet_reserve pallet_nodle_uniques pallet_sponsorship"
 export xcm_generic_extrinsic="report_holding, buy_execution, query_response, transact, refund_surplus,\
