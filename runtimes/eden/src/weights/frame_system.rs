@@ -20,7 +20,7 @@
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 4.0.0-dev
 //! DATE: 2023-11-28, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
-//! HOSTNAME: `tama`, CPU: `11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz`
+//! HOSTNAME: `chain-bench-66242306`, CPU: `AMD EPYC 7B13`
 //! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
 
 // Executed Command:
@@ -48,10 +48,10 @@ pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 	/// The range of component `b` is `[0, 3932160]`.
 	fn remark(b: u32, ) -> Weight {
-		// Minimum execution time: 2_324 nanoseconds.
-		Weight::from_parts(4_281_520_u64, 0)
+		// Minimum execution time: 3_229 nanoseconds.
+		Weight::from_parts(4_378_959_u64, 0)
 			// Standard Error: 0
-			.saturating_add(Weight::from_parts(264_u64, 0).saturating_mul(b as u64))
+			.saturating_add(Weight::from_parts(291_u64, 0).saturating_mul(b as u64))
 	}
 	// Storage: `System::Number` (r:1 w:0)
 	// Proof: `System::Number` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
@@ -63,10 +63,10 @@ impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 	// Proof: `System::Events` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	/// The range of component `b` is `[0, 3932160]`.
 	fn remark_with_event(b: u32, ) -> Weight {
-		// Minimum execution time: 10_264 nanoseconds.
-		Weight::from_parts(904_459_u64, 0)
-			// Standard Error: 0
-			.saturating_add(Weight::from_parts(1_159_u64, 0).saturating_mul(b as u64))
+		// Minimum execution time: 14_250 nanoseconds.
+		Weight::from_parts(20_647_211_u64, 0)
+			// Standard Error: 2
+			.saturating_add(Weight::from_parts(1_761_u64, 0).saturating_mul(b as u64))
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -75,8 +75,8 @@ impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 	// Storage: UNKNOWN KEY `0x3a686561707061676573` (r:0 w:1)
 	// Proof: UNKNOWN KEY `0x3a686561707061676573` (r:0 w:1)
 	fn set_heap_pages() -> Weight {
-		// Minimum execution time: 4_846 nanoseconds.
-		Weight::from_parts(5_000_000_u64, 0)
+		// Minimum execution time: 6_220 nanoseconds.
+		Weight::from_parts(6_460_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -101,8 +101,8 @@ impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 	// Storage: `ParachainSystem::DidSetValidationCode` (r:0 w:1)
 	// Proof: `ParachainSystem::DidSetValidationCode` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	fn set_code() -> Weight {
-		// Minimum execution time: 98_588_686 nanoseconds.
-		Weight::from_parts(100_833_867_000_u64, 0)
+		// Minimum execution time: 167_667_420 nanoseconds.
+		Weight::from_parts(172_035_090_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
@@ -110,30 +110,30 @@ impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `i` is `[0, 1000]`.
 	fn set_storage(i: u32, ) -> Weight {
-		// Minimum execution time: 2_441 nanoseconds.
-		Weight::from_parts(2_532_000_u64, 0)
-			// Standard Error: 1_233
-			.saturating_add(Weight::from_parts(665_416_u64, 0).saturating_mul(i as u64))
+		// Minimum execution time: 3_351 nanoseconds.
+		Weight::from_parts(3_440_000_u64, 0)
+			// Standard Error: 1_978
+			.saturating_add(Weight::from_parts(1_082_229_u64, 0).saturating_mul(i as u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i as u64)))
 	}
 	// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `i` is `[0, 1000]`.
 	fn kill_storage(i: u32, ) -> Weight {
-		// Minimum execution time: 2_477 nanoseconds.
-		Weight::from_parts(2_555_000_u64, 0)
-			// Standard Error: 600
-			.saturating_add(Weight::from_parts(468_307_u64, 0).saturating_mul(i as u64))
+		// Minimum execution time: 3_480 nanoseconds.
+		Weight::from_parts(3_560_000_u64, 0)
+			// Standard Error: 846
+			.saturating_add(Weight::from_parts(713_861_u64, 0).saturating_mul(i as u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i as u64)))
 	}
 	// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `p` is `[0, 1000]`.
 	fn kill_prefix(p: u32, ) -> Weight {
-		// Minimum execution time: 4_513 nanoseconds.
-		Weight::from_parts(4_661_000_u64, 0)
-			// Standard Error: 3_624
-			.saturating_add(Weight::from_parts(928_022_u64, 0).saturating_mul(p as u64))
+		// Minimum execution time: 6_330 nanoseconds.
+		Weight::from_parts(6_600_000_u64, 0)
+			// Standard Error: 1_150
+			.saturating_add(Weight::from_parts(1_264_567_u64, 0).saturating_mul(p as u64))
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(p as u64)))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(p as u64)))
 	}
