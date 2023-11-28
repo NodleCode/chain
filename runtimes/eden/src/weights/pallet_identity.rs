@@ -153,7 +153,7 @@ impl<T: frame_system::Config> pallet_identity::WeightInfo for WeightInfo<T> {
 	/// The range of component `r` is `[1, 20]`.
 	/// The range of component `s` is `[0, 100]`.
 	/// The range of component `x` is `[0, 100]`.
-	fn clear_identity(r: u32, s: u32, x: u32, ) -> Weight {
+	fn clear_identity(_r: u32, s: u32, x: u32, ) -> Weight {
 		// Minimum execution time: 79_336 nanoseconds.
 		Weight::from_parts(53_389_727_u64, 0)
 			// Standard Error: 43_839
@@ -286,7 +286,7 @@ impl<T: frame_system::Config> pallet_identity::WeightInfo for WeightInfo<T> {
 	/// The range of component `r` is `[1, 20]`.
 	/// The range of component `s` is `[0, 100]`.
 	/// The range of component `x` is `[0, 100]`.
-	fn kill_identity(r: u32, s: u32, x: u32, ) -> Weight {
+	fn kill_identity(_r: u32, s: u32, x: u32, ) -> Weight {
 		// Minimum execution time: 103_014 nanoseconds.
 		Weight::from_parts(77_103_481_u64, 0)
 			// Standard Error: 43_621

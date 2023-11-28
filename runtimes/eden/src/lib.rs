@@ -98,9 +98,7 @@ construct_runtime! {
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config<T>, Storage} = 25,
 
 		// Parachain
-		ParachainSystem: cumulus_pallet_parachain_system::{
-			Pallet, Call, Config<T>, Storage, Inherent, Event<T>, ValidateUnsigned,
-		} = 30,
+		ParachainSystem: cumulus_pallet_parachain_system = 30,
 		ParachainInfo: parachain_info = 31,
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
