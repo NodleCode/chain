@@ -47,6 +47,8 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
+mod migration;
 pub mod weights;
 pub use weights::*;
 
@@ -113,6 +115,7 @@ pub mod pallet {
 	use scale_info::prelude::{boxed::Box, vec::Vec};
 
 	#[pallet::pallet]
+	#[pallet::storage_version(migration::STORAGE_VERSION)]
 	pub struct Pallet<T>(_);
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -534,6 +537,22 @@ pub mod pallet {
 
 			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot, sponsorship_type });
 			Ok(())
+		}
+	}
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_runtime_upgrade() -> Weight {
+			migration::on_runtime_upgrade::<T>()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+			migration::pre_upgrade::<T>()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+			migration::post_upgrade::<T>(_state)
 		}
 	}
 }
