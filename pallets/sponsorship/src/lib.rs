@@ -80,6 +80,8 @@ pub struct PotDetails<AccountId, SponsorshipType, Balance: frame_support::traits
 	/// some transactions.
 	/// Any amount used as reserve may be returned to the sponsor when unreserved.
 	reserve_quota: LimitedBalance<Balance>,
+	/// Amount of deposit reserved from the sponsor for this pot.
+	deposit: Balance,
 }
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
@@ -99,6 +101,8 @@ pub struct UserDetails<AccountId, Balance: frame_support::traits::tokens::Balanc
 	/// which do not require any reserve. Any amount used as reserve will be returned to the sponsor
 	/// when unreserved. This is to prevent malicious users from draining sponsor funds.
 	reserve_quota: LimitedBalance<Balance>,
+	/// Amount of deposit reserved from the sponsor for this user.
+	deposit: Balance,
 }
 
 #[frame_support::pallet]
@@ -140,9 +144,9 @@ pub mod pallet {
 			+ InstanceFilter<<Self as Config>::RuntimeCall>
 			+ MaxEncodedLen
 			+ Default;
-		/// The maximum number of users that can be registered per pot.
+		/// The deposit that must be reserved form the sponsor per their sponsored user.
 		#[pallet::constant]
-		type RegisterLimit: Get<u32>;
+		type UserDeposit: Get<BalanceOf<Self>>;
 		/// The deposit that must be locked in order to create a pot.
 		#[pallet::constant]
 		type PotDeposit: Get<BalanceOf<Self>>;
@@ -219,8 +223,6 @@ pub mod pallet {
 		PotNotExist,
 		/// The user is not registered for the pot.
 		UserNotRegistered,
-		/// The number of registered users will exceed the limit for a pot.
-		ExceedsPotLimit,
 		/// The user is already registered for the pot.
 		UserAlreadyRegistered,
 		/// The user is not removable due to holding some reserve.
@@ -263,6 +265,7 @@ pub mod pallet {
 					sponsorship_type: sponsorship_type.clone(),
 					fee_quota: LimitedBalance::with_limit(fee_quota),
 					reserve_quota: LimitedBalance::with_limit(reserve_quota),
+					deposit: T::PotDeposit::get(),
 				},
 			);
 
@@ -289,10 +292,10 @@ pub mod pallet {
 				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 				let users = User::<T>::iter_prefix(pot).count();
 				ensure!(users == 0, Error::<T>::InUse);
+				T::Currency::unreserve(&who, pot_details.deposit);
 				*maybe_pot_details = None;
 				Ok(())
 			})?;
-			T::Currency::unreserve(&who, T::PotDeposit::get());
 			Self::deposit_event(Event::PotRemoved { pot });
 			Ok(())
 		}
@@ -314,12 +317,9 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
-			ensure!(
-				User::<T>::iter_prefix(pot).count() + users.len() <= T::RegisterLimit::get() as usize,
-				Error::<T>::ExceedsPotLimit
-			);
 			for user in users.clone() {
 				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::UserAlreadyRegistered);
+				T::Currency::reserve(&who, T::UserDeposit::get())?;
 				UserRegistrationCount::<T>::mutate(&user, |count| {
 					if count.is_zero() {
 						frame_system::Pallet::<T>::inc_providers(&user);
@@ -335,6 +335,7 @@ pub mod pallet {
 						proxy,
 						fee_quota: LimitedBalance::with_limit(common_fee_quota),
 						reserve_quota: LimitedBalance::with_limit(common_reserve_quota),
+						deposit: T::UserDeposit::get(),
 					},
 				);
 			}
@@ -377,6 +378,7 @@ pub mod pallet {
 						let _ = frame_system::Pallet::<T>::dec_providers(&user);
 					}
 				});
+				T::Currency::unreserve(&who, user_details.deposit);
 				<User<T>>::remove(pot, user);
 			}
 			<Pot<T>>::insert(pot, pot_details);

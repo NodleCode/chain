@@ -35,14 +35,16 @@ mod benchmarks {
 	#[benchmark]
 	fn create_pot() {
 		let caller: T::AccountId = whitelisted_caller();
-		let _ = T::Currency::make_free_balance_be(&caller, T::Currency::minimum_balance() + T::PotDeposit::get());
 		let pot = 0u32.into();
 		let pot_details = PotDetailsOf::<T> {
 			sponsor: caller.clone(),
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
+		T::Currency::make_free_balance_be(&caller, T::Currency::minimum_balance() + T::PotDeposit::get());
+
 		#[extrinsic_call]
 		create_pot(
 			RawOrigin::Signed(caller),
@@ -64,6 +66,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -82,6 +85,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -102,6 +106,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -124,8 +129,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		#[extrinsic_call]
 		register_users(RawOrigin::Signed(caller), pot, users, 8u32.into(), 19u32.into());
@@ -144,8 +155,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -181,8 +198,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -216,6 +239,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
 			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -247,6 +271,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
 			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 

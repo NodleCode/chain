@@ -44,6 +44,7 @@ fn creator_of_pot_becomes_sponsor() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -76,6 +77,7 @@ fn pot_creation_fails_if_pot_exists() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot.sponsor),
@@ -107,6 +109,7 @@ fn sponsors_can_remove_user_free_pots() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -142,6 +145,7 @@ fn only_sponsors_have_permission_to_remove_pots() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -168,6 +172,7 @@ fn updating_non_existing_pot_is_error() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_noop!(
 			SponsorshipModule::update_pot_limits(RuntimeOrigin::signed(pot_details.sponsor), pot, 6, 8),
@@ -194,6 +199,7 @@ fn only_sponsors_have_permission_to_update_pots() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -240,6 +246,7 @@ fn sponsors_can_always_increase_pot_limits() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		Pot::<Test>::insert(unused_pot, &unused_pot_details);
 		assert_ok!(SponsorshipModule::update_pot_limits(
@@ -269,6 +276,7 @@ fn sponsors_can_always_increase_pot_limits() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		fully_used_pot_details.fee_quota.add(5).unwrap();
 		fully_used_pot_details.reserve_quota.add(7).unwrap();
@@ -310,6 +318,7 @@ fn sponsors_can_set_same_limits_when_updating_pots() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		Pot::<Test>::insert(unused_pot, &unused_pot_details);
 
@@ -336,6 +345,7 @@ fn sponsors_can_decrease_pot_limits_only_when_available_margin_allows() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		partially_used_pot_details.fee_quota.add(4).unwrap();
 		partially_used_pot_details.reserve_quota.add(3).unwrap();
@@ -398,6 +408,7 @@ fn sponsors_cannot_remove_pots_with_users() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -430,6 +441,7 @@ fn sponsors_can_register_new_users() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -447,6 +459,7 @@ fn sponsors_can_register_new_users() {
 			proxy: SponsorshipModule::pure_account(&user_1, &pot).unwrap(),
 			fee_quota: LimitedBalance::with_limit(common_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(common_reserve_quota),
+			deposit: UserDeposit::get(),
 		};
 
 		let user_2 = 17u64;
@@ -454,6 +467,7 @@ fn sponsors_can_register_new_users() {
 			proxy: SponsorshipModule::pure_account(&user_2, &pot).unwrap(),
 			fee_quota: LimitedBalance::with_limit(common_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(common_reserve_quota),
+			deposit: UserDeposit::get(),
 		};
 
 		assert_eq!(User::<Test>::get(pot, user_1), None);
@@ -484,6 +498,7 @@ fn sponsors_can_register_new_users() {
 			proxy: SponsorshipModule::pure_account(&user_3, &pot).unwrap(),
 			fee_quota: LimitedBalance::with_limit(user_3_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(user_3_reserve_quota),
+			deposit: UserDeposit::get(),
 		};
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 0);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_details_3.proxy), 0);
@@ -519,6 +534,7 @@ fn sponsors_cannot_register_users_more_than_once() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -575,6 +591,7 @@ fn only_sponsors_have_permission_to_register_users() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -600,6 +617,7 @@ fn only_sponsors_have_permission_to_remove_users() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -667,6 +685,7 @@ fn only_sponsors_have_permission_to_update_users_limits() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -731,6 +750,7 @@ fn updating_user_limits_for_non_existing_pots_is_error() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 
 		let common_fee_quota = 7;
@@ -761,6 +781,7 @@ fn updating_users_limits_only_impacts_the_given_list() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -816,6 +837,7 @@ fn sponsors_can_always_set_user_limits_to_an_amount_equal_or_greater_than_before
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -901,6 +923,7 @@ fn sponsors_can_reduce_user_limits_when_available_margin_allows() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1006,6 +1029,7 @@ fn sponsors_can_update_user_limits_for_registered_users() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1054,6 +1078,7 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1114,6 +1139,7 @@ fn sponsors_cannot_remove_unregistered_user() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1159,6 +1185,7 @@ fn users_get_their_free_balance_back_in_their_original_account_after_being_remov
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1215,6 +1242,7 @@ fn sponsorship_filter_will_block_undesired_sponsor_for_calls() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1281,6 +1309,7 @@ fn sponsor_for_calls_will_fail_if_call_itself_should_fail() {
 			sponsorship_type: SponsorshipType::Balances,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1330,6 +1359,7 @@ fn sponsor_for_calls_will_fail_if_call_leaks_balance_out_of_proxy_account() {
 			sponsorship_type: SponsorshipType::Balances,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1379,7 +1409,11 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -1390,8 +1424,6 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 
 		let user_fee_quota = pot_fee_quota / 100;
 		let user_reserve_quota = pot_reserve_quota / 100;
-
-		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
 		let user = 2u64;
 
@@ -1446,7 +1478,7 @@ fn sponsor_for_calls_will_repay_unused_reserve() {
 		assert_eq!(Balances::reserved_balance(user_details.proxy), 0);
 		assert_eq!(
 			Balances::free_balance(pot_details.sponsor),
-			pot_reserve_quota - Balances::minimum_balance()
+			pot_reserve_quota - Balances::minimum_balance() - PotDeposit::get() - UserDeposit::get(),
 		);
 		let pot_details = Pot::<Test>::get(pot).unwrap();
 		assert_eq!(
@@ -1473,7 +1505,11 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -1484,8 +1520,6 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 
 		let user_fee_quota = pot_fee_quota / 100;
 		let user_reserve_quota = pot_reserve_quota / 100;
-
-		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
 		let user = 2u64;
 
@@ -1534,7 +1568,10 @@ fn users_pay_back_more_debts_on_sponsor_for_calls_if_their_free_balance_allows()
 		);
 
 		let pot_details = Pot::<Test>::get(pot).unwrap();
-		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota);
+		assert_eq!(
+			Balances::free_balance(pot_details.sponsor),
+			pot_reserve_quota - PotDeposit::get() - UserDeposit::get()
+		);
 		assert_eq!(pot_details.reserve_quota.available_margin(), pot_reserve_quota);
 
 		let user_details = User::<Test>::get(pot, user).unwrap();
@@ -1554,6 +1591,7 @@ fn users_pay_back_debts_when_removed_if_their_free_balance_allows() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1646,6 +1684,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(5),
 			reserve_quota: LimitedBalance::with_limit(7),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details_1.sponsor),
@@ -1660,6 +1699,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 			sponsorship_type: SponsorshipType::AnySafe,
 			fee_quota: LimitedBalance::with_limit(10),
 			reserve_quota: LimitedBalance::with_limit(14),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details_2.sponsor),
@@ -1742,6 +1782,7 @@ fn sponsor_call_for_existing_pot_from_registered_user_with_enough_fee_limit_is_v
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1798,6 +1839,7 @@ fn valid_sponsor_call_for_yields_correct_pre_dispatch_details() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1864,7 +1906,11 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -1875,8 +1921,6 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 
 		let user_fee_quota = pot_fee_quota / 10;
 		let user_reserve_quota = pot_reserve_quota / 10;
-
-		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
 		let user = 2u64;
 
@@ -1944,7 +1988,10 @@ fn valid_sponsor_call_settle_paid_fee_post_dispatch() {
 		);
 		assert_eq!(
 			Balances::free_balance(pot_details.sponsor),
-			pot_reserve_quota - fee - user_details_post_dispatch.reserve_quota.balance()
+			pot_reserve_quota
+				- fee - user_details_post_dispatch.reserve_quota.balance()
+				- PotDeposit::get()
+				- UserDeposit::get()
 		);
 		assert_eq!(
 			Balances::total_balance(&user_details.proxy),
@@ -1965,7 +2012,10 @@ fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -1976,8 +2026,6 @@ fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
 
 		let user_fee_quota = pot_fee_quota / 10;
 		let user_reserve_quota = pot_reserve_quota / 10;
-
-		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
 
 		let user = 2u64;
 
@@ -2044,7 +2092,10 @@ fn post_dispatch_for_non_valid_sponsor_calls_is_noop() {
 			user_details_post_dispatch.fee_quota.balance() - user_details.fee_quota.balance(),
 			fee
 		);
-		assert_eq!(Balances::free_balance(pot_details.sponsor), pot_reserve_quota - fee);
+		assert_eq!(
+			Balances::free_balance(pot_details.sponsor),
+			pot_reserve_quota - fee - PotDeposit::get() - UserDeposit::get()
+		);
 	});
 }
 
@@ -2089,6 +2140,7 @@ fn sponsor_call_for_non_existing_pot_is_invalid() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -2157,6 +2209,7 @@ fn sponsor_call_for_not_registered_user_is_invalid() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -2226,6 +2279,7 @@ fn sponsor_call_is_invalid_if_pot_is_running_low() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -2294,6 +2348,7 @@ fn sponsor_call_is_invalid_if_user_limit_is_not_enough() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -2362,6 +2417,7 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 			sponsorship_type: SponsorshipType::Uniques,
 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
 		};
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -2374,7 +2430,7 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 		let user_fee_quota = pot_fee_quota / 10;
 		let user_reserve_quota = pot_reserve_quota / 10;
 
-		Balances::make_free_balance_be(&pot_details.sponsor, 1); // low balance for sponsor
+		Balances::make_free_balance_be(&pot_details.sponsor, 4); // low balance for sponsor
 
 		let user = 2u64;
 

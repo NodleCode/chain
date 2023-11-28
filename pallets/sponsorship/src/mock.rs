@@ -159,7 +159,8 @@ impl Default for SponsorshipType {
 }
 
 parameter_types! {
-	pub TestPotDeposit:  u64 = 3;
+	pub const PotDeposit: u64 = 3;
+	pub const UserDeposit: u64 = 1;
 }
 impl pallet_sponsorship::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
@@ -167,8 +168,8 @@ impl pallet_sponsorship::Config for Test {
 	type Currency = Balances;
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
-	type PotDeposit = TestPotDeposit;
-	type RegisterLimit = ConstU32<1000>;
+	type PotDeposit = PotDeposit;
+	type UserDeposit = UserDeposit;
 	type WeightInfo = ();
 }
 
@@ -176,7 +177,7 @@ impl pallet_sponsorship::Config for Test {
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_balances::GenesisConfig::<Test> {
-		balances: vec![(1, 14), (2, 14)],
+		balances: vec![(1, 25), (2, 25)],
 	}
 	.assimilate_storage(&mut t)
 	.unwrap();
