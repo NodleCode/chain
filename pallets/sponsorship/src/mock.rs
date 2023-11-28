@@ -75,6 +75,9 @@ impl frame_system::Config for Test {
 	type MaxConsumers = ConstU32<16>;
 }
 
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+}
 impl pallet_balances::Config for Test {
 	type MaxLocks = ();
 	type MaxReserves = ();
@@ -82,7 +85,7 @@ impl pallet_balances::Config for Test {
 	type Balance = u64;
 	type RuntimeEvent = RuntimeEvent;
 	type DustRemoval = ();
-	type ExistentialDeposit = ConstU64<1>;
+	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
 	type WeightInfo = ();
 	type FreezeIdentifier = ();
@@ -176,8 +179,10 @@ impl pallet_sponsorship::Config for Test {
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	// Return the balance needed to create a pot and register a `num` of users
+	let sponsor_balance = |num: u64| PotDeposit::get() + ExistentialDeposit::get() + num * UserDeposit::get();
 	pallet_balances::GenesisConfig::<Test> {
-		balances: vec![(1, 25), (2, 25)],
+		balances: vec![(1, sponsor_balance(4)), (2, sponsor_balance(3))],
 	}
 	.assimilate_storage(&mut t)
 	.unwrap();

@@ -2419,6 +2419,7 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
 			deposit: PotDeposit::get(),
 		};
+
 		assert_ok!(SponsorshipModule::create_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot,
@@ -2429,8 +2430,6 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 
 		let user_fee_quota = pot_fee_quota / 10;
 		let user_reserve_quota = pot_reserve_quota / 10;
-
-		Balances::make_free_balance_be(&pot_details.sponsor, 4); // low balance for sponsor
 
 		let user = 2u64;
 
