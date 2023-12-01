@@ -188,7 +188,6 @@ pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime
 
 type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
-
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
@@ -318,7 +317,7 @@ sp_api::impl_runtime_apis! {
 			input_data: Vec<u8>,
 		) -> pallet_contracts_primitives::ContractExecResult<Balance,EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
-					Contracts::bare_call(
+			Contracts::bare_call(
 				origin,
 				dest,
 				value,
@@ -352,7 +351,6 @@ sp_api::impl_runtime_apis! {
 				constants::CONTRACTS_DEBUG_OUTPUT,
 				pallet_contracts::CollectEvents::UnsafeCollect,
 			)
-
 		}
 
 		fn upload_code(

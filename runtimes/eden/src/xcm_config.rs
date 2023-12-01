@@ -160,7 +160,8 @@ impl xcm_executor::Config for XcmConfig {
 	type CallDispatcher = RuntimeCall;
 	type SafeCallFilter = Everything;
 
-	type Aliasers = Nothing; // TODO check if it should be type Aliasers = AliasForeignAccountId32<OnlyParachains>;
+	type Aliasers = Nothing; // TODO check if it should be type:
+						 // type Aliasers = xcm_builder::AliasForeignAccountId32<OnlyParachains>;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -192,9 +193,7 @@ impl pallet_xcm::Config for Runtime {
 	type WeightInfo = crate::weights::pallet_xcm::WeightInfo<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type ReachableDest = ReachableDest;
-
 	type MaxRemoteLockConsumers = ConstU32<0>;
-
 	type RemoteLockConsumerIdentifier = ();
 }
 

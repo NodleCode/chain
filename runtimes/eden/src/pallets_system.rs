@@ -71,7 +71,6 @@ impl frame_system::Config for Runtime {
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Nonce = crate::Nonce;
-
 	type Block = crate::Block;
 }
 
@@ -106,7 +105,6 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ConstU32<0>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
-
 	type RuntimeHoldReason = ();
 }
 
