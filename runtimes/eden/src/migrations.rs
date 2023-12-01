@@ -1,6 +1,7 @@
 use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 
 use frame_support::weights::Weight;
+use sp_core::Get;
 #[cfg(feature = "try-runtime")]
 use {sp_runtime::TryRuntimeError, sp_std::prelude::*};
 
@@ -85,8 +86,7 @@ where
 		// Size of onchain storage is 0 safe to upgrade storage version
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
-		// give it some weight not zero
-		Weight::from_parts(10000, 0x10000)
+		T::DbWeight::get().writes(6)
 	}
 
 	#[cfg(feature = "try-runtime")]
