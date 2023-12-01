@@ -44,7 +44,27 @@ where
 		// No migration needed just update storage version
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 
-		//TODO TechnicalCommittee:: check Found 4 keys (0.19s)
+		// TechnicalCommittee: pallet_collective::<Instance1>
+		// Found 3 keys (0.19s)
+		// key: 0xed25f63942de25ac5253ba64b5eb64d1ba7fb8745735dc3be2a2c61a72c39e78
+		//      technicalCommittee.members: Vec<AccountId32> list of valid keys.
+		// key: 0xed25f63942de25ac5253ba64b5eb64d16254e9d55588784fa2a62b726696e2b1
+		//      technicalCommittee.proposalCount: u32 = 329
+		// key: 0xed25f63942de25ac5253ba64b5eb64d188c2f7188c6fdd1dffae2fa0d171f440
+		//      technicalCommittee.proposals: Vec<H256> = []
+
+		// Source code unchanged since 2021
+		// 03b294641ef substrate/frame/membership/src/lib.rs (Qinxuan Chen         2021-09-07 20:17:26 +0800  44)  const STORAGE_VERSION: StorageVersion = StorageVersion::new(4);
+		// *** This commit changes from old to new frame macros,
+		// decl_storage!{
+		//    Members get(fn members): Vec<T::AccountId>;
+		// }
+		// changed to:
+		// 	#[pallet::storage]
+		//  #[pallet::getter(fn members)]
+		//  pub type Members<T: Config<I>, I: 'static = ()> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+		// *** Migration code only included name change functions.
+
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
 		// https://github.com/paritytech/substrate/pull/12813
