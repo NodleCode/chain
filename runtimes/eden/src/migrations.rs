@@ -21,10 +21,27 @@ where
 	fn on_runtime_upgrade() -> Weight {
 		// Pallets with no data to migrate, just update storage version block goes here:
 
-		//TODO check  1 key
+		// Pallet_scheduler:  1 key
+		// Changed storage version to 3 and executed the v3 to v4 migration
+		// [2023-12-01T03:32:38Z INFO  runtime::scheduler::migration] Trying to migrate 0 agendas...
+		// [2023-12-01T03:32:38Z INFO  runtime::scheduler::migration] Migrated 0 agendas.
+		// *** No v3 agendas to migrate
+
+		// The one present key is identified as
+		// 0x3db7a24cfdc9de785974746c14a99df94e7b9012096b41c4eb3aaf947f6ea429: Raw
+		// scheduler.palletVersion: u16 = 0
+
+		// v2 -> v3 code changed:
+		// 5e50e0bc2c7 (Gavin Wood           2021-12-11 15:55:23 +0100 323)                        StorageVersion::<T>::put(Releases::V3);
+		// *** Adding support for preimage, StorageMap format changed for Agenda
+		//     Since chain contains 0 agendas it should be safe to write new storage version.
+
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
 
-		//TODO TechnicalMembership check 2 keys
+		// TechnicalMembership --  2 keys
+		// Storage version unchanged since 2021-09-07
+		// 03b294641ef substrate/frame/membership/src/lib.rs (Qinxuan Chen         2021-09-07 20:17:26 +0800
+		// No migration needed just update storage version
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 
 		//TODO TechnicalCommittee:: check Found 4 keys (0.19s)
