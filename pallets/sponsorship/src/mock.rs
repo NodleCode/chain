@@ -179,6 +179,7 @@ impl pallet_sponsorship::Config for Test {
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+
 	// Return the balance needed to create a pot and register a `num` of users
 	let sponsor_balance = |num: u64| PotDeposit::get() + ExistentialDeposit::get() + num * UserDeposit::get();
 	pallet_balances::GenesisConfig::<Test> {
@@ -186,5 +187,10 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	}
 	.assimilate_storage(&mut t)
 	.unwrap();
+
+	frame_support::BasicExternalities::execute_with_storage(&mut t, || {
+		pallet_sponsorship::STORAGE_VERSION.put::<pallet_sponsorship::Pallet<Test>>();
+	});
+
 	t.into()
 }

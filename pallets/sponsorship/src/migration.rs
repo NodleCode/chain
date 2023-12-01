@@ -16,19 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{BalanceOf, Config, Pallet, Pot, User, UserRegistrationCount};
+use crate::{
+	BalanceOf, Config, Pallet, Pot, PotDetailsOf, PotMigrationCursor, User, UserDetailsOf, UserMigrationCursor,
+	UserRegistrationCount,
+};
 use codec::{Decode, Encode};
 use frame_support::{
+	pallet_prelude::*,
+	storage::generator::{StorageDoubleMap, StorageMap},
 	traits::{Get, StorageVersion},
 	weights::Weight,
 };
 use support::LimitedBalance;
+pub use v0::migrate_partially;
 
 /// The current storage version.
 pub const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 mod v0 {
-	use super::*;
+	use super::{Pot as V1Pot, PotDetailsOf as V1PotDetailsOf, User as V1User, UserDetailsOf as V1UserDetailsOf, *};
+	use frame_support::storage_alias;
+	use sp_runtime::traits::Saturating;
+
 	#[derive(Encode, Decode, Debug)]
 	pub struct PotDetails<AccountId, SponsorshipType, Balance: frame_support::traits::tokens::Balance> {
 		pub sponsor: AccountId,
@@ -47,53 +56,173 @@ mod v0 {
 	pub type PotDetailsOf<T> =
 		PotDetails<<T as frame_system::Config>::AccountId, <T as Config>::SponsorshipType, BalanceOf<T>>;
 	pub type UserDetailsOf<T> = UserDetails<<T as frame_system::Config>::AccountId, BalanceOf<T>>;
+
+	#[storage_alias]
+	/// Details of a pot.
+	type Pot<T: Config> = StorageMap<Pallet<T>, Blake2_128Concat, <T as Config>::PotId, PotDetailsOf<T>, OptionQuery>;
+
+	#[storage_alias]
+	/// User details of a pot.
+	type User<T: Config> = StorageDoubleMap<
+		Pallet<T>,
+		Blake2_128Concat,
+		<T as Config>::PotId,
+		Blake2_128Concat,
+		<T as frame_system::Config>::AccountId,
+		UserDetailsOf<T>,
+		OptionQuery,
+	>;
+
+	fn migrate_pot_partially<T: Config>(n: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
+		let mut iter = Pot::<T>::iter_from(starting_key);
+
+		let pots = iter
+			.by_ref()
+			.take(n)
+			.map(|(pot, details)| {
+				(
+					pot,
+					V1PotDetailsOf::<T> {
+						sponsor: details.sponsor,
+						sponsorship_type: details.sponsorship_type,
+						fee_quota: details.fee_quota,
+						reserve_quota: details.reserve_quota,
+						deposit: Default::default(),
+					},
+				)
+			})
+			.collect::<Vec<_>>();
+
+		let num_of_pots = pots.len();
+
+		pots.into_iter()
+			.for_each(|(pot, details)| V1Pot::<T>::insert(pot, details));
+
+		log::info!(target: "sponsorship", "migrated {} pots", num_of_pots);
+
+		let weight = T::DbWeight::get().reads_writes(num_of_pots as u64, num_of_pots as u64);
+		if num_of_pots == n {
+			(Some(iter.last_raw_key().to_vec()), weight)
+		} else {
+			(None, weight)
+		}
+	}
+
+	fn migrate_user_partially<T: Config>(n: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
+		let mut iter = User::<T>::iter_from(starting_key);
+
+		let users = iter
+			.by_ref()
+			.take(n)
+			.map(|(pot, user, details)| {
+				(
+					pot,
+					user,
+					V1UserDetailsOf::<T> {
+						proxy: details.proxy,
+						fee_quota: details.fee_quota,
+						reserve_quota: details.reserve_quota,
+						deposit: Default::default(),
+					},
+				)
+			})
+			.collect::<Vec<_>>();
+
+		let users_len = users.len();
+
+		users.into_iter().for_each(|(pot, user, details)| {
+			UserRegistrationCount::<T>::mutate(&user, |count| {
+				count.saturating_inc();
+			});
+			V1User::<T>::insert(pot, user, details);
+		});
+
+		log::info!(target: "sponsorship", "migrated {} user-in-pots", users_len);
+
+		let weight = T::DbWeight::get().reads_writes(users_len as u64, users_len as u64);
+		if users_len == n {
+			(Some(iter.last_raw_key().to_vec()), weight)
+		} else {
+			(None, weight)
+		}
+	}
+
+	pub fn migrate_partially<T: Config>(max_pots: usize, max_users: usize) -> Weight {
+		let mut weight: Weight = T::DbWeight::get().reads(2);
+
+		let pot_migration_in_progress = if let Some(starting_key) = PotMigrationCursor::<T>::get() {
+			let (end_cursor, migration_weight) = migrate_pot_partially::<T>(max_pots, starting_key);
+			weight += migration_weight;
+			match end_cursor {
+				Some(last_key) => {
+					PotMigrationCursor::<T>::put(last_key);
+					true
+				}
+				None => {
+					PotMigrationCursor::<T>::kill();
+					false
+				}
+			}
+		} else {
+			false
+		};
+
+		let user_migration_in_progress = if let Some(starting_key) = UserMigrationCursor::<T>::get() {
+			let (end_cursor, migration_weight) = migrate_user_partially::<T>(max_users, starting_key);
+			weight += migration_weight;
+			match end_cursor {
+				Some(last_key) => {
+					UserMigrationCursor::<T>::put(last_key);
+					true
+				}
+				None => {
+					UserMigrationCursor::<T>::kill();
+					false
+				}
+			}
+		} else {
+			false
+		};
+
+		if !pot_migration_in_progress && !user_migration_in_progress {
+			weight += T::DbWeight::get().writes(1);
+			STORAGE_VERSION.put::<Pallet<T>>();
+		}
+
+		weight
+	}
+
+	#[cfg(feature = "try-runtime")]
+	pub fn migrate_in_steps<T: Config>(steps: usize) -> Weight {
+		let num_of_pots = Pot::<T>::iter().count();
+		let num_of_users = User::<T>::iter().count();
+
+		let mut weight: Weight = T::DbWeight::get().reads(num_of_pots as u64 + num_of_users as u64);
+
+		for _ in 0..steps {
+			weight += migrate_partially::<T>(num_of_pots / steps + 1, num_of_users / steps + 1);
+		}
+
+		weight
+	}
 }
 
 /// Call this during the next runtime upgrade for this module.
 pub fn on_runtime_upgrade<T: Config>() -> Weight {
 	let mut weight: Weight = T::DbWeight::get().reads(1);
 
-	let translate_pot_details = |pre: v0::PotDetailsOf<T>| -> crate::PotDetailsOf<T> {
-		let mut fee_quota = LimitedBalance::with_limit(pre.fee_quota.limit());
-		fee_quota.saturating_add(pre.fee_quota.balance());
-		let mut reserve_quota = LimitedBalance::with_limit(pre.reserve_quota.limit());
-		reserve_quota.saturating_add(pre.reserve_quota.balance());
-		crate::PotDetailsOf::<T> {
-			sponsor: pre.sponsor,
-			sponsorship_type: pre.sponsorship_type,
-			fee_quota,
-			reserve_quota,
-			deposit: Default::default(),
-		}
-	};
-	let translate_user_details = |pre: v0::UserDetailsOf<T>| -> crate::UserDetailsOf<T> {
-		let mut fee_quota = LimitedBalance::with_limit(pre.fee_quota.limit());
-		fee_quota.saturating_add(pre.fee_quota.balance());
-		let mut reserve_quota = LimitedBalance::with_limit(pre.reserve_quota.limit());
-		reserve_quota.saturating_add(pre.reserve_quota.balance());
-		crate::UserDetailsOf::<T> {
-			proxy: pre.proxy,
-			fee_quota,
-			reserve_quota,
-			deposit: Default::default(),
-		}
-	};
-
 	if StorageVersion::get::<Pallet<T>>() == 0 {
-		Pot::<T>::translate(|_key, pre| Some(translate_pot_details(pre)));
-		let pot_count = Pot::<T>::iter().count() as u64;
-		weight = weight.saturating_add(T::DbWeight::get().reads_writes(pot_count, pot_count));
+		PotMigrationCursor::<T>::put(Pot::<T>::prefix_hash());
+		UserMigrationCursor::<T>::put(User::<T>::prefix_hash());
 
-		User::<T>::translate(|_key1, _key2, pre| Some(translate_user_details(pre)));
-		let pot_user_count = User::<T>::iter().count() as u64;
-		weight = weight.saturating_add(T::DbWeight::get().reads_writes(pot_user_count, pot_user_count));
-
-		for (_pot, user, _details) in User::<T>::iter() {
-			UserRegistrationCount::<T>::mutate(user, |count| *count += 1);
+		// The following invocation of migration is only needed for testing the logic during the
+		// try runtime. The actual migration should be called during on_initialize for the pallet.
+		#[cfg(feature = "try-runtime")]
+		{
+			weight += v0::migrate_in_steps::<T>(3);
 		}
-		weight = weight.saturating_add(T::DbWeight::get().reads_writes(pot_user_count, pot_user_count));
 
-		StorageVersion::new(1).put::<Pallet<T>>();
+		weight += T::DbWeight::get().writes(2);
 	}
 
 	weight
@@ -101,10 +230,7 @@ pub fn on_runtime_upgrade<T: Config>() -> Weight {
 
 #[cfg(feature = "try-runtime")]
 use ::{
-	frame_support::{
-		storage::generator::{StorageDoubleMap, StorageMap},
-		Blake2_128Concat, StorageHasher,
-	},
+	frame_support::{Blake2_128Concat, StorageHasher},
 	sp_std::{borrow::Borrow, vec::Vec},
 };
 

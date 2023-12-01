@@ -24,7 +24,7 @@ use frame_support::{
 	traits::{
 		Currency,
 		ExistenceRequirement::{AllowDeath, KeepAlive},
-		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
+		GetStorageVersion, InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
 use pallet_transaction_payment::OnChargeTransaction;
@@ -34,9 +34,13 @@ use sp_runtime::{
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
 };
 use sp_runtime::{FixedPointOperand, Saturating};
-use sp_std::fmt::{Debug, Formatter, Result as FmtResult};
+use sp_std::{
+	fmt::{Debug, Formatter, Result as FmtResult},
+	prelude::*,
+};
 use support::LimitedBalance;
 
+pub use migration::STORAGE_VERSION;
 pub use pallet::*;
 
 #[cfg(test)]
@@ -112,10 +116,11 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use scale_info::prelude::{boxed::Box, vec::Vec};
+	use scale_info::prelude::boxed::Box;
 
 	#[pallet::pallet]
 	#[pallet::storage_version(migration::STORAGE_VERSION)]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -169,6 +174,14 @@ pub mod pallet {
 	/// Stores the number of individual pots a user is registered for.
 	#[pallet::storage]
 	pub(super) type UserRegistrationCount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+
+	/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
+	#[pallet::storage]
+	pub(super) type PotMigrationCursor<T: Config> = StorageValue<_, Vec<u8>, OptionQuery>;
+
+	/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
+	#[pallet::storage]
+	pub(super) type UserMigrationCursor<T: Config> = StorageValue<_, Vec<u8>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -239,6 +252,8 @@ pub mod pallet {
 		CannotUpdateFeeLimit,
 		/// Cannot update the reserve limit most likely due to being below the current commitment.
 		CannotUpdateReserveLimit,
+		/// Migration is in progress.
+		MigrationInProgress,
 	}
 
 	#[pallet::call]
@@ -257,6 +272,7 @@ pub mod pallet {
 			reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			ensure!(!Pot::<T>::contains_key(pot), Error::<T>::InUse);
 
 			T::Currency::reserve(&who, T::PotDeposit::get())?;
@@ -290,6 +306,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_pot())]
 		pub fn remove_pot(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
 				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::InUse)?;
 				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
@@ -318,6 +335,7 @@ pub mod pallet {
 			common_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
@@ -364,6 +382,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_users(users.len() as u32))]
 		pub fn remove_users(origin: OriginFor<T>, pot: T::PotId, users: Vec<T::AccountId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
@@ -426,6 +445,7 @@ pub mod pallet {
 			call: Box<<T as Config>::RuntimeCall>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
@@ -457,6 +477,7 @@ pub mod pallet {
 			new_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -491,6 +512,7 @@ pub mod pallet {
 			users: Vec<T::AccountId>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -541,6 +563,14 @@ pub mod pallet {
 	}
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_initialize(_n: T::BlockNumber) -> Weight {
+			// NOTE: the following consts should be adjusted according to a safe weight limit which
+			// should be way below the total block weight limit.
+			const MAX_POTS_TO_MIGRATE: usize = 200;
+			const MAX_USERS_TO_MIGRATE: usize = 100;
+			migration::migrate_partially::<T>(MAX_POTS_TO_MIGRATE, MAX_USERS_TO_MIGRATE)
+		}
+
 		fn on_runtime_upgrade() -> Weight {
 			migration::on_runtime_upgrade::<T>()
 		}
@@ -663,6 +693,10 @@ impl<T: Config> Pallet<T> {
 
 		Self::deposit_event(Event::Sponsored { paid, repaid });
 		Ok(())
+	}
+
+	fn migration_in_progress() -> bool {
+		Self::on_chain_storage_version() < Self::current_storage_version()
 	}
 }
 
