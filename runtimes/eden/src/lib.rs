@@ -167,8 +167,6 @@ pub type Migrations = (
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
 
-
-
 	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
