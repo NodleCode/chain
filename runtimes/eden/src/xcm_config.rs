@@ -159,9 +159,7 @@ impl xcm_executor::Config for XcmConfig {
 	type UniversalAliases = Nothing;
 	type CallDispatcher = RuntimeCall;
 	type SafeCallFilter = Everything;
-
-	type Aliasers = Nothing; // TODO check if it should be type:
-						 // type Aliasers = xcm_builder::AliasForeignAccountId32<OnlyParachains>;
+	type Aliasers = Nothing;
 }
 
 #[cfg(feature = "runtime-benchmarks")]
