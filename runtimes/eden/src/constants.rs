@@ -128,6 +128,10 @@ mod tests {
 		assert_eq!(10 * MILLI_NODL, DOLLARS);
 		assert_eq!(100 * MICRO_NODL, CENTS);
 		assert_eq!(100 * NANO_NODL, MILLICENTS);
+		assert_eq!(EXISTENTIAL_DEPOSIT, 10_000);
+		assert_eq!(NANO_NODL, 100);
+		assert_eq!(MICRO_NODL, 100_000);
+		assert_eq!(NODL, 1e11 as u128);
 	}
 
 	#[test]
