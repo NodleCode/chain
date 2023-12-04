@@ -223,7 +223,8 @@ impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
 	}
 }
 parameter_types! {
-	pub const BaseXcmWeight: XcmWeight = XcmWeight::from_parts(100_000_000, 0); // TODO: update based on the results of https://github.com/NodleCode/chain-workspace/issues/259
+	pub const BaseXcmWeight: XcmWeight = XcmWeight::from_parts(100_000_000, 0); 
+	// TODO: update based on the results of CHA-407
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
@@ -347,7 +348,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 		Ok(RelayLocation::get())
 	}
 	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
-		// 1 fungibles can be traded in the worst case: TODO: https://github.com/NodleCode/chain/issues/717
+		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
 		let assets = MultiAsset {
 			id: Concrete(NodlLocation::get()),
 			fun: Fungible(10_000_000 * NODL),

@@ -159,15 +159,9 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, Si
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-	// TODO https://github.com/paritytech/substrate/pull/12813
-	// TODO this is related to XCM migration.
-	// pallet_balances::migration::MigrateToTrackInactive<Runtime, AccountId>,
 
 	// Migrate data as designed
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
-
-	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
@@ -485,9 +479,7 @@ sp_api::impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			log::debug!("on_runtime_upgrade");
-			log::info!("Hello: {checks:?}");
 			let weight = Executive::try_runtime_upgrade(checks);
-			log::info!("Hello: {weight:?}");
 			(weight.unwrap(), constants::RuntimeBlockWeights::get().max_block)
 		}
 
