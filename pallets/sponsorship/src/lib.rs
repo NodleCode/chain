@@ -30,7 +30,7 @@ use frame_support::{
 use pallet_transaction_payment::OnChargeTransaction;
 use sp_io::hashing::blake2_256;
 use sp_runtime::{
-	traits::{DispatchInfoOf, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
+	traits::{DispatchInfoOf, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
 };
 use sp_runtime::{FixedPointOperand, Saturating};
@@ -395,10 +395,10 @@ pub mod pallet {
 				)?;
 				pot_details.reserve_quota.saturating_sub(repaid);
 				UserRegistrationCount::<T>::mutate(&user, |count| {
-					count.saturating_dec();
-					if count.is_zero() {
+					if count.is_one() {
 						let _ = frame_system::Pallet::<T>::dec_providers(&user);
 					}
+					count.saturating_dec();
 				});
 				T::Currency::unreserve(&who, user_details.deposit);
 				<User<T>>::remove(pot, user);
