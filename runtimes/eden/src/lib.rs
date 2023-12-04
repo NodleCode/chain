@@ -159,7 +159,6 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, Si
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-
 	// Migrate data as designed
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,

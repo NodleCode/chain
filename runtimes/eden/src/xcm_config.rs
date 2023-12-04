@@ -223,7 +223,7 @@ impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
 	}
 }
 parameter_types! {
-	pub const BaseXcmWeight: XcmWeight = XcmWeight::from_parts(100_000_000, 0); 
+	pub const BaseXcmWeight: XcmWeight = XcmWeight::from_parts(100_000_000, 0);
 	// TODO: update based on the results of CHA-407
 	pub const MaxAssetsForTransfer: usize = 2;
 }
