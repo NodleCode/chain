@@ -32,7 +32,7 @@ use frame_support::{
 use frame_system::limits::BlockLength;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
 use polkadot_runtime_common::SlowAdjustingFeeUpdate;
-use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Moment, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Moment, Nonce, Signature};
 use sp_runtime::{
 	generic,
 	traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
