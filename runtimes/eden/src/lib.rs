@@ -37,7 +37,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -137,8 +137,6 @@ pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 pub type SignedBlock = generic::SignedBlock<Block>;
 /// BlockId type as expected by this runtime.
 pub type BlockId = generic::BlockId<Block>;
-/// Index of a transaction in the chain.
-pub type Nonce = u32;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
 	frame_system::CheckSpecVersion<Runtime>,
@@ -267,8 +265,8 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
-		fn account_nonce(account: AccountId) -> Index {
+	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
 		}
 	}

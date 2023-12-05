@@ -32,7 +32,7 @@ use frame_support::{
 use frame_system::limits::BlockLength;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
 use polkadot_runtime_common::SlowAdjustingFeeUpdate;
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Moment, Signature};
 use sp_runtime::{
 	generic,
 	traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
@@ -70,7 +70,7 @@ impl frame_system::Config for Runtime {
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
-	type Nonce = crate::Nonce;
+	type Nonce = Nonce;
 	type Block = crate::Block;
 }
 
@@ -133,7 +133,7 @@ where
 		call: RuntimeCall,
 		public: <Signature as sp_runtime::traits::Verify>::Signer,
 		account: AccountId,
-		nonce: Index,
+		nonce: Nonce,
 	) -> Option<(
 		RuntimeCall,
 		<UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
