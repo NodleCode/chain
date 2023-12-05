@@ -102,13 +102,68 @@ where
 
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
+		use frame_support::ensure;
+
 		log::info!("Pre upgrade");
+
+		ensure!(
+			StorageVersion::get::<pallet_preimage::Pallet<T>>() == 0,
+			TryRuntimeError::Other("preimage storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_xcm::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_xcm storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_scheduler::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_scheduler storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>() == 0,
+			TryRuntimeError::Other("pallet_collective storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>() == 0,
+			TryRuntimeError::Other("pallet_membership storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_balances::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_balances storage version is not 0")
+		);
+
 		Ok(vec![])
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
+		use frame_support::ensure;
+
 		log::info!("Post upgrade {_state:?}");
+		ensure!(
+			StorageVersion::get::<pallet_preimage::Pallet<T>>() == 1,
+			TryRuntimeError::Other("preimage post upgrade storage version is not 1")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_xcm::Pallet<T>>() == 1,
+			TryRuntimeError::Other("pallet_xcm post upgrade storage version is not 1")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_scheduler::Pallet<T>>() == 4,
+			TryRuntimeError::Other("pallet_scheduler post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>() == 4,
+			TryRuntimeError::Other("pallet_collective post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>() == 4,
+			TryRuntimeError::Other("pallet_membership post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_balances::Pallet<T>>() == 1,
+			TryRuntimeError::Other("pallet_balances post upgrade storage version is not 1")
+		);
+
 		Ok(())
 	}
 }
