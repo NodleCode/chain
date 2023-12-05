@@ -37,12 +37,17 @@ where
 		// *** Adding support for preimage, StorageMap format changed for Agenda
 		//     Since chain contains 0 agendas it should be safe to write new storage version.
 
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
 
 		// TechnicalMembership --  2 keys
 		// Storage version unchanged since 2021-09-07
 		// 03b294641ef substrate/frame/membership/src/lib.rs (Qinxuan Chen         2021-09-07 20:17:26 +0800
 		// No migration needed just update storage version
+
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 
 		// TechnicalCommittee: pallet_collective::<Instance1>
@@ -66,10 +71,15 @@ where
 		//  pub type Members<T: Config<I>, I: 'static = ()> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 		// *** Migration code only included name change functions.
 
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
 		// https://github.com/paritytech/substrate/pull/12813
 		// moves funds to inactive if we don't need that this is OK.
+
+		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
+
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
 
 		// Two keys already migrated.
@@ -84,6 +94,7 @@ where
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
 
 		// Size of onchain storage is 0 safe to upgrade storage version
+		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
 		T::DbWeight::get().writes(6)
