@@ -18,7 +18,7 @@
 
 use crate as pallet_sponsorship;
 use frame_support::{
-	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug},
+	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug, Weight},
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU16, ConstU64, ConstU8, InstanceFilter},
 	weights::IdentityFee,
@@ -28,6 +28,7 @@ use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
+	Perbill,
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -48,9 +49,18 @@ frame_support::construct_runtime!(
 	}
 );
 
+const WEIGHT_REF_TIME_PER_SECOND: u64 = 1_000_000_000_000;
+const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+parameter_types! {
+	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
+		::with_sensible_defaults(
+			Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
+			NORMAL_DISPATCH_RATIO,
+		);
+}
 impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
-	type BlockWeights = ();
+	type BlockWeights = BlockWeights;
 	type BlockLength = ();
 	type DbWeight = ();
 	type RuntimeOrigin = RuntimeOrigin;
