@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{mock::*, Call, ChargeSponsor, Error, Event, Pot, PotDetailsOf, User, UserDetailsOf};
+use crate::{
+	mock::*, Call, ChargeSponsor, Error, Event, Pot, PotDetailsOf, User, UserDetailsOf, UserRegistrationCount,
+};
 use frame_support::dispatch::DispatchResult;
 use frame_support::{
 	assert_err, assert_noop, assert_ok,
@@ -53,6 +55,7 @@ fn creator_of_pot_becomes_sponsor() {
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
+		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), PotDeposit::get());
 		assert_eq!(Pot::<Test>::get(pot), Some(pot_details));
 		System::assert_last_event(
 			Event::PotCreated {
@@ -118,10 +121,12 @@ fn sponsors_can_remove_user_free_pots() {
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
+		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), PotDeposit::get());
 		assert_ok!(SponsorshipModule::remove_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot
 		));
+		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), 0);
 		assert_eq!(Pot::<Test>::get(pot), None);
 		System::assert_last_event(Event::PotRemoved { pot }.into());
 
@@ -481,6 +486,12 @@ fn sponsors_can_register_new_users() {
 		));
 		assert_eq!(User::<Test>::get(pot, user_1), Some(user_details_1));
 		assert_eq!(User::<Test>::get(pot, user_2), Some(user_details_2));
+
+		assert_eq!(
+			Balances::reserved_balance(&pot_details.sponsor),
+			PotDeposit::get() + 2 * UserDeposit::get()
+		);
+
 		System::assert_last_event(
 			Event::UsersRegistered {
 				pot,
@@ -512,6 +523,16 @@ fn sponsors_can_register_new_users() {
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_details_3.proxy), 1);
 		assert_eq!(User::<Test>::get(pot, user_3), Some(user_details_3));
+
+		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 1);
+
+		assert_eq!(
+			Balances::reserved_balance(&pot_details.sponsor),
+			PotDeposit::get() + 3 * UserDeposit::get()
+		);
+
 		System::assert_last_event(
 			Event::UsersRegistered {
 				pot,
@@ -578,6 +599,11 @@ fn sponsors_cannot_register_users_more_than_once() {
 			common_fee_quota,
 			common_reserve_quota
 		));
+
+		assert_eq!(
+			Balances::reserved_balance(&pot_details.sponsor),
+			PotDeposit::get() + 4 * UserDeposit::get()
+		);
 	});
 }
 
@@ -651,6 +677,10 @@ fn only_sponsors_have_permission_to_remove_users() {
 			Error::<Test>::NoPermission
 		);
 
+		assert_eq!(
+			Balances::reserved_balance(&pot_details.sponsor),
+			PotDeposit::get() + 3 * UserDeposit::get()
+		);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1), 1);
 		let user_1_proxy = <User<Test>>::get(pot, user_1).unwrap().proxy;
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1_proxy), 1);
@@ -664,6 +694,13 @@ fn only_sponsors_have_permission_to_remove_users() {
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3), 1);
 		let user_3_proxy = <User<Test>>::get(pot, user_3).unwrap().proxy;
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 1);
+		assert_eq!(
+			Balances::reserved_balance(&pot_details.sponsor),
+			PotDeposit::get() + UserDeposit::get()
+		);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 0);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 0);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 1);
 
 		assert_ok!(SponsorshipModule::register_users(
 			RuntimeOrigin::signed(pot_details.sponsor),
@@ -1126,6 +1163,9 @@ fn sponsors_can_remove_users_with_no_reserve_in_their_proxies() {
 			.into(),
 		);
 		assert_eq!(User::<Test>::iter_prefix_values(pot).count(), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 0);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 0);
 	});
 }
 
@@ -1730,6 +1770,9 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 			common_fee_quota,
 			common_reserve_quota
 		));
+		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 2);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 1);
 
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 1);
 		let user_2_proxy_1 = <User<Test>>::get(pot_1, user_2).unwrap().proxy;
@@ -1744,6 +1787,7 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 1);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_1), 0);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_2), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 1);
 
 		assert_ok!(SponsorshipModule::remove_users(
 			RuntimeOrigin::signed(pot_details_2.sponsor),
@@ -1752,6 +1796,9 @@ fn pallet_continues_to_provide_user_when_removed_from_one_pot_but_still_exists_i
 		));
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2), 0);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_2_proxy_2), 0);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 1);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_2), 0);
+		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 1);
 	});
 }
 
