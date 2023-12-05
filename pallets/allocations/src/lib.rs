@@ -33,6 +33,7 @@ use frame_support::{
 };
 
 use frame_system::ensure_signed;
+use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_arithmetic::traits::UniqueSaturatedInto;
 use sp_runtime::{
@@ -62,16 +63,16 @@ enum Releases {
 
 #[derive(Default, TypeInfo)]
 pub struct MintCurve<T: Config> {
-	session_period: T::BlockNumber,
-	fiscal_period: T::BlockNumber,
+	session_period: BlockNumberFor<T>,
+	fiscal_period: BlockNumberFor<T>,
 	inflation_steps: Vec<Perbill>,
 	maximum_supply: BalanceOf<T>,
 }
 
 impl<T: Config> MintCurve<T> {
 	pub fn new(
-		session_period: T::BlockNumber,
-		fiscal_period: T::BlockNumber,
+		session_period: BlockNumberFor<T>,
+		fiscal_period: BlockNumberFor<T>,
 		inflation_steps: &[Perbill],
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
@@ -87,8 +88,8 @@ impl<T: Config> MintCurve<T> {
 
 	pub fn calc_session_quota(
 		&self,
-		n: T::BlockNumber,
-		curve_start: T::BlockNumber,
+		n: BlockNumberFor<T>,
+		curve_start: BlockNumberFor<T>,
 		current_supply: BalanceOf<T>,
 	) -> BalanceOf<T> {
 		let step: usize = n
@@ -106,21 +107,21 @@ impl<T: Config> MintCurve<T> {
 		Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase
 	}
 
-	pub fn next_quota_renew_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+	pub fn next_quota_renew_schedule(&self, n: BlockNumberFor<T>, curve_start: BlockNumberFor<T>) -> BlockNumberFor<T> {
 		Self::next_schedule(n, curve_start, self.session_period)
 	}
 
-	pub fn next_quota_calc_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+	pub fn next_quota_calc_schedule(&self, n: BlockNumberFor<T>, curve_start: BlockNumberFor<T>) -> BlockNumberFor<T> {
 		Self::next_schedule(n, curve_start, self.fiscal_period)
 	}
 
 	#[inline(always)]
-	pub fn session_period(&self) -> T::BlockNumber {
+	pub fn session_period(&self) -> BlockNumberFor<T> {
 		self.session_period
 	}
 
 	#[inline(always)]
-	pub fn fiscal_period(&self) -> T::BlockNumber {
+	pub fn fiscal_period(&self) -> BlockNumberFor<T> {
 		self.fiscal_period
 	}
 
@@ -130,7 +131,11 @@ impl<T: Config> MintCurve<T> {
 	}
 
 	/// Helper function to calculate the very next schedule based on the current block number.
-	fn next_schedule(n: T::BlockNumber, curve_start: T::BlockNumber, period: T::BlockNumber) -> T::BlockNumber {
+	fn next_schedule(
+		n: BlockNumberFor<T>,
+		curve_start: BlockNumberFor<T>,
+		period: BlockNumberFor<T>,
+	) -> BlockNumberFor<T> {
 		if n >= curve_start {
 			n.saturating_sub(curve_start)
 				.checked_div(&period)
@@ -191,7 +196,7 @@ pub mod pallet {
 		/// Provide access to the block number that should be used in mint curve calculations. For
 		/// example those who use this pallet for a parachain may decide to use the block creation
 		/// pace of the relay chain for timing.
-		type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
+		type BlockNumberProvider: BlockNumberProvider<BlockNumber = BlockNumberFor<Self>>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -225,7 +230,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
 		pub fn set_curve_starting_block(
 			origin: OriginFor<T>,
-			curve_start: T::BlockNumber,
+			curve_start: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
 			<MintCurveStartingBlock<T>>::put(curve_start);
@@ -284,17 +289,17 @@ pub mod pallet {
 	/// The block in or after which the the session quota should be renewed
 	#[pallet::storage]
 	#[pallet::getter(fn quota_renew_schedule)]
-	pub(crate) type SessionQuotaRenewSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
+	pub(crate) type SessionQuotaRenewSchedule<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
 	/// The block in or after which the the session quota should be calculated
 	#[pallet::storage]
 	#[pallet::getter(fn quota_calc_schedule)]
-	pub(crate) type SessionQuotaCalculationSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
+	pub(crate) type SessionQuotaCalculationSchedule<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
 	/// The block from which the mint curve should be considered starting its first inflation step
 	#[pallet::storage]
 	#[pallet::getter(fn mint_curve_starting_block)]
-	pub(crate) type MintCurveStartingBlock<T: Config> = StorageValue<_, T::BlockNumber, OptionQuery>;
+	pub(crate) type MintCurveStartingBlock<T: Config> = StorageValue<_, BlockNumberFor<T>, OptionQuery>;
 }
 
 impl<T: Config> Pallet<T> {
@@ -383,7 +388,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Update both the quota renewal and re-calculation schedules based on the given starting block
 	/// for the curve.
-	fn update_session_quota_schedules(curve_start: T::BlockNumber) {
+	fn update_session_quota_schedules(curve_start: BlockNumberFor<T>) {
 		let n = T::BlockNumberProvider::current_block_number();
 		Self::update_session_quota_calculation_schedule(n, curve_start);
 		Self::update_session_quota_renew_schedule(n, curve_start);
@@ -392,7 +397,7 @@ impl<T: Config> Pallet<T> {
 	/// Calculate the session quota and update the corresponding storage only once during a fiscal
 	/// period.
 	/// Return the weight of the call.
-	fn checked_calc_session_quota(n: T::BlockNumber) -> Weight {
+	fn checked_calc_session_quota(n: BlockNumberFor<T>) -> Weight {
 		if n >= <SessionQuotaCalculationSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
 			Self::update_session_quota_calculation_schedule(n, curve_start);
@@ -409,7 +414,7 @@ impl<T: Config> Pallet<T> {
 	/// Renew the session quota and update the corresponding storage only once during a session
 	/// period.
 	/// Return the weight of the call.
-	fn checked_renew_session_quota(n: T::BlockNumber) -> Weight {
+	fn checked_renew_session_quota(n: BlockNumberFor<T>) -> Weight {
 		if n >= <SessionQuotaRenewSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
 			Self::update_session_quota_renew_schedule(n, curve_start);
@@ -423,20 +428,20 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Update the schedule for calculating the session quota.
-	fn update_session_quota_calculation_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
+	fn update_session_quota_calculation_schedule(n: BlockNumberFor<T>, curve_start: BlockNumberFor<T>) {
 		let next_schedule = T::MintCurve::get().next_quota_calc_schedule(n, curve_start);
 		<SessionQuotaCalculationSchedule<T>>::put(next_schedule);
 	}
 
 	/// Update the schedule for renewing (refilling the bucket) for the session quota.
-	fn update_session_quota_renew_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
+	fn update_session_quota_renew_schedule(n: BlockNumberFor<T>, curve_start: BlockNumberFor<T>) {
 		let next_schedule = T::MintCurve::get().next_quota_renew_schedule(n, curve_start);
 		<SessionQuotaRenewSchedule<T>>::put(next_schedule);
 	}
 
 	/// Return the mint curve starting block number or if it's not set before return `n` itself
 	/// while setting the mint curve starting block to n.
-	fn curve_start_or(n: T::BlockNumber) -> T::BlockNumber {
+	fn curve_start_or(n: BlockNumberFor<T>) -> BlockNumberFor<T> {
 		<MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
 			<MintCurveStartingBlock<T>>::put(n);
 			n

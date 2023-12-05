@@ -37,11 +37,12 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
+
 use sp_runtime::{
 	generic,
 	traits::{BlakeTwo256, Block as BlockT},
@@ -63,17 +64,15 @@ mod version;
 mod weights;
 mod xcm_config;
 
+mod migrations;
+
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
 pub use version::VERSION;
 
 construct_runtime! {
-	pub enum Runtime where
-		Block = Block,
-		NodeBlock = primitives::Block,
-		UncheckedExtrinsic = UncheckedExtrinsic
-	{
+	pub enum Runtime {
 		// System
 		System: frame_system = 0,
 		Timestamp: pallet_timestamp = 1,
@@ -96,7 +95,7 @@ construct_runtime! {
 		Authorship: pallet_authorship = 20,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
+		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config<T>, Storage} = 25,
 
 		// Parachain
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
@@ -104,15 +103,17 @@ construct_runtime! {
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
-		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
+		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 35,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
 
 		// Neat things
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
-		Uniques: pallet_uniques = 42,
+		Uniques: pallet_uniques::{Pallet, Storage, Event<T>} = 42,
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
+		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
+		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 46,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -153,15 +154,31 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
-
+const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
+pub type Migrations = (
+	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
+	// Migrate data as designed
+	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
+	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
+	// Run custom migrations
+	migrations::MultiMigration<Runtime>,
+);
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	Migrations,
+>;
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime>;
 
+type EventRecord =
+	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
@@ -248,8 +265,8 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
-		fn account_nonce(account: AccountId) -> Index {
+	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
 		}
 	}
@@ -279,7 +296,7 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash>
+	impl pallet_contracts::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash, EventRecord>
 		for Runtime
 	{
 		fn call(
@@ -289,7 +306,7 @@ sp_api::impl_runtime_apis! {
 			gas_limit: Option<Weight>,
 			storage_deposit_limit: Option<Balance>,
 			input_data: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+		) -> pallet_contracts_primitives::ContractExecResult<Balance,EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_call(
 				origin,
@@ -299,6 +316,7 @@ sp_api::impl_runtime_apis! {
 				storage_deposit_limit,
 				input_data,
 				constants::CONTRACTS_DEBUG_OUTPUT,
+				pallet_contracts::CollectEvents::UnsafeCollect,
 				pallet_contracts::Determinism::Enforced,
 			)
 		}
@@ -311,7 +329,7 @@ sp_api::impl_runtime_apis! {
 			code: pallet_contracts_primitives::Code<Hash>,
 			data: Vec<u8>,
 			salt: Vec<u8>,
-		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance> {
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance, EventRecord> {
 			let gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_instantiate(
 				origin,
@@ -322,6 +340,7 @@ sp_api::impl_runtime_apis! {
 				data,
 				salt,
 				constants::CONTRACTS_DEBUG_OUTPUT,
+				pallet_contracts::CollectEvents::UnsafeCollect,
 			)
 		}
 
@@ -368,11 +387,13 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
+			list_benchmark!(list, extra, pallet_nodle_uniques, NodleUniques);
 			list_benchmark!(list, extra, pallet_sponsorship, Sponsorship);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 			list_benchmark!(list, extra, pallet_contracts, Contracts);
+			list_benchmark!(list, extra, pallet_identity, Identity);
 			list_benchmark!(list, extra, pallet_membership, TechnicalMembership);
 			list_benchmark!(list, extra, pallet_xcm, PolkadotXcm);
 			list_benchmark!(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
@@ -390,14 +411,35 @@ sp_api::impl_runtime_apis! {
 			// specific and were causing some issues at compile time as they depend on the
 			// presence of the staking and elections pallets.
 
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
+			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, TrackedStorageKey, add_benchmark};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 
-			impl frame_system_benchmarking::Config for Runtime {}
+			impl frame_system_benchmarking::Config for Runtime {
+				fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
+					ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
+					Ok(())
+				}
+
+				fn verify_set_code() {
+					System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+				}
+			}
 
 
-			let whitelist: Vec<TrackedStorageKey> = vec![];
+			let whitelist: Vec<TrackedStorageKey> = vec![
+				// Block Number
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
+				// Total Issuance
+				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
+				// Execution Phase
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
+				// Event Count
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
+				// System Events
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
+			];
+
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 
@@ -410,11 +452,13 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
+			add_benchmark!(params, batches, pallet_nodle_uniques, NodleUniques);
 			add_benchmark!(params, batches, pallet_sponsorship, Sponsorship);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 			add_benchmark!(params, batches, pallet_contracts, Contracts);
+			add_benchmark!(params, batches, pallet_identity, Identity);
 			add_benchmark!(params, batches, pallet_membership, TechnicalMembership);
 			add_benchmark!(params, batches, pallet_xcm, PolkadotXcm);
 			add_benchmark!(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
@@ -432,8 +476,8 @@ sp_api::impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			log::debug!("on_runtime_upgrade");
-			let weight = Executive::try_runtime_upgrade(checks).unwrap();
-			(weight, constants::RuntimeBlockWeights::get().max_block)
+			let weight = Executive::try_runtime_upgrade(checks);
+			(weight.unwrap(), constants::RuntimeBlockWeights::get().max_block)
 		}
 
 		fn execute_block(block: Block, state_root_check: bool, signature_check: bool, select: frame_support::traits::TryStateSelect) -> Weight {

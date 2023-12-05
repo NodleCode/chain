@@ -42,8 +42,7 @@ use sp_std::{
 	vec::Vec,
 };
 
-#[cfg(feature = "std")]
-use frame_support::traits::GenesisBuild;
+use frame_system::pallet_prelude::BlockNumberFor;
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -61,14 +60,9 @@ enum Releases {
 }
 
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-pub type VestingScheduleOf<T> = VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
+pub type VestingScheduleOf<T> = VestingSchedule<BlockNumberFor<T>, BalanceOf<T>>;
 pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
-pub type ScheduledGrant<T> = (
-	<T as frame_system::Config>::BlockNumber,
-	<T as frame_system::Config>::BlockNumber,
-	u32,
-	BalanceOf<T>,
-);
+pub type ScheduledGrant<T> = (BlockNumberFor<T>, BlockNumberFor<T>, u32, BalanceOf<T>);
 pub type ScheduledItem<T> = (<T as frame_system::Config>::AccountId, Vec<ScheduledGrant<T>>);
 
 /// The vesting schedule.
@@ -121,7 +115,7 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+		type Currency: LockableCurrency<Self::AccountId, Moment = BlockNumberFor<Self>>;
 		type CancelOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// The maximum number of vesting schedule.
 		#[pallet::constant]
@@ -129,7 +123,7 @@ pub mod pallet {
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 		// The block number provider
-		type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
+		type BlockNumberProvider: BlockNumberProvider<BlockNumber = BlockNumberFor<Self>>;
 	}
 
 	#[pallet::pallet]
@@ -269,7 +263,6 @@ pub mod pallet {
 		pub vesting: Vec<ScheduledItem<T>>,
 	}
 
-	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
 			Self {
@@ -277,9 +270,8 @@ pub mod pallet {
 			}
 		}
 	}
-
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			self.vesting.iter().for_each(|(ref who, schedules)| {
 				let vesting_schedule: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule> = schedules

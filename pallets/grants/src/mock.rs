@@ -26,18 +26,13 @@ use frame_support::{ord_parameter_types, parameter_types};
 use frame_system::EnsureSignedBy;
 
 use sp_core::H256;
-use sp_runtime::{testing::Header, traits::IdentityLookup};
+use sp_runtime::{traits::IdentityLookup, BuildStorage};
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+	pub enum Test {
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		PalletBalances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Vesting: vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
 	}
@@ -54,13 +49,10 @@ impl frame_system::Config for Test {
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
-	type Index = u64;
-	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = ::sp_runtime::traits::BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -68,11 +60,13 @@ impl frame_system::Config for Test {
 	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
+	type Block = Block;
 	type DbWeight = ();
 	type BaseCallFilter = frame_support::traits::Everything;
 	type OnSetCode = ();
 	type SystemWeightInfo = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type Nonce = u32;
 }
 
 type Balance = u64;
@@ -93,9 +87,9 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
+	type RuntimeHoldReason = ();
 }
 
 ord_parameter_types! {
@@ -155,8 +149,8 @@ impl ExtBuilder {
 	pub fn build(self) -> sp_io::TestExternalities {
 		sp_tracing::try_init_simple();
 
-		let mut storage = frame_system::GenesisConfig::default()
-			.build_storage::<Test>()
+		let mut storage = frame_system::GenesisConfig::<Test>::default()
+			.build_storage()
 			.unwrap_or_else(|err| {
 				panic!(
 					"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",

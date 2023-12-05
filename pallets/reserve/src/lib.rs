@@ -30,12 +30,11 @@ use frame_support::{
 	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
 	PalletId,
 };
+
+use frame_system::pallet_prelude::*;
 use sp_runtime::traits::{AccountIdConversion, Dispatchable};
 use sp_std::prelude::Box;
 use support::WithAccountId;
-
-#[cfg(feature = "std")]
-use frame_support::traits::GenesisBuild;
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -50,7 +49,6 @@ type NegativeImbalanceOf<T, I> =
 pub mod pallet {
 	use super::*;
 	use frame_support::{dispatch::PostDispatchInfo, pallet_prelude::*};
-	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {
@@ -137,7 +135,6 @@ pub mod pallet {
 		pub phantom: sp_std::marker::PhantomData<(T, I)>,
 	}
 
-	#[cfg(feature = "std")]
 	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
 		fn default() -> Self {
 			Self {
@@ -147,7 +144,7 @@ pub mod pallet {
 	}
 
 	#[pallet::genesis_build]
-	impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
+	impl<T: Config<I>, I: 'static> BuildGenesisConfig for GenesisConfig<T, I> {
 		fn build(&self) {
 			let our_account = &<Pallet<T, I>>::account_id();
 

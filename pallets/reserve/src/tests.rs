@@ -24,22 +24,17 @@ use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
-	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
+	BuildStorage,
 	DispatchError::BadOrigin,
 };
 use sp_std::prelude::Box;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+	pub enum Test {
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		TestModule: pallet_reserve::{Pallet, Call, Storage, Event<T>},
 	}
@@ -53,14 +48,12 @@ impl frame_system::Config for Test {
 	type RuntimeCall = RuntimeCall;
 	type BlockWeights = ();
 	type BlockLength = ();
+	type Block = Block;
 	type SS58Prefix = ();
-	type Index = u64;
-	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = ();
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -73,6 +66,7 @@ impl frame_system::Config for Test {
 	type OnSetCode = ();
 	type SystemWeightInfo = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type Nonce = u32;
 }
 parameter_types! {
 	pub const MaxLocks: u32 = 50;
@@ -88,9 +82,9 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
+	type RuntimeHoldReason = ();
 }
 
 ord_parameter_types! {
@@ -112,10 +106,9 @@ type TestCurrency = <Test as Config>::Currency;
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap()
-		.into()
+	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
+
+	sp_io::TestExternalities::new(t)
 }
 
 #[test]

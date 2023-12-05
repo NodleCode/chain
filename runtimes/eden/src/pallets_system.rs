@@ -32,7 +32,7 @@ use frame_support::{
 use frame_system::limits::BlockLength;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
 use polkadot_runtime_common::SlowAdjustingFeeUpdate;
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Moment, Nonce, Signature};
 use sp_runtime::{
 	generic,
 	traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
@@ -55,13 +55,10 @@ impl frame_system::Config for Runtime {
 	type DbWeight = RocksDbWeight;
 	type RuntimeOrigin = RuntimeOrigin;
 	type RuntimeCall = RuntimeCall;
-	type Index = Index;
-	type BlockNumber = BlockNumber;
 	type Hash = Hash;
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = AccountIdLookup<AccountId, ()>;
-	type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = Version;
@@ -69,10 +66,12 @@ impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
-	type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
+	type SystemWeightInfo = crate::weights::frame_system::WeightInfo<Runtime>;
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type Nonce = Nonce;
+	type Block = crate::Block;
 }
 
 parameter_types! {
@@ -105,8 +104,8 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
 	type MaxHolds = ConstU32<0>;
 	type MaxFreezes = ConstU32<0>;
-	type HoldIdentifier = ();
 	type FreezeIdentifier = ();
+	type RuntimeHoldReason = ();
 }
 
 parameter_types! {
@@ -134,7 +133,7 @@ where
 		call: RuntimeCall,
 		public: <Signature as sp_runtime::traits::Verify>::Signer,
 		account: AccountId,
-		nonce: Index,
+		nonce: Nonce,
 	) -> Option<(
 		RuntimeCall,
 		<UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,

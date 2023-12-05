@@ -20,7 +20,7 @@ use crate::{
 	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Aura, Balances, CollatorSelection, Runtime,
 	RuntimeEvent, Session,
 };
-use frame_support::{parameter_types, PalletId};
+use frame_support::{parameter_types, traits::ConstBool, PalletId};
 use primitives::{AccountId, AuraId};
 use sp_runtime::impl_opaque_keys;
 use sp_std::prelude::*;
@@ -61,6 +61,7 @@ impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
 	type MaxAuthorities = MaxAuthorities;
+	type AllowMultipleBlocksPerSlot = ConstBool<false>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
@@ -68,7 +69,7 @@ impl cumulus_pallet_aura_ext::Config for Runtime {}
 parameter_types! {
 	pub const PotId: PalletId = PalletId(*b"PotStake");
 	pub const MaxCandidates: u32 = 1000;
-	pub const MinCandidates: u32 = 3;
+	pub const MinEligibleCollators: u32 = 3;
 	pub const MaxInvulnerables: u32 = 50;
 }
 
@@ -78,11 +79,11 @@ impl pallet_collator_selection::Config for Runtime {
 	type UpdateOrigin = EnsureRootOrMoreThanHalfOfTechComm;
 	type PotId = PotId;
 	type MaxCandidates = MaxCandidates;
-	type MinCandidates = MinCandidates;
 	type MaxInvulnerables = MaxInvulnerables;
 	type KickThreshold = Period;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
 	type ValidatorRegistration = Session;
 	type WeightInfo = crate::weights::pallet_collator_selection::WeightInfo<Runtime>;
+	type MinEligibleCollators = MinEligibleCollators;
 }

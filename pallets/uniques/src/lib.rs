@@ -186,10 +186,10 @@ pub mod pallet {
 			collection: T::CollectionId,
 			witness: DestroyWitness,
 		) -> DispatchResultWithPostInfo {
-			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection.clone())
 				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
-			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection) {
-				let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item)
+			for (item, extra_deposit) in ItemExtraDeposits::<T, I>::drain_prefix(collection.clone()) {
+				let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection.clone(), item)
 					.ok_or(Error::<T, I>::FailedToRetrieveItemOwner)?;
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
 				<T as pallet_uniques::Config<I>>::Currency::transfer(
@@ -199,7 +199,7 @@ pub mod pallet {
 					ExistenceRequirement::AllowDeath,
 				)?;
 			}
-			CollectionExtraDepositDetails::<T, I>::remove(collection);
+			CollectionExtraDepositDetails::<T, I>::remove(collection.clone());
 			pallet_uniques::Pallet::<T, I>::destroy(origin, collection, witness)
 		}
 
@@ -248,11 +248,11 @@ pub mod pallet {
 			item: T::ItemId,
 			check_owner: Option<AccountIdLookupOf<T>>,
 		) -> DispatchResult {
-			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection.clone())
 				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
-			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection, item)
+			let item_owner = pallet_uniques::Pallet::<T, I>::owner(collection.clone(), item)
 				.ok_or(Error::<T, I>::FailedToRetrieveItemOwner)?;
-			pallet_uniques::Pallet::<T, I>::burn(origin, collection, item, check_owner)?;
+			pallet_uniques::Pallet::<T, I>::burn(origin, collection.clone(), item, check_owner)?;
 			let extra_deposit = ItemExtraDeposits::<T, I>::take(collection, item).unwrap_or_else(Zero::zero);
 			if !extra_deposit.is_zero() {
 				<T as pallet_uniques::Config<I>>::Currency::unreserve(&collection_owner, extra_deposit);
@@ -398,7 +398,7 @@ pub mod pallet {
 			collection: T::CollectionId,
 			owner: AccountIdLookupOf<T>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::transfer_ownership(origin.clone(), collection, owner.clone())?;
+			pallet_uniques::Pallet::<T, I>::transfer_ownership(origin.clone(), collection.clone(), owner.clone())?;
 			let old_owner = ensure_signed(origin)?;
 			let new_owner = T::Lookup::lookup(owner)?;
 			if old_owner != new_owner {
@@ -786,7 +786,7 @@ pub mod pallet {
 			// Since the extrinsic is transactional the following call only succeeds if the
 			// collection is also created successfully.
 			CollectionExtraDepositDetails::<T, I>::insert(
-				collection,
+				collection.clone(),
 				LimitedBalance::<BalanceOf<T, I>>::with_limit(limit),
 			);
 			pallet_uniques::Pallet::<T, I>::create(origin, collection, admin)
@@ -813,15 +813,16 @@ pub mod pallet {
 			owner: AccountIdLookupOf<T>,
 			deposit: BalanceOf<T, I>,
 		) -> DispatchResult {
-			pallet_uniques::Pallet::<T, I>::mint(origin, collection, item, owner)?;
-			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+			pallet_uniques::Pallet::<T, I>::mint(origin, collection.clone(), item, owner)?;
+			let collection_owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection.clone())
 				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
-			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(collection).unwrap_or_default();
+			let mut extra_deposit_details =
+				CollectionExtraDepositDetails::<T, I>::get(collection.clone()).unwrap_or_default();
 			extra_deposit_details
 				.add(deposit)
 				.map_err(|_| Error::<T, I>::FailedToIncreaseTotalExtraDeposit)?;
 			<T as pallet_uniques::Config<I>>::Currency::reserve(&collection_owner, deposit)?;
-			ItemExtraDeposits::<T, I>::insert(collection, item, deposit);
+			ItemExtraDeposits::<T, I>::insert(collection.clone(), item, deposit);
 			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
 			Ok(())
 		}
@@ -850,15 +851,16 @@ pub mod pallet {
 			limit: BalanceOf<T, I>,
 		) -> DispatchResult {
 			let origin = ensure_signed(origin)?;
-			let owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection)
+			let owner = pallet_uniques::Pallet::<T, I>::collection_owner(collection.clone())
 				.ok_or(Error::<T, I>::FailedToRetrieveCollectionOwner)?;
 			ensure!(origin == owner, Error::<T, I>::PermissionDenied);
 
-			let mut extra_deposit_details = CollectionExtraDepositDetails::<T, I>::get(collection).unwrap_or_default();
+			let mut extra_deposit_details =
+				CollectionExtraDepositDetails::<T, I>::get(collection.clone()).unwrap_or_default();
 			extra_deposit_details
 				.update_limit(limit)
 				.map_err(|_| Error::<T, I>::FailedToUpdateExtraDepositLimit)?;
-			CollectionExtraDepositDetails::<T, I>::insert(collection, extra_deposit_details);
+			CollectionExtraDepositDetails::<T, I>::insert(collection.clone(), extra_deposit_details);
 
 			Self::deposit_event(Event::<T, I>::ExtraDepositLimitUpdated { collection, limit });
 			Ok(())

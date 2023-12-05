@@ -13,12 +13,13 @@ env:
   try-runtime-uri: wss://eden-rpc.dwellir.com:443/
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
+  RUSTFLAGS: ""
 
 jobs:
   lints:
     runs-on: ubuntu-latest-8-cores
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -41,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.toolchain }}
@@ -58,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest-4-cores
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ env.toolchain }}
@@ -82,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install protobuf-compiler
         run: |
          sudo apt-get install protobuf-compiler
@@ -96,7 +97,7 @@ jobs:
       - name: Build runtime
         run: cargo build --release --features=try-runtime -p runtime-eden
       - name: Upload runtime artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: try_runtime
           path: target/release/wbuild/runtime-eden/runtime_eden.wasm
@@ -134,9 +135,15 @@ jobs:
           install -d snapshots
           date > snapshots/created_at
       - name: Run try-runtime
-        uses: NodleCode/action-try-runtime@v0.3.0
+        uses: NodleCode/action-try-runtime@v0.5.1
         with:
           url: ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
           snap: snapshots/eden-snapshot-full
           runtime: try_runtime/runtime_eden.wasm
-          checks: all
+          checks: "all"
+          options: "--disable-idempotency-checks"
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: edensnap
+          path: snapshots/eden-snapshot-full

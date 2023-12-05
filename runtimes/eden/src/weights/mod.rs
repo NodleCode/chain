@@ -2,6 +2,7 @@ pub mod frame_system;
 pub mod pallet_balances;
 pub mod pallet_collator_selection;
 pub mod pallet_contracts;
+pub mod pallet_identity;
 pub mod pallet_membership;
 pub mod pallet_multisig;
 pub mod pallet_preimage;
@@ -105,8 +106,8 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn reserve_asset_deposited(assets: &xcm::latest::MultiAssets) -> Weight {
-		// TODO https://github.com/NodleCode/chain/issues/738 create benchmark for
-		// reserve_asset_deposited in pallet_xcm_benchmarks_fungible::WeightInfo and use it here
+		// TODO CHA-407 #738 create benchmark for reserve_asset_deposited
+		// in pallet_xcm_benchmarks_fungible::WeightInfo and use it here
 		assets.weigh_multi_assets(Weight::from_parts(2_000_000_000_000_u64, 0))
 	}
 
