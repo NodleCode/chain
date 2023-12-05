@@ -52,7 +52,7 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-mod migration;
+pub(crate) mod migration;
 pub mod weights;
 pub use weights::*;
 
@@ -568,7 +568,7 @@ pub mod pallet {
 			// should be way below the total block weight limit.
 			const MAX_POTS_TO_MIGRATE: usize = 200;
 			const MAX_USERS_TO_MIGRATE: usize = 100;
-			migration::migrate_partially::<T>(MAX_POTS_TO_MIGRATE, MAX_USERS_TO_MIGRATE)
+			migration::v0::migrate_partially::<T>(MAX_POTS_TO_MIGRATE, MAX_USERS_TO_MIGRATE)
 		}
 
 		fn on_runtime_upgrade() -> Weight {

@@ -309,5 +309,113 @@ mod benchmarks {
 		assert_eq!(user_detail.reserve_quota.balance(), T::Currency::minimum_balance());
 	}
 
+	#[benchmark]
+	fn migrate_users(l: Linear<1, 1_000>) {
+		use crate::migration::v0::{
+			migrate_partially, Pot as V0Pot, PotDetailsOf as V0PotDetailsOf, User as V0User,
+			UserDetailsOf as V0UserDetailsOf,
+		};
+		use frame_support::storage::generator::{StorageDoubleMap, StorageMap};
+
+		let caller: T::AccountId = whitelisted_caller();
+		let pot: T::PotId = 0u32.into();
+		let users: Vec<T::AccountId> = (0..l).map(|i| account("user", i, SEED)).collect();
+
+		let pot_details = V0PotDetailsOf::<T> {
+			sponsor: caller.clone(),
+			sponsorship_type: T::SponsorshipType::default(),
+			fee_quota: LimitedBalance::with_limit(5u32.into()),
+			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+		};
+		V0Pot::<T>::insert(pot, pot_details);
+
+		for user in &users {
+			let user_details = V0UserDetailsOf::<T> {
+				proxy: user.clone(),
+				fee_quota: LimitedBalance::with_limit(3u32.into()),
+				reserve_quota: LimitedBalance::with_limit(6u32.into()),
+			};
+			V0User::<T>::insert(pot, user, user_details);
+		}
+
+		PotMigrationCursor::<T>::put(V0Pot::<T>::prefix_hash());
+		UserMigrationCursor::<T>::put(V0User::<T>::prefix_hash());
+
+		#[block]
+		{
+			migrate_partially::<T>(1, l as usize);
+		}
+
+		assert_eq!(
+			Pot::<T>::get(pot),
+			Some(PotDetailsOf::<T> {
+				sponsor: caller.clone(),
+				sponsorship_type: T::SponsorshipType::default(),
+				fee_quota: LimitedBalance::with_limit(5u32.into()),
+				reserve_quota: LimitedBalance::with_limit(7u32.into()),
+				deposit: Zero::zero(),
+			})
+		);
+		assert_eq!(Pot::<T>::iter().count(), 1);
+
+		users.iter().for_each(|user| {
+			assert_eq!(
+				User::<T>::get(pot, user),
+				Some(UserDetailsOf::<T> {
+					proxy: user.clone(),
+					fee_quota: LimitedBalance::with_limit(3u32.into()),
+					reserve_quota: LimitedBalance::with_limit(6u32.into()),
+					deposit: Zero::zero(),
+				})
+			);
+		});
+	}
+
+	#[benchmark]
+	fn migrate_pots(l: Linear<1, 1_000>) {
+		use crate::migration::v0::{migrate_partially, Pot as V0Pot, PotDetailsOf as V0PotDetailsOf, User as V0User};
+		use frame_support::storage::generator::{StorageDoubleMap, StorageMap};
+
+		let caller: T::AccountId = whitelisted_caller();
+		let pots: Vec<T::PotId> = (0..l).map(|i| i.into()).collect();
+
+		pots.iter()
+			.map(|pot| {
+				(
+					pot.clone(),
+					V0PotDetailsOf::<T> {
+						sponsor: caller.clone(),
+						sponsorship_type: T::SponsorshipType::default(),
+						fee_quota: LimitedBalance::with_limit(5u32.into()),
+						reserve_quota: LimitedBalance::with_limit(7u32.into()),
+					},
+				)
+			})
+			.for_each(|(pot, pot_details)| {
+				V0Pot::<T>::insert(pot, pot_details);
+			});
+
+		PotMigrationCursor::<T>::put(V0Pot::<T>::prefix_hash());
+		UserMigrationCursor::<T>::put(V0User::<T>::prefix_hash());
+
+		#[block]
+		{
+			migrate_partially::<T>(l as usize, 0);
+		}
+
+		pots.iter().for_each(|pot| {
+			assert_eq!(
+				Pot::<T>::get(pot),
+				Some(PotDetailsOf::<T> {
+					sponsor: caller.clone(),
+					sponsorship_type: T::SponsorshipType::default(),
+					fee_quota: LimitedBalance::with_limit(5u32.into()),
+					reserve_quota: LimitedBalance::with_limit(7u32.into()),
+					deposit: Zero::zero(),
+				})
+			);
+		});
+	}
+
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }

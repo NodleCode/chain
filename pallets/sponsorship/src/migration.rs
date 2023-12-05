@@ -27,13 +27,13 @@ use frame_support::{
 	traits::{Get, StorageVersion},
 	weights::Weight,
 };
+use sp_std::vec::Vec;
 use support::LimitedBalance;
-pub use v0::migrate_partially;
 
 /// The current storage version.
 pub const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
-mod v0 {
+pub(crate) mod v0 {
 	use super::{Pot as V1Pot, PotDetailsOf as V1PotDetailsOf, User as V1User, UserDetailsOf as V1UserDetailsOf, *};
 	use frame_support::storage_alias;
 	use sp_runtime::traits::Saturating;
@@ -59,11 +59,12 @@ mod v0 {
 
 	#[storage_alias]
 	/// Details of a pot.
-	type Pot<T: Config> = StorageMap<Pallet<T>, Blake2_128Concat, <T as Config>::PotId, PotDetailsOf<T>, OptionQuery>;
+	pub type Pot<T: Config> =
+		StorageMap<Pallet<T>, Blake2_128Concat, <T as Config>::PotId, PotDetailsOf<T>, OptionQuery>;
 
 	#[storage_alias]
 	/// User details of a pot.
-	type User<T: Config> = StorageDoubleMap<
+	pub type User<T: Config> = StorageDoubleMap<
 		Pallet<T>,
 		Blake2_128Concat,
 		<T as Config>::PotId,
@@ -231,7 +232,7 @@ pub fn on_runtime_upgrade<T: Config>() -> Weight {
 #[cfg(feature = "try-runtime")]
 use ::{
 	frame_support::{Blake2_128Concat, StorageHasher},
-	sp_std::{borrow::Borrow, vec::Vec},
+	sp_std::borrow::Borrow,
 };
 
 #[cfg(feature = "try-runtime")]
