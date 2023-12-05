@@ -152,7 +152,7 @@ mod v0 {
 
 		let pot_migration_in_progress = if let Some(starting_key) = PotMigrationCursor::<T>::get() {
 			let (end_cursor, migration_weight) = migrate_pot_partially::<T>(max_pots, starting_key);
-			weight += migration_weight +  T::DbWeight::get().writes(1);
+			weight += migration_weight + T::DbWeight::get().writes(1);
 			match end_cursor {
 				Some(last_key) => {
 					PotMigrationCursor::<T>::put(last_key);
@@ -169,7 +169,7 @@ mod v0 {
 
 		let user_migration_in_progress = if let Some(starting_key) = UserMigrationCursor::<T>::get() {
 			let (end_cursor, migration_weight) = migrate_user_partially::<T>(max_users, starting_key);
-			weight += migration_weight +  T::DbWeight::get().writes(1);
+			weight += migration_weight + T::DbWeight::get().writes(1);
 			match end_cursor {
 				Some(last_key) => {
 					UserMigrationCursor::<T>::put(last_key);
