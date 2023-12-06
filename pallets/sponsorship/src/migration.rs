@@ -28,7 +28,7 @@ use frame_support::{
 	traits::{Get, StorageVersion},
 	weights::Weight,
 };
-use sp_runtime::Perbill;
+use sp_runtime::{Perbill, TryRuntimeError};
 use sp_std::vec::Vec;
 use support::LimitedBalance;
 
@@ -282,9 +282,9 @@ use ::{
 type StorageDoubleMapKey = Vec<u8>;
 
 #[cfg(feature = "try-runtime")]
-pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, &'static str> {
+pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, TryRuntimeError> {
 	if StorageVersion::get::<Pallet<T>>() > 1 {
-		return Err("Storage version is not either 0 or 1");
+		return Err(TryRuntimeError::Other("Storage version is not either 0 or 1"));
 	}
 
 	let pot_details = frame_support::migration::storage_key_iter::<
@@ -305,9 +305,9 @@ pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, &'static str> {
 }
 
 #[cfg(feature = "try-runtime")]
-pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), &'static str> {
+pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), TryRuntimeError> {
 	if StorageVersion::get::<Pallet<T>>() != 1 {
-		return Err("Storage version is not 1");
+		return Err(TryRuntimeError::Other("Storage version is not 1"));
 	}
 
 	let (pre_pot_details, pre_user_details): (
@@ -317,34 +317,34 @@ pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), &'static str
 	let pot_details = Pot::<T>::iter().collect::<Vec<_>>();
 
 	if pre_pot_details.len() != pot_details.len() {
-		return Err("Pot count mismatch");
+		return Err(TryRuntimeError::Other("Pot count mismatch"));
 	}
 
 	for (pre, post) in pre_pot_details.iter().zip(pot_details.iter()) {
 		if pre.0 != post.0 {
-			return Err("Pot id mismatch");
+			return Err(TryRuntimeError::Other("Pot id mismatch"));
 		}
 		if pre.1.sponsor != post.1.sponsor {
-			return Err("Pot sponsor mismatch");
+			return Err(TryRuntimeError::Other("Pot sponsor mismatch"));
 		}
 		if pre.1.sponsorship_type != post.1.sponsorship_type {
-			return Err("Pot sponsorship type mismatch");
+			return Err(TryRuntimeError::Other("Pot sponsorship type mismatch"));
 		}
 		if pre.1.fee_quota != post.1.fee_quota {
-			return Err("Pot fee quota mismatch");
+			return Err(TryRuntimeError::Other("Pot fee quota mismatch"));
 		}
 		if pre.1.reserve_quota != post.1.reserve_quota {
-			return Err("Pot reserve quota mismatch");
+			return Err(TryRuntimeError::Other("Pot reserve quota mismatch"));
 		}
 		if post.1.deposit != Default::default() {
-			return Err("Pot deposit is not default");
+			return Err(TryRuntimeError::Other("Pot deposit is not default"));
 		}
 	}
 
 	let user_details = User::<T>::iter().collect::<Vec<_>>();
 
 	if pre_user_details.len() != user_details.len() {
-		return Err("User count mismatch");
+		return Err(TryRuntimeError::Other("User count mismatch"));
 	}
 
 	for (pre, post) in pre_user_details.iter().zip(user_details.iter()) {
@@ -355,28 +355,30 @@ pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), &'static str
 		final_key.extend_from_slice(key2_hashed.as_ref());
 
 		if pre.0 != final_key {
-			return Err("User hashed key mismatch");
+			return Err(TryRuntimeError::Other("User hashed key mismatch"));
 		}
 		if pre.1.proxy != post.2.proxy {
-			return Err("User proxy mismatch");
+			return Err(TryRuntimeError::Other("User proxy mismatch"));
 		}
 		if pre.1.fee_quota != post.2.fee_quota {
-			return Err("User fee quota mismatch");
+			return Err(TryRuntimeError::Other("User fee quota mismatch"));
 		}
 		if pre.1.reserve_quota != post.2.reserve_quota {
-			return Err("User reserve quota mismatch");
+			return Err(TryRuntimeError::Other("User reserve quota mismatch"));
 		}
 		if post.2.deposit != Default::default() {
-			return Err("User deposit is not default");
+			return Err(TryRuntimeError::Other("User deposit is not default"));
 		}
 	}
 
 	UserRegistrationCount::<T>::iter().try_for_each(|(_user, count)| {
 		if count == 0 {
-			return Err("User registration count is 0");
+			return Err(TryRuntimeError::Other("User registration count is 0"));
 		}
 		if count > pot_details.len() as u32 {
-			return Err("User registration count is greater than number of pots");
+			return Err(TryRuntimeError::Other(
+				"User registration count is greater than number of pots",
+			));
 		}
 		Ok(())
 	})?;

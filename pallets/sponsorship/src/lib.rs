@@ -32,6 +32,7 @@ use sp_io::hashing::blake2_256;
 use sp_runtime::{
 	traits::{DispatchInfoOf, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
+	TryRuntimeError,
 };
 use sp_runtime::{FixedPointOperand, Saturating};
 use sp_std::{
@@ -579,12 +580,12 @@ pub mod pallet {
 		}
 
 		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+		fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
 			migration::pre_upgrade::<T>()
 		}
 
 		#[cfg(feature = "try-runtime")]
-		fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+		fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
 			migration::post_upgrade::<T>(_state)
 		}
 	}
