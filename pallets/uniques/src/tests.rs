@@ -8,20 +8,14 @@ use frame_support::{
 use pallet_uniques::DestroyWitness;
 use sp_core::H256;
 use sp_runtime::{
-	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
+	BuildStorage,
 };
-
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+	pub enum Test {
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Uniques: pallet_nodle_uniques::{Call, Storage, Event<T, I>},
 		Uniques2: pallet_uniques::{Pallet, Call, Storage, Event<T>},
@@ -34,13 +28,11 @@ impl frame_system::Config for Test {
 	type BlockLength = ();
 	type RuntimeOrigin = RuntimeOrigin;
 	type RuntimeCall = RuntimeCall;
-	type Index = u64;
-	type BlockNumber = u64;
+	type Block = Block;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = ConstU64<250>;
 	type DbWeight = ();
@@ -53,6 +45,7 @@ impl frame_system::Config for Test {
 	type SS58Prefix = ();
 	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
+	type Nonce = u32;
 }
 
 impl pallet_balances::Config for Test {
@@ -65,14 +58,10 @@ impl pallet_balances::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
-	#[doc = " The ID type for holds."]
-	type HoldIdentifier = [u8; 8];
-	#[doc = " The ID type for freezes."]
 	type FreezeIdentifier = [u8; 8];
-	#[doc = " The maximum number of holds that can exist on an account at any time."]
 	type MaxHolds = ();
-	#[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
 	type MaxFreezes = ();
+	type RuntimeHoldReason = ();
 }
 parameter_types! {
 	pub TestCollectionDeposit:  u64 = 2;
@@ -110,7 +99,7 @@ macro_rules! bvec {
 	}
 }
 pub(crate) fn new_test_ext() -> sp_io::TestExternalities {
-	let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));

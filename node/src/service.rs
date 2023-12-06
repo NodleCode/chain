@@ -24,7 +24,7 @@ use std::{sync::Arc, time::Duration};
 // rpc
 use jsonrpsee::RpcModule;
 
-pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index as Nonce};
+pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Nonce};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -64,22 +64,6 @@ type ParachainBackend = TFullBackend<Block>;
 
 type ParachainBlockImport<RuntimeApi> =
 	TParachainBlockImport<Block, Arc<ParachainClient<RuntimeApi>>, ParachainBackend>;
-
-pub struct TemplateRuntimeExecutor;
-impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
-	#[cfg(feature = "runtime-benchmarks")]
-	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	type ExtendHostFunctions = ();
-
-	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		runtime_eden::api::dispatch(method, data)
-	}
-
-	fn native_version() -> sc_executor::NativeVersion {
-		runtime_eden::native_version()
-	}
-}
 
 /// Starts a `ServiceBuilder` for a full service.
 ///
@@ -255,6 +239,7 @@ where
 	let prometheus_registry = parachain_config.prometheus_registry().cloned();
 	let transaction_pool = params.transaction_pool.clone();
 	let import_queue_service = params.import_queue.service();
+	let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
 		build_network(BuildNetworkParams {
@@ -265,6 +250,7 @@ where
 			spawn_handle: task_manager.spawn_handle(),
 			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
+			net_config,
 		})
 		.await?;
 

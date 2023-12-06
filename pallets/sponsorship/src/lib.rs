@@ -563,7 +563,7 @@ pub mod pallet {
 	}
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_n: T::BlockNumber) -> Weight {
+		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
 			// NOTE: the following consts should be adjusted according to a safe weight limit which
 			// should be way below the total block weight limit.
 			const MAX_POTS_TO_MIGRATE: usize = 200;

@@ -21,33 +21,24 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-	assert_noop, assert_ok, bounded_vec,
-	dispatch::Pays,
-	ord_parameter_types, parameter_types,
-	traits::{ConstU32, GenesisBuild},
+	assert_noop, assert_ok, bounded_vec, dispatch::Pays, ord_parameter_types, parameter_types, traits::ConstU32,
 	PalletId,
 };
 use frame_system::EnsureSignedBy;
 use lazy_static::lazy_static;
 use sp_core::H256;
 use sp_runtime::{
-	testing::Header,
 	traits::{BadOrigin, BlakeTwo256, IdentityLookup},
-	Perbill,
+	BuildStorage, Perbill,
 };
 
 pub(crate) type AccountId = u64;
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+	pub enum Test {
+		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Membership: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
@@ -63,13 +54,11 @@ impl frame_system::Config for Test {
 	type BlockWeights = ();
 	type BlockLength = ();
 	type SS58Prefix = ();
-	type Index = u64;
-	type BlockNumber = u64;
 	type Hash = H256;
+	type Block = Block;
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
 	type RuntimeEvent = RuntimeEvent;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
@@ -81,6 +70,7 @@ impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
 	type OnSetCode = ();
 	type SystemWeightInfo = ();
+	type Nonce = u32;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
@@ -97,11 +87,11 @@ impl pallet_balances::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type FreezeIdentifier = [u8; 8];
-	type HoldIdentifier = [u8; 8];
 	type MaxHolds = ();
 	type MaxFreezes = ();
-
 	type WeightInfo = ();
+
+	type RuntimeHoldReason = ();
 }
 
 const THREE_INFLATION_STEPS: &[Perbill] = &[
@@ -169,8 +159,8 @@ type Errors = Error<Test>;
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	sp_tracing::try_init_simple();
 
-	let mut storage = frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
+	let mut storage = frame_system::GenesisConfig::<Test>::default()
+		.build_storage()
 		.unwrap_or_else(|err| {
 			panic!(
 				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
