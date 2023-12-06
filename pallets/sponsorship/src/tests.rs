@@ -55,7 +55,7 @@ fn creator_of_pot_becomes_sponsor() {
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
-		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), PotDeposit::get());
+		assert_eq!(Balances::reserved_balance(pot_details.sponsor), PotDeposit::get());
 		assert_eq!(Pot::<Test>::get(pot), Some(pot_details));
 		System::assert_last_event(
 			Event::PotCreated {
@@ -121,12 +121,12 @@ fn sponsors_can_remove_user_free_pots() {
 			pot_details.fee_quota.limit(),
 			pot_details.reserve_quota.limit()
 		));
-		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), PotDeposit::get());
+		assert_eq!(Balances::reserved_balance(pot_details.sponsor), PotDeposit::get());
 		assert_ok!(SponsorshipModule::remove_pot(
 			RuntimeOrigin::signed(pot_details.sponsor),
 			pot
 		));
-		assert_eq!(Balances::reserved_balance(&pot_details.sponsor), 0);
+		assert_eq!(Balances::reserved_balance(pot_details.sponsor), 0);
 		assert_eq!(Pot::<Test>::get(pot), None);
 		System::assert_last_event(Event::PotRemoved { pot }.into());
 
@@ -488,7 +488,7 @@ fn sponsors_can_register_new_users() {
 		assert_eq!(User::<Test>::get(pot, user_2), Some(user_details_2));
 
 		assert_eq!(
-			Balances::reserved_balance(&pot_details.sponsor),
+			Balances::reserved_balance(pot_details.sponsor),
 			PotDeposit::get() + 2 * UserDeposit::get()
 		);
 
@@ -529,7 +529,7 @@ fn sponsors_can_register_new_users() {
 		assert_eq!(UserRegistrationCount::<Test>::get(user_3), 1);
 
 		assert_eq!(
-			Balances::reserved_balance(&pot_details.sponsor),
+			Balances::reserved_balance(pot_details.sponsor),
 			PotDeposit::get() + 3 * UserDeposit::get()
 		);
 
@@ -601,7 +601,7 @@ fn sponsors_cannot_register_users_more_than_once() {
 		));
 
 		assert_eq!(
-			Balances::reserved_balance(&pot_details.sponsor),
+			Balances::reserved_balance(pot_details.sponsor),
 			PotDeposit::get() + 4 * UserDeposit::get()
 		);
 	});
@@ -678,7 +678,7 @@ fn only_sponsors_have_permission_to_remove_users() {
 		);
 
 		assert_eq!(
-			Balances::reserved_balance(&pot_details.sponsor),
+			Balances::reserved_balance(pot_details.sponsor),
 			PotDeposit::get() + 3 * UserDeposit::get()
 		);
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_1), 1);
@@ -695,7 +695,7 @@ fn only_sponsors_have_permission_to_remove_users() {
 		let user_3_proxy = <User<Test>>::get(pot, user_3).unwrap().proxy;
 		assert_eq!(frame_system::Pallet::<Test>::reference_count(&user_3_proxy), 1);
 		assert_eq!(
-			Balances::reserved_balance(&pot_details.sponsor),
+			Balances::reserved_balance(pot_details.sponsor),
 			PotDeposit::get() + UserDeposit::get()
 		);
 		assert_eq!(UserRegistrationCount::<Test>::get(user_1), 0);
