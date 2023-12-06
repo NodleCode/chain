@@ -183,7 +183,7 @@ parameter_types! {
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
-
+	pub const MaxDelegateDependencies: u32 = 32;
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -204,7 +204,6 @@ impl pallet_contracts::Config for Runtime {
 	type DefaultDepositLimit = DefaultDepositLimit;
 	type CallStack = [Frame<Self>; 5];
 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
-	// TODO check 	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
 	type WeightInfo = crate::weights::pallet_contracts::WeightInfo<Runtime>;
 	type ChainExtension = ();
 
@@ -215,7 +214,6 @@ impl pallet_contracts::Config for Runtime {
 	type MaxStorageKeyLen = ConstU32<128>;
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	#[cfg(not(feature = "runtime-benchmarks"))]
 	type Migrations = (
 		pallet_contracts::migration::v10::Migration<Runtime, Balances>,
 		pallet_contracts::migration::v11::Migration<Runtime>,
@@ -224,14 +222,12 @@ impl pallet_contracts::Config for Runtime {
 		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
 		pallet_contracts::migration::v15::Migration<Runtime>,
 	);
-	#[cfg(feature = "runtime-benchmarks")]
-	type Migrations = pallet_contracts::migration::codegen::BenchMigrations;
-	type MaxDelegateDependencies = ConstU32<32>;
+	// TODO check all of here
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+	type MaxDelegateDependencies = MaxDelegateDependencies;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	type Debug = ();
 	type Environment = ();
-	type RuntimeHoldReason = RuntimeHoldReason;
-	// type Xcm = (); TODO maybe need this soon
 }
 
 parameter_types! {

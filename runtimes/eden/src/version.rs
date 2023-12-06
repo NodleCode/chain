@@ -33,24 +33,24 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("nodle-para"),
 	impl_name: create_runtime_str!("nodle-para"),
 
-	/// `authoring_version` is the version of the authorship interface. An authoring node
-	/// will not attempt to author blocks unless this is equal to its native runtime.
+	// `authoring_version` is the version of the authorship interface. An authoring node
+	// will not attempt to author blocks unless this is equal to its native runtime.
 	authoring_version: 1,
 
-	/// Version of the runtime specification. A full-node will not attempt to use its native
-	/// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
-	/// `spec_version` and `authoring_version` are the same between Wasm and native.
-	spec_version: 25,
+	// Version of the runtime specification. A full-node will not attempt to use its native
+	// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
+	// `spec_version` and `authoring_version` are the same between Wasm and native.
+	spec_version: 26,
 
-	/// Version of the implementation of the specification. Nodes are free to ignore this; it
-	/// serves only as an indication that the code is different; as long as the other two versions
-	/// are the same then while the actual code may be different, it is nonetheless required to
-	/// do the same thing.
-	/// Non-consensus-breaking optimizations are about the only changes that could be made which
-	/// would result in only the `impl_version` changing.
+	// Version of the implementation of the specification. Nodes are free to ignore this; it
+	// serves only as an indication that the code is different; as long as the other two versions
+	// are the same then while the actual code may be different, it is nonetheless required to
+	// do the same thing.
+	// Non-consensus-breaking optimizations are about the only changes that could be made which
+	// would result in only the `impl_version` changing.
 	impl_version: 0,
 
-	/// Used for hardware wallets. This typically happens when `SignedExtra` changes.
+	// Used for hardware wallets. This typically happens when `SignedExtra` changes.
 	transaction_version: 9,
 
 	apis: RUNTIME_API_VERSIONS,

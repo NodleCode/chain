@@ -1,7 +1,7 @@
 use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 
-use crate::Runtime;
-use frame_support::{traits::Get, weights::Weight};
+use frame_support::weights::Weight;
+use sp_core::Get;
 #[cfg(feature = "try-runtime")]
 use {sp_runtime::TryRuntimeError, sp_std::prelude::*};
 
@@ -22,17 +22,64 @@ where
 	fn on_runtime_upgrade() -> Weight {
 		// Pallets with no data to migrate, just update storage version block goes here:
 
-		//TODO check  1 key
+		// Pallet_scheduler:  1 key
+		// Changed storage version to 3 and executed the v3 to v4 migration
+		// [2023-12-01T03:32:38Z INFO  runtime::scheduler::migration] Trying to migrate 0 agendas...
+		// [2023-12-01T03:32:38Z INFO  runtime::scheduler::migration] Migrated 0 agendas.
+		// *** No v3 agendas to migrate
+
+		// The one present key is identified as
+		// 0x3db7a24cfdc9de785974746c14a99df94e7b9012096b41c4eb3aaf947f6ea429: Raw
+		// scheduler.palletVersion: u16 = 0
+
+		// v2 -> v3 code changed:
+		// 5e50e0bc2c7 (Gavin Wood           2021-12-11 15:55:23 +0100 323)                        StorageVersion::<T>::put(Releases::V3);
+		// *** Adding support for preimage, StorageMap format changed for Agenda
+		//     Since chain contains 0 agendas it should be safe to write new storage version.
+
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_scheduler::Pallet<T>>();
 
-		//TODO TechnicalMembership check 2 keys
+		// TechnicalMembership --  2 keys
+		// Storage version unchanged since 2021-09-07
+		// 03b294641ef substrate/frame/membership/src/lib.rs (Qinxuan Chen         2021-09-07 20:17:26 +0800
+		// No migration needed just update storage version
+
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>();
 
-		//TODO TechnicalCommittee:: check Found 4 keys (0.19s)
+		// TechnicalCommittee: pallet_collective::<Instance1>
+		// Found 3 keys (0.19s)
+		// key: 0xed25f63942de25ac5253ba64b5eb64d1ba7fb8745735dc3be2a2c61a72c39e78
+		//      technicalCommittee.members: Vec<AccountId32> list of valid keys.
+		// key: 0xed25f63942de25ac5253ba64b5eb64d16254e9d55588784fa2a62b726696e2b1
+		//      technicalCommittee.proposalCount: u32 = 329
+		// key: 0xed25f63942de25ac5253ba64b5eb64d188c2f7188c6fdd1dffae2fa0d171f440
+		//      technicalCommittee.proposals: Vec<H256> = []
+
+		// Source code unchanged since 2021
+		// 03b294641ef substrate/frame/membership/src/lib.rs (Qinxuan Chen         2021-09-07 20:17:26 +0800  44)  const STORAGE_VERSION: StorageVersion = StorageVersion::new(4);
+		// *** This commit changes from old to new frame macros,
+		// decl_storage!{
+		//    Members get(fn members): Vec<T::AccountId>;
+		// }
+		// changed to:
+		// 	#[pallet::storage]
+		//  #[pallet::getter(fn members)]
+		//  pub type Members<T: Config<I>, I: 'static = ()> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+		// *** Migration code only included name change functions.
+
+		// Onchain storage version = 4 in source code - unchanged any new data will be in the v4 format
+
 		StorageVersion::new(4).put::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>();
 
 		// https://github.com/paritytech/substrate/pull/12813
 		// moves funds to inactive if we don't need that this is OK.
+
+		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
+
 		StorageVersion::new(1).put::<pallet_balances::Pallet<T>>();
 
 		// Two keys already migrated.
@@ -47,26 +94,76 @@ where
 		StorageVersion::new(1).put::<pallet_xcm::Pallet<T>>();
 
 		// Size of onchain storage is 0 safe to upgrade storage version
+		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
-		// TODO check 43 keys
-		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
-
-		// // let mut x: Weight=		<Runtime as frame_system::Config>::BlockWeights::get();
-		// let x = <Runtime as frame_system::Config>::BlockWeights::set_proof_size(45);
-		// // .set_ref_time(100);
-		Weight::from_parts(100, 0x10000)
+		T::DbWeight::get().writes(6)
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
+		use frame_support::ensure;
+
 		log::info!("Pre upgrade");
+
+		ensure!(
+			StorageVersion::get::<pallet_preimage::Pallet<T>>() == 0,
+			TryRuntimeError::Other("preimage storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_xcm::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_xcm storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_scheduler::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_scheduler storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>() == 0,
+			TryRuntimeError::Other("pallet_collective storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>() == 0,
+			TryRuntimeError::Other("pallet_membership storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_balances::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_balances storage version is not 0")
+		);
+
 		Ok(vec![])
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
+		use frame_support::ensure;
+
 		log::info!("Post upgrade {_state:?}");
+		ensure!(
+			StorageVersion::get::<pallet_preimage::Pallet<T>>() == 1,
+			TryRuntimeError::Other("preimage post upgrade storage version is not 1")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_xcm::Pallet<T>>() == 1,
+			TryRuntimeError::Other("pallet_xcm post upgrade storage version is not 1")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_scheduler::Pallet<T>>() == 4,
+			TryRuntimeError::Other("pallet_scheduler post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_collective::Pallet<T, pallet_collective::pallet::Instance1>>() == 4,
+			TryRuntimeError::Other("pallet_collective post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_membership::Pallet<T, pallet_membership::pallet::Instance3>>() == 4,
+			TryRuntimeError::Other("pallet_membership post upgrade storage version is not 4")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_balances::Pallet<T>>() == 1,
+			TryRuntimeError::Other("pallet_balances post upgrade storage version is not 1")
+		);
+
 		Ok(())
 	}
 }

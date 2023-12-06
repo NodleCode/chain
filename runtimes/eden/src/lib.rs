@@ -37,7 +37,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -137,8 +137,6 @@ pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 pub type SignedBlock = generic::SignedBlock<Block>;
 /// BlockId type as expected by this runtime.
 pub type BlockId = generic::BlockId<Block>;
-/// Index of a transaction in the chain.
-pub type Nonce = u32;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
 	frame_system::CheckSpecVersion<Runtime>,
@@ -156,33 +154,15 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
+const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 pub type Migrations = (
 	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-	// TODO https://github.com/paritytech/substrate/pull/12813
-	// TODO this is related to XCM migration.
-	// pallet_balances::migration::MigrateToTrackInactive<Runtime, AccountId>,
-
 	// Migrate data as designed
 	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// pallet_collective::migrations::v4,
-	// <pallet_membership::Pallet<Runtime, pallet_membership::pallet::Instance3>>::v4,
-
-	// pallet_scheduler::migration::v3::MigrateToV4<Runtime>,
-	// pallet_scheduler::migration::v4::CleanupAgendas<Runtime>,
-
-	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
-	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-
-	pallet_contracts::Migration<Runtime,TEST_ALL_STEPS>,
-
+	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
 );
-const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
-// pallet_contracts::Migration::<T, TEST_ALL_STEPS>::on_runtime_upgrade();
-// pub type Migrations = (
-// 	 pallet_balances::migration::MigrateToTrackInactive<Runtime, <Runtime as pallet_balances::Config>::AccountStore>
-// 	);
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
@@ -199,7 +179,6 @@ pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime
 
 type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
-
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
@@ -286,8 +265,8 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
-	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
-		fn account_nonce(account: AccountId) -> Index {
+	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
 		}
 	}
@@ -433,14 +412,35 @@ sp_api::impl_runtime_apis! {
 			// specific and were causing some issues at compile time as they depend on the
 			// presence of the staking and elections pallets.
 
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
+			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, TrackedStorageKey, add_benchmark};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 
-			impl frame_system_benchmarking::Config for Runtime {}
+			impl frame_system_benchmarking::Config for Runtime {
+				fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
+					ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
+					Ok(())
+				}
+
+				fn verify_set_code() {
+					System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+				}
+			}
 
 
-			let whitelist: Vec<TrackedStorageKey> = vec![];
+			let whitelist: Vec<TrackedStorageKey> = vec![
+				// Block Number
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
+				// Total Issuance
+				hex_literal::hex!("c2261276cc9d1f8598ea4b6a74b15c2f57c875e4cff74148e4628f264b974c80").to_vec().into(),
+				// Execution Phase
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef7ff553b5a9862a516939d82b3d3d8661a").to_vec().into(),
+				// Event Count
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef70a98fdbe9ce6c55837576c60c7af3850").to_vec().into(),
+				// System Events
+				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7").to_vec().into(),
+			];
+
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 
@@ -477,9 +477,7 @@ sp_api::impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			log::debug!("on_runtime_upgrade");
-			log::info!("Hello: {checks:?}");
 			let weight = Executive::try_runtime_upgrade(checks);
-			log::info!("Hello: {weight:?}");
 			(weight.unwrap(), constants::RuntimeBlockWeights::get().max_block)
 		}
 

@@ -74,7 +74,7 @@ pub const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for .5 seconds of compute with a 16 second average block time.
 pub const MAXIMUM_BLOCK_WEIGHT: Weight = Weight::from_parts(
 	WEIGHT_REF_TIME_PER_SECOND.saturating_div(2),
-	polkadot_primitives::v5::MAX_POV_SIZE as u64,
+	polkadot_primitives::MAX_POV_SIZE as u64,
 );
 
 const_assert!(NORMAL_DISPATCH_RATIO.deconstruct() >= AVERAGE_ON_INITIALIZE_RATIO.deconstruct());
@@ -128,6 +128,10 @@ mod tests {
 		assert_eq!(10 * MILLI_NODL, DOLLARS);
 		assert_eq!(100 * MICRO_NODL, CENTS);
 		assert_eq!(100 * NANO_NODL, MILLICENTS);
+		assert_eq!(EXISTENTIAL_DEPOSIT, 10_000);
+		assert_eq!(NANO_NODL, 100);
+		assert_eq!(MICRO_NODL, 100_000);
+		assert_eq!(NODL, 1e11 as u128);
 	}
 
 	#[test]
