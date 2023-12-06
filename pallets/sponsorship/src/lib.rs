@@ -183,6 +183,9 @@ pub mod pallet {
 	#[pallet::storage]
 	pub(super) type UserMigrationCursor<T: Config> = StorageValue<_, Vec<u8>, OptionQuery>;
 
+	#[pallet::storage]
+	pub(super) type PotUserMigrationPerBlock<T: Config> = StorageValue<_, (u32, u32), OptionQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -563,12 +566,12 @@ pub mod pallet {
 	}
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
-			// NOTE: the following consts should be adjusted according to a safe weight limit which
-			// should be way below the total block weight limit.
-			const MAX_POTS_TO_MIGRATE: usize = 200;
-			const MAX_USERS_TO_MIGRATE: usize = 100;
-			migration::v0::migrate_partially::<T>(MAX_POTS_TO_MIGRATE, MAX_USERS_TO_MIGRATE)
+		fn on_initialize(_n: T::BlockNumber) -> Weight {
+			if let Some((max_pots, max_users)) = PotUserMigrationPerBlock::<T>::get() {
+				migration::v0::migrate_limited::<T>(max_pots as usize, max_users as usize)
+			} else {
+				T::DbWeight::get().reads(1)
+			}
 		}
 
 		fn on_runtime_upgrade() -> Weight {

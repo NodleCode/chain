@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::weights::WeightInfo;
 use crate::{
-	BalanceOf, Config, Pallet, Pot, PotDetailsOf, PotMigrationCursor, User, UserDetailsOf, UserMigrationCursor,
-	UserRegistrationCount,
+	BalanceOf, Config, Pallet, Pot, PotDetailsOf, PotMigrationCursor, PotUserMigrationPerBlock, User, UserDetailsOf,
+	UserMigrationCursor, UserRegistrationCount,
 };
 use codec::{Decode, Encode};
 use frame_support::{
@@ -27,6 +28,7 @@ use frame_support::{
 	traits::{Get, StorageVersion},
 	weights::Weight,
 };
+use sp_runtime::Perbill;
 use sp_std::vec::Vec;
 use support::LimitedBalance;
 
@@ -74,12 +76,12 @@ pub(crate) mod v0 {
 		OptionQuery,
 	>;
 
-	fn migrate_pot_partially<T: Config>(n: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
+	pub fn migrate_pots<T: Config>(max_pots: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
 		let mut iter = Pot::<T>::iter_from(starting_key);
 
 		let pots = iter
 			.by_ref()
-			.take(n)
+			.take(max_pots)
 			.map(|(pot, details)| {
 				(
 					pot,
@@ -101,20 +103,20 @@ pub(crate) mod v0 {
 
 		log::info!(target: "sponsorship", "migrated {} pots", num_of_pots);
 
-		let weight = T::DbWeight::get().reads_writes(num_of_pots as u64, num_of_pots as u64);
-		if num_of_pots == n {
+		let weight = T::WeightInfo::migrate_pots(num_of_pots as u32);
+		if num_of_pots == max_pots {
 			(Some(iter.last_raw_key().to_vec()), weight)
 		} else {
 			(None, weight)
 		}
 	}
 
-	fn migrate_user_partially<T: Config>(n: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
+	pub fn migrate_users<T: Config>(max_users: usize, starting_key: Vec<u8>) -> (Option<Vec<u8>>, Weight) {
 		let mut iter = User::<T>::iter_from(starting_key);
 
 		let users = iter
 			.by_ref()
-			.take(n)
+			.take(max_users)
 			.map(|(pot, user, details)| {
 				(
 					pot,
@@ -140,19 +142,19 @@ pub(crate) mod v0 {
 
 		log::info!(target: "sponsorship", "migrated {} user-in-pots", users_len);
 
-		let weight = T::DbWeight::get().reads_writes(users_len as u64, users_len as u64);
-		if users_len == n {
+		let weight = T::WeightInfo::migrate_users(users_len as u32);
+		if users_len == max_users {
 			(Some(iter.last_raw_key().to_vec()), weight)
 		} else {
 			(None, weight)
 		}
 	}
 
-	pub fn migrate_partially<T: Config>(max_pots: usize, max_users: usize) -> Weight {
+	pub fn migrate_limited<T: Config>(max_pots: usize, max_users: usize) -> Weight {
 		let mut weight: Weight = T::DbWeight::get().reads(2);
 
 		let pot_migration_in_progress = if let Some(starting_key) = PotMigrationCursor::<T>::get() {
-			let (end_cursor, migration_weight) = migrate_pot_partially::<T>(max_pots, starting_key);
+			let (end_cursor, migration_weight) = migrate_pots::<T>(max_pots, starting_key);
 			weight += migration_weight + T::DbWeight::get().writes(1);
 			match end_cursor {
 				Some(last_key) => {
@@ -169,7 +171,7 @@ pub(crate) mod v0 {
 		};
 
 		let user_migration_in_progress = if let Some(starting_key) = UserMigrationCursor::<T>::get() {
-			let (end_cursor, migration_weight) = migrate_user_partially::<T>(max_users, starting_key);
+			let (end_cursor, migration_weight) = migrate_users::<T>(max_users, starting_key);
 			weight += migration_weight + T::DbWeight::get().writes(1);
 			match end_cursor {
 				Some(last_key) => {
@@ -193,15 +195,49 @@ pub(crate) mod v0 {
 		weight
 	}
 
+	/// Return the optimum number of pots and users that can be migrated according to the given
+	/// `max_weight`. It will never return 0 for either pots or users because it would then stall
+	/// the migration process.
+	pub fn determine_optimum_pots_users<T: Config>(max_weight: Weight) -> (usize, usize) {
+		let pots_count = v0::Pot::<T>::iter().count();
+		let users_count = v0::User::<T>::iter().count();
+
+		let one_pot_migration_weight = T::WeightInfo::migrate_pots(1).ref_time();
+		let one_user_migration_weight = T::WeightInfo::migrate_users(1).ref_time();
+
+		let pots_migration_weight = one_pot_migration_weight.saturating_mul(pots_count as u64);
+		let users_migration_weight = one_user_migration_weight.saturating_mul(users_count as u64);
+
+		let total_migration_weight = pots_migration_weight.saturating_add(users_migration_weight);
+
+		let pots_assigning_ref_time = max_weight
+			.ref_time()
+			.saturating_mul(pots_migration_weight)
+			.checked_div(total_migration_weight);
+		let max_pots = pots_assigning_ref_time
+			.map(|ref_time| ref_time.checked_div(one_pot_migration_weight).unwrap_or(1))
+			.unwrap_or(1) as usize;
+
+		let users_assigning_ref_time = max_weight
+			.ref_time()
+			.saturating_mul(users_migration_weight)
+			.checked_div(total_migration_weight);
+		let max_users = users_assigning_ref_time
+			.map(|ref_time| ref_time.checked_div(one_user_migration_weight).unwrap_or(1))
+			.unwrap_or(1) as usize;
+
+		(max_pots.max(1), max_users.max(1))
+	}
+
 	#[cfg(feature = "try-runtime")]
-	pub fn migrate_in_steps<T: Config>(steps: usize) -> Weight {
+	pub fn migrate_all_in_steps<T: Config>(steps: usize) -> Weight {
 		let num_of_pots = Pot::<T>::iter().count();
 		let num_of_users = User::<T>::iter().count();
 
 		let mut weight: Weight = T::DbWeight::get().reads(num_of_pots as u64 + num_of_users as u64);
 
 		for _ in 0..steps {
-			weight += migrate_partially::<T>(num_of_pots / steps + 1, num_of_users / steps + 1);
+			weight += migrate_limited::<T>(num_of_pots / steps + 1, num_of_users / steps + 1);
 		}
 
 		weight
@@ -215,15 +251,22 @@ pub fn on_runtime_upgrade<T: Config>() -> Weight {
 	if StorageVersion::get::<Pallet<T>>() == 0 {
 		PotMigrationCursor::<T>::put(Pot::<T>::prefix_hash());
 		UserMigrationCursor::<T>::put(User::<T>::prefix_hash());
+		weight += T::DbWeight::get().reads_writes(2, 2);
+
+		const MIGRATION_TO_MAX_BLOCK_RATIO: Perbill = Perbill::from_percent(50);
+		let (max_pots, max_users) =
+			v0::determine_optimum_pots_users::<T>(T::BlockWeights::get().max_block * MIGRATION_TO_MAX_BLOCK_RATIO);
+		weight += T::WeightInfo::determine_optimum_pots_users(max_pots as u32, max_users as u32);
+
+		PotUserMigrationPerBlock::<T>::put((max_pots as u32, max_users as u32));
+		weight += T::DbWeight::get().writes(1);
 
 		// The following invocation of migration is only needed for testing the logic during the
 		// try runtime. The actual migration should be called during on_initialize for the pallet.
 		#[cfg(feature = "try-runtime")]
 		{
-			weight += v0::migrate_in_steps::<T>(3);
+			weight += v0::migrate_all_in_steps::<T>(3);
 		}
-
-		weight += T::DbWeight::get().writes(2);
 	}
 
 	weight
