@@ -27,8 +27,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
-	BuildStorage,
-	Perbill,
+	BuildStorage, Perbill,
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
