@@ -357,7 +357,7 @@ mod benchmarks {
 		pots.iter()
 			.map(|pot| {
 				(
-					pot.clone(),
+					*pot,
 					V0PotDetailsOf::<T> {
 						sponsor: caller.clone(),
 						sponsorship_type: T::SponsorshipType::default(),
@@ -404,7 +404,7 @@ mod benchmarks {
 		pots.iter()
 			.map(|pot| {
 				(
-					pot.clone(),
+					*pot,
 					V0PotDetailsOf::<T> {
 						sponsor: caller.clone(),
 						sponsorship_type: T::SponsorshipType::default(),

@@ -28,7 +28,10 @@ use frame_support::{
 	traits::{Get, StorageVersion},
 	weights::Weight,
 };
-use sp_runtime::{Perbill, TryRuntimeError};
+use sp_runtime::Perbill;
+#[cfg(feature = "try-runtime")]
+use sp_runtime::TryRuntimeError;
+
 use sp_std::vec::Vec;
 use support::LimitedBalance;
 
