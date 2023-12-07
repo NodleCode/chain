@@ -19,7 +19,7 @@
 
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin,
+	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
 	Timestamp,
 };
 use frame_support::{
@@ -183,7 +183,7 @@ parameter_types! {
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
-	pub const MaxDelegateDependencies: u32 = 32;
+	pub RuntimeHoldReason: ();
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -224,7 +224,7 @@ impl pallet_contracts::Config for Runtime {
 	);
 	// TODO check all of here
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
-	type MaxDelegateDependencies = MaxDelegateDependencies;
+	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = RuntimeHoldReason;
 	type Debug = ();
 	type Environment = ();
