@@ -391,48 +391,5 @@ mod benchmarks {
 		});
 	}
 
-	#[benchmark]
-	fn determine_optimum_pots_users(p: Linear<1, 10>, u: Linear<1, 100>) {
-		use crate::migration::v0::{
-			determine_optimum_pots_users, Pot as V0Pot, PotDetailsOf as V0PotDetailsOf, User as V0User,
-			UserDetailsOf as V0UserDetailsOf,
-		};
-
-		let caller: T::AccountId = whitelisted_caller();
-		let pots: Vec<T::PotId> = (0..p).map(|i| i.into()).collect();
-
-		pots.iter()
-			.map(|pot| {
-				(
-					*pot,
-					V0PotDetailsOf::<T> {
-						sponsor: caller.clone(),
-						sponsorship_type: T::SponsorshipType::default(),
-						fee_quota: LimitedBalance::with_limit(5u32.into()),
-						reserve_quota: LimitedBalance::with_limit(7u32.into()),
-					},
-				)
-			})
-			.for_each(|(pot, pot_details)| {
-				V0Pot::<T>::insert(pot, pot_details);
-			});
-
-		let users: Vec<T::AccountId> = (0..u).map(|i| account("user", i, SEED)).collect();
-		for user in &users {
-			let user_details = V0UserDetailsOf::<T> {
-				proxy: user.clone(),
-				fee_quota: LimitedBalance::with_limit(3u32.into()),
-				reserve_quota: LimitedBalance::with_limit(6u32.into()),
-			};
-			V0User::<T>::insert(T::PotId::from(0u32), user, user_details);
-		}
-
-		#[block]
-		{
-			let (max_pots, max_users) = determine_optimum_pots_users::<T>(T::BlockWeights::get().max_block / 2);
-			assert!(max_pots >= 1 && max_users >= 1);
-		}
-	}
-
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }

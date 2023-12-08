@@ -569,12 +569,8 @@ pub mod pallet {
 	}
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
-			if let Some((max_pots, max_users)) = PotUserMigrationPerBlock::<T>::get() {
-				migration::v0::migrate_limited::<T>(max_pots as usize, max_users as usize)
-			} else {
-				T::DbWeight::get().reads(1)
-			}
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			migration::on_initialize::<T>(n)
 		}
 
 		fn on_runtime_upgrade() -> Weight {

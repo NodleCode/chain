@@ -56,7 +56,6 @@ pub trait WeightInfo {
 	fn post_sponsor() -> Weight;
 	fn migrate_users(l: u32, ) -> Weight;
 	fn migrate_pots(l: u32, ) -> Weight;
-	fn determine_optimum_pots_users(p: u32, u: u32, ) -> Weight;
 }
 
 /// Weight functions for `pallet_sponsorship`.
@@ -210,23 +209,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(l as u64)))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(l as u64)))
 	}
-	// Storage: `Sponsorship::Pot` (r:11 w:0)
-	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	// Storage: `Sponsorship::User` (r:101 w:0)
-	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `p` is `[1, 10]`.
-	/// The range of component `u` is `[1, 100]`.
-	fn determine_optimum_pots_users(p: u32, u: u32, ) -> Weight {
-		// Minimum execution time: 52_630 nanoseconds.
-		Weight::from_parts(13_830_955_u64, 0)
-			// Standard Error: 40_773
-			.saturating_add(Weight::from_parts(3_616_071_u64, 0).saturating_mul(p as u64))
-			// Standard Error: 3_931
-			.saturating_add(Weight::from_parts(4_339_390_u64, 0).saturating_mul(u as u64))
-			.saturating_add(T::DbWeight::get().reads(2_u64))
-			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(p as u64)))
-			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(u as u64)))
-	}
 }
 
 impl WeightInfo for () {
@@ -377,22 +359,5 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(l as u64)))
 			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(l as u64)))
-	}
-	// Storage: `Sponsorship::Pot` (r:11 w:0)
-	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	// Storage: `Sponsorship::User` (r:101 w:0)
-	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `p` is `[1, 10]`.
-	/// The range of component `u` is `[1, 100]`.
-	fn determine_optimum_pots_users(p: u32, u: u32, ) -> Weight {
-		// Minimum execution time: 52_630 nanoseconds.
-		Weight::from_parts(13_830_955_u64, 0)
-			// Standard Error: 40_773
-			.saturating_add(Weight::from_parts(3_616_071_u64, 0).saturating_mul(p as u64))
-			// Standard Error: 3_931
-			.saturating_add(Weight::from_parts(4_339_390_u64, 0).saturating_mul(u as u64))
-			.saturating_add(RocksDbWeight::get().reads(2_u64))
-			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(p as u64)))
-			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(u as u64)))
 	}
 }
