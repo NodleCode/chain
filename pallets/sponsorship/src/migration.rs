@@ -92,7 +92,7 @@ pub(crate) mod v0 {
 						sponsorship_type: details.sponsorship_type,
 						fee_quota: details.fee_quota,
 						reserve_quota: details.reserve_quota,
-						deposit: Default::default(),
+						deposit: Zero::zero(),
 					},
 				)
 			})
@@ -127,7 +127,7 @@ pub(crate) mod v0 {
 						proxy: details.proxy,
 						fee_quota: details.fee_quota,
 						reserve_quota: details.reserve_quota,
-						deposit: Default::default(),
+						deposit: Zero::zero(),
 					},
 				)
 			})
