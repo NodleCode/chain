@@ -76,7 +76,7 @@ cargo clippy --fix --allow-dirty
 cargo fmt
 
 echo "Running on gcloud server? Run:"
-echo " git config --global user.email \$USER ; git config --global user.name \$USER  git commit -v -a -m Benchmarks ; git format-patch HEAD~ ; find $PWD/*patch"
+echo "git commit -v -a -m Benchmarks ; git format-patch HEAD~ ; find $PWD/*patch"
 echo "Download to dev machine and apply with:"
-echo "    git apply 0001*"
+echo "    git apply " 0001*
 
