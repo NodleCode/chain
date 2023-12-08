@@ -222,7 +222,12 @@ pub(crate) mod v0 {
 
 	/// Return the minimum overhead of attempting to migrate the storage.
 	pub fn min_weight<T: Config>() -> Weight {
-		T::DbWeight::get().reads(2)
+		// 2 reads: PotMigrationCursor, UserMigrationCursor
+		// Fixed: 40_000_000 as a pessimistic estimation for non benchmarked logic with trivial cost
+		// during each loop of migrate_limited
+		T::DbWeight::get()
+			.reads(2)
+			.saturating_add(Weight::from_parts(40_000_000_u64, 0))
 	}
 
 	/// Return the maximum overhead of attempting to migrate the storage.
@@ -268,14 +273,16 @@ type StorageDoubleMapKey = Vec<u8>;
 
 #[cfg(feature = "try-runtime")]
 pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, TryRuntimeError> {
-	if StorageVersion::get::<Pallet<T>>() > 1 {
-		return Err(TryRuntimeError::Other("Storage version is not either 0 or 1"));
-	}
+	ensure!(
+		StorageVersion::get::<Pallet<T>>() == 0,
+		TryRuntimeError::Other("Storage version is not 0")
+	);
 
 	let block_usage = v0::max_weight::<T>();
-	if block_usage.any_lte(v0::min_weight::<T>()) {
-		return Err(TryRuntimeError::Other("Block usage is set too low"));
-	}
+	ensure!(
+		block_usage.all_gt(v0::min_weight::<T>()),
+		TryRuntimeError::Other("Block usage is set too low")
+	);
 	log::info!(target: "sponsorship", "pre_upgrade: block_usage = ({ref_time}, {proof_size})", ref_time=block_usage.ref_time(), proof_size=block_usage.proof_size());
 
 	let max_pots_per_block = block_usage
@@ -288,9 +295,10 @@ pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, TryRuntimeError> {
 		.ref_time()
 		.checked_div(T::WeightInfo::migrate_users(1).ref_time())
 		.unwrap_or(1) as usize;
-	if max_pots_per_block == 0 || max_users_per_block == 0 {
-		return Err(TryRuntimeError::Other("Migration allowed weight is too low"));
-	}
+	ensure!(
+		max_pots_per_block > 0 && max_users_per_block > 0,
+		TryRuntimeError::Other("Migration allowed weight is too low")
+	);
 	log::info!(target: "sponsorship", "pre_upgrade: max_pots_per_block = {max_pots_per_block}, max_users_per_block = {max_users_per_block}");
 
 	let pot_details = frame_support::migration::storage_key_iter::<
@@ -322,9 +330,10 @@ pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, TryRuntimeError> {
 
 #[cfg(feature = "try-runtime")]
 pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), TryRuntimeError> {
-	if StorageVersion::get::<Pallet<T>>() != 1 {
-		return Err(TryRuntimeError::Other("Storage version is not 1"));
-	}
+	ensure!(
+		StorageVersion::get::<Pallet<T>>() == 1,
+		TryRuntimeError::Other("Storage version not fixed")
+	);
 
 	let (pre_pot_details, pre_user_details): (
 		Vec<(T::PotId, v0::PotDetailsOf<T>)>,
@@ -332,36 +341,40 @@ pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), TryRuntimeEr
 	) = Decode::decode(&mut state.as_slice()).map_err(|_| "Unable to decode previous collection details")?;
 	let pot_details = Pot::<T>::iter().collect::<Vec<_>>();
 
-	if pre_pot_details.len() != pot_details.len() {
-		return Err(TryRuntimeError::Other("Pot count mismatch"));
-	}
+	ensure!(
+		pre_pot_details.len() == pot_details.len(),
+		TryRuntimeError::Other("Pot count mismatch")
+	);
 
 	for (pre, post) in pre_pot_details.iter().zip(pot_details.iter()) {
-		if pre.0 != post.0 {
-			return Err(TryRuntimeError::Other("Pot id mismatch"));
-		}
-		if pre.1.sponsor != post.1.sponsor {
-			return Err(TryRuntimeError::Other("Pot sponsor mismatch"));
-		}
-		if pre.1.sponsorship_type != post.1.sponsorship_type {
-			return Err(TryRuntimeError::Other("Pot sponsorship type mismatch"));
-		}
-		if pre.1.fee_quota != post.1.fee_quota {
-			return Err(TryRuntimeError::Other("Pot fee quota mismatch"));
-		}
-		if pre.1.reserve_quota != post.1.reserve_quota {
-			return Err(TryRuntimeError::Other("Pot reserve quota mismatch"));
-		}
-		if post.1.deposit != Default::default() {
-			return Err(TryRuntimeError::Other("Pot deposit is not default"));
-		}
+		ensure!(pre.0 == post.0, TryRuntimeError::Other("Pot id mismatch"));
+		ensure!(
+			pre.1.sponsor == post.1.sponsor,
+			TryRuntimeError::Other("Pot sponsor mismatch")
+		);
+		ensure!(
+			pre.1.sponsorship_type == post.1.sponsorship_type,
+			TryRuntimeError::Other("Pot sponsorship type mismatch")
+		);
+		ensure!(
+			pre.1.fee_quota == post.1.fee_quota,
+			TryRuntimeError::Other("Pot fee quota mismatch")
+		);
+		ensure!(
+			pre.1.reserve_quota == post.1.reserve_quota,
+			TryRuntimeError::Other("Pot reserve quota mismatch")
+		);
+		ensure!(
+			post.1.deposit == Default::default(),
+			TryRuntimeError::Other("Pot deposit is not default")
+		);
 	}
 
 	let user_details = User::<T>::iter().collect::<Vec<_>>();
-
-	if pre_user_details.len() != user_details.len() {
-		return Err(TryRuntimeError::Other("User count mismatch"));
-	}
+	ensure!(
+		pre_user_details.len() == user_details.len(),
+		TryRuntimeError::Other("User count mismatch")
+	);
 
 	for (pre, post) in pre_user_details.iter().zip(user_details.iter()) {
 		let key1_hashed = post.0.borrow().using_encoded(Blake2_128Concat::hash);
@@ -370,33 +383,32 @@ pub(crate) fn post_upgrade<T: Config>(state: Vec<u8>) -> Result<(), TryRuntimeEr
 		final_key.extend_from_slice(key1_hashed.as_ref());
 		final_key.extend_from_slice(key2_hashed.as_ref());
 
-		if pre.0 != final_key {
-			return Err(TryRuntimeError::Other("User hashed key mismatch"));
-		}
-		if pre.1.proxy != post.2.proxy {
-			return Err(TryRuntimeError::Other("User proxy mismatch"));
-		}
-		if pre.1.fee_quota != post.2.fee_quota {
-			return Err(TryRuntimeError::Other("User fee quota mismatch"));
-		}
-		if pre.1.reserve_quota != post.2.reserve_quota {
-			return Err(TryRuntimeError::Other("User reserve quota mismatch"));
-		}
-		if post.2.deposit != Default::default() {
-			return Err(TryRuntimeError::Other("User deposit is not default"));
-		}
+		ensure!(pre.0 == final_key, TryRuntimeError::Other("User key mismatch"));
+		ensure!(
+			pre.1.proxy == post.2.proxy,
+			TryRuntimeError::Other("User proxy mismatch")
+		);
+		ensure!(
+			pre.1.fee_quota == post.2.fee_quota,
+			TryRuntimeError::Other("User fee quota mismatch")
+		);
+		ensure!(
+			pre.1.reserve_quota == post.2.reserve_quota,
+			TryRuntimeError::Other("User reserve quota mismatch")
+		);
+		ensure!(
+			post.2.deposit == Default::default(),
+			TryRuntimeError::Other("User deposit is not default")
+		);
 	}
 
 	UserRegistrationCount::<T>::iter().try_for_each(|(_user, count)| {
-		if count == 0 {
-			return Err(TryRuntimeError::Other("User registration count is 0"));
-		}
-		if count > pot_details.len() as u32 {
-			return Err(TryRuntimeError::Other(
-				"User registration count is greater than number of pots",
-			));
-		}
-		Ok(())
+		ensure!(count > 0, TryRuntimeError::Other("User registration count is 0"));
+		ensure!(
+			count <= pot_details.len() as u32,
+			TryRuntimeError::Other("User registration count is greater than number of pots")
+		);
+		Ok::<(), TryRuntimeError>(())
 	})?;
 
 	log::info!(target: "sponsorship", "post_upgrade: pots = {}, pot_user_count = {}, users = {}", pot_details.len(), user_details.len(), UserRegistrationCount::<T>::iter().count());
