@@ -45,7 +45,7 @@ use core::marker::PhantomData;
 
 /// Weight functions for `pallet_contracts`.
 pub struct WeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> pallet_contracts::WeightInfo for WeightInfo<T> {
+impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightInfo<T> {
 	// Storage: `Contracts::DeletionQueueCounter` (r:1 w:0)
 	// Proof: `Contracts::DeletionQueueCounter` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
 	fn on_process_deletion_queue_batch() -> Weight {
