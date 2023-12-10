@@ -163,12 +163,18 @@ impl Default for SponsorshipType {
 	}
 }
 
+parameter_types! {
+	pub const PotDeposit: Balance = 1000 * constants::NODL;
+	pub const UserDeposit: Balance = constants::NODL / 3;
+}
 impl pallet_sponsorship::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
+	type PotDeposit = PotDeposit;
+	type UserDeposit = UserDeposit;
 	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
 }
 
