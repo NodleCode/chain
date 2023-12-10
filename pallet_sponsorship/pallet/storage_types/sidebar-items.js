@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Pot","User"]};
+window.SIDEBAR_ITEMS = {"struct":["Pot","PotMigrationCursor","PotUserMigrationPerBlock","User","UserMigrationCursor","UserRegistrationCount"]};
