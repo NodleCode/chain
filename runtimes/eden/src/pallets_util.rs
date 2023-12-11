@@ -234,7 +234,7 @@ impl pallet_contracts::Config for Runtime {
 	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = crate::RuntimeHoldReason;
 	type Debug = ();
-	
+
 	type Environment = ();
 }
 
