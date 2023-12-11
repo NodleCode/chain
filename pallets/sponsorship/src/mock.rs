@@ -18,7 +18,7 @@
 
 use crate as pallet_sponsorship;
 use frame_support::{
-	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug},
+	pallet_prelude::{ConstU32, Decode, Encode, MaxEncodedLen, RuntimeDebug, Weight},
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU16, ConstU64, ConstU8, InstanceFilter},
 	weights::IdentityFee,
@@ -27,7 +27,7 @@ use pallet_transaction_payment::CurrencyAdapter;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
-	BuildStorage,
+	BuildStorage, Perbill,
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -43,9 +43,18 @@ frame_support::construct_runtime!(
 	}
 );
 
+const WEIGHT_REF_TIME_PER_SECOND: u64 = 1_000_000_000_000;
+const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+parameter_types! {
+	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
+		::with_sensible_defaults(
+			Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
+			NORMAL_DISPATCH_RATIO,
+		);
+}
 impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
-	type BlockWeights = ();
+	type BlockWeights = BlockWeights;
 	type BlockLength = ();
 	type DbWeight = ();
 	type RuntimeOrigin = RuntimeOrigin;
@@ -69,6 +78,9 @@ impl frame_system::Config for Test {
 	type Nonce = u32;
 }
 
+parameter_types! {
+	pub const ExistentialDeposit: u64 = 1;
+}
 impl pallet_balances::Config for Test {
 	type MaxLocks = ();
 	type MaxReserves = ();
@@ -76,7 +88,7 @@ impl pallet_balances::Config for Test {
 	type Balance = u64;
 	type RuntimeEvent = RuntimeEvent;
 	type DustRemoval = ();
-	type ExistentialDeposit = ConstU64<1>;
+	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = System;
 	type WeightInfo = ();
 	type FreezeIdentifier = ();
@@ -152,19 +164,36 @@ impl Default for SponsorshipType {
 	}
 }
 
+parameter_types! {
+	pub const PotDeposit: u64 = 3;
+	pub const UserDeposit: u64 = 1;
+}
 impl pallet_sponsorship::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
+	type PotDeposit = PotDeposit;
+	type UserDeposit = UserDeposit;
 	type WeightInfo = ();
 }
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::<Test>::default()
-		.build_storage()
-		.unwrap()
-		.into()
+	let mut t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
+
+	// Return the balance needed to create a pot and register a `num` of users
+	let sponsor_balance = |num: u64| PotDeposit::get() + ExistentialDeposit::get() + num * UserDeposit::get();
+	pallet_balances::GenesisConfig::<Test> {
+		balances: vec![(1, sponsor_balance(4)), (2, sponsor_balance(3))],
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
+
+	frame_support::BasicExternalities::execute_with_storage(&mut t, || {
+		pallet_sponsorship::STORAGE_VERSION.put::<pallet_sponsorship::Pallet<Test>>();
+	});
+
+	t.into()
 }

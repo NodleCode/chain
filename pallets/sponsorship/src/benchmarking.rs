@@ -23,7 +23,7 @@ use super::*;
 #[allow(unused)]
 use crate::Pallet as Sponsorship;
 use frame_benchmarking::v2::*;
-use frame_support::assert_ok;
+use frame_support::{assert_ok, traits::Get};
 use frame_system::RawOrigin;
 
 const SEED: u32 = 0;
@@ -41,7 +41,10 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
+		T::Currency::make_free_balance_be(&caller, T::Currency::minimum_balance() + T::PotDeposit::get());
+
 		#[extrinsic_call]
 		create_pot(
 			RawOrigin::Signed(caller),
@@ -63,6 +66,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -81,6 +85,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -101,6 +106,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -123,8 +129,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		#[extrinsic_call]
 		register_users(RawOrigin::Signed(caller), pot, users, 8u32.into(), 19u32.into());
@@ -143,8 +155,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -180,8 +198,14 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(5u32.into()),
 			reserve_quota: LimitedBalance::with_limit(7u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
+
+		T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() + T::UserDeposit::get() * BalanceOf::<T>::from(users.len() as u32),
+		);
 
 		assert_ok!(Pallet::<T>::register_users(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -215,6 +239,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
 			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details);
 
@@ -246,6 +271,7 @@ mod benchmarks {
 			sponsorship_type: T::SponsorshipType::default(),
 			fee_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 5_000_000u32.into()),
 			reserve_quota: LimitedBalance::with_limit(T::Currency::minimum_balance() * 13_000_000u32.into()),
+			deposit: T::PotDeposit::get(),
 		};
 		Pot::<T>::insert(pot, pot_details.clone());
 
@@ -281,6 +307,88 @@ mod benchmarks {
 
 		let user_detail = User::<T>::get(pot, &user).unwrap();
 		assert_eq!(user_detail.reserve_quota.balance(), T::Currency::minimum_balance());
+	}
+
+	#[benchmark]
+	fn migrate_users(l: Linear<1, 1_000>) {
+		use crate::migration::v0::{migrate_users, User as V0User, UserDetailsOf as V0UserDetailsOf};
+		use frame_support::storage::generator::StorageDoubleMap;
+
+		let pot: T::PotId = 0u32.into();
+		let users: Vec<T::AccountId> = (0..l).map(|i| account("user", i, SEED)).collect();
+
+		for user in &users {
+			let user_details = V0UserDetailsOf::<T> {
+				proxy: user.clone(),
+				fee_quota: LimitedBalance::with_limit(3u32.into()),
+				reserve_quota: LimitedBalance::with_limit(6u32.into()),
+			};
+			V0User::<T>::insert(pot, user, user_details);
+		}
+
+		let starting_key = V0User::<T>::prefix_hash();
+
+		#[block]
+		{
+			migrate_users::<T>(l as usize, starting_key);
+		}
+
+		users.iter().for_each(|user| {
+			assert_eq!(
+				User::<T>::get(pot, user),
+				Some(UserDetailsOf::<T> {
+					proxy: user.clone(),
+					fee_quota: LimitedBalance::with_limit(3u32.into()),
+					reserve_quota: LimitedBalance::with_limit(6u32.into()),
+					deposit: Zero::zero(),
+				})
+			);
+		});
+	}
+
+	#[benchmark]
+	fn migrate_pots(l: Linear<1, 1_000>) {
+		use crate::migration::v0::{migrate_pots, Pot as V0Pot, PotDetailsOf as V0PotDetailsOf};
+		use frame_support::storage::generator::StorageMap;
+
+		let caller: T::AccountId = whitelisted_caller();
+		let pots: Vec<T::PotId> = (0..l).map(|i| i.into()).collect();
+
+		pots.iter()
+			.map(|pot| {
+				(
+					*pot,
+					V0PotDetailsOf::<T> {
+						sponsor: caller.clone(),
+						sponsorship_type: T::SponsorshipType::default(),
+						fee_quota: LimitedBalance::with_limit(5u32.into()),
+						reserve_quota: LimitedBalance::with_limit(7u32.into()),
+					},
+				)
+			})
+			.for_each(|(pot, pot_details)| {
+				V0Pot::<T>::insert(pot, pot_details);
+			});
+
+		let starting_key = V0Pot::<T>::prefix_hash();
+
+		#[block]
+		{
+			migrate_pots::<T>(l as usize, starting_key);
+		}
+
+		pots.iter().for_each(|pot| {
+			assert_eq!(
+				Pot::<T>::get(pot),
+				Some(PotDetailsOf::<T> {
+					sponsor: caller.clone(),
+					sponsorship_type: T::SponsorshipType::default(),
+					fee_quota: LimitedBalance::with_limit(5u32.into()),
+					reserve_quota: LimitedBalance::with_limit(7u32.into()),
+					deposit: Zero::zero(),
+				})
+			);
+		});
 	}
 
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);

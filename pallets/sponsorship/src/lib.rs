@@ -24,20 +24,25 @@ use frame_support::{
 	traits::{
 		Currency,
 		ExistenceRequirement::{AllowDeath, KeepAlive},
-		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
+		GetStorageVersion, InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
 use pallet_transaction_payment::OnChargeTransaction;
 use sp_io::hashing::blake2_256;
+#[cfg(feature = "try-runtime")]
+use sp_runtime::TryRuntimeError;
 use sp_runtime::{
-	traits::Dispatchable,
-	traits::{DispatchInfoOf, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
+	traits::{DispatchInfoOf, Dispatchable, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
+	FixedPointOperand, Saturating,
 };
-use sp_runtime::{FixedPointOperand, Saturating};
-use sp_std::fmt::{Debug, Formatter, Result as FmtResult};
+use sp_std::{
+	fmt::{Debug, Formatter, Result as FmtResult},
+	prelude::*,
+};
 use support::LimitedBalance;
 
+pub use migration::STORAGE_VERSION;
 pub use pallet::*;
 
 #[cfg(test)]
@@ -48,6 +53,8 @@ mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
+pub(crate) mod migration;
 pub mod weights;
 pub use weights::*;
 
@@ -81,6 +88,8 @@ pub struct PotDetails<AccountId, SponsorshipType, Balance: frame_support::traits
 	/// some transactions.
 	/// Any amount used as reserve may be returned to the sponsor when unreserved.
 	reserve_quota: LimitedBalance<Balance>,
+	/// Amount of deposit reserved from the sponsor for this pot.
+	deposit: Balance,
 }
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Default, TypeInfo, MaxEncodedLen)]
@@ -100,6 +109,8 @@ pub struct UserDetails<AccountId, Balance: frame_support::traits::tokens::Balanc
 	/// which do not require any reserve. Any amount used as reserve will be returned to the sponsor
 	/// when unreserved. This is to prevent malicious users from draining sponsor funds.
 	reserve_quota: LimitedBalance<Balance>,
+	/// Amount of deposit reserved from the sponsor for this user.
+	deposit: Balance,
 }
 
 #[frame_support::pallet]
@@ -107,9 +118,12 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use scale_info::prelude::{boxed::Box, vec::Vec};
+	use scale_info::prelude::boxed::Box;
+	use sp_runtime::traits::Dispatchable;
 
 	#[pallet::pallet]
+	#[pallet::storage_version(migration::STORAGE_VERSION)]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -141,6 +155,12 @@ pub mod pallet {
 			+ InstanceFilter<<Self as Config>::RuntimeCall>
 			+ MaxEncodedLen
 			+ Default;
+		/// The deposit that must be reserved form the sponsor per their sponsored user.
+		#[pallet::constant]
+		type UserDeposit: Get<BalanceOf<Self>>;
+		/// The deposit that must be locked in order to create a pot.
+		#[pallet::constant]
+		type PotDeposit: Get<BalanceOf<Self>>;
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
 	}
@@ -153,6 +173,21 @@ pub mod pallet {
 	/// User details of a pot.
 	pub(super) type User<T: Config> =
 		StorageDoubleMap<_, Blake2_128Concat, T::PotId, Blake2_128Concat, T::AccountId, UserDetailsOf<T>, OptionQuery>;
+
+	/// Stores the number of individual pots a user is registered for.
+	#[pallet::storage]
+	pub(super) type UserRegistrationCount<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+
+	/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
+	#[pallet::storage]
+	pub(super) type PotMigrationCursor<T: Config> = StorageValue<_, Vec<u8>, OptionQuery>;
+
+	/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
+	#[pallet::storage]
+	pub(super) type UserMigrationCursor<T: Config> = StorageValue<_, Vec<u8>, OptionQuery>;
+
+	#[pallet::storage]
+	pub(super) type PotUserMigrationPerBlock<T: Config> = StorageValue<_, (u32, u32), OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -223,6 +258,8 @@ pub mod pallet {
 		CannotUpdateFeeLimit,
 		/// Cannot update the reserve limit most likely due to being below the current commitment.
 		CannotUpdateReserveLimit,
+		/// Migration is in progress.
+		MigrationInProgress,
 	}
 
 	#[pallet::call]
@@ -241,7 +278,10 @@ pub mod pallet {
 			reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			ensure!(!Pot::<T>::contains_key(pot), Error::<T>::InUse);
+
+			T::Currency::reserve(&who, T::PotDeposit::get())?;
 
 			<Pot<T>>::insert(
 				pot,
@@ -250,6 +290,7 @@ pub mod pallet {
 					sponsorship_type: sponsorship_type.clone(),
 					fee_quota: LimitedBalance::with_limit(fee_quota),
 					reserve_quota: LimitedBalance::with_limit(reserve_quota),
+					deposit: T::PotDeposit::get(),
 				},
 			);
 
@@ -271,11 +312,13 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_pot())]
 		pub fn remove_pot(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
 				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::InUse)?;
 				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 				let users = User::<T>::iter_prefix(pot).count();
 				ensure!(users == 0, Error::<T>::InUse);
+				T::Currency::unreserve(&who, pot_details.deposit);
 				*maybe_pot_details = None;
 				Ok(())
 			})?;
@@ -298,15 +341,20 @@ pub mod pallet {
 			common_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
 				ensure!(!User::<T>::contains_key(pot, &user), Error::<T>::UserAlreadyRegistered);
+				T::Currency::reserve(&who, T::UserDeposit::get())?;
+				UserRegistrationCount::<T>::mutate(&user, |count| {
+					if count.is_zero() {
+						frame_system::Pallet::<T>::inc_providers(&user);
+					}
+					count.saturating_inc();
+				});
 				let proxy = Self::pure_account(&user, &pot).ok_or(Error::<T>::CannotCreateProxy)?;
 				frame_system::Pallet::<T>::inc_providers(&proxy);
-				if !Self::registered_for_any_pots(&user) {
-					frame_system::Pallet::<T>::inc_providers(&user);
-				}
 				<User<T>>::insert(
 					pot,
 					user,
@@ -314,6 +362,7 @@ pub mod pallet {
 						proxy,
 						fee_quota: LimitedBalance::with_limit(common_fee_quota),
 						reserve_quota: LimitedBalance::with_limit(common_reserve_quota),
+						deposit: T::UserDeposit::get(),
 					},
 				);
 			}
@@ -339,6 +388,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_users(users.len() as u32))]
 		pub fn remove_users(origin: OriginFor<T>, pot: T::PotId, users: Vec<T::AccountId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
@@ -350,7 +400,14 @@ pub mod pallet {
 					user_details.reserve_quota.balance(),
 				)?;
 				pot_details.reserve_quota.saturating_sub(repaid);
-				Self::remove_user(&pot, &user);
+				UserRegistrationCount::<T>::mutate(&user, |count| {
+					if count.is_one() {
+						let _ = frame_system::Pallet::<T>::dec_providers(&user);
+					}
+					count.saturating_dec();
+				});
+				T::Currency::unreserve(&who, user_details.deposit);
+				<User<T>>::remove(pot, user);
 			}
 			<Pot<T>>::insert(pot, pot_details);
 			Self::deposit_event(Event::UsersRemoved { pot, users });
@@ -394,6 +451,7 @@ pub mod pallet {
 			call: Box<<T as Config>::RuntimeCall>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
@@ -425,6 +483,7 @@ pub mod pallet {
 			new_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -459,6 +518,7 @@ pub mod pallet {
 			users: Vec<T::AccountId>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -505,6 +565,26 @@ pub mod pallet {
 
 			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot, sponsorship_type });
 			Ok(())
+		}
+	}
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			migration::on_initialize::<T>(n)
+		}
+
+		fn on_runtime_upgrade() -> Weight {
+			migration::on_runtime_upgrade::<T>()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
+			migration::pre_upgrade::<T>()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
+			migration::post_upgrade::<T>(_state)
 		}
 	}
 }
@@ -556,17 +636,6 @@ impl<T: Config> Pallet<T> {
 		T::Currency::transfer(proxy, user, proxy_free_balance.saturating_sub(repay), AllowDeath)?;
 		frame_system::Pallet::<T>::dec_providers(proxy)?;
 		Ok(repay)
-	}
-	/// Remove the user from the pot.
-	fn remove_user(pot: &T::PotId, who: &T::AccountId) {
-		<User<T>>::remove(pot, who);
-		if !Self::registered_for_any_pots(who) {
-			let _ = frame_system::Pallet::<T>::dec_providers(who);
-		}
-	}
-	/// Check if the account is registered for any pots.
-	fn registered_for_any_pots(who: &T::AccountId) -> bool {
-		Pot::<T>::iter_keys().any(|pot| User::<T>::contains_key(pot, who.clone()))
 	}
 
 	fn pre_sponsor_for(who: T::AccountId, pot: T::PotId) -> Result<SponsorCallPreps<T>, sp_runtime::DispatchError> {
@@ -626,6 +695,10 @@ impl<T: Config> Pallet<T> {
 
 		Self::deposit_event(Event::Sponsored { paid, repaid });
 		Ok(())
+	}
+
+	fn migration_in_progress() -> bool {
+		Self::on_chain_storage_version() < Self::current_storage_version()
 	}
 }
 

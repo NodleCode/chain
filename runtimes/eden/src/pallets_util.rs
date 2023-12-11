@@ -163,12 +163,18 @@ impl Default for SponsorshipType {
 	}
 }
 
+parameter_types! {
+	pub const PotDeposit: Balance = 1000 * constants::NODL;
+	pub const UserDeposit: Balance = constants::NODL / 3;
+}
 impl pallet_sponsorship::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
 	type Currency = Balances;
 	type PotId = u32;
 	type SponsorshipType = SponsorshipType;
+	type PotDeposit = PotDeposit;
+	type UserDeposit = UserDeposit;
 	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
 }
 
@@ -183,7 +189,7 @@ parameter_types! {
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
-	pub RuntimeHoldReason: ();
+	// pub RuntimeHoldReason = ();
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -221,12 +227,14 @@ impl pallet_contracts::Config for Runtime {
 		pallet_contracts::migration::v13::Migration<Runtime>,
 		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
 		pallet_contracts::migration::v15::Migration<Runtime>,
+		// pallet_contracts::migration::codegen::BenchMigrations,
 	);
 	// TODO check all of here
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
-	type RuntimeHoldReason = RuntimeHoldReason;
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
 	type Debug = ();
+	
 	type Environment = ();
 }
 
