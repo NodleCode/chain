@@ -191,7 +191,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	.assimilate_storage(&mut t)
 	.unwrap();
 
-	frame_support::BasicExternalities::execute_with_storage(&mut t, || {
+	sp_state_machine::BasicExternalities::execute_with_storage(&mut t, || {
 		pallet_sponsorship::STORAGE_VERSION.put::<pallet_sponsorship::Pallet<Test>>();
 	});
 

@@ -412,7 +412,7 @@ sp_api::impl_runtime_apis! {
 			// specific and were causing some issues at compile time as they depend on the
 			// presence of the staking and elections pallets.
 
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, TrackedStorageKey, add_benchmark};
+			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, add_benchmark};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 
@@ -428,7 +428,7 @@ sp_api::impl_runtime_apis! {
 			}
 
 
-			let whitelist: Vec<TrackedStorageKey> = vec![
+			let whitelist: Vec<sp_storage::TrackedStorageKey> = vec![
 				// Block Number
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),
 				// Total Issuance
