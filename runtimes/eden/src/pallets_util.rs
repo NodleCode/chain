@@ -188,6 +188,8 @@ parameter_types! {
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
+	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
+	// pub RuntimeHoldReason = ();
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -219,10 +221,21 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 	type Migrations = (
-		pallet_contracts::migration::v10::Migration<Runtime>,
+		pallet_contracts::migration::v10::Migration<Runtime, Balances>,
 		pallet_contracts::migration::v11::Migration<Runtime>,
-		pallet_contracts::migration::v12::Migration<Runtime>,
+		pallet_contracts::migration::v12::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v13::Migration<Runtime>,
+		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v15::Migration<Runtime>,
+		// pallet_contracts::migration::codegen::BenchMigrations,
 	);
+	// TODO check all of here
+	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+	type MaxDelegateDependencies = ConstU32<32>;
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
+	type Debug = ();
+
+	type Environment = ();
 }
 
 parameter_types! {

@@ -77,6 +77,28 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
+	fn v13_migration_step() -> Weight {
+		// Minimum execution time: 12_060 nanoseconds.
+		Weight::from_parts(12_651_325_u64, 0)
+			// Standard Error: 8
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	fn v14_migration_step() -> Weight {
+		// Minimum execution time: 12_060 nanoseconds.
+		Weight::from_parts(12_651_325_u64, 0)
+			// Standard Error: 8
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	fn v15_migration_step() -> Weight {
+		// Minimum execution time: 12_060 nanoseconds.
+		Weight::from_parts(12_651_325_u64, 0)
+			// Standard Error: 8
+			.saturating_add(Weight::from_parts(1_529_u64, 0))
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 	// Storage: `Contracts::ContractInfoOf` (r:2 w:1)
 	// Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(290), added: 2765, mode: `Measured`)
 	// Storage: `System::Account` (r:1 w:0)
@@ -111,6 +133,22 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
 	/// The range of component `c` is `[0, 125952]`.
 	fn v12_migration_step(c: u32, ) -> Weight {
+		// Minimum execution time: 21_700 nanoseconds.
+		Weight::from_parts(24_230_211_u64, 0)
+			// Standard Error: 4
+			.saturating_add(Weight::from_parts(506_u64, 0).saturating_mul(c as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+	fn add_delegate_dependency(c: u32, ) -> Weight {
+		// Minimum execution time: 21_700 nanoseconds.
+		Weight::from_parts(24_230_211_u64, 0)
+			// Standard Error: 4
+			.saturating_add(Weight::from_parts(506_u64, 0).saturating_mul(c as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+	fn remove_delegate_dependency(c: u32, ) -> Weight {
 		// Minimum execution time: 21_700 nanoseconds.
 		Weight::from_parts(24_230_211_u64, 0)
 			// Standard Error: 4

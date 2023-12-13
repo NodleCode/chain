@@ -105,7 +105,7 @@ impl pallet_balances::Config for Runtime {
 	type MaxHolds = ConstU32<0>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
-	type RuntimeHoldReason = ();
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
 }
 
 parameter_types! {

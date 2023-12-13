@@ -15,7 +15,7 @@ export xcm_generic_extrinsic="report_holding, buy_execution, query_response, tra
 
 cargo build --profile release \
     --features=runtime-benchmarks \
-    --manifest-path=node/Cargo.toml 
+    --manifest-path=node/Cargo.toml || exit -1
 
 install -d temp_weights
 for PALLET in $internal
