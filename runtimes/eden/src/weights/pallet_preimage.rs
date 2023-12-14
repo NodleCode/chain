@@ -46,6 +46,12 @@ use core::marker::PhantomData;
 /// Weight functions for `pallet_preimage`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_preimage::WeightInfo for WeightInfo<T> {
+
+	// TODO get benchemarked version
+
+	fn ensure_updated(_: u32) -> cumulus_primitives_core::Weight {
+		Weight::from_parts(0, 0)
+	}
 	// Storage: `Preimage::StatusFor` (r:1 w:1)
 	// Proof: `Preimage::StatusFor` (`max_values`: None, `max_size`: Some(91), added: 2566, mode: `MaxEncodedLen`)
 	// Storage: `Preimage::PreimageFor` (r:0 w:1)

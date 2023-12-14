@@ -110,7 +110,7 @@ construct_runtime! {
 		Utility: pallet_utility = 40,
 		Multisig: pallet_multisig = 41,
 		Uniques: pallet_uniques::{Pallet, Storage, Event<T>} = 42,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
+		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>, HoldReason} = 43,
 		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 46,
