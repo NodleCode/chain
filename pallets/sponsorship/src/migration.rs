@@ -246,8 +246,8 @@ pub fn on_runtime_upgrade<T: Config>() -> Weight {
 	let mut weight: Weight = T::DbWeight::get().reads(1);
 
 	if StorageVersion::get::<Pallet<T>>() == 0 {
-		PotMigrationCursor::<T>::put(Pot::<T>::prefix_hash());
-		UserMigrationCursor::<T>::put(User::<T>::prefix_hash());
+		PotMigrationCursor::<T>::put(&Pot::<T>::prefix_hash());
+		UserMigrationCursor::<T>::put(&User::<T>::prefix_hash());
 		weight += T::DbWeight::get().reads_writes(2, 2);
 
 		// The following invocation of migration is only needed for testing the logic during the
