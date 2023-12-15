@@ -90,8 +90,8 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 	type MaxFreezes = ();
 	type WeightInfo = ();
-
 	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 
 const THREE_INFLATION_STEPS: &[Perbill] = &[

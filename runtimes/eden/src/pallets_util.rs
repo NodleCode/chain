@@ -266,4 +266,5 @@ impl pallet_identity::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
+	type IdentityInformation = (); //TODO check
 }
