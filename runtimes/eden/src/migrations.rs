@@ -17,7 +17,8 @@ where
 		+ pallet_xcm::Config
 		+ pallet_preimage::Config
 		+ pallet_multisig::Config
-		+ pallet_contracts::Config,
+		+ pallet_contracts::Config
+		+ pallet_uniques::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
 		// Pallets with no data to migrate, just update storage version block goes here:
@@ -97,6 +98,9 @@ where
 		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
+		// pallet_uniques adding a storage version not chaning anything
+		StorageVersion::new(1).put::<pallet_uniques::Pallet<T>>();
+
 		T::DbWeight::get().writes(6)
 	}
 
@@ -129,6 +133,10 @@ where
 		ensure!(
 			StorageVersion::get::<pallet_balances::Pallet<T>>() == 0,
 			TryRuntimeError::Other("pallet_balances storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_uniques storage version is not 0")
 		);
 
 		Ok(vec![])
