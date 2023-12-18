@@ -278,6 +278,7 @@ parameter_types! {
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
+	type TransactAsset = Balances;
 
 	fn worst_case_response() -> (u64, Response) {
 		(0u64, Response::Version(Default::default()))
@@ -347,6 +348,8 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
+	type DeliveryHelper = ();
+
 	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}

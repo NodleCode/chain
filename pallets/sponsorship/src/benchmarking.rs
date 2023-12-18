@@ -330,7 +330,7 @@ mod benchmarks {
 
 		#[block]
 		{
-			migrate_users::<T>(l as usize, starting_key);
+			migrate_users::<T>(l as usize, starting_key.to_vec());
 		}
 
 		users.iter().for_each(|user| {
@@ -374,7 +374,7 @@ mod benchmarks {
 
 		#[block]
 		{
-			migrate_pots::<T>(l as usize, starting_key);
+			migrate_pots::<T>(l as usize, starting_key.to_vec());
 		}
 
 		pots.iter().for_each(|pot| {
