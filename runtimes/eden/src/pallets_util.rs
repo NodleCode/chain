@@ -33,6 +33,7 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
 
+use pallet_identity::simple::IdentityInfo;
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
@@ -266,5 +267,5 @@ impl pallet_identity::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
-	type IdentityInformation = (); //TODO check
+	type IdentityInformation = IdentityInfo<MaxAdditionalFields>;
 }
