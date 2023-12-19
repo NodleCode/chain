@@ -48,7 +48,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// do the same thing.
 	// Non-consensus-breaking optimizations are about the only changes that could be made which
 	// would result in only the `impl_version` changing.
-	impl_version: 1,
+	impl_version: 0,
 
 	// Used for hardware wallets. This typically happens when `SignedExtra` changes.
 	transaction_version: 10,
