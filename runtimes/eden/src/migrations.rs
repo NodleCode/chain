@@ -1,4 +1,6 @@
+use frame_support::storage::unhashed::clear_prefix;
 use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
+use frame_support::Twox128;
 
 use frame_support::weights::Weight;
 use sp_core::Get;
@@ -20,6 +22,16 @@ where
 		+ pallet_contracts::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
+		use crate::sp_api_hidden_includes_construct_runtime::hidden_include::{
+			traits::PalletInfoAccess, StorageHasher,
+		};
+
+		// Delete all content for pallet_contracts
+		let module = <pallet_contracts::Pallet<T>>::name().as_bytes();
+		let multi_removal_result = clear_prefix(&Twox128::hash(module), None, None);
+		let w = T::DbWeight::get().writes((multi_removal_result.loops + multi_removal_result.unique).into());
+		StorageVersion::new(12).put::<pallet_contracts::Pallet<T>>();
+
 		// Pallets with no data to migrate, just update storage version block goes here:
 
 		// Pallet_scheduler:  1 key
@@ -97,7 +109,7 @@ where
 		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
 		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 
-		T::DbWeight::get().writes(6)
+		T::DbWeight::get().writes(6) + w
 	}
 
 	#[cfg(feature = "try-runtime")]
