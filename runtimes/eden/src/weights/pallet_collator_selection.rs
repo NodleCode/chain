@@ -166,7 +166,7 @@ impl<T: frame_system::Config> pallet_collator_selection::WeightInfo for WeightIn
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `r` is `[1, 1000]`.
 	/// The range of component `c` is `[1, 1000]`.
-	fn new_session(r: u32, c: u32, ) -> Weight {
+	fn new_session(_r: u32, c: u32, ) -> Weight {
 		// Minimum execution time: 30_720 nanoseconds.
 		Weight::from_parts(31_400_000_u64, 0)
 			// Standard Error: 970_248

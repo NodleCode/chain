@@ -80,9 +80,9 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	}
 	// Storage: `Benchmark::Override` (r:0 w:0)
 	// Proof: `Benchmark::Override` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	pub(crate) fn reserve_asset_deposited() -> Weight {
-		Weight::from_parts(500_000_000_000_u64, 0)
-	}
+	// pub(crate) fn reserve_asset_deposited() -> Weight {
+	// 	Weight::from_parts(500_000_000_000_u64, 0)
+	// }
 	// Storage: `ParachainInfo::ParachainId` (r:1 w:0)
 	// Proof: `ParachainInfo::ParachainId` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	// Storage: `PolkadotXcm::SupportedVersion` (r:1 w:0)
@@ -95,11 +95,11 @@ impl<T: frame_system::Config> WeightInfo<T> {
 	// Proof: `ParachainSystem::HostConfiguration` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	// Storage: `ParachainSystem::PendingUpwardMessages` (r:1 w:1)
 	// Proof: `ParachainSystem::PendingUpwardMessages` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	pub(crate) fn initiate_reserve_withdraw() -> Weight {
-		Weight::from_parts(46_920_000_u64, 0)
-			.saturating_add(T::DbWeight::get().reads(6_u64))
-			.saturating_add(T::DbWeight::get().writes(2_u64))
-	}
+	// pub(crate) fn initiate_reserve_withdraw() -> Weight {
+	// 	Weight::from_parts(46_920_000_u64, 0)
+	// 		.saturating_add(T::DbWeight::get().reads(6_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(2_u64))
+	// }
 	// Storage: `Benchmark::Override` (r:0 w:0)
 	// Proof: `Benchmark::Override` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	pub(crate) fn receive_teleported_asset() -> Weight {
