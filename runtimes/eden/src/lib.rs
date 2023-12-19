@@ -155,9 +155,9 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 pub type Migrations = (
-	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
+	// pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
 	// Migrate data as designed
-	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
+	// pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	// Run custom migrations
 	migrations::MultiMigration<Runtime>,
 );
