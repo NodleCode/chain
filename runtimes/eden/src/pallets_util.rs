@@ -219,9 +219,9 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 	type Migrations = (
-		pallet_contracts::migration::v10::Migration<Runtime>,
-		pallet_contracts::migration::v11::Migration<Runtime>,
-		pallet_contracts::migration::v12::Migration<Runtime>,
+		pallet_contracts::NoopMigration<10>,
+		pallet_contracts::NoopMigration<11>,
+		pallet_contracts::NoopMigration<12>,
 	);
 }
 
