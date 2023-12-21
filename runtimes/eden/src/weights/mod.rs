@@ -181,7 +181,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		_reserve: &xcm::latest::MultiLocation,
 		_xcm: &xcm::latest::Xcm<()>,
 	) -> Weight {
-		XcmGeneric::<Runtime>::initiate_reserve_withdraw()
+		XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw()
 	}
 
 	fn report_holding(_response_info: &QueryResponseInfo, _assets: &xcm::latest::MultiAssetFilter) -> Weight {
