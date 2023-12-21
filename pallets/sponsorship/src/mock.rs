@@ -95,6 +95,7 @@ impl pallet_balances::Config for Test {
 	type MaxFreezes = ();
 	type MaxHolds = ();
 	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 
 impl pallet_transaction_payment::Config for Test {

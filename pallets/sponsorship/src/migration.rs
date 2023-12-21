@@ -246,8 +246,8 @@ pub fn on_runtime_upgrade<T: Config>() -> Weight {
 	let mut weight: Weight = T::DbWeight::get().reads(1);
 
 	if StorageVersion::get::<Pallet<T>>() == 0 {
-		PotMigrationCursor::<T>::put(Pot::<T>::prefix_hash());
-		UserMigrationCursor::<T>::put(User::<T>::prefix_hash());
+		PotMigrationCursor::<T>::put(&Pot::<T>::prefix_hash()[..]);
+		UserMigrationCursor::<T>::put(&User::<T>::prefix_hash()[..]);
 		weight += T::DbWeight::get().reads_writes(2, 2);
 
 		// The following invocation of migration is only needed for testing the logic during the
@@ -305,10 +305,10 @@ pub(crate) fn pre_upgrade<T: Config>() -> Result<Vec<u8>, TryRuntimeError> {
 		T::PotId,
 		v0::PotDetailsOf<T>,
 		frame_support::Blake2_128Concat,
-	>(Pot::<T>::module_prefix(), Pot::<T>::storage_prefix())
+	>(Pot::<T>::pallet_prefix(), Pot::<T>::storage_prefix())
 	.collect::<Vec<_>>();
 	let user_details = frame_support::migration::storage_iter::<v0::UserDetailsOf<T>>(
-		User::<T>::module_prefix(),
+		User::<T>::pallet_prefix(),
 		User::<T>::storage_prefix(),
 	)
 	.collect::<Vec<_>>();

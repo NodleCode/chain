@@ -6,6 +6,7 @@ use super::{
 use crate::constants::NODL;
 use crate::implementations::DealWithFees;
 use codec::{Decode, Encode};
+use cumulus_primitives_core::ParaId;
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -18,6 +19,7 @@ use frame_system::EnsureRoot;
 use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::Sibling;
+use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
@@ -204,7 +206,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
-	type PriceForSiblingDelivery = ();
+	type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
 }
 impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -276,6 +278,7 @@ parameter_types! {
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
+	type TransactAsset = Balances;
 
 	fn worst_case_response() -> (u64, Response) {
 		(0u64, Response::Version(Default::default()))
@@ -345,6 +348,8 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
+	type DeliveryHelper = ();
+
 	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
