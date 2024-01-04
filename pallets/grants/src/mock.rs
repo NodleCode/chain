@@ -164,7 +164,6 @@ impl ExtBuilder {
 			balances: self
 				.endowed_accounts
 				.into_iter()
-				.map(|(account_id, initial_balance)| (account_id, initial_balance))
 				.collect::<Vec<_>>(),
 		}
 		.assimilate_storage(&mut storage)

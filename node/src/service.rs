@@ -24,7 +24,7 @@ use std::{sync::Arc, time::Duration};
 // rpc
 use jsonrpsee::RpcModule;
 
-pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Nonce};
+pub use primitives::{AccountId, Balance, Block, Nonce};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
@@ -494,10 +494,10 @@ pub async fn start_parachain_node(
 fn warn_if_slow_hardware(hwbench: &sc_sysinfo::HwBench) {
 	// Polkadot para-chains should generally use these requirements to ensure that the relay-chain
 	// will not take longer than expected to import its blocks.
-	if !frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.check_hardware(hwbench) {
+	if let Err(e) = frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.check_hardware(hwbench) {
 		log::warn!(
 			"⚠️  The hardware does not meet the minimal requirements for role 'Authority' find out more at:\n\
-			https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#reference-hardware"
+			https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#reference-hardware {e:?}"
 		);
 	}
 }
