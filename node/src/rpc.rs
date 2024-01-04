@@ -23,7 +23,7 @@ use std::sync::Arc;
 use primitives::{AccountId, Balance, Block, Nonce};
 
 use sc_client_api::AuxStore;
-pub use sc_rpc::{DenyUnsafe};
+pub use sc_rpc::DenyUnsafe;
 use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;

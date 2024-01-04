@@ -16,16 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{
-	constants, Runtime,
-	RuntimeEvent, XcmpQueue,
-};
+use crate::{constants, Runtime, RuntimeEvent, XcmpQueue};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{match_types, parameter_types};
 use xcm::latest::prelude::*;
-
-
 
 match_types! {
 	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };

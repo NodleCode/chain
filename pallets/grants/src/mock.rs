@@ -161,10 +161,7 @@ impl ExtBuilder {
 			});
 
 		pallet_balances::GenesisConfig::<Test> {
-			balances: self
-				.endowed_accounts
-				.into_iter()
-				.collect::<Vec<_>>(),
+			balances: self.endowed_accounts.into_iter().collect::<Vec<_>>(),
 		}
 		.assimilate_storage(&mut storage)
 		.unwrap_or_else(|err| {
