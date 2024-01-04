@@ -33,7 +33,7 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
 
-use pallet_identity::simple::IdentityInfo;
+use pallet_identity::legacy::IdentityInfo;
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 

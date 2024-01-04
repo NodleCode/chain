@@ -21,6 +21,7 @@ use crate::{
 	RuntimeEvent, XcmpQueue,
 };
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
+use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{match_types, parameter_types};
 use xcm::latest::prelude::*;
 
@@ -30,10 +31,14 @@ match_types! {
 	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
 }
 
+parameter_types! {
+	pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
+}
+
 impl cumulus_pallet_dmp_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ExecuteOverweightOrigin = EnsureRootOrMoreThanHalfOfTechComm;
+	type WeightInfo = ();
+	type DmpSink = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
 }
 
 parameter_types! {
@@ -45,11 +50,12 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type OnSystemEvent = ();
 	type SelfParaId = parachain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = XcmpQueue;
-	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
 	type XcmpMessageHandler = XcmpQueue;
 	type ReservedXcmpWeight = ();
 	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
+	type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
+	type WeightInfo = ();
 }
 
 impl parachain_info::Config for Runtime {}
