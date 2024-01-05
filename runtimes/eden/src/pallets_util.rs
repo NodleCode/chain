@@ -33,7 +33,7 @@ use frame_support::{
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
 
-use pallet_identity::simple::IdentityInfo;
+use pallet_identity::legacy::IdentityInfo;
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
@@ -244,6 +244,7 @@ impl pallet_contracts::Config for Runtime {
 	type Debug = ();
 
 	type Environment = ();
+	type Xcm = ();
 }
 
 parameter_types! {
@@ -253,19 +254,19 @@ parameter_types! {
 	pub const MaxSubAccounts: u32 = 100;
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
+	pub const ByteDeposit: Balance = constants::deposit(0, 1); // TODO give this a reasonable value
 }
 impl pallet_identity::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
-	type FieldDeposit = FieldDeposit;
 	type SubAccountDeposit = SubAccountDeposit;
 	type MaxSubAccounts = MaxSubAccounts;
-	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
 	type Slashed = DaoReserve;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
 	type IdentityInformation = IdentityInfo<MaxAdditionalFields>;
+	type ByteDeposit = ByteDeposit;
 }

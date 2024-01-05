@@ -22,7 +22,7 @@ use frame_support::pallet_prelude::Weight;
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
 use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
-pub use sp_runtime::{Perbill, Perquintill};
+pub use sp_runtime::Perbill;
 
 parameter_types! {
 	pub const CompanyReservePalletId: PalletId = PalletId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR

@@ -101,7 +101,7 @@ impl<T: frame_system::Config> pallet_collator_selection::WeightInfo for WeightIn
 	}
 	// Storage: `CollatorSelection::CandidacyBond` (r:0 w:1)
 	// Proof: `CollatorSelection::CandidacyBond` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
-	fn set_candidacy_bond() -> Weight {
+	fn set_candidacy_bond(_c: u32, _r:u32) -> Weight {
 		// Minimum execution time: 7_580 nanoseconds.
 		Weight::from_parts(7_960_000_u64, 0)
 			.saturating_add(T::DbWeight::get().writes(1_u64))
@@ -176,4 +176,14 @@ impl<T: frame_system::Config> pallet_collator_selection::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(c as u64)))
 	}
+
+fn update_bond(_c: u32) -> Weight {
+        // todo!()
+		Weight::from_parts(24_320_000_u64, 0)
+    }
+
+fn take_candidate_slot(_c: u32) -> Weight {
+        // todo!()
+		Weight::from_parts(24_320_000_u64, 0)
+    }
 }
