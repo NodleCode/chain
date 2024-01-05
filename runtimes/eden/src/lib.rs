@@ -141,6 +141,7 @@ mod benches {
 		[pallet_grants, Vesting]
 		[pallet_uniques, Uniques]
 		[pallet_nodle_uniques, NodleUniques]
+		[pallet_message_queue, MessageQueue]
 		[pallet_sponsorship, Sponsorship]
 		[pallet_utility, Utility]
 		[pallet_allocations, Allocations]
@@ -148,9 +149,10 @@ mod benches {
 		[pallet_contracts, Contracts]
 		[pallet_identity, Identity]
 		[pallet_membership, TechnicalMembership]
-		[pallet_xcm, PolkadotXcm]
+		// [pallet_xcm, PolkadotXcm]
 		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
 		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
+		[cumulus_pallet_parachain_system, ParachainSystem]
 	);
 }
 
