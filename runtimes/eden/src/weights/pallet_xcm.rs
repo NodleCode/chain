@@ -219,17 +219,22 @@ impl<T: frame_system::Config> pallet_xcm::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 
-fn new_query() -> Weight {
-	//TODO
-	Weight::from_parts(46_140_000_u64, 0)
-	.saturating_add(T::DbWeight::get().reads(9_u64))
-	.saturating_add(T::DbWeight::get().writes(4_u64))
-    }
+	fn new_query() -> Weight {
+		//TODO
+		Weight::from_parts(46_140_000_u64, 0)
+		.saturating_add(T::DbWeight::get().reads(9_u64))
+		.saturating_add(T::DbWeight::get().writes(4_u64))
+		}
 
-fn take_response() -> Weight {
-	//TODO
-	Weight::from_parts(46_140_000_u64, 0)
-	.saturating_add(T::DbWeight::get().reads(9_u64))
-	.saturating_add(T::DbWeight::get().writes(4_u64))
-    }
+	fn take_response() -> Weight {
+		//TODO
+		Weight::from_parts(46_140_000_u64, 0)
+		.saturating_add(T::DbWeight::get().reads(9_u64))
+		.saturating_add(T::DbWeight::get().writes(4_u64))
+		}
+
+	fn transfer_assets() -> Weight {
+			//TODO
+			Weight::from_parts(46_140_000_u64, 0)
+	}
 }
