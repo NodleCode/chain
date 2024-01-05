@@ -101,7 +101,7 @@ construct_runtime! {
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
 		ParachainInfo: parachain_info = 31,
 		CumulusXcm: cumulus_pallet_xcm = 32,
-		DmpQueue: cumulus_pallet_dmp_queue = 33,
+		MessageQueue: pallet_message_queue = 33,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 35,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,

@@ -164,7 +164,6 @@ impl xcm_executor::Config for XcmConfig {
 	type Aliasers = Nothing;
 }
 
-
 impl pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
