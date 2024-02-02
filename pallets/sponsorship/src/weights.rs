@@ -54,8 +54,6 @@ pub trait WeightInfo {
 	fn update_users_limits(l: u32, ) -> Weight;
 	fn pre_sponsor() -> Weight;
 	fn post_sponsor() -> Weight;
-	fn migrate_users(l: u32, ) -> Weight;
-	fn migrate_pots(l: u32, ) -> Weight;
 }
 
 /// Weight functions for `pallet_sponsorship`.
@@ -183,32 +181,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
-	// Storage: `Sponsorship::User` (r:1000 w:999)
-	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	// Storage: `Sponsorship::UserRegistrationCount` (r:999 w:999)
-	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `l` is `[1, 1000]`.
-	fn migrate_users(l: u32, ) -> Weight {
-		// Minimum execution time: 20_940 nanoseconds.
-		Weight::from_parts(22_090_000_u64, 0)
-			// Standard Error: 3_169
-			.saturating_add(Weight::from_parts(10_064_726_u64, 0).saturating_mul(l as u64))
-			.saturating_add(T::DbWeight::get().reads(1_u64))
-			.saturating_add(T::DbWeight::get().reads((2_u64).saturating_mul(l as u64)))
-			.saturating_add(T::DbWeight::get().writes((2_u64).saturating_mul(l as u64)))
-	}
-	// Storage: `Sponsorship::Pot` (r:1000 w:999)
-	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `l` is `[1, 1000]`.
-	fn migrate_pots(l: u32, ) -> Weight {
-		// Minimum execution time: 16_880 nanoseconds.
-		Weight::from_parts(17_420_000_u64, 0)
-			// Standard Error: 2_628
-			.saturating_add(Weight::from_parts(5_724_650_u64, 0).saturating_mul(l as u64))
-			.saturating_add(T::DbWeight::get().reads(1_u64))
-			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(l as u64)))
-			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(l as u64)))
-	}
 }
 
 impl WeightInfo for () {
@@ -333,31 +305,5 @@ impl WeightInfo for () {
 		Weight::from_parts(60_210_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
-	}
-	// Storage: `Sponsorship::User` (r:1000 w:999)
-	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	// Storage: `Sponsorship::UserRegistrationCount` (r:999 w:999)
-	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `l` is `[1, 1000]`.
-	fn migrate_users(l: u32, ) -> Weight {
-		// Minimum execution time: 20_940 nanoseconds.
-		Weight::from_parts(22_090_000_u64, 0)
-			// Standard Error: 3_169
-			.saturating_add(Weight::from_parts(10_064_726_u64, 0).saturating_mul(l as u64))
-			.saturating_add(RocksDbWeight::get().reads(1_u64))
-			.saturating_add(RocksDbWeight::get().reads((2_u64).saturating_mul(l as u64)))
-			.saturating_add(RocksDbWeight::get().writes((2_u64).saturating_mul(l as u64)))
-	}
-	// Storage: `Sponsorship::Pot` (r:1000 w:999)
-	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `l` is `[1, 1000]`.
-	fn migrate_pots(l: u32, ) -> Weight {
-		// Minimum execution time: 16_880 nanoseconds.
-		Weight::from_parts(17_420_000_u64, 0)
-			// Standard Error: 2_628
-			.saturating_add(Weight::from_parts(5_724_650_u64, 0).saturating_mul(l as u64))
-			.saturating_add(RocksDbWeight::get().reads(1_u64))
-			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(l as u64)))
-			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(l as u64)))
 	}
 }

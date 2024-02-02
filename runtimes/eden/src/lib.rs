@@ -185,11 +185,10 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 pub type Migrations = (
-	pallet_collator_selection::migration::v1::MigrateToV1<Runtime>,
-	// Migrate data as designed
-	pallet_multisig::migrations::v1::MigrateToV1<Runtime>,
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
+	// v1::MigrateToV1<Runtime>,
 	// Run custom migrations
+	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
 	migrations::MultiMigration<Runtime>,
 );
 /// Executive: handles dispatch to the various modules.
