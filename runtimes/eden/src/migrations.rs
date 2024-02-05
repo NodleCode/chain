@@ -23,6 +23,9 @@ where
 		+ pallet_message_queue::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
+		// Size of onchain storage is 0 safe to upgrade storage version
+		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
+		StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
 		// pallet_uniques adding a storage version not chaning anything
 		StorageVersion::new(1).put::<pallet_uniques::Pallet<T>>();
 
