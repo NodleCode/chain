@@ -19,7 +19,8 @@ where
 		+ pallet_multisig::Config
 		+ pallet_contracts::Config
 		+ pallet_uniques::Config
-		+ pallet_nodle_uniques::Config,
+		+ pallet_nodle_uniques::Config
+		+ pallet_message_queue::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
 		// Size of onchain storage is 0 safe to upgrade storage version
@@ -30,6 +31,7 @@ where
 
 		// Store version 0 for default
 		StorageVersion::new(0).put::<pallet_nodle_uniques::Pallet<T>>();
+		StorageVersion::new(0).put::<pallet_message_queue::Pallet<T>>();
 
 		T::DbWeight::get().writes(6)
 	}

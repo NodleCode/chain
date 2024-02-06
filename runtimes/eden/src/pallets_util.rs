@@ -19,18 +19,21 @@
 
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-	Timestamp,
+	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent,
+	RuntimeHoldReason, RuntimeOrigin, Timestamp,
 };
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
+	traits::{fungible::HoldConsideration, LinearStoragePrice},
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
+
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
 
+use pallet_identity::legacy::IdentityInfo;
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
@@ -96,6 +99,7 @@ impl pallet_scheduler::Config for Runtime {
 parameter_types! {
 	pub const PreimageBaseDeposit: Balance = constants::deposit(2, 64);
 	pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
+	pub const PreimageHoldReason: RuntimeHoldReason = RuntimeHoldReason::Preimage(pallet_preimage::HoldReason::Preimage);
 }
 
 #[allow(clippy::identity_op)]
@@ -104,8 +108,12 @@ impl pallet_preimage::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type BaseDeposit = PreimageBaseDeposit;
-	type ByteDeposit = PreimageByteDeposit;
+	type Consideration = HoldConsideration<
+		AccountId,
+		Balances,
+		PreimageHoldReason,
+		LinearStoragePrice<PreimageBaseDeposit, PreimageByteDeposit, Balance>,
+	>;
 }
 
 parameter_types! {
@@ -188,6 +196,8 @@ parameter_types! {
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
+	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
+	// pub RuntimeHoldReason = ();
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -219,10 +229,22 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 	type Migrations = (
-		pallet_contracts::migration::v10::Migration<Runtime>,
-		pallet_contracts::migration::v11::Migration<Runtime>,
-		pallet_contracts::migration::v12::Migration<Runtime>,
+		// 	pallet_contracts::migration::v10::Migration<Runtime, Balances>,
+		// 	pallet_contracts::migration::v11::Migration<Runtime>,
+		// 	pallet_contracts::migration::v12::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v13::Migration<Runtime>,
+		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v15::Migration<Runtime>,
+		// pallet_contracts::migration::codegen::BenchMigrations,
 	);
+	// TODO check all of here
+	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+	type MaxDelegateDependencies = ConstU32<32>;
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
+	type Debug = ();
+
+	type Environment = ();
+	type Xcm = ();
 }
 
 parameter_types! {
@@ -232,18 +254,19 @@ parameter_types! {
 	pub const MaxSubAccounts: u32 = 100;
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
+	pub const ByteDeposit: Balance = constants::deposit(0, 1); // TODO give this a reasonable value
 }
 impl pallet_identity::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
-	type FieldDeposit = FieldDeposit;
 	type SubAccountDeposit = SubAccountDeposit;
 	type MaxSubAccounts = MaxSubAccounts;
-	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
 	type Slashed = DaoReserve;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
+	type IdentityInformation = IdentityInfo<MaxAdditionalFields>;
+	type ByteDeposit = ByteDeposit;
 }

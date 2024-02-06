@@ -102,10 +102,11 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = frame_system::Pallet<Runtime>;
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
-	type MaxHolds = ConstU32<0>;
+	type MaxHolds = ConstU32<2>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
-	type RuntimeHoldReason = ();
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
+	type RuntimeFreezeReason = ();
 }
 
 parameter_types! {

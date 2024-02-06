@@ -20,8 +20,8 @@
 
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, TypeInfo},
+	sp_runtime::RuntimeDebug,
 	traits::tokens::Balance,
-	RuntimeDebug,
 };
 
 pub trait WithAccountId<AccountId> {

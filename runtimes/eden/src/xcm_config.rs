@@ -6,6 +6,7 @@ use super::{
 use crate::constants::NODL;
 use crate::implementations::DealWithFees;
 use codec::{Decode, Encode};
+use cumulus_primitives_core::ParaId;
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -13,13 +14,13 @@ use frame_support::{
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
 	weights::IdentityFee,
 	weights::Weight,
-	RuntimeDebug,
 };
 use frame_system::EnsureRoot;
-use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain::primitives::Sibling;
+use polkadot_parachain_primitives::primitives::Sibling;
+use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 use scale_info::TypeInfo;
+use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
 #[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;
@@ -162,11 +163,6 @@ impl xcm_executor::Config for XcmConfig {
 	type Aliasers = Nothing;
 }
 
-#[cfg(feature = "runtime-benchmarks")]
-parameter_types! {
-	pub ReachableDest: Option<MultiLocation> = Some(Parent.into());
-}
-
 impl pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type SendXcmOrigin = EnsureXcmOrigin<RuntimeOrigin, LocalOriginToLocation>;
@@ -189,22 +185,20 @@ impl pallet_xcm::Config for Runtime {
 	type MaxLockers = ConstU32<8>;
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_xcm::WeightInfo<Runtime>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type ReachableDest = ReachableDest;
 	type MaxRemoteLockConsumers = ConstU32<0>;
 	type RemoteLockConsumerIdentifier = ();
 }
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
 	type VersionWrapper = PolkadotXcm;
-	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
-	type PriceForSiblingDelivery = ();
+	type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
+	type XcmpQueue = ();
+	type MaxInboundSuspended = sp_core::ConstU32<1_000>;
 }
 impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -228,11 +222,11 @@ parameter_types! {
 parameter_types! {
 	pub SelfLocation: MultiLocation = MultiLocation::here();
 }
-parameter_type_with_key! {
-	pub ParachainMinFee: |_location: MultiLocation| -> Option<u128> {
-		None
-	};
-}
+// parameter_type_with_key! {
+// 	pub ParachainMinFee: |_location: MultiLocation| -> Option<u128> {
+// 		None
+// 	};
+// }
 #[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
 pub enum CurrencyId {
 	// NODL native token
@@ -247,33 +241,19 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 	}
 }
 
-impl orml_xtokens::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type CurrencyIdConvert = CurrencyIdConvert;
-	type AccountIdToMultiLocation = AccountIdToMultiLocation;
-	type SelfLocation = SelfLocation;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
-	type BaseXcmWeight = BaseXcmWeight;
-	type UniversalLocation = UniversalLocation;
-	type MaxAssetsForTransfer = MaxAssetsForTransfer;
-	type MinXcmFee = ParachainMinFee;
-	type MultiLocationsFilter = Everything;
-	type ReserveProvider = RelativeReserveProvider;
-}
-
 #[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
 	pub const TrustedTeleporter: Option<(MultiLocation, MultiAsset)> = Some((
 		MultiLocation::parent(),
 		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(100) }
 	));
+	pub const TrustedReserve: Option<(MultiLocation, MultiAsset)> = None;
+
 }
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
+	type TransactAsset = Balances;
 
 	fn worst_case_response() -> (u64, Response) {
 		(0u64, Response::Version(Default::default()))
@@ -331,6 +311,7 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type TransactAsset = Balances;
 	type CheckedAccount = ();
 	type TrustedTeleporter = TrustedTeleporter;
+	type TrustedReserve = TrustedReserve;
 	fn get_multi_asset() -> MultiAsset {
 		MultiAsset {
 			id: Concrete(NodlLocation::get()),
@@ -342,6 +323,8 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
+	type DeliveryHelper = ();
+
 	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
