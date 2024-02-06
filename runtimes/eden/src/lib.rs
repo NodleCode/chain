@@ -154,7 +154,7 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
-const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
+
 pub type Migrations = ();
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<

@@ -50,8 +50,6 @@ where
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
-		use frame_support::ensure;
-
 		log::info!("Post upgrade {_state:?}");
 
 		Ok(())

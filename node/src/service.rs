@@ -24,7 +24,7 @@ use std::{sync::Arc, time::Duration};
 // rpc
 use jsonrpsee::RpcModule;
 
-pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Nonce};
+pub use primitives::{AccountId, Balance, Block, Nonce};
 
 // Cumulus Imports
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};

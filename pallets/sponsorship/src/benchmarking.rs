@@ -309,6 +309,5 @@ mod benchmarks {
 		assert_eq!(user_detail.reserve_quota.balance(), T::Currency::minimum_balance());
 	}
 
-
 	impl_benchmark_test_suite!(Sponsorship, crate::mock::new_test_ext(), crate::mock::Test);
 }
