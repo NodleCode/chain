@@ -184,16 +184,17 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 
-
 pub type Migrations = (
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
-	// v1::MigrateToV1<Runtime>,
 	// Run custom migrations
+	//
+	// For polkadot 1.5.0
 	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
 	// cumulus_pallet_parachain_system::HostConf::migration::Migration<Runtime>, //  ::migration::v10::MigrateToV10<Runtime>,
-	// cumulus_pallet_ho	
-	// pallet_preimage::migration::v1::Migration<Runtime>,
+	// Try skip: cumulus_pallet_parachain_system::migration::Migration<Runtime>,
+	// cumulus_pallet_ho
 
+	// pallet_preimage::migration::v1::Migration<Runtime>,
 	migrations::MultiMigration<Runtime>,
 );
 /// Executive: handles dispatch to the various modules.
