@@ -26,15 +26,8 @@ where
 		+ pallet_message_queue::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
-		// Size of onchain storage is 0 safe to upgrade storage version
-		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
-		// StorageVersion::new(1).put::<pallet_preimage::Pallet<T>>();
-		// pallet_uniques adding a storage version not chaning anything
+		// pallet_uniques adding a storage version not changing anything
 		StorageVersion::new(1).put::<pallet_uniques::Pallet<T>>();
-
-		// Store version 0 for default
-		StorageVersion::new(0).put::<pallet_nodle_uniques::Pallet<T>>();
-		StorageVersion::new(0).put::<pallet_message_queue::Pallet<T>>();
 
 		// Version 1.5 Fixup two unmigrated storage blocks found on mainnet. HostConfiguration is automatically reloaded and Preimage/StatusFor is unused.
 		// [2024-02-06T11:29:36Z ERROR runtime::executive] - 0. error: Failed to decode storage item `ParachainSystem::HostConfiguration`
@@ -56,19 +49,6 @@ where
 			253, 57, 95, 170, 112, 42, 188, 5, 207, 200, 241, 243, 215, 36, 138, 208, 108, 237, 135,
 		];
 		let _ = frame_support::storage::unhashed::clear_prefix(&pre_image_status_for_key, Some(1), None);
-
-		// [2024-02-08T06:47:03Z INFO  runtime::frame-support] 🐥 New pallet "Mandate" detected in the runtime. The pallet has no defined storage version, so the on-chain version is being initialized to StorageVersion(0).
-		// [2024-02-08T06:47:03Z INFO  runtime::frame-support] 🐥 New pallet "MessageQueue" detected in the runtime. The pallet has no defined storage version, so the on-chain version is being initialized to StorageVersion(0).
-		// [2024-02-08T06:47:03Z INFO  runtime::frame-support] 🐥 New pallet "NodleUniques" detected in the runtime. The pallet has no defined storage version, so the on-chain version is being initialized to StorageVersion(0).
-		// [2024-02-08T06:47:03Z INFO  runtime::frame-support] 🐥 New pallet "Identity" detected in the runtime. The pallet has no defined storage version, so the on-chain version is being initialized to StorageVersion(0).
-		// [2024-02-08T06:47:03Z INFO  runtime::frame-support] 🐥 New pallet "DaoReserve" detected in the runtime. The pallet has no defined storage version, so the on-chain version is being initialized to StorageVersion(0).
-
-		StorageVersion::new(0).put::<pallet_mandate::Pallet<T>>();
-		StorageVersion::new(0).put::<pallet_message_queue::Pallet<T>>();
-		StorageVersion::new(0).put::<pallet_nodle_uniques::Pallet<T>>();
-		StorageVersion::new(0).put::<pallet_identity::Pallet<T>>();
-		StorageVersion::new(0).put::<pallet_message_queue::Pallet<T>>();
-		// StorageVersion::new(0).put::<pallet_reserve<pallet_reserve::pallet::Instance4>::Pallet<T>>();
 
 		T::DbWeight::get().writes(11)
 	}
