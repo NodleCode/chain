@@ -3,6 +3,9 @@ name: DevContainer
 on:
   schedule:
     - cron:  '0 0 * * 0'
+  pull_request:
+    branches:
+      - master
 
 jobs:
 
@@ -22,9 +25,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare Env 
+        id: prepare
+        run: |
+           ([[ ${{ github.event_name == 'pull_request' }} == true ]] && echo "push=never" || echo "push=always" ) >> $GITHUB_OUTPUT
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/nodlecode/devcontainer-chain
           cacheFrom: ghcr.io/nodlecode/devcontainer-chain
-          push: always
+          push: ${{ steps.prepare.outputs.push }}
