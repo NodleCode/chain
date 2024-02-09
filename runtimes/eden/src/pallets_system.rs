@@ -20,7 +20,7 @@
 
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
-	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+	RuntimeEvent, RuntimeOrigin, RuntimeTask, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
 use frame_support::pallet_prelude::ConstU32;
@@ -72,6 +72,7 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Nonce = Nonce;
 	type Block = crate::Block;
+	type RuntimeTask = RuntimeTask;
 }
 
 parameter_types! {

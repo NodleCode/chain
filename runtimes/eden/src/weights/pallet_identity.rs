@@ -46,6 +46,15 @@ use core::marker::PhantomData;
 /// Weight functions for `pallet_identity`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_identity::WeightInfo for WeightInfo<T> {
+    fn add_username_authority() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn remove_username_authority() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn set_username_for() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn accept_username() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn remove_expired_approval() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn set_primary_username() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+    fn remove_dangling_username() -> cumulus_primitives_core::Weight { Weight::from_parts(14_034_304_u64, 0) }
+
+
 	// Storage: `Identity::Registrars` (r:1 w:1)
 	// Proof: `Identity::Registrars` (`max_values`: Some(1), `max_size`: Some(1141), added: 1636, mode: `MaxEncodedLen`)
 	/// The range of component `r` is `[1, 19]`.

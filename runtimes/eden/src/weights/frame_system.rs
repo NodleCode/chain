@@ -46,6 +46,17 @@ use core::marker::PhantomData;
 /// Weight functions for `frame_system`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> frame_system::WeightInfo for WeightInfo<T> {
+
+	fn authorize_upgrade() -> Weight {
+		// Minimum execution time: 3_000 nanoseconds.
+		Weight::from_parts(3_622_385_u64, 0)
+	}
+	fn apply_authorized_upgrade() -> Weight {
+		// Minimum execution time: 3_000 nanoseconds.
+		Weight::from_parts(3_622_385_u64, 0)
+	}
+
+
 	/// The range of component `b` is `[0, 3932160]`.
 	fn remark(b: u32, ) -> Weight {
 		// Minimum execution time: 3_000 nanoseconds.
