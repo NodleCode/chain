@@ -93,7 +93,6 @@ where
 	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
 		+ sp_api::Metadata<Block>
 		+ sp_session::SessionKeys<Block>
-		// + sp_api::ApiExt<Block, StateBackend = sc_client_api::StateBackendFor<ParachainBackend, Block>>
 		+ sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>,
 	sc_client_api::StateBackendFor<ParachainBackend, Block>: StateBackend<BlakeTwo256>,
@@ -187,7 +186,6 @@ where
 	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
 		+ sp_api::Metadata<Block>
 		+ sp_session::SessionKeys<Block>
-		// + sp_api::ApiExt<Block, StateBackend = sc_client_api::StateBackendFor<ParachainBackend, Block>>
 		+ sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
@@ -240,7 +238,6 @@ where
 	let prometheus_registry = parachain_config.prometheus_registry().cloned();
 	let transaction_pool = params.transaction_pool.clone();
 	let import_queue_service = params.import_queue.service();
-	// TODO there should be more here:
 	let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =

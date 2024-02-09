@@ -222,11 +222,6 @@ parameter_types! {
 parameter_types! {
 	pub SelfLocation: MultiLocation = MultiLocation::here();
 }
-// parameter_type_with_key! {
-// 	pub ParachainMinFee: |_location: MultiLocation| -> Option<u128> {
-// 		None
-// 	};
-// }
 #[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
 pub enum CurrencyId {
 	// NODL native token
