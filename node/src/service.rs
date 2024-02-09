@@ -48,6 +48,7 @@ use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerH
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::KeystorePtr;
 use sp_runtime::traits::BlakeTwo256;
+use sp_state_machine::Backend as StateBackend;
 use substrate_prometheus_endpoint::Registry;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -92,10 +93,9 @@ where
 	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
 		+ sp_api::Metadata<Block>
 		+ sp_session::SessionKeys<Block>
-		// + sp_api::ApiExt<Block, StateBackend = sc_client_api::StateBackendFor<ParachainBackend, Block>>
 		+ sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>,
-	sc_client_api::StateBackendFor<ParachainBackend, Block>: sp_api::StateBackend<BlakeTwo256>,
+	sc_client_api::StateBackendFor<ParachainBackend, Block>: StateBackend<BlakeTwo256>,
 	BIQ: FnOnce(
 		Arc<ParachainClient<RuntimeApi>>,
 		ParachainBlockImport<RuntimeApi>,
@@ -186,13 +186,12 @@ where
 	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
 		+ sp_api::Metadata<Block>
 		+ sp_session::SessionKeys<Block>
-		// + sp_api::ApiExt<Block, StateBackend = sc_client_api::StateBackendFor<ParachainBackend, Block>>
 		+ sp_offchain::OffchainWorkerApi<Block>
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
 		+ frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
-	sc_client_api::StateBackendFor<ParachainBackend, Block>: sp_api::StateBackend<BlakeTwo256>,
+	sc_client_api::StateBackendFor<ParachainBackend, Block>: StateBackend<BlakeTwo256>,
 	RB: Fn(Arc<ParachainClient<RuntimeApi>>) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>,
 	BIQ: FnOnce(
 		Arc<ParachainClient<RuntimeApi>>,
@@ -239,7 +238,6 @@ where
 	let prometheus_registry = parachain_config.prometheus_registry().cloned();
 	let transaction_pool = params.transaction_pool.clone();
 	let import_queue_service = params.import_queue.service();
-	// TODO there should be more here:
 	let net_config = sc_network::config::FullNetworkConfiguration::new(&parachain_config.network);
 
 	let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
