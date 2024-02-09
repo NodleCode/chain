@@ -18,7 +18,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::pallet_prelude::{ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, TypeInfo};
+use frame_support::pallet_prelude::{
+	ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, StorageVersion, TypeInfo,
+};
 use frame_support::{
 	dispatch::{DispatchInfo, DispatchResult, Dispatchable, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
@@ -29,8 +31,7 @@ use frame_support::{
 };
 use pallet_transaction_payment::OnChargeTransaction;
 use sp_io::hashing::blake2_256;
-#[cfg(feature = "try-runtime")]
-use sp_runtime::TryRuntimeError;
+
 use sp_runtime::{
 	traits::{DispatchInfoOf, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
@@ -43,7 +44,7 @@ use sp_std::{
 };
 use support::LimitedBalance;
 
-pub use migration::STORAGE_VERSION;
+pub const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 pub use pallet::*;
 
 #[cfg(test)]
@@ -55,7 +56,6 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-pub(crate) mod migration;
 pub mod weights;
 pub use weights::*;
 
@@ -122,7 +122,7 @@ pub mod pallet {
 	use scale_info::prelude::boxed::Box;
 
 	#[pallet::pallet]
-	#[pallet::storage_version(migration::STORAGE_VERSION)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
@@ -565,26 +565,6 @@ pub mod pallet {
 
 			Self::deposit_event(Event::PotSponsorshipTypeUpdated { pot, sponsorship_type });
 			Ok(())
-		}
-	}
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
-			migration::on_initialize::<T>(n)
-		}
-
-		fn on_runtime_upgrade() -> Weight {
-			migration::on_runtime_upgrade::<T>()
-		}
-
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<Vec<u8>, TryRuntimeError> {
-			migration::pre_upgrade::<T>()
-		}
-
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
-			migration::post_upgrade::<T>(_state)
 		}
 	}
 }
