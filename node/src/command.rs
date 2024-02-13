@@ -15,10 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+use crate::{
+	chain_spec,
+	cli::{Cli, RelayChainCli, Subcommand},
+	service::new_partial,
+};
 use cumulus_primitives_core::ParaId;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use log::info;
-use runtime_eden::{Block, RuntimeApi};
+use runtime_eden::Block;
+
 use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams, NetworkParams, Result,
 	SharedParams, SubstrateCli,
@@ -26,13 +32,7 @@ use sc_cli::{
 use sc_service::config::{BasePath, PrometheusConfig};
 use sp_runtime::traits::AccountIdConversion;
 use std::net::SocketAddr;
-
-use crate::{
-	chain_spec,
-	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, parachain_build_import_queue},
-};
-
+// OBS import parachain_build_import_queue
 // default to Nodle parachain id
 const DEFAULT_PARA_ID: u32 = 2026;
 
@@ -118,13 +118,7 @@ macro_rules! construct_async_run {
 	(|$components:ident, $cli:ident, $cmd:ident, $config:ident| $( $code:tt )* ) => {{
 		let runner = $cli.create_runner($cmd)?;
 		runner.async_run(|$config| {
-			let $components = new_partial::<
-				RuntimeApi,
-				_
-			>(
-				&$config,
-				parachain_build_import_queue,
-			)?;
+			let $components = new_partial(&$config)?;
 			let task_manager = $components.task_manager;
 			{ $( $code )* }.map(|v| (v, task_manager))
 		})
@@ -182,8 +176,10 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::ExportGenesisState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| {
-				let partials = new_partial(&config, parachain_build_import_queue)?;
-				cmd.run(&*config.chain_spec, &*partials.client)
+				let partials = new_partial(&config)?;
+				let client = partials.client.clone();
+				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
+				cmd.run(&*spec, &*client)
 			})
 		}
 		Some(Subcommand::ExportGenesisWasm(cmd)) => {
@@ -209,7 +205,7 @@ pub fn run() -> Result<()> {
 					}
 				}
 				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+					let partials = new_partial(&config)?;
 					cmd.run(partials.client)
 				}),
 				#[cfg(not(feature = "runtime-benchmarks"))]
@@ -220,7 +216,7 @@ pub fn run() -> Result<()> {
 				)),
 				#[cfg(feature = "runtime-benchmarks")]
 				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
-					let partials = new_partial::<RuntimeApi, _>(&config, parachain_build_import_queue)?;
+					let partials = new_partial(&config)?;
 					let db = partials.backend.expose_db();
 					let storage = partials.backend.expose_storage();
 
