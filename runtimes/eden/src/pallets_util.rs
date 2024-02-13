@@ -18,9 +18,9 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, constants::DAYS,  implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent,
-	RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
+	constants, constants::DAYS, implementations::RelayChainBlockNumberProvider,
+	pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip,
+	Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
 };
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
@@ -35,7 +35,7 @@ use pallet_contracts::{Frame, Schedule};
 
 use pallet_identity::legacy::IdentityInfo;
 use primitives::{AccountId, Balance};
-use sp_runtime::{Perbill,traits::Verify};
+use sp_runtime::{traits::Verify, Perbill};
 
 parameter_types! {
 	pub const MaxSchedule: u32 = 100;

@@ -47,7 +47,6 @@ use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 
-// OBS use sp_consensus::Proposer;
 use sp_keystore::KeystorePtr;
 use substrate_prometheus_endpoint::Registry;
 
@@ -171,9 +170,6 @@ async fn start_node_impl(
 	polkadot_config: Configuration,
 	collator_options: CollatorOptions,
 	para_id: ParaId,
-	// OBS	_rpc_ext_builder: RB,
-	// OBS	build_import_queue: BIQ,
-	// OBS	build_consensus: BIC,
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> sc_service::error::Result<(TaskManager, Arc<ParachainClient>)> {
 	let parachain_config = prepare_node_config(parachain_config);
@@ -197,7 +193,6 @@ async fn start_node_impl(
 	.await
 	.map_err(|e| sc_service::Error::Application(Box::new(e) as Box<_>))?;
 
-	// OBS	let force_authoring = parachain_config.force_authoring;
 	let validator = parachain_config.role.is_authority();
 	let prometheus_registry = parachain_config.prometheus_registry().cloned();
 	let transaction_pool = params.transaction_pool.clone();
@@ -253,14 +248,14 @@ async fn start_node_impl(
 		}
 
 		// OBS
-		// if let Some(ref mut telemetry) = telemetry {
-		// 	let telemetry_handle = telemetry.handle();
-		// 	task_manager.spawn_handle().spawn(
-		// 		"telemetry_hwbench",
-		// 		None,
-		// 		sc_sysinfo::initialize_hwbench_telemetry(telemetry_handle, hwbench),
-		// 	);
-		// }
+		if let Some(ref mut telemetry) = telemetry {
+			let telemetry_handle = telemetry.handle();
+			task_manager.spawn_handle().spawn(
+				"telemetry_hwbench",
+				None,
+				sc_sysinfo::initialize_hwbench_telemetry(telemetry_handle, hwbench),
+			);
+		}
 	}
 
 	let announce_block = {
