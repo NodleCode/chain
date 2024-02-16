@@ -67,6 +67,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Nonce = u32;
+	type RuntimeTask = ();
 }
 parameter_types! {
 	pub const MaxLocks: u32 = 50;
