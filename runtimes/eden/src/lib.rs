@@ -192,7 +192,7 @@ pub type Migrations = (
 	//
 	// For polkadot 1.5.0
 	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
-	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 10>,
+	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,
 	migrations::MultiMigration<Runtime>,
 );
 /// Executive: handles dispatch to the various modules.

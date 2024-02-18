@@ -15,8 +15,8 @@ where
 		+ pallet_collective::Config<pallet_collective::pallet::Instance1>
 		+ pallet_collator_selection::Config
 		+ pallet_xcm::Config
-		+ pallet_identity::Config
 		+ pallet_preimage::Config
+		+ pallet_identity::Config
 		+ pallet_multisig::Config
 		+ pallet_contracts::Config
 		+ pallet_uniques::Config
@@ -51,6 +51,10 @@ where
 		];
 		let _ = frame_support::storage::unhashed::clear_prefix(&pre_image_status_for_key, Some(1), None);
 
+		// Storage migration `pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,` does not update
+		// StorageVersion on chain.
+
+		StorageVersion::new(1).put::<pallet_identity::Pallet<T>>();
 		T::DbWeight::get().writes(11)
 	}
 
