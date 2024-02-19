@@ -247,7 +247,6 @@ async fn start_node_impl(
 			warn_if_slow_hardware(&hwbench);
 		}
 
-		// OBS
 		if let Some(ref mut telemetry) = telemetry {
 			let telemetry_handle = telemetry.handle();
 			task_manager.spawn_handle().spawn(

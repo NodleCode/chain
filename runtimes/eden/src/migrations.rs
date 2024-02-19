@@ -15,8 +15,8 @@ where
 		+ pallet_collective::Config<pallet_collective::pallet::Instance1>
 		+ pallet_collator_selection::Config
 		+ pallet_xcm::Config
-		+ pallet_preimage::Config
 		+ pallet_identity::Config
+		+ pallet_preimage::Config
 		+ pallet_multisig::Config
 		+ pallet_contracts::Config
 		+ pallet_uniques::Config
