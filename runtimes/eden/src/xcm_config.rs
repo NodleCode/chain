@@ -281,6 +281,10 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 	type TransactAsset = Balances;
 
+	fn fee_asset() -> Result<MultiAsset, BenchmarkError> {
+		Err(BenchmarkError::Skip)
+	}
+
 	fn worst_case_response() -> (u64, Response) {
 		(0u64, Response::Version(Default::default()))
 	}
