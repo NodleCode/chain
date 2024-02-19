@@ -281,8 +281,10 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 	type TransactAsset = Balances;
 
+	//TODO put a realistic value here:
 	fn fee_asset() -> Result<MultiAsset, BenchmarkError> {
-		Err(BenchmarkError::Skip)
+		let assets: MultiAsset = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
+		Ok(assets)
 	}
 
 	fn worst_case_response() -> (u64, Response) {
