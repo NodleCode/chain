@@ -73,7 +73,6 @@ pub use pallets_consensus::SessionKeys;
 pub use version::native_version;
 pub use version::VERSION;
 
-use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
 construct_runtime! {
 	pub enum Runtime {
 		// System
@@ -427,7 +426,7 @@ sp_api::impl_runtime_apis! {
 			// We did not include the offences and sessions benchmarks as they are parity
 			// specific and were causing some issues at compile time as they depend on the
 			// presence of the staking and elections pallets.
-
+			use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
 
 			use crate::constants::EXISTENTIAL_DEPOSIT;
