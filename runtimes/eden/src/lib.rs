@@ -73,6 +73,7 @@ pub use pallets_consensus::SessionKeys;
 pub use version::native_version;
 pub use version::VERSION;
 
+use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
 construct_runtime! {
 	pub enum Runtime {
 		// System
@@ -129,6 +130,8 @@ construct_runtime! {
 		Contracts: pallet_contracts = 62,
 	}
 }
+#[cfg(feature = "runtime-benchmarks")]
+use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
@@ -151,7 +154,7 @@ mod benches {
 		[pallet_contracts, Contracts]
 		[pallet_identity, Identity]
 		[pallet_membership, TechnicalMembership]
-		// [pallet_xcm, PolkadotXcm]
+		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
 		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
 		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
 		[cumulus_pallet_parachain_system, ParachainSystem]
@@ -426,6 +429,29 @@ sp_api::impl_runtime_apis! {
 			// presence of the staking and elections pallets.
 
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
+
+			use crate::constants::EXISTENTIAL_DEPOSIT;
+
+			impl pallet_xcm::benchmarking::Config for Runtime {
+				fn reachable_dest() -> Option<MultiLocation> {
+					Some(Parent.into())
+				}
+
+				fn teleportable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
+					// Relay/native token can be teleported between People and Relay.
+					Some((
+						MultiAsset {
+							fun: Fungible(EXISTENTIAL_DEPOSIT),
+							id: Parent.into()
+						},
+						Parent.into(),
+					))
+				}
+
+				fn reserve_transferable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
+					None
+				}
+			}
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 

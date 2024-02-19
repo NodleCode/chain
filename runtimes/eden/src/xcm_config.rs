@@ -9,6 +9,11 @@ use codec::{Decode, Encode};
 use cumulus_primitives_core::ParaId;
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
+
+// #[cfg(feature="runtime-benchmarks")]
+// impl pallet_xcm::benchmarking::Config for Runtime {
+
+// }
 use frame_support::{
 	match_types, parameter_types,
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
@@ -225,6 +230,11 @@ parameter_types! {
 parameter_types! {
 	pub SelfLocation: MultiLocation = MultiLocation::here();
 }
+parameter_type_with_key! {
+	pub ParachainMinFee: |_location: MultiLocation| -> Option<u128> {
+		None
+	};
+}
 #[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
 pub enum CurrencyId {
 	// NODL native token
@@ -237,17 +247,6 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 			CurrencyId::NodleNative => Some(NodlLocation::get()),
 		}
 	}
-}
-
-// TODO
-parameter_type_with_key! {
-	pub ParachainMinFee: |location: MultiLocation| -> Option<u128> {
-		#[allow(clippy::match_ref_pats)] // false positive
-		match (location.parents, location.first_interior()) {
-			(1, Some(Parachain(2))) => Some(40),  //TODO this is from a MOCK
-			_ => None,
-		}
-	};
 }
 
 impl orml_xtokens::Config for Runtime {
