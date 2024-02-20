@@ -106,9 +106,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn reserve_asset_deposited(assets: &xcm::latest::MultiAssets) -> Weight {
-		// TODO CHA-407 #738 create benchmark for reserve_asset_deposited
-		// in pallet_xcm_benchmarks_fungible::WeightInfo and use it here
-		assets.weigh_multi_assets(Weight::from_parts(2_000_000_000_000_u64, 0))
+		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::reserve_asset_deposited())
 	}
 
 	fn receive_teleported_asset(assets: &xcm::latest::MultiAssets) -> Weight {
