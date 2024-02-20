@@ -197,7 +197,6 @@ parameter_types! {
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
-	// pub RuntimeHoldReason = ();
 }
 
 impl pallet_contracts::Config for Runtime {

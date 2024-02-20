@@ -9,11 +9,6 @@ use codec::{Decode, Encode};
 use cumulus_primitives_core::ParaId;
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
-
-// #[cfg(feature="runtime-benchmarks")]
-// impl pallet_xcm::benchmarking::Config for Runtime {
-
-// }
 use frame_support::{
 	match_types, parameter_types,
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
