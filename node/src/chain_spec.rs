@@ -228,18 +228,6 @@ fn local_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 				get_account_id_from_seed::<sr25519::Public>("Bob"),
 				get_collator_keys_from_seed("Bob"),
 			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				get_collator_keys_from_seed("Charlie"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Dave"),
-				get_collator_keys_from_seed("Dave"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Eve"),
-				get_collator_keys_from_seed("Eve"),
-			),
 		],
 		None,
 		id,
