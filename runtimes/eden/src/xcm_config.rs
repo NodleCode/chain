@@ -4,9 +4,8 @@ use super::{
 };
 #[cfg(feature = "runtime-benchmarks")]
 use crate::constants::NODL;
-use crate::implementations::DealWithFees;
+use crate::{implementations::DealWithFees, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
-use cumulus_primitives_core::ParaId;
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -19,7 +18,6 @@ use frame_system::EnsureRoot;
 use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::Sibling;
-use polkadot_runtime_common::xcm_sender::NoPriceForMessageDelivery;
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
@@ -192,6 +190,16 @@ impl pallet_xcm::Config for Runtime {
 	type RemoteLockConsumerIdentifier = ();
 }
 
+parameter_types! {
+	/// The asset ID for the asset that we use to pay for message delivery fees.
+	pub FeeAssetId: AssetId = Concrete(NodlLocation::get());
+	/// The base fee for the message delivery fees.
+	pub const BaseDeliveryFee: u128 = crate::constants::NODL.saturating_mul(3);
+}
+
+pub type PriceForSiblingParachainDelivery =
+	polkadot_runtime_common::xcm_sender::ExponentialPrice<FeeAssetId, BaseDeliveryFee, TransactionByteFee, XcmpQueue>;
+
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ChannelInfo = ParachainSystem;
@@ -199,7 +207,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
-	type PriceForSiblingDelivery = NoPriceForMessageDelivery<ParaId>;
+	type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
 	type XcmpQueue = ();
 	type MaxInboundSuspended = sp_core::ConstU32<1_000>;
 }

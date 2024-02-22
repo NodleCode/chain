@@ -232,7 +232,6 @@ impl pallet_contracts::Config for Runtime {
 		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
 		pallet_contracts::migration::v15::Migration<Runtime>,
 	);
-	// TODO check all of here
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = crate::RuntimeHoldReason;
