@@ -53,8 +53,8 @@ where
 
 		// Storage migration `pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,` does not update
 		// StorageVersion on chain.
-
 		StorageVersion::new(1).put::<pallet_identity::Pallet<T>>();
+
 		T::DbWeight::get().writes(11)
 	}
 
@@ -67,6 +67,10 @@ where
 		ensure!(
 			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 0,
 			TryRuntimeError::Other("pallet_uniques storage version is not 0")
+		);
+		ensure!(
+			StorageVersion::get::<pallet_identity::Pallet<T>>() == 0,
+			TryRuntimeError::Other("pallet_identity storage version is not 0")
 		);
 
 		Ok(vec![])

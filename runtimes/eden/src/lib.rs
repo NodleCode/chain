@@ -34,8 +34,6 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 	)
 }
 
-use core::u64;
-
 use constants::RuntimeBlockWeights;
 use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
@@ -193,7 +191,7 @@ pub type Migrations = (
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
 	// Run custom migrations
 	//
-	// For polkadot 1.5.0
+	// For polkadot 1.6.0
 	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
 	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,
 	migrations::MultiMigration<Runtime>,
