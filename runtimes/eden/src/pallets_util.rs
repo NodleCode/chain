@@ -153,10 +153,12 @@ impl pallet_uniques::Config for Runtime {
 pub enum SponsorshipType {
 	AnySafe,
 	Uniques,
+	// Nft,
 }
 impl InstanceFilter<RuntimeCall> for SponsorshipType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
+			// SponsorshipType::Nft => matches!(c, RuntimeCall::Utility {  })
 			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Utility { .. }),
 			SponsorshipType::Uniques => matches!(c, RuntimeCall::NodleUniques { .. }),
 		}
