@@ -189,9 +189,6 @@ const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 
 pub type Migrations = (
 	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
-	// Run custom migrations
-	//
-	// For polkadot 1.6.0
 	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
 	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,
 	migrations::MultiMigration<Runtime>,
@@ -375,7 +372,6 @@ sp_api::impl_runtime_apis! {
 				constants::CONTRACTS_DEBUG_OUTPUT,
 				pallet_contracts::CollectEvents::UnsafeCollect,
 			)
-
 		}
 
 		fn upload_code(
@@ -404,10 +400,6 @@ sp_api::impl_runtime_apis! {
 			use frame_benchmarking::{Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 
-			// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
-			// issues. To get around that, we separated the Session benchmarks into its own crate,
-			// which is why we need these two lines below.
-			// use pallet_loans_benchmarking::Pallet as LoansBench;
 			use frame_system_benchmarking::Pallet as SystemBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
