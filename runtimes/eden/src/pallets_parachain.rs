@@ -40,12 +40,6 @@ parameter_types! {
 	pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
 }
 
-// impl cumulus_pallet_dmp_queue::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-//     type DmpSink = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
-//     type WeightInfo = ();  // TODO check this ()
-// }
-
 impl pallet_message_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
