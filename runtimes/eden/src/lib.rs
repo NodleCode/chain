@@ -423,9 +423,6 @@ sp_api::impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			// We did not include the offences and sessions benchmarks as they are parity
-			// specific and were causing some issues at compile time as they depend on the
-			// presence of the staking and elections pallets.
 			use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
 
