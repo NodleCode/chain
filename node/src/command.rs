@@ -32,7 +32,6 @@ use sc_cli::{
 use sc_service::config::{BasePath, PrometheusConfig};
 use sp_runtime::traits::AccountIdConversion;
 use std::net::SocketAddr;
-// OBS import parachain_build_import_queue
 // default to Nodle parachain id
 const DEFAULT_PARA_ID: u32 = 2026;
 
