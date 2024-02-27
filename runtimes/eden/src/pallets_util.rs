@@ -234,7 +234,7 @@ impl pallet_contracts::Config for Runtime {
 	);
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
-	type RuntimeHoldReason = crate::RuntimeHoldReason;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	type Debug = ();
 
 	type Environment = ();
