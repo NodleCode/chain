@@ -416,7 +416,7 @@ sp_api::impl_runtime_apis! {
 			use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
 
-			use crate::constants::EXISTENTIAL_DEPOSIT;
+			use crate::constants::POLKADOT_EXISTENTIAL_DEPOSIT;
 
 			impl pallet_xcm::benchmarking::Config for Runtime {
 				fn reachable_dest() -> Option<MultiLocation> {
@@ -427,7 +427,7 @@ sp_api::impl_runtime_apis! {
 					// Relay/native token can be teleported between People and Relay.
 					Some((
 						MultiAsset {
-							fun: Fungible(EXISTENTIAL_DEPOSIT),
+							fun: Fungible(POLKADOT_EXISTENTIAL_DEPOSIT),
 							id: Parent.into()
 						},
 						Parent.into(),
