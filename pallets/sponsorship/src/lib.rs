@@ -279,7 +279,7 @@ pub mod pallet {
 			reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			ensure!(!Pot::<T>::contains_key(pot), Error::<T>::InUse);
 
 			T::Currency::reserve(&who, T::PotDeposit::get())?;
@@ -313,7 +313,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_pot())]
 		pub fn remove_pot(origin: OriginFor<T>, pot: T::PotId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			Pot::<T>::try_mutate(pot, |maybe_pot_details| -> DispatchResult {
 				let pot_details = maybe_pot_details.as_mut().ok_or(Error::<T>::InUse)?;
 				ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
@@ -342,7 +342,7 @@ pub mod pallet {
 			common_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
@@ -389,7 +389,7 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::remove_users(users.len() as u32))]
 		pub fn remove_users(origin: OriginFor<T>, pot: T::PotId, users: Vec<T::AccountId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 			for user in users.clone() {
@@ -452,7 +452,7 @@ pub mod pallet {
 			call: Box<<T as Config>::RuntimeCall>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
@@ -484,7 +484,7 @@ pub mod pallet {
 			new_reserve_quota: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			let mut pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -519,7 +519,7 @@ pub mod pallet {
 			users: Vec<T::AccountId>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::migration_in_progress()?;
+			Self::ensure_migration_completed()?;
 			let pot_details = Pot::<T>::get(pot).ok_or(Error::<T>::PotNotExist)?;
 			ensure!(pot_details.sponsor == who, Error::<T>::NoPermission);
 
@@ -678,7 +678,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn migration_in_progress() -> Result<(), Error<T>> {
+	fn ensure_migration_completed() -> Result<(), Error<T>> {
 		if Self::on_chain_storage_version() < Self::current_storage_version() {
 			Err(Error::<T>::MigrationInProgress)
 		} else {
