@@ -792,7 +792,8 @@ where
 		info: &DispatchInfoOf<Self::Call>,
 		len: usize,
 	) -> TransactionValidity {
-		Self::validate_sponsor_call(who, call, info, len).map(|_| Ok(ValidTransaction::default()))?
+		Self::validate_sponsor_call(who, call, info, len)?;
+		Ok(ValidTransaction::default())
 	}
 
 	fn pre_dispatch(

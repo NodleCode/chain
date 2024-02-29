@@ -226,6 +226,16 @@ mod benchmarks {
 	}
 
 	#[benchmark]
+	fn fn_validate() {
+		let v = pallet::Pallet::<T>::validate_sponsor_call();
+
+		#[block]
+		{
+			assert!(v.is_ok);
+		}
+	}
+
+	#[benchmark]
 	fn pre_sponsor() {
 		let sponsor: T::AccountId = account("sponsor", 0, SEED);
 		let pot = 11u32.into();

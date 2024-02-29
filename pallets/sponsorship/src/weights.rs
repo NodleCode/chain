@@ -64,8 +64,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn create_pot() -> Weight {
-		// Minimum execution time: 32_769 nanoseconds.
-		Weight::from_parts(33_306_000_u64, 0)
+		// Minimum execution time: 32_880 nanoseconds.
+		Weight::from_parts(33_985_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -76,8 +76,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::User` (r:1 w:0)
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn remove_pot() -> Weight {
-		// Minimum execution time: 23_806 nanoseconds.
-		Weight::from_parts(24_290_000_u64, 0)
+		// Minimum execution time: 24_205 nanoseconds.
+		Weight::from_parts(25_120_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -86,16 +86,16 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn update_pot_limits() -> Weight {
-		// Minimum execution time: 17_820 nanoseconds.
-		Weight::from_parts(18_476_000_u64, 0)
+		// Minimum execution time: 18_291 nanoseconds.
+		Weight::from_parts(18_870_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn update_sponsorship_type() -> Weight {
-		// Minimum execution time: 15_598 nanoseconds.
-		Weight::from_parts(24_608_000_u64, 0)
+		// Minimum execution time: 14_668 nanoseconds.
+		Weight::from_parts(15_410_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -111,10 +111,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn register_users(l: u32, ) -> Weight {
-		// Minimum execution time: 55_922 nanoseconds.
-		Weight::from_parts(830_608_152_u64, 0)
-			// Standard Error: 50_735
-			.saturating_add(Weight::from_parts(22_399_786_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 54_519 nanoseconds.
+		Weight::from_parts(750_997_581_u64, 0)
+			// Standard Error: 48_272
+			.saturating_add(Weight::from_parts(22_686_755_u64, 0).saturating_mul(l as u64))
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().reads((4_u64).saturating_mul(l as u64)))
 			.saturating_add(T::DbWeight::get().writes((4_u64).saturating_mul(l as u64)))
@@ -131,10 +131,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn remove_users(l: u32, ) -> Weight {
-		// Minimum execution time: 80_971 nanoseconds.
-		Weight::from_parts(81_816_000_u64, 0)
-			// Standard Error: 48_548
-			.saturating_add(Weight::from_parts(69_136_645_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 82_416 nanoseconds.
+		Weight::from_parts(83_038_000_u64, 0)
+			// Standard Error: 42_912
+			.saturating_add(Weight::from_parts(70_094_474_u64, 0).saturating_mul(l as u64))
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().reads((4_u64).saturating_mul(l as u64)))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
@@ -148,10 +148,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn update_users_limits(l: u32, ) -> Weight {
-		// Minimum execution time: 19_733 nanoseconds.
-		Weight::from_parts(19_910_000_u64, 0)
-			// Standard Error: 7_405
-			.saturating_add(Weight::from_parts(6_090_488_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 19_269 nanoseconds.
+		Weight::from_parts(19_558_000_u64, 0)
+			// Standard Error: 7_281
+			.saturating_add(Weight::from_parts(5_868_202_u64, 0).saturating_mul(l as u64))
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(l as u64)))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
@@ -164,8 +164,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `System::Account` (r:2 w:2)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	fn pre_sponsor() -> Weight {
-		// Minimum execution time: 46_903 nanoseconds.
-		Weight::from_parts(47_893_000_u64, 0)
+		// Minimum execution time: 45_955 nanoseconds.
+		Weight::from_parts(46_861_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
@@ -176,8 +176,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::Pot` (r:0 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn post_sponsor() -> Weight {
-		// Minimum execution time: 41_577 nanoseconds.
-		Weight::from_parts(42_712_000_u64, 0)
+		// Minimum execution time: 41_084 nanoseconds.
+		Weight::from_parts(41_662_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -189,8 +189,8 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn create_pot() -> Weight {
-		// Minimum execution time: 32_769 nanoseconds.
-		Weight::from_parts(33_306_000_u64, 0)
+		// Minimum execution time: 32_880 nanoseconds.
+		Weight::from_parts(33_985_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
@@ -201,8 +201,8 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::User` (r:1 w:0)
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn remove_pot() -> Weight {
-		// Minimum execution time: 23_806 nanoseconds.
-		Weight::from_parts(24_290_000_u64, 0)
+		// Minimum execution time: 24_205 nanoseconds.
+		Weight::from_parts(25_120_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
@@ -211,16 +211,16 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn update_pot_limits() -> Weight {
-		// Minimum execution time: 17_820 nanoseconds.
-		Weight::from_parts(18_476_000_u64, 0)
+		// Minimum execution time: 18_291 nanoseconds.
+		Weight::from_parts(18_870_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 	// Storage: `Sponsorship::Pot` (r:1 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn update_sponsorship_type() -> Weight {
-		// Minimum execution time: 15_598 nanoseconds.
-		Weight::from_parts(24_608_000_u64, 0)
+		// Minimum execution time: 14_668 nanoseconds.
+		Weight::from_parts(15_410_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
@@ -236,10 +236,10 @@ impl WeightInfo for () {
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn register_users(l: u32, ) -> Weight {
-		// Minimum execution time: 55_922 nanoseconds.
-		Weight::from_parts(830_608_152_u64, 0)
-			// Standard Error: 50_735
-			.saturating_add(Weight::from_parts(22_399_786_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 54_519 nanoseconds.
+		Weight::from_parts(750_997_581_u64, 0)
+			// Standard Error: 48_272
+			.saturating_add(Weight::from_parts(22_686_755_u64, 0).saturating_mul(l as u64))
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().reads((4_u64).saturating_mul(l as u64)))
 			.saturating_add(RocksDbWeight::get().writes((4_u64).saturating_mul(l as u64)))
@@ -256,10 +256,10 @@ impl WeightInfo for () {
 	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn remove_users(l: u32, ) -> Weight {
-		// Minimum execution time: 80_971 nanoseconds.
-		Weight::from_parts(81_816_000_u64, 0)
-			// Standard Error: 48_548
-			.saturating_add(Weight::from_parts(69_136_645_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 82_416 nanoseconds.
+		Weight::from_parts(83_038_000_u64, 0)
+			// Standard Error: 42_912
+			.saturating_add(Weight::from_parts(70_094_474_u64, 0).saturating_mul(l as u64))
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().reads((4_u64).saturating_mul(l as u64)))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
@@ -273,10 +273,10 @@ impl WeightInfo for () {
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
 	fn update_users_limits(l: u32, ) -> Weight {
-		// Minimum execution time: 19_733 nanoseconds.
-		Weight::from_parts(19_910_000_u64, 0)
-			// Standard Error: 7_405
-			.saturating_add(Weight::from_parts(6_090_488_u64, 0).saturating_mul(l as u64))
+		// Minimum execution time: 19_269 nanoseconds.
+		Weight::from_parts(19_558_000_u64, 0)
+			// Standard Error: 7_281
+			.saturating_add(Weight::from_parts(5_868_202_u64, 0).saturating_mul(l as u64))
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(l as u64)))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
@@ -289,8 +289,8 @@ impl WeightInfo for () {
 	// Storage: `System::Account` (r:2 w:2)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	fn pre_sponsor() -> Weight {
-		// Minimum execution time: 46_903 nanoseconds.
-		Weight::from_parts(47_893_000_u64, 0)
+		// Minimum execution time: 45_955 nanoseconds.
+		Weight::from_parts(46_861_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(4_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
 	}
@@ -301,8 +301,8 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::Pot` (r:0 w:1)
 	// Proof: `Sponsorship::Pot` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn post_sponsor() -> Weight {
-		// Minimum execution time: 41_577 nanoseconds.
-		Weight::from_parts(42_712_000_u64, 0)
+		// Minimum execution time: 41_084 nanoseconds.
+		Weight::from_parts(41_662_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(2_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
