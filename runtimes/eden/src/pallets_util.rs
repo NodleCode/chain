@@ -47,7 +47,7 @@ impl pallet_grants::Config for Runtime {
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
-	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
 
@@ -184,12 +184,12 @@ impl pallet_sponsorship::Config for Runtime {
 	type SponsorshipType = SponsorshipType;
 	type PotDeposit = PotDeposit;
 	type UserDeposit = UserDeposit;
-	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_sponsorship::WeightInfo<Runtime>;
 }
 
 impl pallet_nodle_uniques::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_nodle_uniques::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -325,7 +325,7 @@ impl pallet_proxy::Config for Runtime {
 	type ProxyDepositBase = ProxyDepositBase;
 	type ProxyDepositFactor = ProxyDepositFactor;
 	type MaxProxies = ConstU32<32>;
-	type WeightInfo = pallet_proxy::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_proxy::WeightInfo<Runtime>;
 	type MaxPending = ConstU32<32>;
 	type CallHasher = BlakeTwo256;
 	type AnnouncementDepositBase = AnnouncementDepositBase;

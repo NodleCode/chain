@@ -25,7 +25,7 @@ use sp_runtime::traits::{StaticLookup, Zero};
 use support::LimitedBalance;
 
 pub use pallet::*;
-pub use weights::WeightInfo as NodleWeightInfo;
+pub use weights::WeightInfo;
 
 pub mod weights;
 
@@ -56,7 +56,7 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		/// Weight information for extrinsics specific to this pallet.
-		type WeightInfo: NodleWeightInfo;
+		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::pallet]

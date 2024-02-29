@@ -12,6 +12,11 @@ pub mod pallet_timestamp;
 pub mod pallet_uniques;
 pub mod pallet_utility;
 pub mod pallet_xcm;
+pub mod pallet_allocations;
+pub mod pallet_grants;
+pub mod pallet_nodle_uniques;
+pub mod pallet_reserve;
+pub mod pallet_sponsorship;
 
 mod pallet_xcm_benchmarks_fungible;
 mod pallet_xcm_benchmarks_generic;

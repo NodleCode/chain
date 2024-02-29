@@ -97,7 +97,7 @@ impl pallet_allocations::Config for Runtime {
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = AllocationsOracles;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
-	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_allocations::WeightInfo<Runtime>;
 }
 
 parameter_types! {
