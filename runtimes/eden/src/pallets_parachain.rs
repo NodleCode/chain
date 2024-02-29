@@ -42,7 +42,7 @@ parameter_types! {
 
 impl pallet_message_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = ();
+	type WeightInfo = crate::weights::pallet_message_queue::WeightInfo<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type MessageProcessor =
 		pallet_message_queue::mock_helpers::NoopMessageProcessor<cumulus_primitives_core::AggregateMessageOrigin>;
@@ -75,7 +75,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type ReservedXcmpWeight = ();
 	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
 	type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
-	type WeightInfo = ();
+	type WeightInfo = crate::weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
 }
 
 impl parachain_info::Config for Runtime {}

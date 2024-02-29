@@ -17,7 +17,8 @@ pub mod pallet_timestamp;
 pub mod pallet_uniques;
 pub mod pallet_utility;
 pub mod pallet_xcm;
-
+pub mod pallet_message_queue;
+pub mod cumulus_pallet_parachain_system;
 mod pallet_xcm_benchmarks_fungible;
 mod pallet_xcm_benchmarks_generic;
 

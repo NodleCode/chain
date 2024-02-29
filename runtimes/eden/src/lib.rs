@@ -153,6 +153,7 @@ mod benches {
 		[pallet_contracts, Contracts]
 		[pallet_identity, Identity]
 		[pallet_membership, TechnicalMembership]
+		[pallet_collective, TechnicalCommittee ]
 		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
 		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
 		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
