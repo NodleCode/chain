@@ -35,17 +35,15 @@
 // --wasm-execution=compiled
 // --template=./.maintain/internal_pallet_weights.hbs
 // --output=temp_weights
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-use frame_support::{traits::Get, weights::{constants::RocksDbWeight, Weight}};
 use core::marker::PhantomData;
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 
 /// Weight functions needed for pallet_allocations.
 pub trait WeightInfo {
-	fn allocate(b: u32, ) -> Weight;
+	fn allocate(b: u32) -> Weight;
 	fn calc_quota() -> Weight;
 	fn renew_quota() -> Weight;
 	fn checked_update_session_quota() -> Weight;
@@ -60,7 +58,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `System::Account` (r:502 w:502)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `b` is `[1, 500]`.
-	fn allocate(b: u32, ) -> Weight {
+	fn allocate(b: u32) -> Weight {
 		// Minimum execution time: 129_400 nanoseconds.
 		Weight::from_parts(47_424_668_u64, 0)
 			// Standard Error: 18_955
@@ -136,7 +134,7 @@ impl WeightInfo for () {
 	// Storage: `System::Account` (r:502 w:502)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `b` is `[1, 500]`.
-	fn allocate(b: u32, ) -> Weight {
+	fn allocate(b: u32) -> Weight {
 		// Minimum execution time: 129_400 nanoseconds.
 		Weight::from_parts(47_424_668_u64, 0)
 			// Standard Error: 18_955

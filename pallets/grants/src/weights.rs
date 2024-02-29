@@ -35,13 +35,11 @@
 // --wasm-execution=compiled
 // --template=./.maintain/internal_pallet_weights.hbs
 // --output=temp_weights
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-use frame_support::{traits::Get, weights::{constants::RocksDbWeight, Weight}};
 use core::marker::PhantomData;
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 
 /// Weight functions needed for pallet_grants.
 pub trait WeightInfo {
@@ -110,8 +108,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
 	fn renounce() -> Weight {
 		// Minimum execution time: 9_610 nanoseconds.
-		Weight::from_parts(10_200_000_u64, 0)
-			.saturating_add(T::DbWeight::get().writes(1_u64))
+		Weight::from_parts(10_200_000_u64, 0).saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 }
 
@@ -172,7 +169,6 @@ impl WeightInfo for () {
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
 	fn renounce() -> Weight {
 		// Minimum execution time: 9_610 nanoseconds.
-		Weight::from_parts(10_200_000_u64, 0)
-			.saturating_add(RocksDbWeight::get().writes(1_u64))
+		Weight::from_parts(10_200_000_u64, 0).saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 }

@@ -35,13 +35,11 @@
 // --wasm-execution=compiled
 // --template=./.maintain/internal_pallet_weights.hbs
 // --output=temp_weights
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-use frame_support::{traits::Get, weights::{constants::RocksDbWeight, Weight}};
 use core::marker::PhantomData;
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 
 /// Weight functions needed for pallet_sponsorship.
 pub trait WeightInfo {
@@ -49,9 +47,9 @@ pub trait WeightInfo {
 	fn remove_pot() -> Weight;
 	fn update_pot_limits() -> Weight;
 	fn update_sponsorship_type() -> Weight;
-	fn register_users(l: u32, ) -> Weight;
-	fn remove_users(l: u32, ) -> Weight;
-	fn update_users_limits(l: u32, ) -> Weight;
+	fn register_users(l: u32) -> Weight;
+	fn remove_users(l: u32) -> Weight;
+	fn update_users_limits(l: u32) -> Weight;
 	fn pre_sponsor() -> Weight;
 	fn post_sponsor() -> Weight;
 }
@@ -110,7 +108,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `System::Account` (r:1998 w:1998)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn register_users(l: u32, ) -> Weight {
+	fn register_users(l: u32) -> Weight {
 		// Minimum execution time: 55_171 nanoseconds.
 		Weight::from_parts(56_590_000_u64, 0)
 			// Standard Error: 7_532
@@ -130,7 +128,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::UserRegistrationCount` (r:999 w:999)
 	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn remove_users(l: u32, ) -> Weight {
+	fn remove_users(l: u32) -> Weight {
 		// Minimum execution time: 117_730 nanoseconds.
 		Weight::from_parts(119_071_000_u64, 0)
 			// Standard Error: 41_981
@@ -147,7 +145,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Sponsorship::User` (r:999 w:999)
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn update_users_limits(l: u32, ) -> Weight {
+	fn update_users_limits(l: u32) -> Weight {
 		// Minimum execution time: 26_990 nanoseconds.
 		Weight::from_parts(27_370_000_u64, 0)
 			// Standard Error: 9_187
@@ -235,7 +233,7 @@ impl WeightInfo for () {
 	// Storage: `System::Account` (r:1998 w:1998)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn register_users(l: u32, ) -> Weight {
+	fn register_users(l: u32) -> Weight {
 		// Minimum execution time: 55_171 nanoseconds.
 		Weight::from_parts(56_590_000_u64, 0)
 			// Standard Error: 7_532
@@ -255,7 +253,7 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::UserRegistrationCount` (r:999 w:999)
 	// Proof: `Sponsorship::UserRegistrationCount` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn remove_users(l: u32, ) -> Weight {
+	fn remove_users(l: u32) -> Weight {
 		// Minimum execution time: 117_730 nanoseconds.
 		Weight::from_parts(119_071_000_u64, 0)
 			// Standard Error: 41_981
@@ -272,7 +270,7 @@ impl WeightInfo for () {
 	// Storage: `Sponsorship::User` (r:999 w:999)
 	// Proof: `Sponsorship::User` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `l` is `[1, 1000]`.
-	fn update_users_limits(l: u32, ) -> Weight {
+	fn update_users_limits(l: u32) -> Weight {
 		// Minimum execution time: 26_990 nanoseconds.
 		Weight::from_parts(27_370_000_u64, 0)
 			// Standard Error: 9_187

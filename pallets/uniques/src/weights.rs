@@ -35,17 +35,15 @@
 // --wasm-execution=compiled
 // --template=./.maintain/internal_pallet_weights.hbs
 // --output=temp_weights
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-use frame_support::{traits::Get, weights::{constants::RocksDbWeight, Weight}};
 use core::marker::PhantomData;
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 
 /// Weight functions needed for pallet_nodle_uniques.
 pub trait WeightInfo {
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight;
+	fn destroy(n: u32, m: u32, a: u32) -> Weight;
 	fn mint_with_extra_deposit() -> Weight;
 	fn burn() -> Weight;
 	fn create_with_extra_deposit_limit() -> Weight;
@@ -81,7 +79,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// The range of component `n` is `[0, 1000]`.
 	/// The range of component `m` is `[0, 1000]`.
 	/// The range of component `a` is `[0, 1000]`.
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight {
+	fn destroy(n: u32, m: u32, a: u32) -> Weight {
 		// Minimum execution time: 3_168_051 nanoseconds.
 		Weight::from_parts(3_201_672_000_u64, 0)
 			// Standard Error: 29_566
@@ -205,7 +203,7 @@ impl WeightInfo for () {
 	/// The range of component `n` is `[0, 1000]`.
 	/// The range of component `m` is `[0, 1000]`.
 	/// The range of component `a` is `[0, 1000]`.
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight {
+	fn destroy(n: u32, m: u32, a: u32) -> Weight {
 		// Minimum execution time: 3_168_051 nanoseconds.
 		Weight::from_parts(3_201_672_000_u64, 0)
 			// Standard Error: 29_566

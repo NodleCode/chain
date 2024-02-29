@@ -35,13 +35,11 @@
 // --wasm-execution=compiled
 // --template=./.maintain/internal_pallet_weights.hbs
 // --output=temp_weights
-
-#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-use frame_support::{traits::Get, weights::{constants::RocksDbWeight, Weight}};
 use core::marker::PhantomData;
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 
 /// Weight functions needed for pallet_reserve.
 pub trait WeightInfo {
