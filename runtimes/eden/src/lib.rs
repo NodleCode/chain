@@ -146,6 +146,7 @@ mod benches {
 		[pallet_nodle_uniques, NodleUniques]
 		[pallet_message_queue, MessageQueue]
 		[pallet_sponsorship, Sponsorship]
+		[pallet_proxy, Proxy]
 		[pallet_utility, Utility]
 		[pallet_allocations, Allocations]
 		[pallet_collator_selection, CollatorSelection]
