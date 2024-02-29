@@ -114,6 +114,7 @@ construct_runtime! {
 		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 46,
+		Proxy: pallet_proxy = 47,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
