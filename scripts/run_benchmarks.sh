@@ -4,9 +4,6 @@
 STEPS="${1:-50}"
 REPEAT="${2:-20}"
 
-export external="cumulus_pallet_parachain_system pallet_message_queue pallet_proxy frame_system pallet_balances pallet_collator_selection pallet_contracts pallet_membership \
- pallet_multisig pallet_preimage pallet_scheduler pallet_timestamp pallet_uniques pallet_utility pallet_xcm pallet_identity \
- pallet_allocations pallet_grants pallet_reserve pallet_nodle_uniques pallet_sponsorship"
 export xcm_generic_extrinsic="report_holding, buy_execution, query_response, transact, refund_surplus,\
  set_error_handler, set_appendix, clear_error, descend_origin, clear_origin, report_error, claim_asset, trap, \
  subscribe_version, unsubscribe_version, initiate_reserve_withdraw, burn_asset, expect_asset, expect_origin,\
@@ -18,9 +15,10 @@ cargo build --profile release \
     --manifest-path=node/Cargo.toml || exit -1
 
 
-for PALLET in $external
+for PALLET in `./target/release/nodle-parachain benchmark pallet --list| sed s/,.*//|sort|uniq|grep -v ::`
 do
-./target/release/nodle-parachain benchmark pallet \
+ echo $PALLET
+ $DRY_RUN ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
     --steps=$STEPS \
     --repeat=$REPEAT \
@@ -32,7 +30,7 @@ do
 
 done
 
-./target/release/nodle-parachain benchmark pallet \
+$DRY_RUN ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
     --steps=$STEPS \
     --repeat=$REPEAT \
@@ -42,7 +40,7 @@ done
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
 
-./target/release/nodle-parachain benchmark pallet \
+$DRY_RUN ./target/release/nodle-parachain benchmark pallet \
     --chain=dev \
     --steps=$STEPS \
     --repeat=$REPEAT \
@@ -51,10 +49,10 @@ done
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
-sed -s 's/pallet_contracts::WeightInfo/pallet_contracts::weights::WeightInfo/' -i runtimes/eden/src/weights/pallet_contracts.rs
+$DRY_RUN sed -s 's/pallet_contracts::WeightInfo/pallet_contracts::weights::WeightInfo/' -i runtimes/eden/src/weights/pallet_contracts.rs
 
-cargo clippy --fix --allow-dirty
-cargo fmt
+$DRY_RUN cargo clippy --fix --allow-dirty
+$DRY_RUN cargo fmt
 
 echo "Running on gcloud server? Run:"
 echo "git commit -v -a -m Benchmarks ; git format-patch HEAD~ ; find $PWD/*patch"
