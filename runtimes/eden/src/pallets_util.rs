@@ -160,7 +160,14 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 		match self {
 			// SponsorshipType::Nft => matches!(c, RuntimeCall::Utility {  })
 			SponsorshipType::AnySafe => !matches!(c, RuntimeCall::Utility { .. }),
-			SponsorshipType::Uniques => matches!(c, RuntimeCall::NodleUniques { .. }),
+			SponsorshipType::Uniques => match c {
+				RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) => {
+					calls.into_iter().all(|c| matches!(c, RuntimeCall::NodleUniques { .. }));
+					true
+				}
+				RuntimeCall::NodleUniques(..) => true,
+				_ => false,
+			},
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {

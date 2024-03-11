@@ -163,8 +163,12 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 			}
 			SponsorshipType::Compoud => match c {
 				RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) => {
-					calls.into_iter().all(|c| matches!(c, RuntimeCall::Uniques { .. }))
+					calls.into_iter().all(|c| matches!(c, RuntimeCall::Uniques { .. }));
+					true
 				}
+				RuntimeCall::Uniques(pallet_uniques::Call::create { .. }) => true,
+				RuntimeCall::Uniques(pallet_uniques::Call::set_metadata { .. }) => true,
+
 				_ => false,
 			},
 		}
