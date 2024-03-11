@@ -38,6 +38,7 @@ frame_support::construct_runtime!(
 		System: frame_system,
 		Balances: pallet_balances,
 		Uniques: pallet_uniques,
+		Utility: pallet_utility,
 		SponsorshipModule: pallet_sponsorship,
 		TransactionPayment: pallet_transaction_payment,
 	}
@@ -133,6 +134,13 @@ impl pallet_uniques::Config for Test {
 	type Helper = ();
 }
 
+impl pallet_utility::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type PalletsOrigin = OriginCaller;
+	type WeightInfo = ();
+}
+
 #[derive(
 	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
 )]
@@ -141,6 +149,7 @@ pub enum SponsorshipType {
 	Balances,
 	Uniques,
 	UniquesMint,
+	Compoud,
 }
 impl InstanceFilter<RuntimeCall> for SponsorshipType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
@@ -151,6 +160,9 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 			SponsorshipType::Uniques => matches!(c, RuntimeCall::Uniques { .. }),
 			SponsorshipType::UniquesMint => {
 				matches!(c, RuntimeCall::Uniques(pallet_uniques::Call::mint { .. }))
+			}
+			SponsorshipType::Compoud => {
+				matches!(c, RuntimeCall::Utility(pallet_utility::Call::batch_all { .. }))
 			}
 		}
 	}
