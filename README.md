@@ -45,5 +45,5 @@ cargo build --release -p nodle-parachain && polkadot-launch launch.json
 
 ## With docker
 
-1. Build the image: `docker build -t nodle/chain -f .maintain/docker/Dockerfile .`.
+1. Build the image: `docker build -t nodle/chain -f ./Dockerfile .`.
 2. Run it: `docker run -v /path/to/local/repertory:/data -p 9944:9944 -it nodle/chain`.
