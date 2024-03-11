@@ -161,9 +161,12 @@ impl InstanceFilter<RuntimeCall> for SponsorshipType {
 			SponsorshipType::UniquesMint => {
 				matches!(c, RuntimeCall::Uniques(pallet_uniques::Call::mint { .. }))
 			}
-			SponsorshipType::Compoud => {
-				matches!(c, RuntimeCall::Utility(pallet_utility::Call::batch_all { .. }))
-			}
+			SponsorshipType::Compoud => match c {
+				RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) => {
+					calls.into_iter().all(|c| matches!(c, RuntimeCall::Uniques { .. }))
+				}
+				_ => false,
+			},
 		}
 	}
 	fn is_superset(&self, o: &Self) -> bool {
