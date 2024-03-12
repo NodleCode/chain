@@ -209,7 +209,7 @@ impl<T: frame_system::Config> pallet_collective::WeightInfo for WeightInfo<T> {
 	/// The range of component `b` is `[2, 1024]`.
 	/// The range of component `m` is `[4, 50]`.
 	/// The range of component `p` is `[1, 100]`.
-	fn close_approved(b: u32, m: u32, p: u32) -> Weight {
+	fn close_approved(b: u32, _m: u32, p: u32) -> Weight {
 		// Minimum execution time: 45_570 nanoseconds.
 		Weight::from_parts(48_653_945_u64, 0)
 			// Standard Error: 200
