@@ -25,7 +25,8 @@ use frame_support::{
 	dispatch::{DispatchInfo, DispatchResult, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
 		Currency,
-		ExistenceRequirement::{AllowDeath, KeepAlive}, InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
+		ExistenceRequirement::{AllowDeath, KeepAlive},
+		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
 use pallet_transaction_payment::OnChargeTransaction;
@@ -429,19 +430,34 @@ pub mod pallet {
 		/// are needed during pre and post dispatching this call.
 		#[pallet::call_index(4)]
 		#[pallet::weight({
-		let dispatch_info = call.get_dispatch_info();
-		(dispatch_info.weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_info.class, Pays::No)
+			let dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::<Vec<_>>();
+			let dispatch_weight = dispatch_infos.iter()
+				.map(|di| di.weight)
+				.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
+			let dispatch_class = {
+				let all_operational = dispatch_infos.iter()
+					.map(|di| di.class)
+					.all(|class| class == DispatchClass::Operational);
+				if all_operational {
+					DispatchClass::Operational
+				} else {
+					DispatchClass::Normal
+				}
+			};
+			(dispatch_weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_class, Pays::No)
 		})]
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
 			pot: T::PotId,
-			call: Vec<Box<<T as Config>::RuntimeCall>>,
+			calls: Vec<Box<<T as Config>::RuntimeCall>>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
-			call.dispatch(preps.proxy_origin).map_err(|e| e.error)?;
+			for call in calls.into_iter() {
+				call.dispatch(preps.proxy_origin.clone()).map_err(|e| e.error)?;
+			}
 
 			Self::post_sponsor_for(
 				who,
