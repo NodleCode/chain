@@ -448,7 +448,7 @@ pub mod pallet {
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
 			pot: T::PotId,
-			call: Box<<T as Config>::RuntimeCall>,
+			call: Vec<Box<<T as Config>::RuntimeCall>>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 			ensure!(!Self::migration_in_progress(), Error::<T>::MigrationInProgress);
