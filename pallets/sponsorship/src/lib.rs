@@ -25,7 +25,8 @@ use frame_support::{
 	dispatch::{DispatchInfo, DispatchResult, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
 		Currency,
-		ExistenceRequirement::{AllowDeath, KeepAlive}, InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
+		ExistenceRequirement::{AllowDeath, KeepAlive},
+		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
 use pallet_transaction_payment::OnChargeTransaction;

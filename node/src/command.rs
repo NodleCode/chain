@@ -282,6 +282,10 @@ impl DefaultConfigurationValues for RelayChainCli {
 	fn prometheus_listen_port() -> u16 {
 		9616
 	}
+
+	fn rpc_listen_port() -> u16 {
+		9933
+	}
 }
 
 impl CliConfiguration<Self> for RelayChainCli {

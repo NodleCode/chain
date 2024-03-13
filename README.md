@@ -46,4 +46,6 @@ cargo build --release -p nodle-parachain && polkadot-launch launch.json
 ## With docker
 
 1. Build the image: `docker build -t nodle/chain -f ./Dockerfile .`.
-2. Run it: `docker run -v /path/to/local/repertory:/data -p 9944:9944 -it nodle/chain`.
+2. Run it: `docker run -v /path/to/local/repertory:/data -p 9944:9944 -it nodle/chain --chain=eden-testing --base-path=/data`.
+   for instance as:
+        `docker run -v /mnt/d1/.local/share/nodle-parachain-2.2.2:/data -p 9944:9944 -p 9933:9933 -p30333:30333 -it nodle/chain --chain=eden-testing --base-path=/data --rpc-methods=safe --rpc-cors all --rpc-external -- --rpc-external`
