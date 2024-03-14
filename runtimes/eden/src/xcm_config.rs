@@ -194,7 +194,7 @@ parameter_types! {
 	/// The asset ID for the asset that we use to pay for message delivery fees.
 	pub FeeAssetId: AssetId = Concrete(NodlLocation::get());
 	/// The base fee for the message delivery fees.
-	pub const BaseDeliveryFee: u128 = crate::constants::NODL.saturating_mul(3);
+	pub const BaseDeliveryFee: u128 = crate::constants::POLKADOT_CENT.saturating_mul(3);
 }
 
 pub type PriceForSiblingParachainDelivery =

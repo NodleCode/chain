@@ -38,6 +38,7 @@ pub const NANO_NODL: Balance = MICRO_NODL / 1_000;
 
 pub const EXISTENTIAL_DEPOSIT: Balance = 100 * NANO_NODL;
 pub const POLKADOT_EXISTENTIAL_DEPOSIT: Balance = 10_000_000_000;
+pub const POLKADOT_CENT: Balance = 100_000_000;
 
 pub const fn deposit(items: u32, bytes: u32) -> Balance {
 	items as Balance * 1_500 * MICRO_NODL + (bytes as Balance) * 600 * MICRO_NODL
