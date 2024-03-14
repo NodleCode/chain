@@ -1,17 +1,25 @@
+pub mod cumulus_pallet_parachain_system;
 pub mod frame_system;
+pub mod pallet_allocations;
 pub mod pallet_balances;
 pub mod pallet_collator_selection;
+pub mod pallet_collective;
 pub mod pallet_contracts;
+pub mod pallet_grants;
 pub mod pallet_identity;
 pub mod pallet_membership;
+pub mod pallet_message_queue;
 pub mod pallet_multisig;
+pub mod pallet_nodle_uniques;
 pub mod pallet_preimage;
+pub mod pallet_proxy;
+pub mod pallet_reserve;
 pub mod pallet_scheduler;
+pub mod pallet_sponsorship;
 pub mod pallet_timestamp;
 pub mod pallet_uniques;
 pub mod pallet_utility;
 pub mod pallet_xcm;
-
 mod pallet_xcm_benchmarks_fungible;
 mod pallet_xcm_benchmarks_generic;
 
@@ -106,9 +114,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn reserve_asset_deposited(assets: &xcm::latest::MultiAssets) -> Weight {
-		// TODO CHA-407 #738 create benchmark for reserve_asset_deposited
-		// in pallet_xcm_benchmarks_fungible::WeightInfo and use it here
-		assets.weigh_multi_assets(Weight::from_parts(2_000_000_000_000_u64, 0))
+		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::reserve_asset_deposited())
 	}
 
 	fn receive_teleported_asset(assets: &xcm::latest::MultiAssets) -> Weight {
@@ -181,7 +187,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		_reserve: &xcm::latest::MultiLocation,
 		_xcm: &xcm::latest::Xcm<()>,
 	) -> Weight {
-		XcmGeneric::<Runtime>::initiate_reserve_withdraw()
+		XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw()
 	}
 
 	fn report_holding(_response_info: &QueryResponseInfo, _assets: &xcm::latest::MultiAssetFilter) -> Weight {

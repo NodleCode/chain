@@ -46,6 +46,7 @@ impl frame_system::Config for Test {
 	type OnSetCode = ();
 	type MaxConsumers = ConstU32<16>;
 	type Nonce = u32;
+	type RuntimeTask = ();
 }
 
 impl pallet_balances::Config for Test {
@@ -62,6 +63,7 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 	type MaxFreezes = ();
 	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 parameter_types! {
 	pub TestCollectionDeposit:  u64 = 2;

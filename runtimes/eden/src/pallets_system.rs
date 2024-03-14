@@ -20,7 +20,7 @@
 
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
-	RuntimeEvent, RuntimeOrigin, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+	RuntimeEvent, RuntimeOrigin, RuntimeTask, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
 use frame_support::pallet_prelude::ConstU32;
@@ -72,6 +72,7 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Nonce = Nonce;
 	type Block = crate::Block;
+	type RuntimeTask = RuntimeTask;
 }
 
 parameter_types! {
@@ -102,10 +103,11 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = frame_system::Pallet<Runtime>;
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
-	type MaxHolds = ConstU32<0>;
+	type MaxHolds = ConstU32<2>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
-	type RuntimeHoldReason = ();
+	type RuntimeHoldReason = crate::RuntimeHoldReason;
+	type RuntimeFreezeReason = crate::RuntimeFreezeReason;
 }
 
 parameter_types! {

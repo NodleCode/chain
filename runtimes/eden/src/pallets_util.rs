@@ -18,21 +18,25 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-	Timestamp,
+	constants, constants::deposit, constants::DAYS, implementations::RelayChainBlockNumberProvider,
+	pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip,
+	Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
 };
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
+	traits::{fungible::HoldConsideration, LinearStoragePrice},
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
+
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
 
+use pallet_identity::legacy::IdentityInfo;
+use polkadot_primitives::BlakeTwo256;
 use primitives::{AccountId, Balance};
-use sp_runtime::Perbill;
+use sp_runtime::{traits::Verify, Perbill};
 
 parameter_types! {
 	pub const MaxSchedule: u32 = 100;
@@ -43,7 +47,7 @@ impl pallet_grants::Config for Runtime {
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
-	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
 
@@ -96,6 +100,7 @@ impl pallet_scheduler::Config for Runtime {
 parameter_types! {
 	pub const PreimageBaseDeposit: Balance = constants::deposit(2, 64);
 	pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
+	pub const PreimageHoldReason: RuntimeHoldReason = RuntimeHoldReason::Preimage(pallet_preimage::HoldReason::Preimage);
 }
 
 #[allow(clippy::identity_op)]
@@ -104,8 +109,12 @@ impl pallet_preimage::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type ManagerOrigin = EnsureRoot<AccountId>;
-	type BaseDeposit = PreimageBaseDeposit;
-	type ByteDeposit = PreimageByteDeposit;
+	type Consideration = HoldConsideration<
+		AccountId,
+		Balances,
+		PreimageHoldReason,
+		LinearStoragePrice<PreimageBaseDeposit, PreimageByteDeposit, Balance>,
+	>;
 }
 
 parameter_types! {
@@ -175,12 +184,12 @@ impl pallet_sponsorship::Config for Runtime {
 	type SponsorshipType = SponsorshipType;
 	type PotDeposit = PotDeposit;
 	type UserDeposit = UserDeposit;
-	type WeightInfo = pallet_sponsorship::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_sponsorship::WeightInfo<Runtime>;
 }
 
 impl pallet_nodle_uniques::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_nodle_uniques::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = crate::weights::pallet_nodle_uniques::WeightInfo<Runtime>;
 }
 
 parameter_types! {
@@ -188,6 +197,7 @@ parameter_types! {
 	pub const DepositPerByte: Balance = constants::deposit(0, 1);
 	pub const DefaultDepositLimit: Balance = constants::deposit(1024, 1024 * 1024);
 	pub MySchedule: Schedule<Runtime> = Default::default();
+	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
 }
 
 impl pallet_contracts::Config for Runtime {
@@ -219,10 +229,17 @@ impl pallet_contracts::Config for Runtime {
 	type UnsafeUnstableInterface = ConstBool<false>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 	type Migrations = (
-		pallet_contracts::migration::v10::Migration<Runtime>,
-		pallet_contracts::migration::v11::Migration<Runtime>,
-		pallet_contracts::migration::v12::Migration<Runtime>,
+		pallet_contracts::migration::v13::Migration<Runtime>,
+		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
+		pallet_contracts::migration::v15::Migration<Runtime>,
 	);
+	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
+	type MaxDelegateDependencies = ConstU32<32>;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Debug = ();
+
+	type Environment = ();
+	type Xcm = ();
 }
 
 parameter_types! {
@@ -232,18 +249,85 @@ parameter_types! {
 	pub const MaxSubAccounts: u32 = 100;
 	pub const MaxAdditionalFields: u32 = 100;
 	pub const MaxRegistrars: u32 = 20;
+	pub const ByteDeposit: Balance = constants::deposit(0, 1);
 }
 impl pallet_identity::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type BasicDeposit = BasicDeposit;
-	type FieldDeposit = FieldDeposit;
 	type SubAccountDeposit = SubAccountDeposit;
 	type MaxSubAccounts = MaxSubAccounts;
-	type MaxAdditionalFields = MaxAdditionalFields;
 	type MaxRegistrars = MaxRegistrars;
 	type Slashed = DaoReserve;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type RegistrarOrigin = frame_system::EnsureRoot<AccountId>;
 	type WeightInfo = crate::weights::pallet_identity::WeightInfo<Runtime>;
+	type IdentityInformation = IdentityInfo<MaxAdditionalFields>;
+	type ByteDeposit = ByteDeposit;
+	type OffchainSignature = Signature;
+	type SigningPublicKey = <Signature as Verify>::Signer;
+	type UsernameAuthorityOrigin = EnsureRoot<Self::AccountId>;
+	type PendingUsernameExpiration = ConstU32<{ 7 * DAYS }>;
+	type MaxSuffixLength = ConstU32<7>;
+	type MaxUsernameLength = ConstU32<32>;
+}
+
+parameter_types! {
+	// One storage item; key size 32, value size 8; .
+	pub const ProxyDepositBase: Balance = deposit(1, 8);
+	// Additional storage item size of 33 bytes.
+	pub const ProxyDepositFactor: Balance = deposit(0, 33);
+	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
+	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
+}
+
+/// The type used to represent the kinds of proxying allowed.
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
+)]
+pub enum ProxyType {
+	Any,
+	NonTransfer,
+	Governance,
+}
+impl Default for ProxyType {
+	fn default() -> Self {
+		Self::Any
+	}
+}
+impl InstanceFilter<RuntimeCall> for ProxyType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			ProxyType::Any => true,
+			ProxyType::NonTransfer => !matches!(
+				c,
+				RuntimeCall::Balances(..) | RuntimeCall::NodleUniques(..) // Do we need this??? RuntimeCall::Vesting(pallet_grants::Call::vested_transfer { .. }) |
+			),
+			ProxyType::Governance => matches!(c, RuntimeCall::TechnicalCommittee(..)),
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		match (self, o) {
+			(x, y) if x == y => true,
+			(ProxyType::Any, _) => true,
+			(_, ProxyType::Any) => false,
+			(ProxyType::NonTransfer, _) => true,
+			_ => false,
+		}
+	}
+}
+
+impl pallet_proxy::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type ProxyType = ProxyType;
+	type ProxyDepositBase = ProxyDepositBase;
+	type ProxyDepositFactor = ProxyDepositFactor;
+	type MaxProxies = ConstU32<32>;
+	type WeightInfo = crate::weights::pallet_proxy::WeightInfo<Runtime>;
+	type MaxPending = ConstU32<32>;
+	type CallHasher = BlakeTwo256;
+	type AnnouncementDepositBase = AnnouncementDepositBase;
+	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }

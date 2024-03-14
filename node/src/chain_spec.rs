@@ -114,9 +114,6 @@ fn eden_testnet_genesis(
 	RuntimeGenesisConfig {
 		// Core
 		system: SystemConfig {
-			code: WASM_BINARY
-				.expect("WASM binary was not build, please build it!")
-				.to_vec(),
 			_config: Default::default(),
 		},
 		balances: BalancesConfig {
@@ -215,6 +212,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
+		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 	)
 }
 
@@ -229,18 +227,6 @@ fn local_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 			(
 				get_account_id_from_seed::<sr25519::Public>("Bob"),
 				get_collator_keys_from_seed("Bob"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				get_collator_keys_from_seed("Charlie"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Dave"),
-				get_collator_keys_from_seed("Dave"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Eve"),
-				get_collator_keys_from_seed("Eve"),
 			),
 		],
 		None,
@@ -277,6 +263,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 			relay_chain: "westend".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
+		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 	)
 }
 

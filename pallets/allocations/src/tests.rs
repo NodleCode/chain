@@ -21,13 +21,13 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-	assert_noop, assert_ok, bounded_vec, dispatch::Pays, ord_parameter_types, parameter_types, traits::ConstU32,
-	PalletId,
+	assert_noop, assert_ok, dispatch::Pays, ord_parameter_types, parameter_types, traits::ConstU32, PalletId,
 };
 use frame_system::EnsureSignedBy;
 use lazy_static::lazy_static;
 use sp_core::H256;
 use sp_runtime::{
+	bounded_vec,
 	traits::{BadOrigin, BlakeTwo256, IdentityLookup},
 	BuildStorage, Perbill,
 };
@@ -72,6 +72,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type Nonce = u32;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type RuntimeTask = ();
 }
 parameter_types! {
 	pub const ExistentialDeposit: u64 = 2;
@@ -90,8 +91,8 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 	type MaxFreezes = ();
 	type WeightInfo = ();
-
 	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 
 const THREE_INFLATION_STEPS: &[Perbill] = &[

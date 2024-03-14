@@ -67,6 +67,7 @@ impl frame_system::Config for Test {
 	type SystemWeightInfo = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type Nonce = u32;
+	type RuntimeTask = ();
 }
 
 type Balance = u64;
@@ -90,6 +91,7 @@ impl pallet_balances::Config for Test {
 	type MaxHolds = ();
 	type MaxFreezes = ();
 	type RuntimeHoldReason = ();
+	type RuntimeFreezeReason = ();
 }
 
 ord_parameter_types! {

@@ -206,23 +206,23 @@ fn claim_works() {
 
 		System::set_block_number(11);
 		// remain locked if not claimed
-		assert!(PalletBalances::transfer(RuntimeOrigin::signed(BOB::get()), ALICE::get(), 10).is_err());
+		assert!(PalletBalances::transfer_keep_alive(RuntimeOrigin::signed(BOB::get()), ALICE::get(), 10).is_err());
 		// unlocked after claiming
 		assert_ok!(Vesting::claim(RuntimeOrigin::signed(BOB::get())));
-		assert_ok!(PalletBalances::transfer(
+		assert_ok!(PalletBalances::transfer_keep_alive(
 			RuntimeOrigin::signed(BOB::get()),
 			ALICE::get(),
 			10
 		));
 		// more are still locked
-		assert!(PalletBalances::transfer(RuntimeOrigin::signed(BOB::get()), ALICE::get(), 1).is_err());
+		assert!(PalletBalances::transfer_allow_death(RuntimeOrigin::signed(BOB::get()), ALICE::get(), 1).is_err());
 		// does not clear storage
 		assert!(<VestingSchedules<Runtime>>::contains_key(BOB::get()));
 
 		System::set_block_number(21);
 		// claim more
 		assert_ok!(Vesting::claim(RuntimeOrigin::signed(BOB::get())));
-		assert_ok!(PalletBalances::transfer(
+		assert_ok!(PalletBalances::transfer_allow_death(
 			RuntimeOrigin::signed(BOB::get()),
 			ALICE::get(),
 			10
@@ -270,14 +270,14 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
 		));
 
 		// Auto claim
-		assert_ok!(PalletBalances::transfer(
+		assert_ok!(PalletBalances::transfer_allow_death(
 			RuntimeOrigin::signed(BOB::get()),
 			ALICE::get(),
 			10
 		));
 
 		// Wire the rest
-		assert_ok!(PalletBalances::transfer(
+		assert_ok!(PalletBalances::transfer_allow_death(
 			RuntimeOrigin::signed(CancelOrigin::get()),
 			ALICE::get(),
 			10
