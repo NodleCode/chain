@@ -143,4 +143,9 @@ mod tests {
 		assert_eq!(deposit(0, 1000), 60000000000 as Balance);
 		assert_eq!(deposit(0xFFFF_FFFF, 0xFFFF_FFFF), 901943131950000000 as Balance);
 	}
+
+	#[test]
+	fn polkadot_constants() {
+		assert_eq!(100 * POLKADOT_CENT, POLKADOT_EXISTENTIAL_DEPOSIT);
+	}
 }
