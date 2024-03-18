@@ -143,27 +143,20 @@ jobs:
              }' | jq .result.specVersion | sed 's/^/try-runtime-snapshot-eden-spec-/' >> $GITHUB_OUTPUT
            cat $GITHUB_OUTPUT
         id: get_version
-      - name: Setup cache
-        uses: actions/cache@v3
-        id: cachedir
-        with:
-          path: snapshots
-          key: ${{steps.get_version.outputs.eden_rev}}
-      - name: Ensure cache directory is created
-        if: steps.cachedir.outputs.cache-hit != 'true'
+      - uses: robinraju/release-downloader@v1.9
+        with: 
+          repository: "NodleCode/eden-snapshot"
+          latest: true
+          fileName: "eden-snapshot-full"
+          out-file-path: "snaps"
+          extract: false
+      - name: Check files
         run: |
-          install -d snapshots
-          date > snapshots/created_at
+           md5sum snaps/eden-snapshot-full
       - name: Run try-runtime
-        uses: NodleCode/action-try-runtime@v0.5.1
+        uses: NodleCode/action-try-runtime/check@beta
         with:
-          url: ${{ env.try-runtime-uri}}${{ secrets.DWELLIR_API_KEY}}
-          snap: snapshots/eden-snapshot-full
+          snap: snaps/eden-snapshot-full
           runtime: try_runtime/runtime_eden.wasm
           checks: "all"
           options: "--disable-idempotency-checks"
-      - name: Upload snap artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: edensnap
-          path: snapshots/eden-snapshot-full
