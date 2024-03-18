@@ -2519,3 +2519,187 @@ fn sponsor_call_is_invalid_if_sponsor_account_is_running_low() {
 		);
 	});
 }
+
+#[test]
+fn compound_transation_pass() {
+	new_test_ext().execute_with(|| {
+		let pot = 3;
+		System::set_block_number(1);
+		let pot_fee_quota = 100_000_000_000;
+		let pot_reserve_quota = 100_000_000_000;
+		let pot_details = PotDetailsOf::<Test> {
+			sponsor: 1,
+			sponsorship_type: SponsorshipType::Uniques,
+			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
+			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+			deposit: PotDeposit::get(),
+		};
+
+		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+		assert_ok!(SponsorshipModule::create_pot(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			pot_details.sponsorship_type,
+			pot_details.fee_quota.limit(),
+			pot_details.reserve_quota.limit()
+		));
+
+		let user_fee_quota = pot_fee_quota / 10;
+		let user_reserve_quota = pot_reserve_quota / 10;
+
+		let user = 2u64;
+
+		assert_ok!(SponsorshipModule::register_users(
+			RuntimeOrigin::signed(pot_details.sponsor),
+			pot,
+			vec![user],
+			user_fee_quota,
+			user_reserve_quota
+		));
+		let user_details = User::<Test>::get(pot, user).unwrap();
+
+		let unique_create_call = vec![
+			Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+				collection: 0u32,
+				admin: user,
+			})),
+			Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+				collection: 1u32,
+				admin: user,
+			})),
+			Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+				collection: 2u32,
+				admin: user,
+			})),
+		];
+
+		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
+			pot: 3,
+			calls: unique_create_call.clone(),
+		}));
+
+		let pre_dispatch_details = ChargeSponsor::<Test>::default()
+			.pre_dispatch(
+				&user,
+				&sponsor_for_uniques_create_call,
+				&sponsor_for_uniques_create_call.get_dispatch_info(),
+				0,
+			)
+			.ok();
+		assert_ok!(SponsorshipModule::sponsor_for(
+			RuntimeOrigin::signed(user),
+			pot,
+			unique_create_call.clone()
+		));
+
+		assert_ok!(ChargeSponsor::<Test>::post_dispatch(
+			pre_dispatch_details,
+			&sponsor_for_uniques_create_call.get_dispatch_info(),
+			&().into(),
+			0,
+			&DispatchResult::Ok(())
+		));
+
+		let user_details_post_dispatch = User::<Test>::get(pot, user).unwrap();
+		let pot_details_post_dispatch = Pot::<Test>::get(pot).unwrap();
+
+		let fee = pot_details_post_dispatch.fee_quota.balance() - pot_details.fee_quota.balance();
+		assert_ne!(fee, 0);
+		assert_eq!(
+			user_details_post_dispatch.fee_quota.balance() - user_details.fee_quota.balance(),
+			fee
+		);
+
+		assert_eq!(user_details_post_dispatch.reserve_quota.balance(), 7);
+		assert_eq!(pot_details_post_dispatch.reserve_quota.balance(), 7);
+
+		System::assert_last_event(
+			Event::TransactionFeePaid {
+				sponsor: pot_details.sponsor,
+				fee,
+			}
+			.into(),
+		);
+		assert_eq!(
+			Balances::free_balance(pot_details.sponsor),
+			pot_reserve_quota
+				- fee - user_details_post_dispatch.reserve_quota.balance()
+				- PotDeposit::get()
+				- UserDeposit::get()
+		);
+		assert_eq!(
+			Balances::total_balance(&user_details.proxy),
+			user_details_post_dispatch.reserve_quota.balance()
+		);
+	});
+}
+
+// #[test]
+// fn compound_transation_should_be_filtered() {
+// 	new_test_ext().execute_with(|| {
+// 		let pot = 3;
+// 		System::set_block_number(1);
+// 		let pot_fee_quota = 100_000_000_000;
+// 		let pot_reserve_quota = 100_000_000_000;
+// 		let pot_details = PotDetailsOf::<Test> {
+// 			sponsor: 1,
+// 			sponsorship_type: SponsorshipType::Uniques,
+// 			fee_quota: LimitedBalance::with_limit(pot_fee_quota),
+// 			reserve_quota: LimitedBalance::with_limit(pot_reserve_quota),
+// 			deposit: PotDeposit::get(),
+// 		};
+
+// 		Balances::make_free_balance_be(&pot_details.sponsor, pot_reserve_quota);
+
+// 		assert_ok!(SponsorshipModule::create_pot(
+// 			RuntimeOrigin::signed(pot_details.sponsor),
+// 			pot,
+// 			pot_details.sponsorship_type,
+// 			pot_details.fee_quota.limit(),
+// 			pot_details.reserve_quota.limit()
+// 		));
+
+// 		let user_fee_quota = pot_fee_quota / 10;
+// 		let user_reserve_quota = pot_reserve_quota / 10;
+
+// 		let user = 2u64;
+
+// 		assert_ok!(SponsorshipModule::register_users(
+// 			RuntimeOrigin::signed(pot_details.sponsor),
+// 			pot,
+// 			vec![user],
+// 			user_fee_quota,
+// 			user_reserve_quota
+// 		));
+// 		let user_details = User::<Test>::get(pot, user).unwrap();
+
+// 		let unique_create_call = RuntimeCall::Uniques(pallet_uniques::Call::create {
+// 			collection: 0u32,
+// 			admin: user,
+// 		});
+
+// 		let compound_call = Box::new(RuntimeCall::Utility(pallet_utility::Call::batch_all {
+// 			calls: vec![unique_create_call],
+// 		}));
+
+// 		let sponsor_for_uniques_create_call = Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
+// 			pot: 3,
+// 			call: compound_call.clone(),
+// 		}));
+
+// 		let pre_dispatch_details = ChargeSponsor::<Test>::default()
+// 			.pre_dispatch(
+// 				&user,
+// 				&sponsor_for_uniques_create_call,
+// 				&sponsor_for_uniques_create_call.get_dispatch_info(),
+// 				0,
+// 			)
+// 			.ok();
+
+// 		assert_noop!(
+// 			SponsorshipModule::sponsor_for(RuntimeOrigin::signed(user), pot, compound_call),
+// 			frame_system::Error::<Test>::CallFiltered
+// 		);
+// 	});
+// }

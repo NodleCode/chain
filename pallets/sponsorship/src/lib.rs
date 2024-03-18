@@ -404,8 +404,10 @@ pub mod pallet {
 
 		/// Sponsor me for the given call from the specified pot.
 		/// The caller must be registered for the pot.
-		/// The call must be consistent with the pot's sponsorship type.
+		/// The calls must be consistent with the pot's sponsorship type.
 		///
+		/// Calls: one or more extrinsics which will be executed paid by the sponsorship. If any call fails all will be rolled back
+
 		/// Returns Error if the pot doesn't exist or the user is not registered for the pot or if
 		/// their call is not matching the sponsorship type in which case the error would be
 		/// `frame_system::Error::CallFiltered`. Also returns error if the call itself should fail
@@ -455,6 +457,7 @@ pub mod pallet {
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
+			// Execution strategy: AllMustPass as in as in utility batch all
 			for call in calls.into_iter() {
 				call.dispatch(preps.proxy_origin.clone()).map_err(|e| e.error)?;
 			}
