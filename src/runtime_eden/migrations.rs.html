@@ -56,6 +56,34 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 
 <span class="kw">use </span>frame_support::weights::Weight;
@@ -73,23 +101,47 @@
 		+ pallet_collective::Config&lt;pallet_collective::pallet::Instance1&gt;
 		+ pallet_collator_selection::Config
 		+ pallet_xcm::Config
+		+ pallet_identity::Config
 		+ pallet_preimage::Config
 		+ pallet_multisig::Config
 		+ pallet_contracts::Config
 		+ pallet_uniques::Config
-		+ pallet_nodle_uniques::Config,
+		+ pallet_mandate::Config
+		+ pallet_nodle_uniques::Config
+		+ pallet_reserve::Config&lt;pallet_reserve::pallet::Instance4&gt;
+		+ pallet_message_queue::Config,
 {
 	<span class="kw">fn </span>on_runtime_upgrade() -&gt; Weight {
-		<span class="comment">// Size of onchain storage is 0 safe to upgrade storage version
-		// Onchain storage version = 1 in source code - unchanged any new data will be in the v1 format
-		</span>StorageVersion::new(<span class="number">1</span>).put::&lt;pallet_preimage::Pallet&lt;T&gt;&gt;();
-		<span class="comment">// pallet_uniques adding a storage version not chaning anything
+		<span class="comment">// pallet_uniques adding a storage version not changing anything
 		</span>StorageVersion::new(<span class="number">1</span>).put::&lt;pallet_uniques::Pallet&lt;T&gt;&gt;();
 
-		<span class="comment">// Store version 0 for default
-		</span>StorageVersion::new(<span class="number">0</span>).put::&lt;pallet_nodle_uniques::Pallet&lt;T&gt;&gt;();
+		<span class="comment">// Version 1.5 Fixup two unmigrated storage blocks found on mainnet. HostConfiguration is automatically reloaded and Preimage/StatusFor is unused.
+		// [2024-02-06T11:29:36Z ERROR runtime::executive] - 0. error: Failed to decode storage item `ParachainSystem::HostConfiguration`
+		// [2024-02-06T11:29:36Z DEBUG runtime::executive] - 0. error: TryDecodeEntireStorageError { key: [69, 50, 61, 247, 204, 71, 21, 11, 57, 48, 226, 102, 107, 10, 163, 19, 197, 34, 35, 24, 128, 35, 138, 12, 86, 2, 27, 135, 68, 160, 7, 67], raw: Some([0, 0, 48, 0, 0, 80, 0, 0, 170, 170, 2, 0, 0, 0, 16, 0, 251, 255, 0, 0, 16, 0, 0, 0, 10, 0, 0, 0, 64, 56, 0, 0, 88, 2, 0, 0]), info: StorageInfo { pallet_name: [80, 97, 114, 97, 99, 104, 97, 105, 110, 83, 121, 115, 116, 101, 109], storage_name: [72, 111, 115, 116, 67, 111, 110, 102, 105, 103, 117, 114, 97, 116, 105, 111, 110], prefix: [69, 50, 61, 247, 204, 71, 21, 11, 57, 48, 226, 102, 107, 10, 163, 19, 197, 34, 35, 24, 128, 35, 138, 12, 86, 2, 27, 135, 68, 160, 7, 67], max_values: Some(1), max_size: None } }
+		// [2024-02-06T11:29:36Z ERROR runtime::executive] - 1. error: Failed to decode storage item `Preimage::StatusFor`
+		// [2024-02-06T11:29:36Z DEBUG runtime::executive] - 1. error: TryDecodeEntireStorageError { key: [216, 243, 20, 183, 244, 230, 176, 149, 240, 248, 238, 70, 86, 164, 72, 37, 85, 177, 174, 142, 206, 213, 82, 47, 60, 64, 73, 188, 132, 237, 164, 168, 134, 165, 126, 209, 14, 33, 121, 241, 141, 181, 169, 30, 183, 253, 57, 95, 170, 112, 42, 188, 5, 207, 200, 241, 243, 215, 36, 138, 208, 108, 237, 135], raw: Some([0, 1, 74, 34, 11, 19, 82, 60, 166, 200, 236, 155, 46, 110, 132, 247, 154, 76, 85, 37, 199, 188, 137, 30, 55, 23, 255, 89, 202, 125, 127, 172, 65, 44, 0, 67, 52, 105, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), info: StorageInfo { pallet_name: [80, 114, 101, 105, 109, 97, 103, 101], storage_name: [83, 116, 97, 116, 117, 115, 70, 111, 114], prefix: [216, 243, 20, 183, 244, 230, 176, 149, 240, 248, 238, 70, 86, 164, 72, 37, 85, 177, 174, 142, 206, 213, 82, 47, 60, 64, 73, 188, 132, 237, 164, 168], max_values: None, max_size: None } }
 
-		T::DbWeight::get().writes(<span class="number">6</span>)
+		//Host Configuration
+		// TODO Remove this migration at final merge. It is only needed during integration (as it will fail one test in CI and hide other real errors)
+		</span><span class="kw">let </span>parachain_system_host_configuration_key = [
+			<span class="number">69_u8</span>, <span class="number">50</span>, <span class="number">61</span>, <span class="number">247</span>, <span class="number">204</span>, <span class="number">71</span>, <span class="number">21</span>, <span class="number">11</span>, <span class="number">57</span>, <span class="number">48</span>, <span class="number">226</span>, <span class="number">102</span>, <span class="number">107</span>, <span class="number">10</span>, <span class="number">163</span>, <span class="number">19</span>, <span class="number">197</span>, <span class="number">34</span>, <span class="number">35</span>, <span class="number">24</span>, <span class="number">128</span>, <span class="number">35</span>, <span class="number">138</span>, <span class="number">12</span>,
+			<span class="number">86</span>, <span class="number">2</span>, <span class="number">27</span>, <span class="number">135</span>, <span class="number">68</span>, <span class="number">160</span>, <span class="number">7</span>, <span class="number">67</span>,
+		];
+		<span class="kw">let _ </span>= frame_support::storage::unhashed::clear_prefix(<span class="kw-2">&amp;</span>parachain_system_host_configuration_key, <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>);
+
+		<span class="comment">// PreImage
+		</span><span class="kw">let </span>pre_image_status_for_key = [
+			<span class="number">216_u8</span>, <span class="number">243</span>, <span class="number">20</span>, <span class="number">183</span>, <span class="number">244</span>, <span class="number">230</span>, <span class="number">176</span>, <span class="number">149</span>, <span class="number">240</span>, <span class="number">248</span>, <span class="number">238</span>, <span class="number">70</span>, <span class="number">86</span>, <span class="number">164</span>, <span class="number">72</span>, <span class="number">37</span>, <span class="number">85</span>, <span class="number">177</span>, <span class="number">174</span>, <span class="number">142</span>, <span class="number">206</span>, <span class="number">213</span>,
+			<span class="number">82</span>, <span class="number">47</span>, <span class="number">60</span>, <span class="number">64</span>, <span class="number">73</span>, <span class="number">188</span>, <span class="number">132</span>, <span class="number">237</span>, <span class="number">164</span>, <span class="number">168</span>, <span class="number">134</span>, <span class="number">165</span>, <span class="number">126</span>, <span class="number">209</span>, <span class="number">14</span>, <span class="number">33</span>, <span class="number">121</span>, <span class="number">241</span>, <span class="number">141</span>, <span class="number">181</span>, <span class="number">169</span>, <span class="number">30</span>, <span class="number">183</span>,
+			<span class="number">253</span>, <span class="number">57</span>, <span class="number">95</span>, <span class="number">170</span>, <span class="number">112</span>, <span class="number">42</span>, <span class="number">188</span>, <span class="number">5</span>, <span class="number">207</span>, <span class="number">200</span>, <span class="number">241</span>, <span class="number">243</span>, <span class="number">215</span>, <span class="number">36</span>, <span class="number">138</span>, <span class="number">208</span>, <span class="number">108</span>, <span class="number">237</span>, <span class="number">135</span>,
+		];
+		<span class="kw">let _ </span>= frame_support::storage::unhashed::clear_prefix(<span class="kw-2">&amp;</span>pre_image_status_for_key, <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>);
+
+		<span class="comment">// Storage migration `pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1&lt;Runtime, 50&gt;,` does not update
+		// StorageVersion on chain.
+		</span>StorageVersion::new(<span class="number">1</span>).put::&lt;pallet_identity::Pallet&lt;T&gt;&gt;();
+
+		T::DbWeight::get().writes(<span class="number">11</span>)
 	}
 
 	<span class="attr">#[cfg(feature = <span class="string">"try-runtime"</span>)]
@@ -101,6 +153,10 @@
 		<span class="macro">ensure!</span>(
 			StorageVersion::get::&lt;pallet_uniques::Pallet&lt;T&gt;&gt;() == <span class="number">0</span>,
 			TryRuntimeError::Other(<span class="string">"pallet_uniques storage version is not 0"</span>)
+		);
+		<span class="macro">ensure!</span>(
+			StorageVersion::get::&lt;pallet_identity::Pallet&lt;T&gt;&gt;() == <span class="number">0</span>,
+			TryRuntimeError::Other(<span class="string">"pallet_identity storage version is not 0"</span>)
 		);
 
 		<span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[])

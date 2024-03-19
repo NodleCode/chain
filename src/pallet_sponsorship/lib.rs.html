@@ -841,25 +841,6 @@
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
 <a href="#842" id="842">842</a>
-<a href="#843" id="843">843</a>
-<a href="#844" id="844">844</a>
-<a href="#845" id="845">845</a>
-<a href="#846" id="846">846</a>
-<a href="#847" id="847">847</a>
-<a href="#848" id="848">848</a>
-<a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
-<a href="#851" id="851">851</a>
-<a href="#852" id="852">852</a>
-<a href="#853" id="853">853</a>
-<a href="#854" id="854">854</a>
-<a href="#855" id="855">855</a>
-<a href="#856" id="856">856</a>
-<a href="#857" id="857">857</a>
-<a href="#858" id="858">858</a>
-<a href="#859" id="859">859</a>
-<a href="#860" id="860">860</a>
-<a href="#861" id="861">861</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -884,22 +865,21 @@
 	ensure, Decode, Encode, MaxEncodedLen, PhantomData, RuntimeDebug, StorageVersion, TypeInfo,
 };
 <span class="kw">use </span>frame_support::{
-	dispatch::{DispatchInfo, DispatchResult, Dispatchable, GetDispatchInfo, Pays, PostDispatchInfo},
+	dispatch::{DispatchInfo, DispatchResult, GetDispatchInfo, Pays, PostDispatchInfo},
 	traits::{
 		Currency,
 		ExistenceRequirement::{AllowDeath, KeepAlive},
-		GetStorageVersion, InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
+		InstanceFilter, IsSubType, IsType, OriginTrait, ReservableCurrency,
 	},
 };
 <span class="kw">use </span>pallet_transaction_payment::OnChargeTransaction;
 <span class="kw">use </span>sp_io::hashing::blake2_256;
 
 <span class="kw">use </span>sp_runtime::{
-	traits::{DispatchInfoOf, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
+	traits::{DispatchInfoOf, Dispatchable, One, PostDispatchInfoOf, SignedExtension, TrailingZeroInput, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, TransactionValidityError, ValidTransaction},
 	FixedPointOperand, Saturating,
 };
-
 <span class="kw">use </span>sp_std::{
 	fmt::{Debug, Formatter, <span class="prelude-ty">Result </span><span class="kw">as </span>FmtResult},
 	prelude::<span class="kw-2">*</span>,
@@ -982,6 +962,7 @@
 	<span class="kw">use </span>frame_support::pallet_prelude::<span class="kw-2">*</span>;
 	<span class="kw">use </span>frame_system::pallet_prelude::<span class="kw-2">*</span>;
 	<span class="kw">use </span>scale_info::prelude::boxed::Box;
+	<span class="kw">use </span>sp_runtime::traits::Dispatchable;
 
 	<span class="attr">#[pallet::pallet]
 	#[pallet::storage_version(STORAGE_VERSION)]
@@ -1039,14 +1020,6 @@
 	<span class="doccomment">/// Stores the number of individual pots a user is registered for.
 	</span><span class="attr">#[pallet::storage]
 	</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>UserRegistrationCount&lt;T: Config&gt; = StorageMap&lt;<span class="kw">_</span>, Blake2_128Concat, T::AccountId, u32, ValueQuery&gt;;
-
-	<span class="doccomment">/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
-	</span><span class="attr">#[pallet::storage]
-	</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>PotMigrationCursor&lt;T: Config&gt; = StorageValue&lt;<span class="kw">_</span>, Vec&lt;u8&gt;, OptionQuery&gt;;
-
-	<span class="doccomment">/// Stores the migration cursor for the Pot storage. This item will be removed in a subsequent upgrade.
-	</span><span class="attr">#[pallet::storage]
-	</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>UserMigrationCursor&lt;T: Config&gt; = StorageValue&lt;<span class="kw">_</span>, Vec&lt;u8&gt;, OptionQuery&gt;;
 
 	<span class="attr">#[pallet::storage]
 	</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>PotUserMigrationPerBlock&lt;T: Config&gt; = StorageValue&lt;<span class="kw">_</span>, (u32, u32), OptionQuery&gt;;
@@ -1140,7 +1113,6 @@
 			reserve_quota: BalanceOf&lt;T&gt;,
 		) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			<span class="macro">ensure!</span>(!Pot::&lt;T&gt;::contains_key(pot), Error::&lt;T&gt;::InUse);
 
 			T::Currency::reserve(<span class="kw-2">&amp;</span>who, T::PotDeposit::get())<span class="question-mark">?</span>;
@@ -1174,7 +1146,6 @@
 		#[pallet::weight(T::WeightInfo::remove_pot())]
 		</span><span class="kw">pub fn </span>remove_pot(origin: OriginFor&lt;T&gt;, pot: T::PotId) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			Pot::&lt;T&gt;::try_mutate(pot, |maybe_pot_details| -&gt; DispatchResult {
 				<span class="kw">let </span>pot_details = maybe_pot_details.as_mut().ok_or(Error::&lt;T&gt;::InUse)<span class="question-mark">?</span>;
 				<span class="macro">ensure!</span>(pot_details.sponsor == who, Error::&lt;T&gt;::NoPermission);
@@ -1203,7 +1174,6 @@
 			common_reserve_quota: BalanceOf&lt;T&gt;,
 		) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			<span class="kw">let </span>pot_details = Pot::&lt;T&gt;::get(pot).ok_or(Error::&lt;T&gt;::PotNotExist)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(pot_details.sponsor == who, Error::&lt;T&gt;::NoPermission);
 			<span class="kw">for </span>user <span class="kw">in </span>users.clone() {
@@ -1250,7 +1220,6 @@
 		#[pallet::weight(T::WeightInfo::remove_users(users.len() <span class="kw">as </span>u32))]
 		</span><span class="kw">pub fn </span>remove_users(origin: OriginFor&lt;T&gt;, pot: T::PotId, users: Vec&lt;T::AccountId&gt;) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			<span class="kw">let </span><span class="kw-2">mut </span>pot_details = Pot::&lt;T&gt;::get(pot).ok_or(Error::&lt;T&gt;::PotNotExist)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(pot_details.sponsor == who, Error::&lt;T&gt;::NoPermission);
 			<span class="kw">for </span>user <span class="kw">in </span>users.clone() {
@@ -1313,7 +1282,6 @@
 			call: Box&lt;&lt;T <span class="kw">as </span>Config&gt;::RuntimeCall&gt;,
 		) -&gt; DispatchResultWithPostInfo {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 
 			<span class="kw">let </span>preps = <span class="self">Self</span>::pre_sponsor_for(who.clone(), pot)<span class="question-mark">?</span>;
 
@@ -1345,7 +1313,6 @@
 			new_reserve_quota: BalanceOf&lt;T&gt;,
 		) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			<span class="kw">let </span><span class="kw-2">mut </span>pot_details = Pot::&lt;T&gt;::get(pot).ok_or(Error::&lt;T&gt;::PotNotExist)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(pot_details.sponsor == who, Error::&lt;T&gt;::NoPermission);
 
@@ -1380,7 +1347,6 @@
 			users: Vec&lt;T::AccountId&gt;,
 		) -&gt; DispatchResult {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(!<span class="self">Self</span>::migration_in_progress(), Error::&lt;T&gt;::MigrationInProgress);
 			<span class="kw">let </span>pot_details = Pot::&lt;T&gt;::get(pot).ok_or(Error::&lt;T&gt;::PotNotExist)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(pot_details.sponsor == who, Error::&lt;T&gt;::NoPermission);
 
@@ -1537,10 +1503,6 @@
 
 		<span class="self">Self</span>::deposit_event(Event::Sponsored { paid, repaid });
 		<span class="prelude-val">Ok</span>(())
-	}
-
-	<span class="kw">fn </span>migration_in_progress() -&gt; bool {
-		<span class="self">Self</span>::on_chain_storage_version() &lt; <span class="self">Self</span>::current_storage_version()
 	}
 }
 

@@ -424,82 +424,6 @@
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
-<a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a>
-<a href="#428" id="428">428</a>
-<a href="#429" id="429">429</a>
-<a href="#430" id="430">430</a>
-<a href="#431" id="431">431</a>
-<a href="#432" id="432">432</a>
-<a href="#433" id="433">433</a>
-<a href="#434" id="434">434</a>
-<a href="#435" id="435">435</a>
-<a href="#436" id="436">436</a>
-<a href="#437" id="437">437</a>
-<a href="#438" id="438">438</a>
-<a href="#439" id="439">439</a>
-<a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
-<a href="#443" id="443">443</a>
-<a href="#444" id="444">444</a>
-<a href="#445" id="445">445</a>
-<a href="#446" id="446">446</a>
-<a href="#447" id="447">447</a>
-<a href="#448" id="448">448</a>
-<a href="#449" id="449">449</a>
-<a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a>
-<a href="#489" id="489">489</a>
-<a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
-<a href="#496" id="496">496</a>
-<a href="#497" id="497">497</a>
-<a href="#498" id="498">498</a>
-<a href="#499" id="499">499</a>
-<a href="#500" id="500">500</a>
-<a href="#501" id="501">501</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -523,89 +447,71 @@
 </span><span class="comment">// std
 </span><span class="kw">use </span>std::{sync::Arc, time::Duration};
 
-<span class="comment">// rpc
-</span><span class="kw">use </span>jsonrpsee::RpcModule;
+<span class="kw">use </span>cumulus_client_cli::CollatorOptions;
+<span class="comment">// Local Runtime Types
+</span><span class="kw">use </span>runtime_eden::RuntimeApi;
 
-<span class="kw">pub use </span>primitives::{AccountId, Balance, Block, Nonce};
+<span class="kw">use </span>polkadot_primitives::{Block, Hash};
 
 <span class="comment">// Cumulus Imports
-</span><span class="kw">use </span>cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
-<span class="kw">use </span>cumulus_client_consensus_common::{ParachainBlockImport <span class="kw">as </span>TParachainBlockImport, ParachainConsensus};
+</span><span class="kw">use </span>cumulus_client_collator::service::CollatorService;
+<span class="kw">use </span>cumulus_client_consensus_common::ParachainBlockImport <span class="kw">as </span>TParachainBlockImport;
+<span class="kw">use </span>cumulus_client_consensus_proposer::Proposer;
 <span class="kw">use </span>cumulus_client_service::{
-	build_network, build_relay_chain_interface, prepare_node_config, start_collator, start_full_node,
-	BuildNetworkParams, StartCollatorParams, StartFullNodeParams,
+	build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks, BuildNetworkParams,
+	CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
-<span class="kw">use </span>cumulus_primitives_core::ParaId;
-
-<span class="kw">use </span>cumulus_client_cli::CollatorOptions;
-<span class="kw">use </span>cumulus_relay_chain_interface::RelayChainInterface;
+<span class="kw">use </span>cumulus_primitives_core::{relay_chain::CollatorPair, ParaId};
+<span class="kw">use </span>cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
 
 <span class="comment">// Substrate Imports
+
 </span><span class="kw">use </span>sc_consensus::ImportQueue;
-<span class="kw">use </span>sc_executor::WasmExecutor;
+<span class="kw">use </span>sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 <span class="kw">use </span>sc_network::NetworkBlock;
 <span class="kw">use </span>sc_network_sync::SyncingService;
 <span class="kw">use </span>sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 <span class="kw">use </span>sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
-<span class="kw">use </span>sp_api::ConstructRuntimeApi;
+
 <span class="kw">use </span>sp_keystore::KeystorePtr;
-<span class="kw">use </span>sp_runtime::traits::BlakeTwo256;
 <span class="kw">use </span>substrate_prometheus_endpoint::Registry;
+
+<span class="attr">#[cfg(not(feature = <span class="string">"runtime-benchmarks"</span>))]
+</span><span class="kw">type </span>HostFunctions = (
+	sp_io::SubstrateHostFunctions,
+	cumulus_client_service::storage_proof_size::HostFunctions,
+);
 
 <span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
 </span><span class="kw">type </span>HostFunctions = (
 	sp_io::SubstrateHostFunctions,
+	cumulus_client_service::storage_proof_size::HostFunctions,
 	frame_benchmarking::benchmarking::HostFunctions,
 );
-<span class="attr">#[cfg(not(feature = <span class="string">"runtime-benchmarks"</span>))]
-</span><span class="kw">type </span>HostFunctions = sp_io::SubstrateHostFunctions;
 
-<span class="kw">type </span>ParachainClient&lt;RuntimeApi&gt; = TFullClient&lt;Block, RuntimeApi, WasmExecutor&lt;HostFunctions&gt;&gt;;
+<span class="kw">type </span>ParachainClient = TFullClient&lt;Block, RuntimeApi, WasmExecutor&lt;HostFunctions&gt;&gt;;
 
 <span class="kw">type </span>ParachainBackend = TFullBackend&lt;Block&gt;;
 
-<span class="kw">type </span>ParachainBlockImport&lt;RuntimeApi&gt; =
-	TParachainBlockImport&lt;Block, Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;, ParachainBackend&gt;;
+<span class="kw">type </span>ParachainBlockImport = TParachainBlockImport&lt;Block, Arc&lt;ParachainClient&gt;, ParachainBackend&gt;;
 
 <span class="doccomment">/// Starts a `ServiceBuilder` for a full service.
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
-</span><span class="kw">pub fn </span>new_partial&lt;RuntimeApi, BIQ&gt;(
+</span><span class="kw">pub fn </span>new_partial(
 	config: <span class="kw-2">&amp;</span>Configuration,
-	build_import_queue: BIQ,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;
 	PartialComponents&lt;
-		ParachainClient&lt;RuntimeApi&gt;,
+		ParachainClient,
 		ParachainBackend,
 		(),
-		sc_consensus::DefaultImportQueue&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;,
-		sc_transaction_pool::FullPool&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;,
-		(
-			ParachainBlockImport&lt;RuntimeApi&gt;,
-			<span class="prelude-ty">Option</span>&lt;Telemetry&gt;,
-			<span class="prelude-ty">Option</span>&lt;TelemetryWorkerHandle&gt;,
-		),
+		sc_consensus::DefaultImportQueue&lt;Block&gt;,
+		sc_transaction_pool::FullPool&lt;Block, ParachainClient&gt;,
+		(ParachainBlockImport, <span class="prelude-ty">Option</span>&lt;Telemetry&gt;, <span class="prelude-ty">Option</span>&lt;TelemetryWorkerHandle&gt;),
 	&gt;,
 	sc_service::Error,
-&gt;
-<span class="kw">where
-	</span>RuntimeApi: ConstructRuntimeApi&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt; + Send + Sync + <span class="lifetime">'static</span>,
-	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue&lt;Block&gt;
-		+ sp_api::Metadata&lt;Block&gt;
-		+ sp_session::SessionKeys&lt;Block&gt;
-		+ sp_api::ApiExt&lt;Block, StateBackend = sc_client_api::StateBackendFor&lt;ParachainBackend, Block&gt;&gt;
-		+ sp_offchain::OffchainWorkerApi&lt;Block&gt;
-		+ sp_block_builder::BlockBuilder&lt;Block&gt;,
-	sc_client_api::StateBackendFor&lt;ParachainBackend, Block&gt;: sp_api::StateBackend&lt;BlakeTwo256&gt;,
-	BIQ: FnOnce(
-		Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;,
-		ParachainBlockImport&lt;RuntimeApi&gt;,
-		<span class="kw-2">&amp;</span>Configuration,
-		<span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
-		<span class="kw-2">&amp;</span>TaskManager,
-	) -&gt; <span class="prelude-ty">Result</span>&lt;sc_consensus::DefaultImportQueue&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;, sc_service::Error&gt;,
-{
+&gt; {
 	<span class="kw">let </span>telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -616,14 +522,20 @@
 			<span class="prelude-val">Ok</span>((worker, telemetry))
 		})
 		.transpose()<span class="question-mark">?</span>;
-	<span class="attr">#[allow(deprecated)]
-	</span><span class="kw">let </span>executor = sc_executor::WasmExecutor::&lt;HostFunctions&gt;::new(
-		config.wasm_method,
-		config.default_heap_pages,
-		config.max_runtime_instances,
-		<span class="prelude-val">None</span>,
-		config.runtime_cache_size,
-	);
+
+	<span class="kw">let </span>heap_pages = config
+		.default_heap_pages
+		.map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static {
+			extra_pages: h <span class="kw">as _</span>,
+		});
+
+	<span class="kw">let </span>executor = sc_executor::WasmExecutor::&lt;HostFunctions&gt;::builder()
+		.with_execution_method(config.wasm_method)
+		.with_max_runtime_instances(config.max_runtime_instances)
+		.with_runtime_cache_size(config.runtime_cache_size)
+		.with_onchain_heap_alloc_strategy(heap_pages)
+		.with_offchain_heap_alloc_strategy(heap_pages)
+		.build();
 
 	<span class="kw">let </span>(client, backend, keystore_container, task_manager) = sc_service::new_full_parts::&lt;Block, RuntimeApi, <span class="kw">_</span>&gt;(
 		config,
@@ -657,7 +569,7 @@
 		<span class="kw-2">&amp;</span>task_manager,
 	)<span class="question-mark">?</span>;
 
-	<span class="kw">let </span>params = PartialComponents {
+	<span class="prelude-val">Ok</span>(PartialComponents {
 		backend,
 		client,
 		import_queue,
@@ -666,60 +578,25 @@
 		transaction_pool,
 		select_chain: (),
 		other: (block_import, telemetry, telemetry_worker_handle),
-	};
-
-	<span class="prelude-val">Ok</span>(params)
+	})
 }
 
-<span class="attr">#[allow(clippy::too_many_arguments)]
-#[sc_tracing::logging::prefix_logs_with(<span class="string">"Parachain"</span>)]
-</span><span class="kw">async fn </span>start_node_impl&lt;RuntimeApi, RB, BIQ, BIC&gt;(
+<span class="doccomment">/// Start a node with the given parachain `Configuration` and relay chain `Configuration`.
+///
+/// This is the actual implementation that is abstract over the executor and the runtime api.
+</span><span class="attr">#[sc_tracing::logging::prefix_logs_with(<span class="string">"Parachain"</span>)]
+</span><span class="kw">async fn </span>start_node_impl(
 	parachain_config: Configuration,
 	polkadot_config: Configuration,
 	collator_options: CollatorOptions,
 	para_id: ParaId,
-	_rpc_ext_builder: RB,
-	build_import_queue: BIQ,
-	build_consensus: BIC,
 	hwbench: <span class="prelude-ty">Option</span>&lt;sc_sysinfo::HwBench&gt;,
-) -&gt; sc_service::error::Result&lt;(TaskManager, Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;)&gt;
-<span class="kw">where
-	</span>RuntimeApi: ConstructRuntimeApi&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt; + Send + Sync + <span class="lifetime">'static</span>,
-	RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue&lt;Block&gt;
-		+ sp_api::Metadata&lt;Block&gt;
-		+ sp_session::SessionKeys&lt;Block&gt;
-		+ sp_api::ApiExt&lt;Block, StateBackend = sc_client_api::StateBackendFor&lt;ParachainBackend, Block&gt;&gt;
-		+ sp_offchain::OffchainWorkerApi&lt;Block&gt;
-		+ sp_block_builder::BlockBuilder&lt;Block&gt;
-		+ cumulus_primitives_core::CollectCollationInfo&lt;Block&gt;
-		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi&lt;Block, Balance&gt;
-		+ frame_rpc_system::AccountNonceApi&lt;Block, AccountId, Nonce&gt;,
-	sc_client_api::StateBackendFor&lt;ParachainBackend, Block&gt;: sp_api::StateBackend&lt;BlakeTwo256&gt;,
-	RB: Fn(Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;jsonrpsee::RpcModule&lt;()&gt;, sc_service::Error&gt;,
-	BIQ: FnOnce(
-		Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;,
-		ParachainBlockImport&lt;RuntimeApi&gt;,
-		<span class="kw-2">&amp;</span>Configuration,
-		<span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
-		<span class="kw-2">&amp;</span>TaskManager,
-	) -&gt; <span class="prelude-ty">Result</span>&lt;sc_consensus::DefaultImportQueue&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;, sc_service::Error&gt;,
-	BIC: FnOnce(
-		Arc&lt;ParachainClient&lt;RuntimeApi&gt;&gt;,
-		ParachainBlockImport&lt;RuntimeApi&gt;,
-		<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Registry&gt;,
-		<span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
-		<span class="kw-2">&amp;</span>TaskManager,
-		Arc&lt;<span class="kw">dyn </span>RelayChainInterface&gt;,
-		Arc&lt;sc_transaction_pool::FullPool&lt;Block, ParachainClient&lt;RuntimeApi&gt;&gt;&gt;,
-		Arc&lt;SyncingService&lt;Block&gt;&gt;,
-		KeystorePtr,
-		bool,
-	) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ParachainConsensus&lt;Block&gt;&gt;, sc_service::Error&gt;,
-{
+) -&gt; sc_service::error::Result&lt;(TaskManager, Arc&lt;ParachainClient&gt;)&gt; {
 	<span class="kw">let </span>parachain_config = prepare_node_config(parachain_config);
 
-	<span class="kw">let </span>params = new_partial::&lt;RuntimeApi, BIQ&gt;(<span class="kw-2">&amp;</span>parachain_config, build_import_queue)<span class="question-mark">?</span>;
+	<span class="kw">let </span>params = new_partial(<span class="kw-2">&amp;</span>parachain_config)<span class="question-mark">?</span>;
 	<span class="kw">let </span>(block_import, <span class="kw-2">mut </span>telemetry, telemetry_worker_handle) = params.other;
+	<span class="kw">let </span>net_config = sc_network::config::FullNetworkConfiguration::new(<span class="kw-2">&amp;</span>parachain_config.network);
 
 	<span class="kw">let </span>client = params.client.clone();
 	<span class="kw">let </span>backend = params.backend.clone();
@@ -736,24 +613,22 @@
 	.<span class="kw">await
 	</span>.map_err(|e| sc_service::Error::Application(Box::new(e) <span class="kw">as </span>Box&lt;<span class="kw">_</span>&gt;))<span class="question-mark">?</span>;
 
-	<span class="kw">let </span>force_authoring = parachain_config.force_authoring;
 	<span class="kw">let </span>validator = parachain_config.role.is_authority();
 	<span class="kw">let </span>prometheus_registry = parachain_config.prometheus_registry().cloned();
 	<span class="kw">let </span>transaction_pool = params.transaction_pool.clone();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
-	<span class="kw">let </span>net_config = sc_network::config::FullNetworkConfiguration::new(<span class="kw-2">&amp;</span>parachain_config.network);
-
 	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
 		build_network(BuildNetworkParams {
 			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
+			net_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
 			para_id,
 			spawn_handle: task_manager.spawn_handle(),
 			relay_chain_interface: relay_chain_interface.clone(),
 			import_queue: params.import_queue,
-			net_config,
-		})
+			sybil_resistance_level: CollatorSybilResistance::Resistant, <span class="comment">// because of Aura
+		</span>})
 		.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let </span>rpc_builder = {
@@ -778,7 +653,7 @@
 		task_manager: <span class="kw-2">&amp;mut </span>task_manager,
 		config: parachain_config,
 		keystore: params.keystore_container.keystore(),
-		backend: backend.clone(),
+		backend,
 		network: network.clone(),
 		sync_service: sync_service.clone(),
 		system_rpc_tx,
@@ -813,8 +688,25 @@
 		.overseer_handle()
 		.map_err(|e| sc_service::Error::Application(Box::new(e)))<span class="question-mark">?</span>;
 
+	start_relay_chain_tasks(StartRelayChainTasksParams {
+		client: client.clone(),
+		announce_block: announce_block.clone(),
+		para_id,
+		relay_chain_interface: relay_chain_interface.clone(),
+		task_manager: <span class="kw-2">&amp;mut </span>task_manager,
+		da_recovery_profile: <span class="kw">if </span>validator {
+			DARecoveryProfile::Collator
+		} <span class="kw">else </span>{
+			DARecoveryProfile::FullNode
+		},
+		import_queue: import_queue_service,
+		relay_chain_slot_duration,
+		recovery_handle: Box::new(overseer_handle.clone()),
+		sync_service: sync_service.clone(),
+	})<span class="question-mark">?</span>;
+
 	<span class="kw">if </span>validator {
-		<span class="kw">let </span>parachain_consensus = build_consensus(
+		start_consensus(
 			client.clone(),
 			block_import,
 			prometheus_registry.as_ref(),
@@ -824,42 +716,12 @@
 			transaction_pool,
 			sync_service.clone(),
 			params.keystore_container.keystore(),
-			force_authoring,
+			relay_chain_slot_duration,
+			para_id,
+			collator_key.expect(<span class="string">"Command line arguments do not allow this. qed"</span>),
+			overseer_handle,
+			announce_block,
 		)<span class="question-mark">?</span>;
-
-		<span class="kw">let </span>spawner = task_manager.spawn_handle();
-
-		<span class="kw">let </span>params = StartCollatorParams {
-			para_id,
-			block_status: client.clone(),
-			announce_block,
-			client: client.clone(),
-			task_manager: <span class="kw-2">&amp;mut </span>task_manager,
-			relay_chain_interface,
-			spawner,
-			parachain_consensus,
-			import_queue: import_queue_service,
-			collator_key: collator_key.expect(<span class="string">"Command line arguments do not allow this. qed"</span>),
-			relay_chain_slot_duration,
-			recovery_handle: Box::new(overseer_handle),
-			sync_service: sync_service.clone(),
-		};
-
-		start_collator(params).<span class="kw">await</span><span class="question-mark">?</span>;
-	} <span class="kw">else </span>{
-		<span class="kw">let </span>params = StartFullNodeParams {
-			client: client.clone(),
-			announce_block,
-			task_manager: <span class="kw-2">&amp;mut </span>task_manager,
-			para_id,
-			relay_chain_interface,
-			relay_chain_slot_duration,
-			import_queue: import_queue_service,
-			recovery_handle: Box::new(overseer_handle),
-			sync_service: sync_service.clone(),
-		};
-
-		start_full_node(params)<span class="question-mark">?</span>;
 	}
 
 	start_network.start_network();
@@ -868,36 +730,101 @@
 }
 
 <span class="doccomment">/// Build the import queue for the parachain runtime.
-</span><span class="attr">#[allow(clippy::type_complexity)]
-</span><span class="kw">pub fn </span>parachain_build_import_queue(
-	client: Arc&lt;ParachainClient&lt;runtime_eden::RuntimeApi&gt;&gt;,
-	block_import: ParachainBlockImport&lt;runtime_eden::RuntimeApi&gt;,
+</span><span class="kw">fn </span>build_import_queue(
+	client: Arc&lt;ParachainClient&gt;,
+	block_import: ParachainBlockImport,
 	config: <span class="kw-2">&amp;</span>Configuration,
 	telemetry: <span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
 	task_manager: <span class="kw-2">&amp;</span>TaskManager,
-) -&gt; <span class="prelude-ty">Result</span>&lt;sc_consensus::DefaultImportQueue&lt;Block, ParachainClient&lt;runtime_eden::RuntimeApi&gt;&gt;, sc_service::Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;sc_consensus::DefaultImportQueue&lt;Block&gt;, sc_service::Error&gt; {
 	<span class="kw">let </span>slot_duration = cumulus_client_consensus_aura::slot_duration(<span class="kw-2">&amp;*</span>client)<span class="question-mark">?</span>;
 
-	cumulus_client_consensus_aura::import_queue::&lt;sp_consensus_aura::sr25519::AuthorityPair, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>&gt;(
-		cumulus_client_consensus_aura::ImportQueueParams {
-			block_import,
+	<span class="prelude-val">Ok</span>(
+		cumulus_client_consensus_aura::equivocation_import_queue::fully_verifying_import_queue::&lt;
+			sp_consensus_aura::sr25519::AuthorityPair,
+			<span class="kw">_</span>,
+			<span class="kw">_</span>,
+			<span class="kw">_</span>,
+			<span class="kw">_</span>,
+		&gt;(
 			client,
-			create_inherent_data_providers: <span class="kw">move </span>|<span class="kw">_</span>, <span class="kw">_</span>| <span class="kw">async move </span>{
+			block_import,
+			<span class="kw">move </span>|<span class="kw">_</span>, <span class="kw">_</span>| <span class="kw">async move </span>{
 				<span class="kw">let </span>timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-				<span class="kw">let </span>slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-					<span class="kw-2">*</span>timestamp,
-					slot_duration,
-				);
-
-				<span class="prelude-val">Ok</span>((slot, timestamp))
+				<span class="prelude-val">Ok</span>(timestamp)
 			},
-			registry: config.prometheus_registry(),
-			spawner: <span class="kw-2">&amp;</span>task_manager.spawn_essential_handle(),
+			slot_duration,
+			<span class="kw-2">&amp;</span>task_manager.spawn_essential_handle(),
+			config.prometheus_registry(),
 			telemetry,
-		},
+		),
 	)
-	.map_err(Into::into)
+}
+
+<span class="attr">#[allow(clippy::too_many_arguments)]
+</span><span class="kw">fn </span>start_consensus(
+	client: Arc&lt;ParachainClient&gt;,
+	block_import: ParachainBlockImport,
+	prometheus_registry: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Registry&gt;,
+	telemetry: <span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
+	task_manager: <span class="kw-2">&amp;</span>TaskManager,
+	relay_chain_interface: Arc&lt;<span class="kw">dyn </span>RelayChainInterface&gt;,
+	transaction_pool: Arc&lt;sc_transaction_pool::FullPool&lt;Block, ParachainClient&gt;&gt;,
+	sync_oracle: Arc&lt;SyncingService&lt;Block&gt;&gt;,
+	keystore: KeystorePtr,
+	relay_chain_slot_duration: Duration,
+	para_id: ParaId,
+	collator_key: CollatorPair,
+	overseer_handle: OverseerHandle,
+	announce_block: Arc&lt;<span class="kw">dyn </span>Fn(Hash, <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;) + Send + Sync&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), sc_service::Error&gt; {
+	<span class="kw">use </span>cumulus_client_consensus_aura::collators::basic::{<span class="self">self </span><span class="kw">as </span>basic_aura, Params <span class="kw">as </span>BasicAuraParams};
+
+	<span class="comment">// NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
+	// when starting the network.
+
+	</span><span class="kw">let </span>slot_duration = cumulus_client_consensus_aura::slot_duration(<span class="kw-2">&amp;*</span>client)<span class="question-mark">?</span>;
+
+	<span class="kw">let </span>proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
+		task_manager.spawn_handle(),
+		client.clone(),
+		transaction_pool,
+		prometheus_registry,
+		telemetry.clone(),
+	);
+
+	<span class="kw">let </span>proposer = Proposer::new(proposer_factory);
+
+	<span class="kw">let </span>collator_service = CollatorService::new(
+		client.clone(),
+		Arc::new(task_manager.spawn_handle()),
+		announce_block,
+		client.clone(),
+	);
+
+	<span class="kw">let </span>params = BasicAuraParams {
+		create_inherent_data_providers: <span class="kw">move </span>|<span class="kw">_</span>, ()| <span class="kw">async move </span>{ <span class="prelude-val">Ok</span>(()) },
+		block_import,
+		para_client: client,
+		relay_client: relay_chain_interface,
+		sync_oracle,
+		keystore,
+		collator_key,
+		para_id,
+		overseer_handle,
+		slot_duration,
+		relay_chain_slot_duration,
+		proposer,
+		collator_service,
+		<span class="comment">// Very limited proposal time.
+		</span>authoring_duration: Duration::from_millis(<span class="number">500</span>),
+		collation_request_receiver: <span class="prelude-val">None</span>,
+	};
+
+	<span class="kw">let </span>fut = basic_aura::run::&lt;Block, sp_consensus_aura::sr25519::AuthorityPair, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>&gt;(params);
+	task_manager.spawn_essential_handle().spawn(<span class="string">"aura"</span>, <span class="prelude-val">None</span>, fut);
+
+	<span class="prelude-val">Ok</span>(())
 }
 
 <span class="doccomment">/// Start a parachain node.
@@ -907,97 +834,18 @@
 	collator_options: CollatorOptions,
 	para_id: ParaId,
 	hwbench: <span class="prelude-ty">Option</span>&lt;sc_sysinfo::HwBench&gt;,
-) -&gt; sc_service::error::Result&lt;(TaskManager, Arc&lt;ParachainClient&lt;runtime_eden::RuntimeApi&gt;&gt;)&gt; {
-	start_node_impl::&lt;runtime_eden::RuntimeApi, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>&gt;(
-		parachain_config,
-		polkadot_config,
-		collator_options,
-		para_id,
-		|<span class="kw">_</span>| <span class="prelude-val">Ok</span>(RpcModule::new(())),
-		parachain_build_import_queue,
-		|client,
-		 block_import,
-		 prometheus_registry,
-		 telemetry,
-		 task_manager,
-		 relay_chain_interface,
-		 transaction_pool,
-		 sync_oracle,
-		 keystore,
-		 force_authoring| {
-			<span class="kw">let </span>slot_duration = cumulus_client_consensus_aura::slot_duration(<span class="kw-2">&amp;*</span>client)<span class="question-mark">?</span>;
-
-			<span class="kw">let </span>proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
-				task_manager.spawn_handle(),
-				client.clone(),
-				transaction_pool,
-				prometheus_registry,
-				telemetry.clone(),
-			);
-
-			<span class="prelude-val">Ok</span>(AuraConsensus::build::&lt;
-				sp_consensus_aura::sr25519::AuthorityPair,
-				<span class="kw">_</span>,
-				<span class="kw">_</span>,
-				<span class="kw">_</span>,
-				<span class="kw">_</span>,
-				<span class="kw">_</span>,
-				<span class="kw">_</span>,
-			&gt;(BuildAuraConsensusParams {
-				proposer_factory,
-				create_inherent_data_providers: <span class="kw">move </span>|<span class="kw">_</span>, (relay_parent, validation_data)| {
-					<span class="kw">let </span>relay_chain_interface = relay_chain_interface.clone();
-					<span class="kw">async move </span>{
-						<span class="kw">let </span>parachain_inherent =
-							cumulus_primitives_parachain_inherent::ParachainInherentData::create_at(
-								relay_parent,
-								<span class="kw-2">&amp;</span>relay_chain_interface,
-								<span class="kw-2">&amp;</span>validation_data,
-								para_id,
-							)
-							.<span class="kw">await</span>;
-
-						<span class="kw">let </span>timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-
-						<span class="kw">let </span>slot = sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_slot_duration(
-							<span class="kw-2">*</span>timestamp,
-							slot_duration,
-						);
-
-						<span class="kw">let </span>parachain_inherent = parachain_inherent.ok_or_else(|| {
-							Box::&lt;<span class="kw">dyn </span>std::error::Error + Send + Sync&gt;::from(<span class="string">"Failed to create parachain inherent"</span>)
-						})<span class="question-mark">?</span>;
-
-						<span class="prelude-val">Ok</span>((slot, timestamp, parachain_inherent))
-					}
-				},
-				block_import,
-				para_client: client,
-				backoff_authoring_blocks: <span class="prelude-ty">Option</span>::&lt;()&gt;::None,
-				sync_oracle,
-				keystore,
-				force_authoring,
-				slot_duration,
-				<span class="comment">// We got around 500ms for proposing
-				</span>block_proposal_slot_portion: SlotProportion::new(<span class="number">1f32 </span>/ <span class="number">24f32</span>),
-				<span class="comment">// And a maximum of 750ms if slots are skipped
-				</span>max_block_proposal_slot_portion: <span class="prelude-val">Some</span>(SlotProportion::new(<span class="number">1f32 </span>/ <span class="number">16f32</span>)),
-				telemetry,
-			}))
-		},
-		hwbench,
-	)
-	.<span class="kw">await
+) -&gt; sc_service::error::Result&lt;(TaskManager, Arc&lt;ParachainClient&gt;)&gt; {
+	start_node_impl(parachain_config, polkadot_config, collator_options, para_id, hwbench).<span class="kw">await
 </span>}
 
 <span class="doccomment">/// Checks that the hardware meets the requirements and print a warning otherwise.
 </span><span class="kw">fn </span>warn_if_slow_hardware(hwbench: <span class="kw-2">&amp;</span>sc_sysinfo::HwBench) {
 	<span class="comment">// Polkadot para-chains should generally use these requirements to ensure that the relay-chain
 	// will not take longer than expected to import its blocks.
-	</span><span class="kw">if </span>!frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.check_hardware(hwbench) {
+	</span><span class="kw">if let </span><span class="prelude-val">Err</span>(e) = frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.check_hardware(hwbench) {
 		<span class="macro">log::warn!</span>(
 			<span class="string">"⚠️  The hardware does not meet the minimal requirements for role 'Authority' find out more at:\n\
-			https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#reference-hardware"
+			https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#reference-hardware {e:?}"
 		</span>);
 	}
 }

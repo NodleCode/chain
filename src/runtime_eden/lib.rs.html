@@ -562,6 +562,23 @@
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -665,7 +682,7 @@
 		</span>ParachainSystem: cumulus_pallet_parachain_system = <span class="number">30</span>,
 		ParachainInfo: parachain_info = <span class="number">31</span>,
 		CumulusXcm: cumulus_pallet_xcm = <span class="number">32</span>,
-		DmpQueue: cumulus_pallet_dmp_queue = <span class="number">33</span>,
+		MessageQueue: pallet_message_queue = <span class="number">33</span>,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event&lt;T&gt;} = <span class="number">34</span>,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event&lt;T&gt;, Origin, Config&lt;T&gt;} = <span class="number">35</span>,
 		XTokens: orml_xtokens::{Pallet, Call, Storage, Event&lt;T&gt;} = <span class="number">36</span>,
@@ -674,10 +691,11 @@
 		</span>Utility: pallet_utility = <span class="number">40</span>,
 		Multisig: pallet_multisig = <span class="number">41</span>,
 		Uniques: pallet_uniques::{Pallet, Storage, Event&lt;T&gt;} = <span class="number">42</span>,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event&lt;T&gt;} = <span class="number">43</span>,
+		Preimage: pallet_preimage::{Pallet, Call, Storage, Event&lt;T&gt;, HoldReason} = <span class="number">43</span>,
 		NodleUniques: pallet_nodle_uniques = <span class="number">44</span>,
 		Sponsorship: pallet_sponsorship = <span class="number">45</span>,
 		Identity: pallet_identity::{Pallet, Call, Storage, Event&lt;T&gt;} = <span class="number">46</span>,
+		Proxy: pallet_proxy = <span class="number">47</span>,
 
 		<span class="comment">// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -691,6 +709,39 @@
 		</span>Contracts: pallet_contracts = <span class="number">62</span>,
 	}
 }
+<span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
+</span><span class="kw">use </span>pallet_xcm::benchmarking::Pallet <span class="kw">as </span>PalletXcmExtrinsicsBenchmark;
+
+<span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
+</span><span class="kw">mod </span>benches {
+	<span class="macro">frame_benchmarking::define_benchmarks!</span>(
+		[frame_system, SystemBench::&lt;Runtime&gt;]
+		[pallet_timestamp, Timestamp]
+		[pallet_balances, Balances]
+		[pallet_scheduler, Scheduler]
+		[pallet_preimage, Preimage]
+		[pallet_multisig, Multisig]
+		[pallet_reserve, CompanyReserve]
+		[pallet_grants, Vesting]
+		[pallet_uniques, Uniques]
+		[pallet_nodle_uniques, NodleUniques]
+		[pallet_message_queue, MessageQueue]
+		[pallet_sponsorship, Sponsorship]
+		[pallet_proxy, Proxy]
+		[pallet_utility, Utility]
+		[pallet_allocations, Allocations]
+		[pallet_collator_selection, CollatorSelection]
+		[pallet_contracts, Contracts]
+		[pallet_identity, Identity]
+		[pallet_membership, TechnicalMembership]
+		[pallet_collective, TechnicalCommittee ]
+		[pallet_xcm, PalletXcmExtrinsicsBenchmark::&lt;Runtime&gt;]
+		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
+		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
+		[cumulus_pallet_parachain_system, ParachainSystem]
+	);
+}
+
 <span class="doccomment">/// The address format for describing accounts.
 </span><span class="kw">pub type </span>Address = sp_runtime::MultiAddress&lt;AccountId, ()&gt;;
 <span class="doccomment">/// Block header type as expected by this runtime.
@@ -718,8 +769,14 @@
 </span><span class="kw">pub type </span>SignedPayload = generic::SignedPayload&lt;RuntimeCall, SignedExtra&gt;;
 <span class="doccomment">/// Extrinsic type that has already been checked.
 </span><span class="kw">pub type </span>CheckedExtrinsic = generic::CheckedExtrinsic&lt;AccountId, RuntimeCall, SignedExtra&gt;;
+<span class="kw">const </span>TEST_ALL_STEPS: bool = <span class="macro">cfg!</span>(feature = <span class="string">"try-runtime"</span>);
 
-<span class="kw">pub type </span>Migrations = ();
+<span class="kw">pub type </span>Migrations = (
+	pallet_contracts::Migration&lt;Runtime, TEST_ALL_STEPS&gt;,
+	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4&lt;Runtime&gt;,
+	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1&lt;Runtime, <span class="number">50</span>&gt;,
+	migrations::MultiMigration&lt;Runtime&gt;,
+);
 <span class="doccomment">/// Executive: handles dispatch to the various modules.
 </span><span class="kw">pub type </span>Executive = frame_executive::Executive&lt;
 	Runtime,
@@ -863,7 +920,7 @@
 			gas_limit: <span class="prelude-ty">Option</span>&lt;Weight&gt;,
 			storage_deposit_limit: <span class="prelude-ty">Option</span>&lt;Balance&gt;,
 			input_data: Vec&lt;u8&gt;,
-		) -&gt; pallet_contracts_primitives::ContractExecResult&lt;Balance,EventRecord&gt; {
+		) -&gt; pallet_contracts::ContractExecResult&lt;Balance,EventRecord&gt; {
 			<span class="kw">let </span>gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_call(
 				origin,
@@ -883,10 +940,10 @@
 			value: Balance,
 			gas_limit: <span class="prelude-ty">Option</span>&lt;Weight&gt;,
 			storage_deposit_limit: <span class="prelude-ty">Option</span>&lt;Balance&gt;,
-			code: pallet_contracts_primitives::Code&lt;Hash&gt;,
+			code: pallet_contracts::Code&lt;Hash&gt;,
 			data: Vec&lt;u8&gt;,
 			salt: Vec&lt;u8&gt;,
-		) -&gt; pallet_contracts_primitives::ContractInstantiateResult&lt;AccountId, Balance, EventRecord&gt; {
+		) -&gt; pallet_contracts::ContractInstantiateResult&lt;AccountId, Balance, EventRecord&gt; {
 			<span class="kw">let </span>gas_limit = gas_limit.unwrap_or(RuntimeBlockWeights::get().max_block);
 			Contracts::bare_instantiate(
 				origin,
@@ -906,14 +963,14 @@
 			code: Vec&lt;u8&gt;,
 			storage_deposit_limit: <span class="prelude-ty">Option</span>&lt;Balance&gt;,
 			determinism: pallet_contracts::Determinism,
-		) -&gt; pallet_contracts_primitives::CodeUploadResult&lt;Hash, Balance&gt; {
+		) -&gt; pallet_contracts::CodeUploadResult&lt;Hash, Balance&gt; {
 			Contracts::bare_upload_code(origin, code, storage_deposit_limit, determinism)
 		}
 
 		<span class="kw">fn </span>get_storage(
 			address: AccountId,
 			key: Vec&lt;u8&gt;,
-		) -&gt; pallet_contracts_primitives::GetStorageResult {
+		) -&gt; pallet_contracts::GetStorageResult {
 			Contracts::get_storage(address, key)
 		}
 	}
@@ -924,38 +981,14 @@
 			Vec&lt;frame_benchmarking::BenchmarkList&gt;,
 			Vec&lt;frame_support::traits::StorageInfo&gt;,
 		) {
-			<span class="kw">use </span>frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkList};
 			<span class="kw">use </span>frame_support::traits::StorageInfoTrait;
 
-			<span class="comment">// Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
-			// issues. To get around that, we separated the Session benchmarks into its own crate,
-			// which is why we need these two lines below.
-			// use pallet_loans_benchmarking::Pallet as LoansBench;
-			</span><span class="kw">use </span>frame_system_benchmarking::Pallet <span class="kw">as </span>SystemBench;
+			<span class="kw">use </span>frame_system_benchmarking::Pallet <span class="kw">as </span>SystemBench;
 
 			<span class="kw">let </span><span class="kw-2">mut </span>list = Vec::&lt;BenchmarkList&gt;::new();
 
-			<span class="macro">list_benchmark!</span>(list, extra, frame_system, SystemBench::&lt;Runtime&gt;);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_timestamp, Timestamp);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_balances, Balances);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_scheduler, Scheduler);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_preimage, Preimage);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_multisig, Multisig);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_reserve, CompanyReserve);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_grants, Vesting);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_uniques, Uniques);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_nodle_uniques, NodleUniques);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_sponsorship, Sponsorship);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_utility, Utility);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_allocations, Allocations);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_collator_selection, CollatorSelection);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_contracts, Contracts);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_identity, Identity);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_membership, TechnicalMembership);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_xcm, PolkadotXcm);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
-			<span class="macro">list_benchmark!</span>(list, extra, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
-
+			<span class="macro">list_benchmarks!</span>(list, extra);
 			<span class="kw">let </span>storage_info = AllPalletsWithSystem::storage_info();
 
 			(list, storage_info)
@@ -964,11 +997,31 @@
 		<span class="kw">fn </span>dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;frame_benchmarking::BenchmarkBatch&gt;, sp_runtime::RuntimeString&gt; {
-			<span class="comment">// We did not include the offences and sessions benchmarks as they are parity
-			// specific and were causing some issues at compile time as they depend on the
-			// presence of the staking and elections pallets.
+			<span class="kw">use </span>cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
+			<span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
 
-			</span><span class="kw">use </span>frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError, TrackedStorageKey, add_benchmark};
+			<span class="kw">use </span><span class="kw">crate</span>::constants::POLKADOT_EXISTENTIAL_DEPOSIT;
+
+			<span class="kw">impl </span>pallet_xcm::benchmarking::Config <span class="kw">for </span>Runtime {
+				<span class="kw">fn </span>reachable_dest() -&gt; <span class="prelude-ty">Option</span>&lt;MultiLocation&gt; {
+					<span class="prelude-val">Some</span>(Parent.into())
+				}
+
+				<span class="kw">fn </span>teleportable_asset_and_dest() -&gt; <span class="prelude-ty">Option</span>&lt;(MultiAsset, MultiLocation)&gt; {
+					<span class="comment">// Relay/native token can be teleported between People and Relay.
+					</span><span class="prelude-val">Some</span>((
+						MultiAsset {
+							fun: Fungible(POLKADOT_EXISTENTIAL_DEPOSIT),
+							id: Parent.into()
+						},
+						Parent.into(),
+					))
+				}
+
+				<span class="kw">fn </span>reserve_transferable_asset_and_dest() -&gt; <span class="prelude-ty">Option</span>&lt;(MultiAsset, MultiLocation)&gt; {
+					<span class="prelude-val">None
+				</span>}
+			}
 
 			<span class="kw">use </span>frame_system_benchmarking::Pallet <span class="kw">as </span>SystemBench;
 
@@ -984,7 +1037,7 @@
 			}
 
 
-			<span class="kw">let </span>whitelist: Vec&lt;TrackedStorageKey&gt; = <span class="macro">vec!</span>[
+			<span class="kw">let </span>whitelist: Vec&lt;sp_storage::TrackedStorageKey&gt; = <span class="macro">vec!</span>[
 				<span class="comment">// Block Number
 				</span><span class="macro">hex_literal::hex!</span>(<span class="string">"26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac"</span>).to_vec().into(),
 				<span class="comment">// Total Issuance
@@ -1000,26 +1053,7 @@
 			<span class="kw">let </span><span class="kw-2">mut </span>batches = Vec::&lt;BenchmarkBatch&gt;::new();
 			<span class="kw">let </span>params = (<span class="kw-2">&amp;</span>config, <span class="kw-2">&amp;</span>whitelist);
 
-			<span class="macro">add_benchmark!</span>(params, batches, frame_system, SystemBench::&lt;Runtime&gt;);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_timestamp, Timestamp);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_balances, Balances);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_scheduler, Scheduler);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_preimage, Preimage);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_multisig, Multisig);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_reserve, CompanyReserve);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_grants, Vesting);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_uniques, Uniques);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_nodle_uniques, NodleUniques);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_sponsorship, Sponsorship);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_utility, Utility);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_allocations, Allocations);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_collator_selection, CollatorSelection);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_contracts, Contracts);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_identity, Identity);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_membership, TechnicalMembership);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_xcm, PolkadotXcm);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_xcm_benchmarks::generic, XcmGenericBenchmarks);
-			<span class="macro">add_benchmark!</span>(params, batches, pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks);
+			<span class="macro">add_benchmarks!</span>(params, batches);
 
 			<span class="kw">if </span>batches.is_empty() { <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"Benchmark not found for this pallet."</span>.into()) }
 			<span class="prelude-val">Ok</span>(batches)

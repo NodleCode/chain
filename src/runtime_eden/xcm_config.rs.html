@@ -393,13 +393,30 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
 <span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::constants::NODL;
-<span class="kw">use </span><span class="kw">crate</span>::implementations::DealWithFees;
+<span class="kw">use crate</span>::{implementations::DealWithFees, pallets_system::TransactionByteFee};
 <span class="kw">use </span>codec::{Decode, Encode};
 <span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
 </span><span class="kw">use </span>frame_benchmarking::BenchmarkError;
@@ -408,22 +425,23 @@
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
 	weights::IdentityFee,
 	weights::Weight,
-	RuntimeDebug,
 };
 <span class="kw">use </span>frame_system::EnsureRoot;
 <span class="kw">use </span>orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 <span class="kw">use </span>pallet_xcm::XcmPassthrough;
-<span class="kw">use </span>polkadot_parachain::primitives::Sibling;
+<span class="kw">use </span>polkadot_parachain_primitives::primitives::Sibling;
 <span class="kw">use </span>scale_info::TypeInfo;
+<span class="kw">use </span>sp_core::RuntimeDebug;
 <span class="kw">use </span>sp_runtime::traits::Convert;
 <span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
 </span><span class="kw">use </span>sp_std::vec;
 <span class="kw">use </span>xcm::latest::{prelude::<span class="kw-2">*</span>, NetworkId, Weight <span class="kw">as </span>XcmWeight};
 <span class="kw">use </span>xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	CurrencyAdapter, EnsureXcmOrigin, IsConcrete, NativeAsset, ParentIsPreset, RelayChainAsNative,
-	SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-	SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds, WithComputedOrigin,
+	CurrencyAdapter, EnsureXcmOrigin, FrameTransactionalProcessor, IsConcrete, NativeAsset, ParentIsPreset,
+	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
+	WithComputedOrigin,
 };
 <span class="kw">use </span>xcm_executor::XcmExecutor;
 
@@ -555,11 +573,7 @@
 	<span class="kw">type </span>CallDispatcher = RuntimeCall;
 	<span class="kw">type </span>SafeCallFilter = Everything;
 	<span class="kw">type </span>Aliasers = Nothing;
-}
-
-<span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
-</span><span class="macro">parameter_types! </span>{
-	<span class="kw">pub </span>ReachableDest: <span class="prelude-ty">Option</span>&lt;MultiLocation&gt; = <span class="prelude-val">Some</span>(Parent.into());
+	<span class="kw">type </span>TransactionalProcessor = FrameTransactionalProcessor;
 }
 
 <span class="kw">impl </span>pallet_xcm::Config <span class="kw">for </span>Runtime {
@@ -584,22 +598,30 @@
 	<span class="kw">type </span>MaxLockers = ConstU32&lt;<span class="number">8</span>&gt;;
 	<span class="kw">type </span>AdminOrigin = EnsureRoot&lt;AccountId&gt;;
 	<span class="kw">type </span>WeightInfo = <span class="kw">crate</span>::weights::pallet_xcm::WeightInfo&lt;Runtime&gt;;
-	<span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
-	</span><span class="kw">type </span>ReachableDest = ReachableDest;
 	<span class="kw">type </span>MaxRemoteLockConsumers = ConstU32&lt;<span class="number">0</span>&gt;;
 	<span class="kw">type </span>RemoteLockConsumerIdentifier = ();
 }
 
+<span class="macro">parameter_types! </span>{
+	<span class="doccomment">/// The asset ID for the asset that we use to pay for message delivery fees.
+	</span><span class="kw">pub </span>FeeAssetId: AssetId = Concrete(NodlLocation::get());
+	<span class="doccomment">/// The base fee for the message delivery fees.
+	</span><span class="kw">pub const </span>BaseDeliveryFee: u128 = <span class="kw">crate</span>::constants::POLKADOT_CENT.saturating_mul(<span class="number">3</span>);
+}
+
+<span class="kw">pub type </span>PriceForSiblingParachainDelivery =
+	polkadot_runtime_common::xcm_sender::ExponentialPrice&lt;FeeAssetId, BaseDeliveryFee, TransactionByteFee, XcmpQueue&gt;;
+
 <span class="kw">impl </span>cumulus_pallet_xcmp_queue::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
-	<span class="kw">type </span>XcmExecutor = XcmExecutor&lt;XcmConfig&gt;;
 	<span class="kw">type </span>ChannelInfo = ParachainSystem;
 	<span class="kw">type </span>VersionWrapper = PolkadotXcm;
-	<span class="kw">type </span>ExecuteOverweightOrigin = EnsureRoot&lt;AccountId&gt;;
 	<span class="kw">type </span>ControllerOrigin = EnsureRoot&lt;AccountId&gt;;
 	<span class="kw">type </span>ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 	<span class="kw">type </span>WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight&lt;<span class="self">Self</span>&gt;;
-	<span class="kw">type </span>PriceForSiblingDelivery = ();
+	<span class="kw">type </span>PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
+	<span class="kw">type </span>XcmpQueue = ();
+	<span class="kw">type </span>MaxInboundSuspended = sp_core::ConstU32&lt;<span class="number">1_000</span>&gt;;
 }
 <span class="kw">impl </span>cumulus_pallet_xcm::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeEvent = RuntimeEvent;
@@ -665,10 +687,19 @@
 		MultiLocation::parent(),
 		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(<span class="number">100</span>) }
 	));
+	<span class="kw">pub const </span>TrustedReserve: <span class="prelude-ty">Option</span>&lt;(MultiLocation, MultiAsset)&gt; = <span class="prelude-val">None</span>;
+
 }
 <span class="attr">#[cfg(feature = <span class="string">"runtime-benchmarks"</span>)]
 </span><span class="kw">impl </span>pallet_xcm_benchmarks::generic::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>RuntimeCall = RuntimeCall;
+	<span class="kw">type </span>TransactAsset = Balances;
+
+	<span class="comment">//TODO put a realistic value here:
+	</span><span class="kw">fn </span>fee_asset() -&gt; <span class="prelude-ty">Result</span>&lt;MultiAsset, BenchmarkError&gt; {
+		<span class="kw">let </span>assets: MultiAsset = (Concrete(NodlLocation::get()), <span class="number">10_000_000 </span>* NODL).into();
+		<span class="prelude-val">Ok</span>(assets)
+	}
 
 	<span class="kw">fn </span>worst_case_response() -&gt; (u64, Response) {
 		(<span class="number">0u64</span>, Response::Version(Default::default()))
@@ -726,6 +757,7 @@
 	<span class="kw">type </span>TransactAsset = Balances;
 	<span class="kw">type </span>CheckedAccount = ();
 	<span class="kw">type </span>TrustedTeleporter = TrustedTeleporter;
+	<span class="kw">type </span>TrustedReserve = TrustedReserve;
 	<span class="kw">fn </span>get_multi_asset() -&gt; MultiAsset {
 		MultiAsset {
 			id: Concrete(NodlLocation::get()),
@@ -737,6 +769,8 @@
 </span><span class="kw">impl </span>pallet_xcm_benchmarks::Config <span class="kw">for </span>Runtime {
 	<span class="kw">type </span>XcmConfig = XcmConfig;
 	<span class="kw">type </span>AccountIdConverter = LocationToAccountId;
+	<span class="kw">type </span>DeliveryHelper = ();
+
 	<span class="kw">fn </span>valid_destination() -&gt; <span class="prelude-ty">Result</span>&lt;MultiLocation, BenchmarkError&gt; {
 		<span class="prelude-val">Ok</span>(RelayLocation::get())
 	}
