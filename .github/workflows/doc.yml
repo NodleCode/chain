@@ -3,10 +3,13 @@ name: Rust AutoDoc
 env:
   SCCACHE_GHA_ENABLED: "true"
   RUSTC_WRAPPER: "sccache"
+  RUSTFLAGS: "-A warnings"
 
 
 on:
   push:
+    branches: master
+  pull_request: 
     branches: master
 
 jobs:
@@ -14,7 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: rustup show
+      - name: Install Rust stable
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rust-src
+          target: wasm32-unknown-unknown
       - name: Install protobuf-compiler
         run: |
           sudo apt-get install protobuf-compiler
@@ -23,6 +31,7 @@ jobs:
       - name: Build the docs
         run: cargo doc --all --no-deps
       - name: Deploy the docs
+        if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
