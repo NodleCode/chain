@@ -432,16 +432,16 @@ pub mod pallet {
 		/// are needed during pre and post dispatching this call.
 		#[pallet::call_index(4)]
 		#[pallet::weight({
-			let dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::<Vec<_>>();
-			let dispatch_weight = dispatch_infos.iter().map(|di| di.weight)
-				.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
-			let dispatch_class = if dispatch_infos.iter().all(|di| di.class == DispatchClass::Operational) {
-				DispatchClass::Operational
-			} else {
-				DispatchClass::Normal
-			};
-			(dispatch_weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_class, Pays::No)
-		})]
+		let dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::<Vec<_>>();
+		let dispatch_weight = dispatch_infos.iter().map(|di| di.weight)
+			.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
+		let dispatch_class = if dispatch_infos.iter().all(|di| di.class == DispatchClass::Operational) {
+			DispatchClass::Operational
+		} else {
+			DispatchClass::Normal
+		};
+		(dispatch_weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_class, Pays::No)
+	})]
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
 			pot: T::PotId,
