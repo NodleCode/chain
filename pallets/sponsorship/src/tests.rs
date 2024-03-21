@@ -2787,7 +2787,7 @@ fn compound_transaction_illegal_content_should_be_filtered() {
 			user_fee_quota,
 			user_reserve_quota
 		));
-		let user_details = User::<Test>::get(pot, user).unwrap();
+		let _user_details = User::<Test>::get(pot, user).unwrap();
 
 		let unique_create_call = RuntimeCall::Uniques(pallet_uniques::Call::create {
 			collection: 0u32,
@@ -2804,7 +2804,7 @@ fn compound_transaction_illegal_content_should_be_filtered() {
 			calls: compound_call.clone(),
 		}));
 
-		let pre_dispatch_details = ChargeSponsor::<Test>::default()
+		let _pre_dispatch_details = ChargeSponsor::<Test>::default()
 			.pre_dispatch(
 				&user,
 				&sponsor_for_uniques_create_call,
