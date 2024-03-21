@@ -433,18 +433,12 @@ pub mod pallet {
 		#[pallet::call_index(4)]
 		#[pallet::weight({
 			let dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::<Vec<_>>();
-			let dispatch_weight = dispatch_infos.iter()
-				.map(|di| di.weight)
+			let dispatch_weight = dispatch_infos.iter().map(|di| di.weight)
 				.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
-			let dispatch_class = {
-				let all_operational = dispatch_infos.iter()
-					.map(|di| di.class)
-					.all(|class| class == DispatchClass::Operational);
-				if all_operational {
-					DispatchClass::Operational
-				} else {
-					DispatchClass::Normal
-				}
+			let dispatch_class = if dispatch_infos.iter().all(|di| di.class == DispatchClass::Operational) {
+				DispatchClass::Operational
+			} else {
+				DispatchClass::Normal
 			};
 			(dispatch_weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_class, Pays::No)
 		})]

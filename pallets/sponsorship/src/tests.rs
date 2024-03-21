@@ -2683,13 +2683,13 @@ fn compound_transation_should_be_filtered() {
 				collection: 1u32,
 				admin: user,
 			})),
-			Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
-				collection: 2u32,
-				admin: user,
-			})),
 			Box::new(RuntimeCall::SponsorshipModule(Call::sponsor_for {
 				pot: 3,
 				calls: vec![],
+			})),
+			Box::new(RuntimeCall::Uniques(pallet_uniques::Call::create {
+				collection: 2u32,
+				admin: user,
 			})),
 		];
 
