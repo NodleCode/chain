@@ -23,17 +23,13 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, BalancesConfig, CollatorSelectionConfig, ParachainInfoConfig, PolkadotXcmConfig, RuntimeGenesisConfig,
-	SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
+	AuraId, RuntimeGenesisConfig, SessionKeys, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
-use sc_service::{ChainType, GenericChainSpec};
+use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::{
-	bounded_vec,
-	traits::{IdentifyAccount, Verify},
-};
+use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -168,7 +164,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 42.into());
 
-	let cs = ChainSpec::builder(
+	ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
@@ -179,8 +175,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	.with_id("para_eden_dev")
 	.with_chain_type(ChainType::Development)
 	.with_genesis_config_patch(development_config_genesis(id))
-	.build();
-	cs
+	.build()
 }
 
 fn local_config_genesis(id: ParaId) -> serde_json::Value {
