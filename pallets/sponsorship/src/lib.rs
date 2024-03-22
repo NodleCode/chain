@@ -404,8 +404,10 @@ pub mod pallet {
 
 		/// Sponsor me for the given call from the specified pot.
 		/// The caller must be registered for the pot.
-		/// The call must be consistent with the pot's sponsorship type.
+		/// The calls must be consistent with the pot's sponsorship type.
 		///
+		/// Calls: one or more extrinsics which will be executed paid by the sponsorship. If any call fails all will be rolled back
+
 		/// Returns Error if the pot doesn't exist or the user is not registered for the pot or if
 		/// their call is not matching the sponsorship type in which case the error would be
 		/// `frame_system::Error::CallFiltered`. Also returns error if the call itself should fail
@@ -430,19 +432,29 @@ pub mod pallet {
 		/// are needed during pre and post dispatching this call.
 		#[pallet::call_index(4)]
 		#[pallet::weight({
-		let dispatch_info = call.get_dispatch_info();
-		(dispatch_info.weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_info.class, Pays::No)
-		})]
+		let dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::<Vec<_>>();
+		let dispatch_weight = dispatch_infos.iter().map(|di| di.weight)
+			.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
+		let dispatch_class = if dispatch_infos.iter().all(|di| di.class == DispatchClass::Operational) {
+			DispatchClass::Operational
+		} else {
+			DispatchClass::Normal
+		};
+		(dispatch_weight + < T as Config >::WeightInfo::pre_sponsor() + < T as Config >::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(2, 2), dispatch_class, Pays::No)
+	})]
 		pub fn sponsor_for(
 			origin: OriginFor<T>,
 			pot: T::PotId,
-			call: Box<<T as Config>::RuntimeCall>,
+			calls: Vec<Box<<T as Config>::RuntimeCall>>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
 			let preps = Self::pre_sponsor_for(who.clone(), pot)?;
 
-			call.dispatch(preps.proxy_origin).map_err(|e| e.error)?;
+			// Execution strategy: AllMustPass as in as in utility batch all
+			for call in calls.into_iter() {
+				call.dispatch(preps.proxy_origin.clone()).map_err(|e| e.error)?;
+			}
 
 			Self::post_sponsor_for(
 				who,
