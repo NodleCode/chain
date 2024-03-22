@@ -842,6 +842,18 @@
 <a href="#840" id="840">840</a>
 <a href="#841" id="841">841</a>
 <a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -1248,8 +1260,10 @@
 
 		<span class="doccomment">/// Sponsor me for the given call from the specified pot.
 		/// The caller must be registered for the pot.
-		/// The call must be consistent with the pot's sponsorship type.
+		/// The calls must be consistent with the pot's sponsorship type.
 		///
+		/// Calls: one or more extrinsics which will be executed paid by the sponsorship. If any call fails all will be rolled back
+
 		/// Returns Error if the pot doesn't exist or the user is not registered for the pot or if
 		/// their call is not matching the sponsorship type in which case the error would be
 		/// `frame_system::Error::CallFiltered`. Also returns error if the call itself should fail
@@ -1274,19 +1288,29 @@
 		/// are needed during pre and post dispatching this call.
 		</span><span class="attr">#[pallet::call_index(<span class="number">4</span>)]
 		#[pallet::weight({
-		<span class="kw">let </span>dispatch_info = call.get_dispatch_info();
-		(dispatch_info.weight + &lt; T <span class="kw">as </span>Config &gt;::WeightInfo::pre_sponsor() + &lt; T <span class="kw">as </span>Config &gt;::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(<span class="number">2</span>, <span class="number">2</span>), dispatch_info.class, Pays::No)
-		})]
+		<span class="kw">let </span>dispatch_infos = calls.iter().map(|call| call.get_dispatch_info()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+		<span class="kw">let </span>dispatch_weight = dispatch_infos.iter().map(|di| di.weight)
+			.fold(Weight::zero(), |total: Weight, weight: Weight| total.saturating_add(weight));
+		<span class="kw">let </span>dispatch_class = <span class="kw">if </span>dispatch_infos.iter().all(|di| di.class == DispatchClass::Operational) {
+			DispatchClass::Operational
+		} <span class="kw">else </span>{
+			DispatchClass::Normal
+		};
+		(dispatch_weight + &lt; T <span class="kw">as </span>Config &gt;::WeightInfo::pre_sponsor() + &lt; T <span class="kw">as </span>Config &gt;::WeightInfo::post_sponsor() + T::DbWeight::get().reads_writes(<span class="number">2</span>, <span class="number">2</span>), dispatch_class, Pays::No)
+	})]
 		</span><span class="kw">pub fn </span>sponsor_for(
 			origin: OriginFor&lt;T&gt;,
 			pot: T::PotId,
-			call: Box&lt;&lt;T <span class="kw">as </span>Config&gt;::RuntimeCall&gt;,
+			calls: Vec&lt;Box&lt;&lt;T <span class="kw">as </span>Config&gt;::RuntimeCall&gt;&gt;,
 		) -&gt; DispatchResultWithPostInfo {
 			<span class="kw">let </span>who = ensure_signed(origin)<span class="question-mark">?</span>;
 
 			<span class="kw">let </span>preps = <span class="self">Self</span>::pre_sponsor_for(who.clone(), pot)<span class="question-mark">?</span>;
 
-			call.dispatch(preps.proxy_origin).map_err(|e| e.error)<span class="question-mark">?</span>;
+			<span class="comment">// Execution strategy: AllMustPass as in as in utility batch all
+			</span><span class="kw">for </span>call <span class="kw">in </span>calls.into_iter() {
+				call.dispatch(preps.proxy_origin.clone()).map_err(|e| e.error)<span class="question-mark">?</span>;
+			}
 
 			<span class="self">Self</span>::post_sponsor_for(
 				who,
