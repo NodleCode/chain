@@ -26,7 +26,7 @@ use sp_std::vec;
 use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	FungibleAdapter, EnsureXcmOrigin, FrameTransactionalProcessor, IsConcrete, NativeAsset, ParentIsPreset,
+	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
 	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
 	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
 	WithComputedOrigin,
