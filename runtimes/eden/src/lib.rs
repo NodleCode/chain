@@ -35,7 +35,11 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 }
 
 use constants::RuntimeBlockWeights;
-use frame_support::{construct_runtime, weights::Weight};
+use frame_support::{
+	construct_runtime,
+	genesis_builder_helper::{build_config, create_default_config},
+	weights::Weight,
+};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Signature};
 pub use primitives::{AuraId, ParaId};
@@ -213,6 +217,16 @@ pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime
 type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
 sp_api::impl_runtime_apis! {
+	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
+		fn create_default_config() -> Vec<u8> {
+			create_default_config::<RuntimeGenesisConfig>()
+		}
+
+		fn build_config(config: Vec<u8>) -> sp_genesis_builder::Result {
+			build_config::<RuntimeGenesisConfig>(config)
+		}
+	}
+
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
 			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())

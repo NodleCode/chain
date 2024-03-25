@@ -26,7 +26,7 @@ use sp_std::vec;
 use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	CurrencyAdapter, EnsureXcmOrigin, FrameTransactionalProcessor, IsConcrete, NativeAsset, ParentIsPreset,
+	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
 	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
 	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
 	WithComputedOrigin,
@@ -117,7 +117,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 pub type AssetTransactors = CurrencyTransactor;
 
 /// Means for transacting the native currency on this chain.
-pub type CurrencyTransactor = CurrencyAdapter<
+pub type CurrencyTransactor = FungibleAdapter<
 	// Use this currency:
 	Balances,
 	// Use this currency when it is a fungible asset matching the given location or name:

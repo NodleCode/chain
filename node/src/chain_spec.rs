@@ -23,17 +23,13 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, BalancesConfig, CollatorSelectionConfig, ParachainInfoConfig, PolkadotXcmConfig, RuntimeGenesisConfig,
-	SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
+	AuraId, RuntimeGenesisConfig, SessionKeys, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::{
-	bounded_vec,
-	traits::{IdentifyAccount, Verify},
-};
+use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -93,7 +89,7 @@ fn eden_testnet_genesis(
 	collators: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Option<Vec<AccountId>>,
 	id: ParaId,
-) -> RuntimeGenesisConfig {
+) -> serde_json::Value {
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
 		vec![
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -111,24 +107,17 @@ fn eden_testnet_genesis(
 
 	const ENDOWMENT: Balance = 10_000 * NODL;
 
-	RuntimeGenesisConfig {
-		// Core
-		system: SystemConfig {
-			_config: Default::default(),
+	serde_json::json!({
+		"balances": {
+			"balances": endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect::<Vec<_>>(),
 		},
-		balances: BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
+		"collatorSelection": {
+			"invulnerables": collators.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
+			"candidacyBond": EXISTENTIAL_DEPOSIT * 16,
+			"desiredCandidates": 0
 		},
-		vesting: Default::default(),
-
-		// Consensus
-		collator_selection: CollatorSelectionConfig {
-			invulnerables: collators.iter().cloned().map(|(acc, _)| acc).collect(),
-			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
-			..Default::default()
-		},
-		session: SessionConfig {
-			keys: collators
+		"session": {
+			"keys": collators
 				.into_iter()
 				.map(|(acc, aura)| {
 					(
@@ -137,41 +126,21 @@ fn eden_testnet_genesis(
 						eden_session_keys(aura), // session keys
 					)
 				})
-				.collect(),
+				.collect::<Vec<_>>(),
 		},
-		aura: Default::default(),
-		aura_ext: Default::default(),
-		parachain_system: Default::default(),
-		parachain_info: ParachainInfoConfig {
-			parachain_id: id,
-			_config: Default::default(),
+		"parachainInfo": {
+			"parachainId": id,
 		},
-		transaction_payment: Default::default(),
-
-		// Governance
-		company_reserve: Default::default(),
-		international_reserve: Default::default(),
-		usa_reserve: Default::default(),
-		technical_committee: Default::default(),
-		technical_membership: TechnicalMembershipConfig {
-			members: bounded_vec![root_key],
-			phantom: Default::default(),
+		"technicalMembership": {
+			"members": vec![root_key],
 		},
-
-		// Allocations
-		allocations_oracles: Default::default(),
-
-		// DAO
-		dao_reserve: Default::default(),
-
-		polkadot_xcm: PolkadotXcmConfig {
-			safe_xcm_version: Some(SAFE_XCM_VERSION),
-			_config: Default::default(),
+		"polkadotXcm": {
+			"safeXcmVersion": Some(SAFE_XCM_VERSION),
 		},
-	}
+	})
 }
 
-fn development_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
+fn development_config_genesis(id: ParaId) -> serde_json::Value {
 	eden_testnet_genesis(
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
 		vec![
@@ -192,79 +161,23 @@ fn development_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "NODL".into());
+	properties.insert("tokenSymbol".into(), "DevNODL".into());
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 42.into());
 
-	ChainSpec::from_genesis(
-		// Name
-		"Parachain Eden Development",
-		// ID
-		"para_eden_dev",
-		ChainType::Development,
-		move || development_config_genesis(id),
-		Vec::new(),
-		None,
-		None,
-		None,
-		None,
+	ChainSpec::builder(
+		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
-		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 	)
-}
-
-fn local_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
-	eden_testnet_genesis(
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		vec![
-			(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_collator_keys_from_seed("Alice"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_collator_keys_from_seed("Bob"),
-			),
-		],
-		None,
-		id,
-	)
-}
-
-pub fn local_testnet_config(id: ParaId) -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "NODL".into());
-	properties.insert("tokenDecimals".into(), 11.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	ChainSpec::from_genesis(
-		// Name
-		"Eden Local Testnet",
-		// ID
-		"para_eden_local",
-		ChainType::Local,
-		move || local_config_genesis(id),
-		// Bootnodes
-		Vec::new(),
-		// Telemetry
-		None,
-		// Protocol ID
-		Some("eden-local"),
-		// Fork ID
-		None,
-		// Properties
-		Some(properties),
-		// Extensions
-		Extensions {
-			relay_chain: "westend".into(), // You MUST set this to the correct network!
-			para_id: id.into(),
-		},
-		WASM_BINARY.expect("WASM binary was not build, please build it!"),
-	)
+	.with_name("Parachain Eden Development")
+	.with_id("para_eden_dev")
+	.with_chain_type(ChainType::Development)
+	.with_properties(properties)
+	.with_genesis_config_patch(development_config_genesis(id))
+	.build()
 }
 
 pub fn production_config() -> ChainSpec {
@@ -286,11 +199,6 @@ pub(crate) mod tests {
 	#[test]
 	fn create_development_chain_spec() {
 		assert!(development_config(ParaId::from(1000u32)).build_storage().is_ok());
-	}
-
-	#[test]
-	fn create_local_chain_spec() {
-		assert!(local_testnet_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
