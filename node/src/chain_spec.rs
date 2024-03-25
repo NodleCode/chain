@@ -111,9 +111,10 @@ fn eden_testnet_genesis(
 		"balances": {
 			"balances": endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect::<Vec<_>>(),
 		},
-		"collator_selection": {
+		"collatorSelection": {
 			"invulnerables": collators.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
-			"candidacy_bond": EXISTENTIAL_DEPOSIT * 16
+			"candidacyBond": EXISTENTIAL_DEPOSIT * 16,
+			"desiredCandidates": 0
 		},
 		"session": {
 			"keys": collators
@@ -127,14 +128,14 @@ fn eden_testnet_genesis(
 				})
 				.collect::<Vec<_>>(),
 		},
-		"parachain_info": {
-			"parachain_id": id,
+		"parachainInfo": {
+			"parachainId": id,
 		},
-		"technical_membership": {
+		"technicalMembership": {
 			"members": vec![root_key],
 		},
-		"polkadot_xcm": {
-			"safe_xcm_version": Some(SAFE_XCM_VERSION),
+		"polkadotXcm": {
+			"safeXcmVersion": Some(SAFE_XCM_VERSION),
 		},
 	})
 }
@@ -174,6 +175,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	.with_name("Parachain Eden Development")
 	.with_id("para_eden_dev")
 	.with_chain_type(ChainType::Development)
+	.with_properties(properties)
 	.with_genesis_config_patch(development_config_genesis(id))
 	.build()
 }
@@ -213,7 +215,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	.with_name("Eden Local Testnet")
 	.with_id("para_eden_local")
 	.with_chain_type(ChainType::Local)
-	.with_genesis_config(local_config_genesis(id))
+	.with_genesis_config_patch(local_config_genesis(id))
 	.with_protocol_id("eden-local")
 	.with_properties(properties)
 	.build()
