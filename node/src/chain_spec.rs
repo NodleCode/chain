@@ -161,7 +161,7 @@ fn development_config_genesis(id: ParaId) -> serde_json::Value {
 pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "NODL".into());
+	properties.insert("tokenSymbol".into(), "DevNODL".into());
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 42.into());
 
@@ -177,47 +177,6 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	.with_chain_type(ChainType::Development)
 	.with_properties(properties)
 	.with_genesis_config_patch(development_config_genesis(id))
-	.build()
-}
-
-fn local_config_genesis(id: ParaId) -> serde_json::Value {
-	eden_testnet_genesis(
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		vec![
-			(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_collator_keys_from_seed("Alice"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_collator_keys_from_seed("Bob"),
-			),
-		],
-		None,
-		id,
-	)
-}
-
-pub fn local_testnet_config(id: ParaId) -> ChainSpec {
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "NODL".into());
-	properties.insert("tokenDecimals".into(), 11.into());
-	properties.insert("ss58Format".into(), 42.into());
-
-	ChainSpec::builder(
-		WASM_BINARY.expect("WASM binary was not build, please build it!"),
-		Extensions {
-			relay_chain: "westend".into(), // You MUST set this to the correct network!
-			para_id: id.into(),
-		},
-	)
-	.with_name("Eden Local Testnet")
-	.with_id("para_eden_local")
-	.with_chain_type(ChainType::Local)
-	.with_genesis_config_patch(local_config_genesis(id))
-	.with_protocol_id("eden-local")
-	.with_properties(properties)
 	.build()
 }
 
@@ -240,11 +199,6 @@ pub(crate) mod tests {
 	#[test]
 	fn create_development_chain_spec() {
 		assert!(development_config(ParaId::from(1000u32)).build_storage().is_ok());
-	}
-
-	#[test]
-	fn create_local_chain_spec() {
-		assert!(local_testnet_config(ParaId::from(1000u32)).build_storage().is_ok());
 	}
 
 	#[test]
