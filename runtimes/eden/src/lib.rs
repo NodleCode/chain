@@ -217,7 +217,7 @@ pub type XcmFungibleBenchmarks = pallet_xcm_benchmarks::fungible::Pallet<Runtime
 type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
 sp_api::impl_runtime_apis! {
-		impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
+	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
 		fn create_default_config() -> Vec<u8> {
 			create_default_config::<RuntimeGenesisConfig>()
 		}
