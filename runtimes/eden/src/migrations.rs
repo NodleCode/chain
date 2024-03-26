@@ -68,11 +68,6 @@ where
 			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 0,
 			TryRuntimeError::Other("pallet_uniques storage version is not 0")
 		);
-		ensure!(
-			StorageVersion::get::<pallet_identity::Pallet<T>>() == 0,
-			TryRuntimeError::Other("pallet_identity storage version is not 0")
-		);
-
 		Ok(vec![])
 	}
 
