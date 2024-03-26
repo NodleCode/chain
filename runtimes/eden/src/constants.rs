@@ -147,5 +147,6 @@ mod tests {
 	#[test]
 	fn polkadot_constants() {
 		assert_eq!(100 * POLKADOT_CENT, POLKADOT_EXISTENTIAL_DEPOSIT);
+		assert_eq!(POLKADOT_CENT, 100_000_000);
 	}
 }
