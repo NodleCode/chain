@@ -98,9 +98,8 @@ jobs:
           fail_ci_if_error: false
           files: lcov.info
 
-  try-runtime:
+  try-runtime-prepare:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Install protobuf-compiler
@@ -116,6 +115,21 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.4
       - name: Build runtime
         run: cargo build --release --features=try-runtime -p runtime-eden
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: try_runtime
+          path: target/release/wbuild/runtime-eden/runtime_eden.wasm
+
+  try-runtime-paradis-execute:
+    runs-on: ubuntu-latest
+    needs: try-runtime-prepare
+    steps:
+      - name: Download runtime artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: try_runtime
+          path: try_runtime
       - uses: robinraju/release-downloader@v1.9
         with: 
           repository: "NodleCode/paradis-snapshot"
@@ -128,9 +142,19 @@ jobs:
         uses: NodleCode/action-try-runtime/check@v0.6.1
         with:
           snap: snaps/paradis-snapshot-full
-          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
+          runtime: try_runtime/runtime_eden.wasm
           checks: "all"
           options: "--disable-idempotency-checks"
+  
+  try-runtime-eden-execute:
+    runs-on: ubuntu-latest
+    needs: try-runtime-prepare
+    steps:
+      - name: Download runtime artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: try_runtime
+          path: try_runtime
       - uses: robinraju/release-downloader@v1.9
         with: 
           repository: "NodleCode/eden-snapshot"
@@ -142,6 +166,6 @@ jobs:
         uses: NodleCode/action-try-runtime/check@v0.6.1
         with:
           snap: snaps/eden-snapshot-full
-          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
+          runtime: try_runtime/runtime_eden.wasm
           checks: "all"
           options: "--disable-idempotency-checks"
