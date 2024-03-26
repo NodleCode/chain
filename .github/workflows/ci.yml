@@ -116,17 +116,6 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.4
       - name: Build runtime
         run: cargo build --release --features=try-runtime -p runtime-eden
-      - name: Check Version
-        run: |
-          echo -n "eden_rev=" >> $GITHUB_OUTPUT
-          curl -s --request POST   --url https://nodle-parachain.api.onfinality.io/public   --header 'Content-Type: application/json'   --data '{
-              "jsonrpc": "2.0",
-               "method": "state_getRuntimeVersion",
-               "params": [],
-               "id": 1
-             }' | jq .result.specVersion | sed 's/^/try-runtime-snapshot-eden-spec-/' >> $GITHUB_OUTPUT
-           cat $GITHUB_OUTPUT
-        id: get_version
       - uses: robinraju/release-downloader@v1.9
         with: 
           repository: "NodleCode/eden-snapshot"
@@ -138,6 +127,21 @@ jobs:
         uses: NodleCode/action-try-runtime/check@v0.6.1
         with:
           snap: snaps/eden-snapshot-full
+          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
+          checks: "all"
+          options: "--disable-idempotency-checks"
+      - uses: robinraju/release-downloader@v1.9
+        with: 
+          repository: "NodleCode/paradis-snapshot"
+          latest: true
+          fileName: "paradis-snapshot-full.bz2"
+          out-file-path: "snaps"
+          extract: false
+      - run: bunzip2 snaps/paradis-snapshot-full.bz2
+      - name: Run try-runtime paradis
+        uses: NodleCode/action-try-runtime/check@v0.6.1
+        with:
+          snap: snaps/paradis-snapshot-full
           runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
           checks: "all"
           options: "--disable-idempotency-checks"
