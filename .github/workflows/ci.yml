@@ -118,6 +118,21 @@ jobs:
         run: cargo build --release --features=try-runtime -p runtime-eden
       - uses: robinraju/release-downloader@v1.9
         with: 
+          repository: "NodleCode/paradis-snapshot"
+          latest: true
+          fileName: "paradis-snapshot-full.snap.bz2"
+          out-file-path: "snaps"
+          extract: false
+      - run: bunzip2 snaps/paradis-snapshot-full.bz2
+      - name: Run try-runtime paradis
+        uses: NodleCode/action-try-runtime/check@v0.6.1
+        with:
+          snap: snaps/paradis-snapshot-full
+          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
+          checks: "all"
+          options: "--disable-idempotency-checks"
+      - uses: robinraju/release-downloader@v1.9
+        with: 
           repository: "NodleCode/eden-snapshot"
           latest: true
           fileName: "eden-snapshot-full"
@@ -127,21 +142,6 @@ jobs:
         uses: NodleCode/action-try-runtime/check@v0.6.1
         with:
           snap: snaps/eden-snapshot-full
-          runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
-          checks: "all"
-          options: "--disable-idempotency-checks"
-      - uses: robinraju/release-downloader@v1.9
-        with: 
-          repository: "NodleCode/paradis-snapshot"
-          latest: true
-          fileName: "paradis-snapshot-full.bz2"
-          out-file-path: "snaps"
-          extract: false
-      - run: bunzip2 snaps/paradis-snapshot-full.bz2
-      - name: Run try-runtime paradis
-        uses: NodleCode/action-try-runtime/check@v0.6.1
-        with:
-          snap: snaps/paradis-snapshot-full
           runtime: target/release/wbuild/runtime-eden/runtime_eden.wasm
           checks: "all"
           options: "--disable-idempotency-checks"
