@@ -68,18 +68,18 @@ where
 			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 0,
 			TryRuntimeError::Other("pallet_uniques storage version is not 0")
 		);
-		ensure!(
-			StorageVersion::get::<pallet_identity::Pallet<T>>() == 0,
-			TryRuntimeError::Other("pallet_identity storage version is not 0")
-		);
-
 		Ok(vec![])
 	}
 
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), TryRuntimeError> {
-		log::info!("Post upgrade {_state:?}");
+		use frame_support::ensure;
 
+		log::info!("Post upgrade {_state:?}");
+		ensure!(
+			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 1,
+			TryRuntimeError::Other("pallet_uniques post upgrade storage version is not 1")
+		);
 		Ok(())
 	}
 }
