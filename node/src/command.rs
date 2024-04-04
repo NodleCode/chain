@@ -108,6 +108,13 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+		use polkadot_cli::service;
+		if id == "paseo" {
+			let chain_spec = Box::new(service::GenericChainSpec::from_json_bytes(
+				&include_bytes!("../res/paseo.raw.json")[..],
+			)?);
+			return Ok(chain_spec as Box<dyn service::ChainSpec>);
+		}
 		polkadot_cli::Cli::from_iter([RelayChainCli::executable_name()].iter()).load_spec(id)
 	}
 }
