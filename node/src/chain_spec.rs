@@ -19,7 +19,13 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
+use std::borrow::Cow;
+use std::{fs::File, str::FromStr};
+use std::io::Read;
+
+use bzip2_rs::DecoderReader;
 use cumulus_primitives_core::ParaId;
+use hex_literal::hex;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
@@ -29,6 +35,8 @@ use runtime_eden::{
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sp_core::crypto::Ss58Codec;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::{
 	bounded_vec,
@@ -190,6 +198,89 @@ fn development_config_genesis(id: ParaId) -> RuntimeGenesisConfig {
 		None,
 		id,
 	)
+}
+
+pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error>> {
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "notNodl".into());
+	properties.insert("tokenDecimals".into(), 11.into());
+	properties.insert("ss58Format".into(), 37.into());
+
+	let patch_chain_spec = ChainSpec::from_genesis(
+		// Name
+		"Parachain Hades testnet",
+		// ID
+		"hades",
+		ChainType::Live,
+		move || eden_testnet_genesis(			
+			sp_core::sr25519::Public::from_ss58check("4jmcpevRTaN4sd4KGwAQ48w1UkC1Ky38HKCBdNpEC8jbv2N9").expect("Internal Error").into(),
+			vec![
+				(
+					sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW").expect("Internal Error").into(),
+					sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW").expect("Internal Error").into(),
+				),
+				(
+					sp_core::sr25519::Public::from_ss58check("4j5pvMg65HBK4KvUcgSGMPEqrRjXkWJmjuqhb7AktmrB9auf").expect("Internal Error").into(),
+					sp_core::sr25519::Public::from_ss58check("4j5pvMg65HBK4KvUcgSGMPEqrRjXkWJmjuqhb7AktmrB9auf").expect("Internal Error").into(),
+				),
+				(
+					sp_core::sr25519::Public::from_ss58check("4mXXuWGQNgUW8QzWH8bg2Ao654d99CSYJXfELCCyd7qx2ACs").expect("Internal Error").into(),
+					sp_core::sr25519::Public::from_ss58check("4mXXuWGQNgUW8QzWH8bg2Ao654d99CSYJXfELCCyd7qx2ACs").expect("Internal Error").into(),
+				)
+			],
+			None,
+			id,
+		),
+		Vec::new(),
+		None,
+		None,
+		None,
+		Some(properties),
+		Extensions {
+			// TODO change to paseo
+			relay_chain: "paseo".into(), // You MUST set this to the correct network! 
+			para_id: id.into(),
+		},
+	);
+
+	let mut target_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+	// black list all data with values in current spec
+	let mut blacklist = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+
+	// black list block number of relay chain we are a parachain under.
+	blacklist["genesis"]["raw"]["top"]["0x45323df7cc47150b3930e2666b0aa313a2bca190d36bd834cc73a38fc213ecbd"] = true.into();
+
+	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
+
+	let mut reader = DecoderReader::new(compressed_file);
+
+	let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
+	let _ = reader.read_to_end(&mut exported_bytes)?;
+
+	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
+
+	if let Some(top) = exported_state["genesis"]["raw"]["top"].as_object() {
+		for key in top.keys() {
+			if blacklist["genesis"]["raw"]["top"][key].is_null() {
+				target_spec["genesis"]["raw"]["top"][key] = top[key].clone();
+			}
+		}
+	}
+
+	// working_cs_state["id"] = "hades".into();
+	// working_cs_state["bootNodes"] = Value::Array(vec![]);
+	// working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
+	// working_cs_state["relayChain"] = "paseo".into();
+
+	let cs_string = target_spec.to_string();
+	
+	// Maybe this debug is nneded soon again
+	// println!("{cs_string}");
+
+	let cs_bytes = Cow::from_iter(cs_string.bytes());
+	let cs = ChainSpec::from_json_bytes(cs_bytes)?;
+	Ok(cs)
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {
