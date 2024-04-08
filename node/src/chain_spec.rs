@@ -20,6 +20,7 @@
 #![allow(clippy::derive_partial_eq_without_eq)]
 
 use cumulus_primitives_core::ParaId;
+use hex_literal::hex;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
@@ -28,7 +29,7 @@ use runtime_eden::{
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::Ss58Codec, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
@@ -83,7 +84,41 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
 	SessionKeys { aura: keys }
 }
 
-/// Helper function to create RuntimeGenesisConfig for testing
+// /// Helper function to create RuntimeGenesisConfig for testing
+// fn paradis_config_genesis(
+// 	id: ParaId,
+// ) -> serde_json::Value {
+
+// 	let j = serde_json::json!({
+// 		"collatorSelection": {
+// 			"invulnerables": [
+// 				hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
+// 			],
+// 			"candidacyBond": 30000000000000000000,
+// 			"desiredCandidates": 0
+// 		},
+// 		"session": {
+// 			"keys": 
+// 					[
+// 						hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
+// 						hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
+// 						{
+// 							"aura": hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]
+// 						}
+// 					]
+// 		},
+// 		"parachainInfo": {
+// 			"parachainId": id,
+// 		},
+// 		"technicalMembership": {
+// 			"members": vec![],
+// 		},
+// 		"polkadotXcm": {
+// 			"safeXcmVersion": Some(SAFE_XCM_VERSION),
+// 		},
+// 	});
+// 	j
+// }
 fn eden_testnet_genesis(
 	root_key: AccountId,
 	collators: Vec<(AccountId, AuraId)>,
@@ -156,6 +191,42 @@ fn development_config_genesis(id: ParaId) -> serde_json::Value {
 		None,
 		id,
 	)
+}
+
+pub fn paradis_config(	id: ParaId) -> ChainSpec {
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "NotNODL".into());
+	properties.insert("tokenDecimals".into(), 11.into());
+	properties.insert("ss58Format".into(), 37.into());
+
+	let collators = 	vec![
+	( 
+		AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]),
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW").unwrap().into()
+
+	)
+	];
+	ChainSpec::builder(
+		WASM_BINARY.expect("WASM binary was not build, please build it!"),
+		Extensions {
+			relay_chain: "paseo".into(), // You MUST set this to the correct network!
+			para_id: id.into(),
+		},
+	)
+	.with_name("Parachain Eden Development")
+	.with_id("paradis")
+	.with_chain_type(ChainType::Development)
+	.with_properties(properties)
+
+
+	.with_genesis_config_patch(eden_testnet_genesis(
+		AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]),
+		collators,
+		None,
+		id
+	))
+	.build()
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {
