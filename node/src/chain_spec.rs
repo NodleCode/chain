@@ -19,7 +19,7 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::{borrow::Cow, str::FromStr};
+use std::{borrow::Cow, str::FromStr, vec};
 
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
@@ -190,14 +190,23 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	))
 	.build();
 
-	let json = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+	let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
-	let mut exported_state: Value = serde_json::from_slice(&include_bytes!("../res/eden-export.json")[..])?;
+	let exported_state: Value = serde_json::from_slice(&include_bytes!("../res/eden-export.json")[..])?;
+	let mut working_cs_state = exported_state;
 
-	exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] =
-		json["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"].clone();
+	working_cs_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] =
+		patched_spec["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"]
+			.clone();
 
-	let csbytes = Cow::from_iter(exported_state.to_string().bytes());
+	working_cs_state["id"] = "hades".into();
+	working_cs_state["bootNodes"] = Value::Array(vec![]);
+	working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
+	working_cs_state["relayChain"] = "paseo".into();
+
+
+
+	let csbytes = Cow::from_iter(working_cs_state.to_string().bytes());
 	let cs = ChainSpec::from_json_bytes(csbytes).unwrap();
 	Ok(cs)
 }
