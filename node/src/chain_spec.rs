@@ -19,6 +19,9 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
+use std::str::FromStr;
+
+use cumulus_client_consensus_aura::collator;
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
 use primitives::{AccountId, Balance, Signature};
@@ -29,7 +32,8 @@ use runtime_eden::{
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{crypto::Ss58Codec, sr25519, Pair, Public};
+use serde_json::Value;
+use sp_core::{crypto::{IsWrappedBy, Ss58Codec}, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
@@ -84,47 +88,13 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
 	SessionKeys { aura: keys }
 }
 
-// /// Helper function to create RuntimeGenesisConfig for testing
-// fn paradis_config_genesis(
-// 	id: ParaId,
-// ) -> serde_json::Value {
-
-// 	let j = serde_json::json!({
-// 		"collatorSelection": {
-// 			"invulnerables": [
-// 				hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
-// 			],
-// 			"candidacyBond": 30000000000000000000,
-// 			"desiredCandidates": 0
-// 		},
-// 		"session": {
-// 			"keys": 
-// 					[
-// 						hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
-// 						hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"],
-// 						{
-// 							"aura": hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]
-// 						}
-// 					]
-// 		},
-// 		"parachainInfo": {
-// 			"parachainId": id,
-// 		},
-// 		"technicalMembership": {
-// 			"members": vec![],
-// 		},
-// 		"polkadotXcm": {
-// 			"safeXcmVersion": Some(SAFE_XCM_VERSION),
-// 		},
-// 	});
-// 	j
-// }
+/// Helper function to create RuntimeGenesisConfig for testing
 fn eden_testnet_genesis(
-	root_key: AccountId,
+	root_key: Vec<AccountId>,
 	collators: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Option<Vec<AccountId>>,
 	id: ParaId,
-) -> serde_json::Value {
+) -> Value {
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
 		vec![
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -167,7 +137,7 @@ fn eden_testnet_genesis(
 			"parachainId": id,
 		},
 		"technicalMembership": {
-			"members": vec![root_key],
+			"members": root_key,
 		},
 		"polkadotXcm": {
 			"safeXcmVersion": Some(SAFE_XCM_VERSION),
@@ -175,9 +145,9 @@ fn eden_testnet_genesis(
 	})
 }
 
-fn development_config_genesis(id: ParaId) -> serde_json::Value {
+fn development_config_genesis(id: ParaId) -> Value {
 	eden_testnet_genesis(
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
+		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		vec![
 			(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -193,7 +163,7 @@ fn development_config_genesis(id: ParaId) -> serde_json::Value {
 	)
 }
 
-pub fn paradis_config(	id: ParaId) -> ChainSpec {
+pub fn paradis_config(	id: ParaId) -> Result<ChainSpec,Box<dyn std::error::Error>> {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "NotNODL".into());
@@ -203,11 +173,11 @@ pub fn paradis_config(	id: ParaId) -> ChainSpec {
 	let collators = 	vec![
 	( 
 		AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]),
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW").unwrap().into()
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into()
 
 	)
 	];
-	ChainSpec::builder(
+	let cs = ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
 			relay_chain: "paseo".into(), // You MUST set this to the correct network!
@@ -221,12 +191,34 @@ pub fn paradis_config(	id: ParaId) -> ChainSpec {
 
 
 	.with_genesis_config_patch(eden_testnet_genesis(
-		AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]),
+		vec![AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"])],
 		collators,
 		None,
 		id
 	))
-	.build()
+	.build();
+
+	let json = cs.clone().as_json(true)?;
+	let json = Value::from_str(&json)?;
+
+	let collator_invounarble = &json["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"];
+
+
+
+	let mut exported_state:Value = serde_json::from_slice(&include_bytes!("../res/eden-testing.json")[..])?;
+	
+	exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] = collator_invounarble.clone();
+
+
+	let es = &exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"];
+
+
+
+	println!("HELLO {collator_invounarble:?} {es:?}");
+
+
+	panic!();
+	Ok(cs)
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {
