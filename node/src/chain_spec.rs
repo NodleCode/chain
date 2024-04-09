@@ -169,10 +169,19 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 37.into());
 
-	let collators = vec![(
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	)];
+	let collators = 
+	// Real data:
+	// vec![(
+	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	// )];
+		// Alice collator
+	vec![
+		(
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			get_collator_keys_from_seed("Alice"),
+		),
+	];
 	let patch_chain_spec = ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
@@ -195,9 +204,13 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	let exported_state: Value = serde_json::from_slice(&include_bytes!("../res/eden-export.json")[..])?;
 	let mut working_cs_state = exported_state;
 
-	working_cs_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] =
-		patched_spec["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"]
-			.clone();
+	if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
+		for key in top.keys() {
+			working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
+			}
+	}else{
+		panic!();
+	}
 
 	working_cs_state["id"] = "hades".into();
 	working_cs_state["bootNodes"] = Value::Array(vec![]);
