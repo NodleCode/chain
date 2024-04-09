@@ -19,9 +19,8 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 
-use cumulus_client_consensus_aura::collator;
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
 use primitives::{AccountId, Balance, Signature};
@@ -33,7 +32,7 @@ use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sp_core::{crypto::{IsWrappedBy, Ss58Codec}, sr25519, Pair, Public};
+use sp_core::{crypto::Ss58Codec, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
@@ -163,61 +162,43 @@ fn development_config_genesis(id: ParaId) -> Value {
 	)
 }
 
-pub fn paradis_config(	id: ParaId) -> Result<ChainSpec,Box<dyn std::error::Error>> {
+pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error>> {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "NotNODL".into());
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 37.into());
 
-	let collators = 	vec![
-	( 
-		AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"]),
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into()
-
-	)
-	];
-	let cs = ChainSpec::builder(
+	let collators = vec![(
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	)];
+	let patch_chain_spec = ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
 			relay_chain: "paseo".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)
-	.with_name("Parachain Eden Development")
-	.with_id("paradis")
-	.with_chain_type(ChainType::Development)
-	.with_properties(properties)
-
-
 	.with_genesis_config_patch(eden_testnet_genesis(
-		vec![AccountId::new(hex!["6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"])],
+		vec![AccountId::new(hex![
+			"6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"
+		])],
 		collators,
 		None,
-		id
+		id,
 	))
 	.build();
 
-	let json = cs.clone().as_json(true)?;
-	let json = Value::from_str(&json)?;
+	let json = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
-	let collator_invounarble = &json["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"];
+	let mut exported_state: Value = serde_json::from_slice(&include_bytes!("../res/eden-export.json")[..])?;
 
+	exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] =
+		json["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"].clone();
 
-
-	let mut exported_state:Value = serde_json::from_slice(&include_bytes!("../res/eden-testing.json")[..])?;
-	
-	exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"] = collator_invounarble.clone();
-
-
-	let es = &exported_state["genesis"]["raw"]["top"]["0x15464cac3378d46f113cd5b7a4d71c845579297f4dfb9609e7e4c2ebab9ce40a"];
-
-
-
-	println!("HELLO {collator_invounarble:?} {es:?}");
-
-
-	panic!();
+	let csbytes = Cow::from_iter(exported_state.to_string().bytes());
+	let cs = ChainSpec::from_json_bytes(csbytes).unwrap();
 	Ok(cs)
 }
 
