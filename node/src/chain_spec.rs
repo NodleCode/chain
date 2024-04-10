@@ -203,36 +203,37 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	))
 	.build();
 
-	let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+	Ok(patch_chain_spec)
+	// let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
-	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
+	// let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
 
-	let mut reader = DecoderReader::new(compressed_file);
+	// let mut reader = DecoderReader::new(compressed_file);
 
-	let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
-	let _ = reader.read_to_end(&mut exported_bytes)?;
+	// let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
+	// let _ = reader.read_to_end(&mut exported_bytes)?;
 
-	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
-	let mut working_cs_state = exported_state;
+	// let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
+	// let mut working_cs_state = exported_state;
 
-	if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
-		for key in top.keys() {
-			working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
-			}
-	}else{
-		panic!();
-	}
+	// if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
+	// 	for key in top.keys() {
+	// 		working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
+	// 		}
+	// }else{
+	// 	panic!();
+	// }
 
-	working_cs_state["id"] = "hades".into();
-	working_cs_state["bootNodes"] = Value::Array(vec![]);
-	working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
-	working_cs_state["relayChain"] = "paseo".into();
+	// working_cs_state["id"] = "hades".into();
+	// working_cs_state["bootNodes"] = Value::Array(vec![]);
+	// working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
+	// working_cs_state["relayChain"] = "paseo".into();
 
 
 
-	let csbytes = Cow::from_iter(working_cs_state.to_string().bytes());
-	let cs = ChainSpec::from_json_bytes(csbytes).unwrap();
-	Ok(cs)
+	// let csbytes = Cow::from_iter(working_cs_state.to_string().bytes());
+	// let cs = ChainSpec::from_json_bytes(csbytes).unwrap();
+	// Ok(cs)
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {
