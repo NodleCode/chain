@@ -198,13 +198,22 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 			get_collator_keys_from_seed("Alice"),
 		),
 	];
+	let mut wasm_file = File::open("/home/simson/nodle/chain/node/res/runtime_eden.compact.wasm")?;
+	let mut code = Vec::<u8>::new();
+	let _ = wasm_file.read_to_end(&mut code)?;
+
+
 	let patch_chain_spec = ChainSpec::builder(
-		WASM_BINARY.expect("WASM binary was not build, please build it!"),
+		&code,
 		Extensions {
 			relay_chain: "paseo".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)
+	.with_name("Parachain Eden Development")
+	.with_id("hades")
+	.with_chain_type(ChainType::Live)
+	.with_properties(properties)
 	.with_genesis_config_patch(eden_testnet_genesis(
 		vec![AccountId::new(hex![
 			"6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"
@@ -216,7 +225,7 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	.build();
 
 	// Ok(patch_chain_spec)
-	let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+	let mut target_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
 	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
 
@@ -226,25 +235,26 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	let _ = reader.read_to_end(&mut exported_bytes)?;
 
 	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
-	let mut working_cs_state = exported_state;
 
-	if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
+	if let Some(top) = exported_state["genesis"]["raw"]["top"].as_object() {
 		for key in top.keys() {
-			log::warn!("🌵migrate = {key:?}");
-			working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
+			if target_spec["genesis"]["raw"]["top"][key].is_null() {
+				target_spec["genesis"]["raw"]["top"][key] = top[key].clone();
 			}
+		}
 	}else{
 		log::warn!("🌵WARNING NO KEYS MIGRATED");
 	}
 
-	working_cs_state["id"] = "hades".into();
-	working_cs_state["bootNodes"] = Value::Array(vec![]);
-	working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
-	working_cs_state["relayChain"] = "paseo".into();
-	working_cs_state.as_object_mut().ok_or(Error::JsonNull)?.remove("codeSubstitutes");//] = Value::Array(vec![]);
-	working_cs_state["properties"] = patched_spec["properties"].clone();
+	// working_cs_state["id"] = "hades".into();
+	// working_cs_state["bootNodes"] = Value::Array(vec![]);
+	// working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
+	// working_cs_state["relayChain"] = "paseo".into();
+	// working_cs_state.as_object_mut().ok_or(Error::JsonNull)?.remove("codeSubstitutes");//] = Value::Array(vec![]);
+	// working_cs_state["properties"] = patched_spec["properties"].clone();
 
-	let cs_string = working_cs_state.to_string();
+	let cs_string = target_spec.to_string();
+	
 	// Maybe this debug is nneded soon again println!("{cs}");
 
 	let cs_bytes = Cow::from_iter(cs_string.bytes());
