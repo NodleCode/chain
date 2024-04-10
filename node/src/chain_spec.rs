@@ -175,17 +175,10 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 
 	let collators = 
 	// Real data:
-	// vec![(
-	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	// )];
-		// Alice collator
-	vec![
-		(
-			get_account_id_from_seed::<sr25519::Public>("Alice"),
-			get_collator_keys_from_seed("Alice"),
-		),
-	];
+	vec![(
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	)];
 	let patch_chain_spec = ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
