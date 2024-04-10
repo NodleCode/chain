@@ -19,7 +19,7 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::{borrow::Cow, str::FromStr, vec};
+use std::{borrow::Cow, io::Read, str::FromStr, vec};
 
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
@@ -34,6 +34,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sp_core::{crypto::Ss58Codec, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
+use std::fs::File;
+use bzip2_rs::DecoderReader;
+
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -201,7 +205,14 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 
 	let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
-	let exported_state: Value = serde_json::from_slice(&include_bytes!("../res/eden-export.json")[..])?;
+	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
+
+	let mut reader = DecoderReader::new(compressed_file);
+
+	let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
+	let _ = reader.read_to_end(&mut exported_bytes)?;
+
+	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
 	let mut working_cs_state = exported_state;
 
 	if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
