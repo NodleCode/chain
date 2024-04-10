@@ -198,7 +198,7 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 			get_collator_keys_from_seed("Alice"),
 		),
 	];
-	let mut wasm_file = File::open("/home/simson/nodle/chain/node/res/runtime_eden.compact.wasm")?;
+	let mut wasm_file = File::open("/home/simson/nodle/chain/node/res/runtime_eden.wasm")?;
 	let mut code = Vec::<u8>::new();
 	let _ = wasm_file.read_to_end(&mut code)?;
 
