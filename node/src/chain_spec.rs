@@ -21,6 +21,7 @@
 
 use std::{borrow::Cow, io::Read, str::FromStr, vec};
 
+use clap::builder::Str;
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
 use primitives::{AccountId, Balance, Signature};
@@ -39,6 +40,14 @@ use std::fs::File;
 use bzip2_rs::DecoderReader;
 
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
+
+/// Error type for the CLI.
+#[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
+pub enum Error {
+	#[error("Invalid json input")]
+	JsonNull,
+}
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
@@ -167,18 +176,28 @@ fn development_config_genesis(id: ParaId) -> Value {
 }
 
 pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error>> {
+
+	log::error!("🌵Code In Use");
+
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "NotNODL".into());
+	properties.insert("tokenSymbol".into(), "Soba".into());
 	properties.insert("tokenDecimals".into(), 11.into());
 	properties.insert("ss58Format".into(), 37.into());
 
 	let collators = 
 	// Real data:
-	vec![(
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-		sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	)];
+	// vec![(
+	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
+	// )];
+		// Alice collator
+	vec![
+		(
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			get_collator_keys_from_seed("Alice"),
+		),
+	];
 	let patch_chain_spec = ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),
 		Extensions {
@@ -196,37 +215,41 @@ pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error
 	))
 	.build();
 
-	Ok(patch_chain_spec)
-	// let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
+	// Ok(patch_chain_spec)
+	let patched_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
 
-	// let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
+	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
 
-	// let mut reader = DecoderReader::new(compressed_file);
+	let mut reader = DecoderReader::new(compressed_file);
 
-	// let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
-	// let _ = reader.read_to_end(&mut exported_bytes)?;
+	let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
+	let _ = reader.read_to_end(&mut exported_bytes)?;
 
-	// let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
-	// let mut working_cs_state = exported_state;
+	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
+	let mut working_cs_state = exported_state;
 
-	// if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
-	// 	for key in top.keys() {
-	// 		working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
-	// 		}
-	// }else{
-	// 	panic!();
-	// }
+	if let Some(top) = patched_spec["genesis"]["raw"]["top"].as_object() {
+		for key in top.keys() {
+			log::warn!("🌵migrate = {key:?}");
+			working_cs_state["genesis"]["raw"]["top"][key] = top[key].clone();
+			}
+	}else{
+		log::warn!("🌵WARNING NO KEYS MIGRATED");
+	}
 
-	// working_cs_state["id"] = "hades".into();
-	// working_cs_state["bootNodes"] = Value::Array(vec![]);
-	// working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
-	// working_cs_state["relayChain"] = "paseo".into();
+	working_cs_state["id"] = "hades".into();
+	working_cs_state["bootNodes"] = Value::Array(vec![]);
+	working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
+	working_cs_state["relayChain"] = "paseo".into();
+	working_cs_state.as_object_mut().ok_or(Error::JsonNull)?.remove("codeSubstitutes");//] = Value::Array(vec![]);
+	working_cs_state["properties"] = patched_spec["properties"].clone();
 
+	let cs_string = working_cs_state.to_string();
+	// Maybe this debug is nneded soon again println!("{cs}");
 
-
-	// let csbytes = Cow::from_iter(working_cs_state.to_string().bytes());
-	// let cs = ChainSpec::from_json_bytes(csbytes).unwrap();
-	// Ok(cs)
+	let cs_bytes = Cow::from_iter(cs_string.bytes());
+	let cs = ChainSpec::from_json_bytes(cs_bytes)?;
+	Ok(cs)
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {

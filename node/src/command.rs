@@ -36,6 +36,7 @@ use std::net::SocketAddr;
 const DEFAULT_PARA_ID: u32 = 2026;
 
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+	log::warn!("🌵 Hello {id:?}");
 	Ok(match id {
 		"eden-local" | "local" | "eden-dev" | "dev" => Box::new(chain_spec::development_config(DEFAULT_PARA_ID.into())),
 		"eden-testing" | "testing" | "test" | "paradis" => Box::new(chain_spec::testing_config()),
