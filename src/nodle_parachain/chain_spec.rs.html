@@ -249,7 +249,10 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 </span><span class="attr">#![allow(clippy::derive_partial_eq_without_eq)]
 
-</span><span class="kw">use </span>cumulus_primitives_core::ParaId;
+</span><span class="kw">use </span>std::vec;
+
+<span class="kw">use </span>cumulus_primitives_core::ParaId;
+
 <span class="kw">use </span>primitives::{AccountId, Balance, Signature};
 <span class="kw">use </span>runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
@@ -258,8 +261,10 @@
 <span class="kw">use </span>sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 <span class="kw">use </span>sc_service::ChainType;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>serde_json::Value;
 <span class="kw">use </span>sp_core::{sr25519, Pair, Public};
 <span class="kw">use </span>sp_runtime::traits::{IdentifyAccount, Verify};
+
 <span class="kw">const </span>SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 <span class="doccomment">/// Specialized `ChainSpec` for the normal parachain runtime.
@@ -315,11 +320,11 @@
 
 <span class="doccomment">/// Helper function to create RuntimeGenesisConfig for testing
 </span><span class="kw">fn </span>eden_testnet_genesis(
-	root_key: AccountId,
+	root_key: Vec&lt;AccountId&gt;,
 	collators: Vec&lt;(AccountId, AuraId)&gt;,
 	endowed_accounts: <span class="prelude-ty">Option</span>&lt;Vec&lt;AccountId&gt;&gt;,
 	id: ParaId,
-) -&gt; serde_json::Value {
+) -&gt; Value {
 	<span class="kw">let </span>endowed_accounts: Vec&lt;AccountId&gt; = endowed_accounts.unwrap_or_else(|| {
 		<span class="macro">vec!</span>[
 			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">"Alice"</span>),
@@ -362,7 +367,7 @@
 			<span class="string">"parachainId"</span>: id,
 		},
 		<span class="string">"technicalMembership"</span>: {
-			<span class="string">"members"</span>: <span class="macro">vec!</span>[root_key],
+			<span class="string">"members"</span>: root_key,
 		},
 		<span class="string">"polkadotXcm"</span>: {
 			<span class="string">"safeXcmVersion"</span>: <span class="prelude-val">Some</span>(SAFE_XCM_VERSION),
@@ -370,9 +375,9 @@
 	})
 }
 
-<span class="kw">fn </span>development_config_genesis(id: ParaId) -&gt; serde_json::Value {
+<span class="kw">fn </span>development_config_genesis(id: ParaId) -&gt; Value {
 	eden_testnet_genesis(
-		get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">"Alice"</span>),
+		<span class="macro">vec!</span>[get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">"Alice"</span>)],
 		<span class="macro">vec!</span>[
 			(
 				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">"Alice"</span>),
@@ -414,8 +419,8 @@
 	ChainSpec::from_json_bytes(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">"../res/eden.json"</span>)[..]).unwrap()
 }
 
-<span class="kw">pub fn </span>testing_config() -&gt; ChainSpec {
-	ChainSpec::from_json_bytes(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">"../res/eden-testing.json"</span>)[..]).unwrap()
+<span class="kw">pub fn </span>paradis_config() -&gt; <span class="prelude-ty">Result</span>&lt;ChainSpec, Box&lt;<span class="kw">dyn </span>std::error::Error&gt;&gt; {
+	<span class="prelude-val">Ok</span>(ChainSpec::from_json_file(<span class="string">"/usr/local/share/nodle/paradis.json"</span>.into())<span class="question-mark">?</span>)
 }
 
 <span class="attr">#[cfg(test)]
@@ -449,11 +454,6 @@
 			),
 			<span class="macro">hex!</span>(<span class="string">"207767fb73e1fcf8ae32455843419e51c94987228a4b77857aff7653d103cac3"</span>),
 		);
-	}
-
-	<span class="attr">#[test]
-	</span><span class="kw">fn </span>create_testing_spec() {
-		<span class="macro">assert!</span>(testing_config().build_storage().is_ok());
 	}
 }
 </code></pre></div></section></main></body></html>
