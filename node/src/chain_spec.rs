@@ -19,8 +19,7 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::{vec};
-
+use std::vec;
 
 use cumulus_primitives_core::ParaId;
 
