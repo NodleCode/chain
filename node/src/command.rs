@@ -39,8 +39,9 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 	log::warn!("🌵 Hello {id:?}");
 	Ok(match id {
 		"eden-local" | "local" | "eden-dev" | "dev" => Box::new(chain_spec::development_config(DEFAULT_PARA_ID.into())),
-		"eden-testing" | "testing" | "test" | "paradis" => Box::new(chain_spec::testing_config()),
-		"hades" => Box::new(chain_spec::paradis_config(DEFAULT_PARA_ID.into()).map_err(|e| format!("{e:?}"))?),
+		"eden-testing" | "testing" | "test" | "paradis" => {
+			Box::new(chain_spec::paradis_config().map_err(|e| format!("{e:?}"))?)
+		}
 		"eden" | "production" | "main" | "" => Box::new(chain_spec::production_config()),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})

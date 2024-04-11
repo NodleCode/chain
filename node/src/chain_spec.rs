@@ -19,11 +19,11 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::{borrow::Cow, io::Read, str::FromStr, vec};
+use std::{vec};
 
-use clap::builder::Str;
+
 use cumulus_primitives_core::ParaId;
-use hex_literal::hex;
+
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
@@ -33,21 +33,10 @@ use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sp_core::{crypto::Ss58Codec, sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
-use std::fs::File;
-use bzip2_rs::DecoderReader;
-
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
-
-/// Error type for the CLI.
-#[derive(Debug, thiserror::Error)]
-#[allow(missing_docs)]
-pub enum Error {
-	#[error("Invalid json input")]
-	JsonNull,
-}
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
@@ -175,93 +164,6 @@ fn development_config_genesis(id: ParaId) -> Value {
 	)
 }
 
-pub fn paradis_config(id: ParaId) -> Result<ChainSpec, Box<dyn std::error::Error>> {
-
-	log::error!("🌵Code In Use");
-
-	// Give your base currency a unit name and decimal places
-	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "Soba".into());
-	properties.insert("tokenDecimals".into(), 11.into());
-	properties.insert("ss58Format".into(), 37.into());
-
-	let collators = 
-	// Real data:
-	// vec![(
-	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	// 	sp_core::sr25519::Public::from_ss58check("4jaftaRRK57EAGw2ooaLU7wQDQ4FpVaj2yTqxxkPpX49uRrW")?.into(),
-	// )];
-		// Alice collator
-	vec![
-		(
-			get_account_id_from_seed::<sr25519::Public>("Alice"),
-			get_collator_keys_from_seed("Alice"),
-		),
-	];
-	let mut wasm_file = File::open("/home/simson/nodle/chain/node/res/runtime_eden.wasm")?;
-	let mut code = Vec::<u8>::new();
-	let _ = wasm_file.read_to_end(&mut code)?;
-
-
-	let patch_chain_spec = ChainSpec::builder(
-		&code,
-		Extensions {
-			relay_chain: "paseo".into(), // You MUST set this to the correct network!
-			para_id: id.into(),
-		},
-	)
-	.with_name("Parachain Eden Development")
-	.with_id("hades")
-	.with_chain_type(ChainType::Live)
-	.with_properties(properties)
-	.with_genesis_config_patch(eden_testnet_genesis(
-		vec![AccountId::new(hex![
-			"6c806fe2f2f719ecd28cac83589e873800f6290ebee8b035abc2fcc91f8a6678"
-		])],
-		collators,
-		None,
-		id,
-	))
-	.build();
-
-	// Ok(patch_chain_spec)
-	let mut target_spec = Value::from_str(&patch_chain_spec.clone().as_json(true)?)?;
-
-	let compressed_file = File::open("/home/simson/nodle/chain/node/res/eden-export.json.bz2")?;
-
-	let mut reader = DecoderReader::new(compressed_file);
-
-	let mut exported_bytes = Vec::<u8>::with_capacity(500_000_000);
-	let _ = reader.read_to_end(&mut exported_bytes)?;
-
-	let exported_state: Value = serde_json::from_slice(&exported_bytes[..])?;
-
-	if let Some(top) = exported_state["genesis"]["raw"]["top"].as_object() {
-		for key in top.keys() {
-			if target_spec["genesis"]["raw"]["top"][key].is_null() {
-				target_spec["genesis"]["raw"]["top"][key] = top[key].clone();
-			}
-		}
-	}else{
-		log::warn!("🌵WARNING NO KEYS MIGRATED");
-	}
-
-	// working_cs_state["id"] = "hades".into();
-	// working_cs_state["bootNodes"] = Value::Array(vec![]);
-	// working_cs_state["telemetryEndpoints"] = Value::Array(vec![]);
-	// working_cs_state["relayChain"] = "paseo".into();
-	// working_cs_state.as_object_mut().ok_or(Error::JsonNull)?.remove("codeSubstitutes");//] = Value::Array(vec![]);
-	// working_cs_state["properties"] = patched_spec["properties"].clone();
-
-	let cs_string = target_spec.to_string();
-	
-	// Maybe this debug is nneded soon again println!("{cs}");
-
-	let cs_bytes = Cow::from_iter(cs_string.bytes());
-	let cs = ChainSpec::from_json_bytes(cs_bytes)?;
-	Ok(cs)
-}
-
 pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
@@ -288,8 +190,8 @@ pub fn production_config() -> ChainSpec {
 	ChainSpec::from_json_bytes(&include_bytes!("../res/eden.json")[..]).unwrap()
 }
 
-pub fn testing_config() -> ChainSpec {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/eden-testing.json")[..]).unwrap()
+pub fn paradis_config() -> Result<ChainSpec, Box<dyn std::error::Error>> {
+	Ok(ChainSpec::from_json_file("/usr/local/share/nodle/paradis.json".into())?)
 }
 
 #[cfg(test)]
@@ -323,10 +225,5 @@ pub(crate) mod tests {
 			),
 			hex!("207767fb73e1fcf8ae32455843419e51c94987228a4b77857aff7653d103cac3"),
 		);
-	}
-
-	#[test]
-	fn create_testing_spec() {
-		assert!(testing_config().build_storage().is_ok());
 	}
 }
