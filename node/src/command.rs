@@ -38,7 +38,7 @@ const DEFAULT_PARA_ID: u32 = 2026;
 fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
 		"eden-local" | "local" | "eden-dev" | "dev" => Box::new(chain_spec::development_config(DEFAULT_PARA_ID.into())),
-		"eden-testing" | "testing" | "test" | "paradis" => {
+		"eden-testing" |  "paradis" => {
 			Box::new(chain_spec::paradis_config().map_err(|e| format!("{e:?}"))?)
 		}
 		"eden" | "production" | "main" | "" => Box::new(chain_spec::production_config()),
