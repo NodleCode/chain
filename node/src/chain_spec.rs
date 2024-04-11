@@ -19,7 +19,10 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
+use std::vec;
+
 use cumulus_primitives_core::ParaId;
+
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
@@ -28,8 +31,10 @@ use runtime_eden::{
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -85,11 +90,11 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
 
 /// Helper function to create RuntimeGenesisConfig for testing
 fn eden_testnet_genesis(
-	root_key: AccountId,
+	root_key: Vec<AccountId>,
 	collators: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Option<Vec<AccountId>>,
 	id: ParaId,
-) -> serde_json::Value {
+) -> Value {
 	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
 		vec![
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -132,7 +137,7 @@ fn eden_testnet_genesis(
 			"parachainId": id,
 		},
 		"technicalMembership": {
-			"members": vec![root_key],
+			"members": root_key,
 		},
 		"polkadotXcm": {
 			"safeXcmVersion": Some(SAFE_XCM_VERSION),
@@ -140,9 +145,9 @@ fn eden_testnet_genesis(
 	})
 }
 
-fn development_config_genesis(id: ParaId) -> serde_json::Value {
+fn development_config_genesis(id: ParaId) -> Value {
 	eden_testnet_genesis(
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
+		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		vec![
 			(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -184,8 +189,8 @@ pub fn production_config() -> ChainSpec {
 	ChainSpec::from_json_bytes(&include_bytes!("../res/eden.json")[..]).unwrap()
 }
 
-pub fn testing_config() -> ChainSpec {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/eden-testing.json")[..]).unwrap()
+pub fn paradis_config() -> Result<ChainSpec, Box<dyn std::error::Error>> {
+	Ok(ChainSpec::from_json_file("/usr/local/share/nodle/paradis.json".into())?)
 }
 
 #[cfg(test)]
@@ -219,10 +224,5 @@ pub(crate) mod tests {
 			),
 			hex!("207767fb73e1fcf8ae32455843419e51c94987228a4b77857aff7653d103cac3"),
 		);
-	}
-
-	#[test]
-	fn create_testing_spec() {
-		assert!(testing_config().build_storage().is_ok());
 	}
 }

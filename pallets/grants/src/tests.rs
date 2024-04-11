@@ -445,7 +445,7 @@ fn add_vesting_schedule_overflow_check() {
 		.execute_with(|| {
 			System::set_block_number(1);
 
-			let schedules = vec![
+			let schedules = [
 				VestingSchedule {
 					start: 0u64,
 					period: 10u64,
@@ -508,7 +508,7 @@ fn add_vesting_schedule_overflow_cfg_min_check() {
 		.execute_with(|| {
 			System::set_block_number(1);
 
-			let schedules = vec![VestingSchedule {
+			let schedules = [VestingSchedule {
 				start: 0u64,
 				period: 10u64,
 				period_count: 1u32,
@@ -552,7 +552,7 @@ fn add_vesting_schedule_overflow_cfg_max_check() {
 		.execute_with(|| {
 			System::set_block_number(1);
 
-			let schedules = vec![VestingSchedule {
+			let schedules = [VestingSchedule {
 				start: 0u64,
 				period: 10u64,
 				period_count: 1u32,
