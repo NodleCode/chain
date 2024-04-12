@@ -1,4 +1,4 @@
-FROM rust:1.77.2-bookworm as builder
+FROM rust:1.77.2-slim-bookworm as builder
 
 ARG PROFILE=release
 WORKDIR /nodle-chain
