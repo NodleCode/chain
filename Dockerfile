@@ -1,22 +1,18 @@
-FROM ubuntu as builder
+FROM rust:1.77.2-bookworm as builder
 
 ARG PROFILE=release
 WORKDIR /nodle-chain
 
 COPY . /nodle-chain
 
-RUN apt-get update && \
-	apt-get upgrade -y && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y cmake pkg-config libssl-dev git clang build-essential curl protobuf-compiler bzip2
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-	export PATH=$PATH:$HOME/.cargo/bin && \
-	scripts/init.sh && \
-	cargo build -p nodle-parachain --$PROFILE && \
+RUN apt-get update && apt-get install -qy libssl-dev pkg-config protobuf-compiler
+RUN rustup component add rust-src && rustup target add wasm32-unknown-unknown --toolchain stable
+RUN cargo build -p nodle-parachain --$PROFILE && \
 	bunzip2 node/res/paradis.json.bz2
 
 # ===== SECOND STAGE ======
 
-FROM ubuntu
+FROM rust:1.77.2-slim-bookworm as runtime
 
 ARG PROFILE=release
 
