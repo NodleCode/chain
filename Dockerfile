@@ -20,10 +20,6 @@ RUN install -d /usr/local/share/nodle
 COPY --from=builder /nodle-chain/target/$PROFILE/nodle-parachain /usr/local/bin
 COPY --from=builder /nodle-chain/node/res/paradis.json /usr/local/share/nodle
 
-RUN apt-get update && \
-	apt-get upgrade -y && \
-	apt-get install -y curl netcat
-
 RUN mv /usr/share/ca* /tmp && \
 	rm -rf /usr/share/*  && \
 	mv /tmp/ca-certificates /usr/share/ && \
