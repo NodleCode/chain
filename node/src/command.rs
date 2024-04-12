@@ -248,7 +248,7 @@ pub fn run() -> Result<()> {
 					.map(|e| e.para_id)
 					.ok_or("Could not find parachain ID in chain-spec.")?;
 
-				if cli.force_purge_chain_from_storage {
+				if cli.force_purge_chain_db_from_filesystem {
 					let db_path =
 						config.database.path().and_then(|p| p.parent()).ok_or_else(|| {
 							sc_cli::Error::Input("Cannot purge custom database implementation".into())

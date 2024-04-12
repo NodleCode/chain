@@ -86,7 +86,7 @@ pub struct Cli {
 
 	/// Purge chain from storage, for that time when purge-chain subcommand cannot be used
 	#[arg(long)]
-	pub force_purge_chain_from_storage: bool,
+	pub force_purge_chain_db_from_filesystem: bool,
 
 	/// Relay chain arguments
 	#[arg(raw = true)]
