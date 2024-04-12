@@ -5,7 +5,7 @@ WORKDIR /nodle-chain
 
 COPY . /nodle-chain
 
-RUN apt-get update && apt-get install -qy libssl-dev pkg-config protobuf-compiler
+RUN apt-get update && apt-get install -qy   cmake pkg-config libssl-dev git clang build-essential curl protobuf-compiler
 RUN rustup component add rust-src && rustup target add wasm32-unknown-unknown --toolchain stable
 RUN cargo build -p nodle-parachain --$PROFILE && \
 	bunzip2 node/res/paradis.json.bz2
