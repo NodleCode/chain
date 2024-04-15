@@ -84,10 +84,6 @@ pub struct Cli {
 	#[arg(long)]
 	pub no_hardware_benchmarks: bool,
 
-	/// Purge chain from storage, for that time when purge-chain subcommand cannot be used
-	#[arg(long)]
-	pub force_purge_chain_db_from_filesystem: bool,
-
 	/// Relay chain arguments
 	#[arg(raw = true)]
 	pub relaychain_args: Vec<String>,

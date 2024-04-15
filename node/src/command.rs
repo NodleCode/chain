@@ -31,7 +31,7 @@ use sc_cli::{
 };
 use sc_service::config::{BasePath, PrometheusConfig};
 use sp_runtime::traits::AccountIdConversion;
-use std::{fs, net::SocketAddr};
+use std::net::SocketAddr;
 // default to Nodle parachain id
 const DEFAULT_PARA_ID: u32 = 2026;
 
@@ -247,22 +247,6 @@ pub fn run() -> Result<()> {
 				let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
 					.map(|e| e.para_id)
 					.ok_or("Could not find parachain ID in chain-spec.")?;
-
-				if cli.force_purge_chain_db_from_filesystem {
-					let db_path =
-						config.database.path().and_then(|p| p.parent()).ok_or_else(|| {
-							sc_cli::Error::Input("Cannot purge custom database implementation".into())
-						})?;
-					match fs::remove_dir_all(&db_path) {
-						Ok(_) => {
-							log::warn!("🧯 Removed {:?}", &db_path);
-						}
-						Err(ref err) if err.kind() == std::io::ErrorKind::NotFound => {
-							log::error!("🧯 {:?} did not exist.", &db_path);
-						}
-						Err(err) => return Result::Err(err.into()),
-					}
-				};
 
 				let polkadot_cli = RelayChainCli::new(
 					&config,
