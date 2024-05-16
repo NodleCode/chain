@@ -511,7 +511,7 @@ sp_api::impl_runtime_apis! {
 	}
 }
 
-struct CheckInherents;
+pub struct CheckInherents;
 impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 	fn check_inherents(
 		block: &Block,
