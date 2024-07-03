@@ -16,20 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// //TODO  #[cfg(all(not(feature = "metadata-hash"), feature = "std"))]
-// #[cfg(not(feature = "std"))]
-//  fn main() {
-// 	 substrate_wasm_builder::WasmBuilder::build_using_defaults();
-//  }
-
-// //TODO  #[cfg(all(feature = "metadata-hash", feature = "std"))]
-// #[cfg(feature = "std")]
-//  fn main() {
-// 	 substrate_wasm_builder::WasmBuilder::init_with_defaults()
-// 		 .enable_metadata_hash("NODL", 12)
-// 		 .build();
-//  }
-
 #[cfg(all(feature = "std", feature = "metadata-hash"))]
 #[docify::export(template_enable_metadata_hash)]
 fn main() {
