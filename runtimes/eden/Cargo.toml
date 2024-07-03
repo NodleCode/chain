@@ -8,6 +8,7 @@ version.workspace = true
 default = ["std"]
 std = [
   "frame-executive/std",
+  "frame-metadata-hash-extension/std",
   "frame-support/std",
   "frame-system/std",
   "frame-try-runtime/std",
@@ -79,6 +80,7 @@ std = [
   "sp-transaction-pool/std",
   "sp-version/std",
   "sp-npos-elections/std",
+  "substrate-wasm-builder",
   "pallet-xcm-benchmarks/std",
   "pallet-message-queue/std",
   "parachains-common/std"
@@ -174,10 +176,10 @@ scale-info = { workspace = true, default-features = false, features = ["derive"]
 serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec.workspace = true
 lazy_static = {workspace = true, default-features = false, features = ["spin_no_std"] }
-
 frame-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-system-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-executive = { workspace = true, default-features = false }
+frame-metadata-hash-extension ={ workspace = true, default-features = false}
 frame-support = { workspace = true, default-features = false }
 frame-system = { workspace = true, default-features = false }
 frame-system-rpc-runtime-api = { workspace = true, default-features = false }
@@ -257,4 +259,17 @@ orml-xtokens = { workspace = true, default-features = false }
 orml-traits = { workspace = true, default-features = false }
 
 [build-dependencies]
-substrate-wasm-builder.workspace = true
+substrate-wasm-builder = { workspace = true , optional = true }
+
+# Enable the metadata hash generation.
+#
+# This is hidden behind a feature because it increases the compile time.
+# The wasm binary needs to be compiled twice, once to fetch the metadata,
+# generate the metadata hash and then a second time with the
+# `RUNTIME_METADATA_HASH` environment variable set for the `CheckMetadataHash`
+# extension.
+# metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+
+# A convenience feature for enabling things when doing a build
+# for an on-chain release.
+# on-chain-release-build = ["metadata-hash"]
