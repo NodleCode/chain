@@ -1636,11 +1636,11 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
-	/// The range of component `r` is `[0, 5000]`.
-	fn instr_i64const(r: u32, ) -> Weight {
-		// Minimum execution time: 3_150 nanoseconds.
-		Weight::from_parts(4_462_162_u64, 0)
-			// Standard Error: 14
-			.saturating_add(Weight::from_parts(14_522_u64, 0).saturating_mul(r as u64))
-	}
+	// /// The range of component `r` is `[0, 5000]`.
+	// fn instr_i64const(r: u32, ) -> Weight {
+	// 	// Minimum execution time: 3_150 nanoseconds.
+	// 	Weight::from_parts(4_462_162_u64, 0)
+	// 		// Standard Error: 14
+	// 		.saturating_add(Weight::from_parts(14_522_u64, 0).saturating_mul(r as u64))
+	// }
 }
