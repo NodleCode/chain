@@ -10,9 +10,8 @@ use codec::{Decode, Encode};
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
 	match_types, parameter_types,
-	traits::{ConstU32, Everything, Nothing, PalletInfoAccess},
-	weights::IdentityFee,
-	weights::Weight,
+	traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
+	weights::{IdentityFee, Weight},
 };
 use frame_system::EnsureRoot;
 use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key, RateLimiter};
@@ -33,7 +32,7 @@ use xcm_builder::{
 };
 use xcm_executor::XcmExecutor;
 
-/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
+/// Type for specifying how a `Location` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
 /// `Transact` in order to determine the dispatch RuntimeOrigin.
 pub type LocationToAccountId = (
@@ -45,11 +44,15 @@ pub type LocationToAccountId = (
 	AccountId32Aliases<RelayNetwork, AccountId>,
 );
 
-match_types! {
-	pub type ParentOrSiblings: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: Here } |
-		MultiLocation { parents: 1, interior: X1(_) }
-	};
+pub struct ParentOrSiblings;
+impl Contains<Location> for ParentOrSiblings {
+	fn contains(loc: &Location) -> bool {
+		matches!(
+			loc.unpack(),
+			// (1, [ Here]) |
+			(1, [_]) // Todo Sic! Upgrade to sdk1.7 without optimizations.
+		)
+	}
 }
 
 pub type Barrier = (
@@ -81,16 +84,16 @@ pub type XcmRouter = (
 );
 
 parameter_types! {
-	pub RelayLocation: MultiLocation = MultiLocation::parent();
-	pub NodlLocation: MultiLocation = MultiLocation {
+	pub RelayLocation: Location = Location::parent();
+	pub NodlLocation: Location = Location {
 		parents:0,
-		interior: Junctions::X1(
+		interior: [
 			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
-		)
+		].into()
 	};
 	pub const RelayNetwork: Option<NetworkId> = None;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
-	pub UniversalLocation: InteriorMultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+	pub UniversalLocation: InteriorLocation = Parachain(ParachainInfo::parachain_id().into()).into();
 }
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
@@ -122,7 +125,7 @@ pub type CurrencyTransactor = FungibleAdapter<
 	Balances,
 	// Use this currency when it is a fungible asset matching the given location or name:
 	IsConcrete<NodlLocation>,
-	// Convert an XCM MultiLocation into a local account id:
+	// Convert an XCM Location into a local account id:
 	LocationToAccountId,
 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
 	AccountId,
@@ -192,7 +195,7 @@ impl pallet_xcm::Config for Runtime {
 
 parameter_types! {
 	/// The asset ID for the asset that we use to pay for message delivery fees.
-	pub FeeAssetId: AssetId = Concrete(NodlLocation::get());
+	pub FeeAssetId: AssetId = AssetId(NodlLocation::get());
 	/// The base fee for the message delivery fees.
 	pub const BaseDeliveryFee: u128 = crate::constants::POLKADOT_CENT.saturating_mul(3);
 }
@@ -215,13 +218,13 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
-pub struct AccountIdToMultiLocation;
-impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
-	fn convert(account: AccountId) -> MultiLocation {
-		X1(AccountId32 {
+pub struct AccountIdToLocation;
+impl Convert<AccountId, Location> for AccountIdToLocation {
+	fn convert(account: AccountId) -> Location {
+		[AccountId32 {
 			network: None,
 			id: account.into(),
-		})
+		}]
 		.into()
 	}
 }
@@ -231,10 +234,10 @@ parameter_types! {
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
-	pub SelfLocation: MultiLocation = MultiLocation::here();
+	pub SelfLocation: Location = Location::here();
 }
 parameter_type_with_key! {
-	pub ParachainMinFee: |_location: MultiLocation| -> Option<u128> {
+	pub ParachainMinFee: |_location: Location| -> Option<u128> {
 		None
 	};
 }
@@ -244,8 +247,8 @@ pub enum CurrencyId {
 	NodleNative,
 }
 pub struct CurrencyIdConvert;
-impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
-	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+impl Convert<CurrencyId, Option<Location>> for CurrencyIdConvert {
+	fn convert(id: CurrencyId) -> Option<Location> {
 		match id {
 			CurrencyId::NodleNative => Some(NodlLocation::get()),
 		}
@@ -267,17 +270,17 @@ impl orml_xtokens::Config for Runtime {
 	type ReserveProvider = RelativeReserveProvider;
 	type AccountIdToLocation = AccountIdToLocation;
 	type LocationsFilter = LocationsFilter;
-	type RateLimiter = RateLimiter;
-	type RateLimiterId = RateLimiterId;
+	type RateLimiter = ();
+	type RateLimiterId = ();
 }
 
 #[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
-	pub const TrustedTeleporter: Option<(MultiLocation, MultiAsset)> = Some((
-		MultiLocation::parent(),
-		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(100) }
+	pub const TrustedTeleporter: Option<(Location, MultiAsset)> = Some((
+		Location::parent(),
+		MultiAsset{ id: AssetId(Location::parent()), fun: Fungible(100) }
 	));
-	pub const TrustedReserve: Option<(MultiLocation, MultiAsset)> = None;
+	pub const TrustedReserve: Option<(Location, MultiAsset)> = None;
 
 }
 #[cfg(feature = "runtime-benchmarks")]
@@ -287,7 +290,7 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 
 	//TODO put a realistic value here:
 	fn fee_asset() -> Result<MultiAsset, BenchmarkError> {
-		let assets: MultiAsset = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
+		let assets: MultiAsset = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
 		Ok(assets)
 	}
 
@@ -300,44 +303,43 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Err(BenchmarkError::Skip)
 	}
 
-	fn universal_alias() -> Result<(MultiLocation, Junction), BenchmarkError> {
+	fn universal_alias() -> Result<(Location, Junction), BenchmarkError> {
 		// The XCM executor of Eden doesn't have a configured `UniversalAliases`
 		Err(BenchmarkError::Skip)
 	}
 
-	fn export_message_origin_and_destination(
-	) -> Result<(MultiLocation, NetworkId, InteriorMultiLocation), BenchmarkError> {
+	fn export_message_origin_and_destination() -> Result<(Location, NetworkId, InteriorLocation), BenchmarkError> {
 		// The XCM executor of Eden doesn't support exporting messages
 		Err(BenchmarkError::Skip)
 	}
 
-	fn transact_origin_and_runtime_call() -> Result<(MultiLocation, RuntimeCall), BenchmarkError> {
+	fn transact_origin_and_runtime_call() -> Result<(Location, RuntimeCall), BenchmarkError> {
 		Ok((
-			MultiLocation::parent(),
+			Location::parent(),
 			frame_system::Call::remark_with_event { remark: vec![] }.into(),
 		))
 	}
 
-	fn subscribe_origin() -> Result<MultiLocation, BenchmarkError> {
-		Ok(MultiLocation::parent())
+	fn subscribe_origin() -> Result<Location, BenchmarkError> {
+		Ok(Location::parent())
 	}
 
-	fn claimable_asset() -> Result<(MultiLocation, MultiLocation, MultiAssets), BenchmarkError> {
-		let origin = MultiLocation::parent();
-		let assets: MultiAssets = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
-		let ticket = MultiLocation {
+	fn claimable_asset() -> Result<(Location, Location, MultiAssets), BenchmarkError> {
+		let origin = Location::parent();
+		let assets: MultiAssets = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
+		let ticket = Location {
 			parents: 0,
 			interior: Here,
 		};
 		Ok((origin, ticket, assets))
 	}
 
-	fn unlockable_asset() -> Result<(MultiLocation, MultiLocation, MultiAsset), BenchmarkError> {
+	fn unlockable_asset() -> Result<(Location, Location, MultiAsset), BenchmarkError> {
 		// Eden doesn't support locking/unlocking assets
 		Err(BenchmarkError::Skip)
 	}
 
-	fn alias_origin() -> Result<(MultiLocation, MultiLocation), BenchmarkError> {
+	fn alias_origin() -> Result<(Location, Location), BenchmarkError> {
 		Err(BenchmarkError::Skip)
 	}
 }
@@ -350,7 +352,7 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type TrustedReserve = TrustedReserve;
 	fn get_multi_asset() -> MultiAsset {
 		MultiAsset {
-			id: Concrete(NodlLocation::get()),
+			id: AssetId(NodlLocation::get()),
 			fun: Fungible(u128::MAX),
 		}
 	}
@@ -361,13 +363,13 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	type AccountIdConverter = LocationToAccountId;
 	type DeliveryHelper = ();
 
-	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
+	fn valid_destination() -> Result<Location, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
 	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
 		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
 		let assets = MultiAsset {
-			id: Concrete(NodlLocation::get()),
+			id: AssetId(NodlLocation::get()),
 			fun: Fungible(10_000_000 * NODL),
 		};
 		assets.into()
@@ -381,9 +383,9 @@ mod tests {
 	#[test]
 	fn test_convert_currency_id_to_multi_location() {
 		let pallet_balance_index = <Balances as PalletInfoAccess>::index() as u8; //using same index as the built runtime
-		let expected_nodl_location = MultiLocation {
+		let expected_nodl_location = Location {
 			parents: 0,
-			interior: Junctions::X1(PalletInstance(pallet_balance_index)), // Index of the pallet balance in the runtime
+			interior: [PalletInstance(pallet_balance_index)], // Index of the pallet balance in the runtime
 		};
 		assert_eq!(
 			CurrencyIdConvert::convert(CurrencyId::NodleNative),
@@ -398,16 +400,16 @@ mod tests {
 		]
 		.into();
 
-		let expected_multilocation = MultiLocation {
+		let expected_location = Location {
 			parents: 0,
-			interior: X1(AccountId32 {
+			interior: [AccountId32 {
 				network: None,
 				id: [
 					126, 200, 62, 9, 114, 243, 243, 190, 185, 27, 243, 145, 244, 87, 26, 26, 213, 7, 6, 113, 36, 76,
 					54, 87, 241, 19, 175, 234, 166, 39, 21, 27,
 				],
-			}),
+			}],
 		};
-		assert_eq!(AccountIdToMultiLocation::convert(alice), expected_multilocation);
+		assert_eq!(AccountIdToLocation::convert(alice), expected_location);
 	}
 }

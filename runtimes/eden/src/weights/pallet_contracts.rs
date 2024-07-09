@@ -1636,6 +1636,10 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
+	
+	fn instr_i64_load_store(_r: u32, ) -> Weight {
+			Weight::zero()
+		}
 	// /// The range of component `r` is `[0, 5000]`.
 	// fn instr_i64const(r: u32, ) -> Weight {
 	// 	// Minimum execution time: 3_150 nanoseconds.
