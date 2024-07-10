@@ -11,7 +11,7 @@ use frame_benchmarking::BenchmarkError;
 use frame_support::{
 	match_types, parameter_types,
 	traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
-	weights::{IdentityFee, Weight},
+	weights::{IdentityFee, Weight, WeightToFee},
 };
 use frame_system::EnsureRoot;
 use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key, RateLimiter};
@@ -149,7 +149,21 @@ impl xcm_executor::Config for XcmConfig {
 	type UniversalLocation = UniversalLocation;
 	type Barrier = Barrier;
 	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees>;
+	// RerferenceImplemenation https://github.com/polkadot-fellows/runtimes/blob/40f849df87a8a1b79aba4cfb7ce762d868243dca/system-parachains/encointer/src/xcm_config.rs#L46
+	// type Trader = UsingComponents<
+	// 	WeightToFee,
+	// 	KsmLocation,
+	// 	AccountId,
+	// 	Balances,
+	// 	ResolveTo<StakingPot, Balances>,
+	// >;
+	
+	type Trader = UsingComponents<
+		IdentityFee<Balances>,
+		NodlLocation,
+		AccountId,
+		Balances,
+		DealWithFees>;
 	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;
@@ -269,7 +283,7 @@ impl orml_xtokens::Config for Runtime {
 	type MinXcmFee = ParachainMinFee;
 	type ReserveProvider = RelativeReserveProvider;
 	type AccountIdToLocation = AccountIdToLocation;
-	type LocationsFilter = LocationsFilter;
+	type LocationsFilter = Everything;
 	type RateLimiter = ();
 	type RateLimiterId = ();
 }

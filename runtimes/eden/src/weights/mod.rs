@@ -54,13 +54,13 @@ impl From<&Asset> for AssetTypes {
 				}),
 				fun: Fungible(_),
 			} => AssetTypes::Balances,
-			Asset {
-				id: AssetId(Location {
-					parents: 0,
-					interior: PalletInstance(2),
-				}),
-				fun: Fungible(_),
-			} => AssetTypes::Balances,
+			// Asset {
+			// 	id: AssetId(Location {
+			// 		parents: 0,
+			// 		interior: [PalletInstance(2)].into(),
+			// 	}),
+			// 	fun: Fungible(_),
+			// } => AssetTypes::Balances,
 			_ => AssetTypes::Unknown,
 		}
 	}
