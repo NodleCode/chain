@@ -50,6 +50,97 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 		}
 	}
 }
+// // TODO probably not correct
+// impl
+// 	OnUnbalanced<
+// 		frame_support::traits::fungible::Imbalance<
+// 			u128,
+// 			frame_support::traits::fungible::DecreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 			frame_support::traits::fungible::IncreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 		>,
+// 	> for DealWithFees
+// {
+// 	fn on_unbalanceds<B>(
+// 		amounts: impl Iterator<
+// 			Item = frame_support::traits::fungible::Imbalance<
+// 				u128,
+// 				frame_support::traits::fungible::DecreaseIssuance<
+// 					sp_runtime::AccountId32,
+// 					pallet_balances::Pallet<Runtime>,
+// 				>,
+// 				frame_support::traits::fungible::IncreaseIssuance<
+// 					sp_runtime::AccountId32,
+// 					pallet_balances::Pallet<Runtime>,
+// 				>,
+// 			>,
+// 		>,
+// 	) where
+// 		frame_support::traits::fungible::Imbalance<
+// 			u128,
+// 			frame_support::traits::fungible::DecreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 			frame_support::traits::fungible::IncreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 		>: frame_support::traits::Imbalance<B>,
+// 	{
+// 		Self::on_unbalanced(amounts.fold(
+// 			<frame_support::traits::fungible::Imbalance<
+// 				u128,
+// 				frame_support::traits::fungible::DecreaseIssuance<
+// 					sp_runtime::AccountId32,
+// 					pallet_balances::Pallet<Runtime>,
+// 				>,
+// 				frame_support::traits::fungible::IncreaseIssuance<
+// 					sp_runtime::AccountId32,
+// 					pallet_balances::Pallet<Runtime>,
+// 				>,
+// 			>>::zero(),
+// 			|i, x| x.merge(i),
+// 		))
+// 	}
+
+// 	fn on_unbalanced(
+// 		amount: frame_support::traits::fungible::Imbalance<
+// 			u128,
+// 			frame_support::traits::fungible::DecreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 			frame_support::traits::fungible::IncreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 		>,
+// 	) {
+// 		amount.try_drop().unwrap_or_else(Self::on_nonzero_unbalanced)
+// 	}
+
+// 	fn on_nonzero_unbalanced(
+// 		amount: frame_support::traits::fungible::Imbalance<
+// 			u128,
+// 			frame_support::traits::fungible::DecreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 			frame_support::traits::fungible::IncreaseIssuance<
+// 				sp_runtime::AccountId32,
+// 				pallet_balances::Pallet<Runtime>,
+// 			>,
+// 		>,
+// 	) {
+// 		drop(amount);
+// 	}
+// }
 
 pub struct RelayChainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
 

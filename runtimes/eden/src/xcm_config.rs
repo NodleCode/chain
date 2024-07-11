@@ -9,12 +9,12 @@ use codec::{Decode, Encode};
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
-	match_types, parameter_types,
+	parameter_types,
 	traits::{ConstU32, Contains, Everything, Nothing, PalletInfoAccess},
-	weights::{IdentityFee, Weight, WeightToFee},
+	weights::{IdentityFee, Weight},
 };
 use frame_system::EnsureRoot;
-use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key, RateLimiter};
+use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::Sibling;
 use scale_info::TypeInfo;
@@ -157,13 +157,8 @@ impl xcm_executor::Config for XcmConfig {
 	// 	Balances,
 	// 	ResolveTo<StakingPot, Balances>,
 	// >;
-	
-	type Trader = UsingComponents<
-		IdentityFee<Balances>,
-		NodlLocation,
-		AccountId,
-		Balances,
-		DealWithFees>;
+
+	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees>;
 	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;

@@ -27,7 +27,6 @@ use frame_support::{match_types, parameter_types};
 use parachains_common::message_queue::NarrowOriginToSibling;
 use sp_runtime::Perbill;
 use xcm::latest::prelude::*;
-use xcm::v3::MultiLocation;
 
 // match_types! {
 // 	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
