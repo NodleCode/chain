@@ -23,21 +23,33 @@ use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 use primitives::{AccountId, BlockNumber};
 use sp_runtime::traits::BlockNumberProvider;
 
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+pub type NegativeImbalance<T> =
+	<pallet_balances::Pallet<T> as Currency<<T as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 /// Implementation of `OnUnbalanced` that deposits the fees into a staking pot for later payout.
-pub struct ToStakingPot;
-impl OnUnbalanced<NegativeImbalance> for ToStakingPot {
-	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-		let staking_pot = CollatorSelection::account_id();
-		Balances::resolve_creating(&staking_pot, amount);
+pub struct ToAuthor<R>(sp_std::marker::PhantomData<R>);
+impl<R> OnUnbalanced<NegativeImbalance<R>> for ToAuthor<R>
+where
+	R: pallet_balances::Config + pallet_authorship::Config,
+	<R as frame_system::Config>::AccountId: From<primitives::AccountId>,
+	<R as frame_system::Config>::AccountId: Into<primitives::AccountId>,
+{
+	fn on_nonzero_unbalanced(amount: NegativeImbalance<R>) {
+		if let Some(author) = <pallet_authorship::Pallet<R>>::author() {
+			<pallet_balances::Pallet<R>>::resolve_creating(&author, amount);
+		}
 	}
 }
 
 /// Splits fees 20/80 between reserve and block author.
-pub struct DealWithFees;
-impl OnUnbalanced<NegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
+pub struct DealWithFees<R>(sp_std::marker::PhantomData<R>);
+impl<R> OnUnbalanced<NegativeImbalance<R>> for DealWithFees<R>
+where
+	R: pallet_balances::Config + pallet_authorship::Config,
+	<R as frame_system::Config>::AccountId: From<primitives::AccountId>,
+	<R as frame_system::Config>::AccountId: Into<primitives::AccountId>,
+{
+	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<R>>) {
 		if let Some(fees) = fees_then_tips.next() {
 			// for fees, 20% to treasury, 80% to author
 			let mut split = fees.ration(20, 80);
@@ -46,101 +58,10 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 				tips.ration_merge_into(20, 80, &mut split);
 			}
 			DaoReserve::on_unbalanced(split.0);
-			ToStakingPot::on_unbalanced(split.1);
+			<ToAuthor<R> as OnUnbalanced<_>>::on_unbalanced(split.1);
 		}
 	}
 }
-// // TODO probably not correct
-// impl
-// 	OnUnbalanced<
-// 		frame_support::traits::fungible::Imbalance<
-// 			u128,
-// 			frame_support::traits::fungible::DecreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 			frame_support::traits::fungible::IncreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 		>,
-// 	> for DealWithFees
-// {
-// 	fn on_unbalanceds<B>(
-// 		amounts: impl Iterator<
-// 			Item = frame_support::traits::fungible::Imbalance<
-// 				u128,
-// 				frame_support::traits::fungible::DecreaseIssuance<
-// 					sp_runtime::AccountId32,
-// 					pallet_balances::Pallet<Runtime>,
-// 				>,
-// 				frame_support::traits::fungible::IncreaseIssuance<
-// 					sp_runtime::AccountId32,
-// 					pallet_balances::Pallet<Runtime>,
-// 				>,
-// 			>,
-// 		>,
-// 	) where
-// 		frame_support::traits::fungible::Imbalance<
-// 			u128,
-// 			frame_support::traits::fungible::DecreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 			frame_support::traits::fungible::IncreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 		>: frame_support::traits::Imbalance<B>,
-// 	{
-// 		Self::on_unbalanced(amounts.fold(
-// 			<frame_support::traits::fungible::Imbalance<
-// 				u128,
-// 				frame_support::traits::fungible::DecreaseIssuance<
-// 					sp_runtime::AccountId32,
-// 					pallet_balances::Pallet<Runtime>,
-// 				>,
-// 				frame_support::traits::fungible::IncreaseIssuance<
-// 					sp_runtime::AccountId32,
-// 					pallet_balances::Pallet<Runtime>,
-// 				>,
-// 			>>::zero(),
-// 			|i, x| x.merge(i),
-// 		))
-// 	}
-
-// 	fn on_unbalanced(
-// 		amount: frame_support::traits::fungible::Imbalance<
-// 			u128,
-// 			frame_support::traits::fungible::DecreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 			frame_support::traits::fungible::IncreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 		>,
-// 	) {
-// 		amount.try_drop().unwrap_or_else(Self::on_nonzero_unbalanced)
-// 	}
-
-// 	fn on_nonzero_unbalanced(
-// 		amount: frame_support::traits::fungible::Imbalance<
-// 			u128,
-// 			frame_support::traits::fungible::DecreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 			frame_support::traits::fungible::IncreaseIssuance<
-// 				sp_runtime::AccountId32,
-// 				pallet_balances::Pallet<Runtime>,
-// 			>,
-// 		>,
-// 	) {
-// 		drop(amount);
-// 	}
-// }
 
 pub struct RelayChainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
 

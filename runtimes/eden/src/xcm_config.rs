@@ -14,7 +14,6 @@ use frame_support::{
 	weights::{IdentityFee, Weight},
 };
 use frame_system::EnsureRoot;
-use orml_traits::{location::RelativeReserveProvider, parameter_type_with_key};
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::Sibling;
 use scale_info::TypeInfo;
@@ -24,11 +23,11 @@ use sp_runtime::traits::Convert;
 use sp_std::vec;
 use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
-	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
-	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
-	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
-	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
-	WithComputedOrigin,
+	AccountId32Aliases, AllowExplicitUnpaidExecutionFrom, AllowTopLevelPaidExecutionFrom,
+	DenyReserveTransferToRelayChain, DenyThenTry, EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter,
+	IsConcrete, NativeAsset, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, TrailingSetTopicAsId,
+	UsingComponents, WeightInfoBounds, WithComputedOrigin,
 };
 use xcm_executor::XcmExecutor;
 
@@ -44,33 +43,40 @@ pub type LocationToAccountId = (
 	AccountId32Aliases<RelayNetwork, AccountId>,
 );
 
-pub struct ParentOrSiblings;
-impl Contains<Location> for ParentOrSiblings {
-	fn contains(loc: &Location) -> bool {
+pub struct ParentOrParentsExecutivePlurality;
+impl Contains<Location> for ParentOrParentsExecutivePlurality {
+	fn contains(location: &Location) -> bool {
 		matches!(
-			loc.unpack(),
-			// (1, [ Here]) |
-			(1, [_]) // Todo Sic! Upgrade to sdk1.7 without optimizations.
+			location.unpack(),
+			(1, [])
+				| (
+					1,
+					[Plurality {
+						id: BodyId::Executive,
+						..
+					}]
+				)
 		)
 	}
 }
 
-pub type Barrier = (
-	TakeWeightCredit,
-	// Expected responses are OK.
-	AllowKnownQueryResponses<PolkadotXcm>,
-	// Allow XCMs with some computed origins to pass through.
-	WithComputedOrigin<
+pub type Barrier = TrailingSetTopicAsId<
+	DenyThenTry<
+		DenyReserveTransferToRelayChain,
 		(
-			// If the message is one that immediately attemps to pay for execution, then allow it.
-			AllowTopLevelPaidExecutionFrom<Everything>,
-			// Subscriptions for version tracking are OK.
-			AllowSubscriptionsFrom<ParentOrSiblings>,
+			TakeWeightCredit,
+			WithComputedOrigin<
+				(
+					AllowTopLevelPaidExecutionFrom<Everything>,
+					AllowExplicitUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
+					// ^^^ Parent and its exec plurality get free execution
+				),
+				UniversalLocation,
+				ConstU32<8>,
+			>,
 		),
-		UniversalLocation,
-		ConstU32<8>,
 	>,
-);
+>;
 
 pub type LocalOriginToLocation = SignedToAccountId32<RuntimeOrigin, AccountId, RelayNetwork>;
 
@@ -149,16 +155,7 @@ impl xcm_executor::Config for XcmConfig {
 	type UniversalLocation = UniversalLocation;
 	type Barrier = Barrier;
 	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
-	// RerferenceImplemenation https://github.com/polkadot-fellows/runtimes/blob/40f849df87a8a1b79aba4cfb7ce762d868243dca/system-parachains/encointer/src/xcm_config.rs#L46
-	// type Trader = UsingComponents<
-	// 	WeightToFee,
-	// 	KsmLocation,
-	// 	AccountId,
-	// 	Balances,
-	// 	ResolveTo<StakingPot, Balances>,
-	// >;
-
-	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees>;
+	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees<Runtime>>;
 	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;
@@ -262,25 +259,6 @@ impl Convert<CurrencyId, Option<Location>> for CurrencyIdConvert {
 			CurrencyId::NodleNative => Some(NodlLocation::get()),
 		}
 	}
-}
-
-impl orml_xtokens::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type CurrencyId = CurrencyId;
-	type CurrencyIdConvert = CurrencyIdConvert;
-	type SelfLocation = SelfLocation;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
-	type BaseXcmWeight = BaseXcmWeight;
-	type UniversalLocation = UniversalLocation;
-	type MaxAssetsForTransfer = MaxAssetsForTransfer;
-	type MinXcmFee = ParachainMinFee;
-	type ReserveProvider = RelativeReserveProvider;
-	type AccountIdToLocation = AccountIdToLocation;
-	type LocationsFilter = Everything;
-	type RateLimiter = ();
-	type RateLimiterId = ();
 }
 
 #[cfg(feature = "runtime-benchmarks")]
