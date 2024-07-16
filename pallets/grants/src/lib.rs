@@ -214,6 +214,41 @@ pub mod pallet {
 
 			Ok(().into())
 		}
+
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::bridge_all_vesting_schedules())]
+		pub fn bridge_all_vesting_schedules(
+			origin: OriginFor<T>,
+			eth_address: [u8; 20],
+			chain_id: u64,
+		) -> DispatchResultWithPostInfo {
+			let from = ensure_signed(origin)?;
+
+			let locked_amount_left = Self::do_claim(&from);
+			let free_balance = T::Currency::free_balance(&from);
+			let bridgeable_funds = locked_amount_left.min(free_balance);
+
+			T::Currency::remove_lock(VESTING_LOCK_ID, &from);
+			T::Currency::settle(
+				&from,
+				T::Currency::burn(bridgeable_funds),
+				WithdrawReasons::RESERVE,
+				ExistenceRequirement::AllowDeath,
+			)
+			.map_err(|_| Error::<T>::FailedToSettleBridge)?;
+
+			let grants = <VestingSchedules<T>>::take(&from);
+			<VestingSchedules<T>>::remove(from);
+
+			Self::deposit_event(Event::Bridge {
+				to: eth_address,
+				chain_id,
+				amount: bridgeable_funds,
+				grants,
+			});
+
+			Ok(().into())
+		}
 	}
 
 	#[pallet::event]
@@ -227,6 +262,12 @@ pub mod pallet {
 		VestingSchedulesCanceled(T::AccountId),
 		/// Renounced rights to cancel grant for the given account id \[who\]
 		Renounced(T::AccountId),
+		Bridge {
+			to: [u8; 20],
+			chain_id: u64,
+			amount: BalanceOf<T>,
+			grants: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
+		},
 	}
 
 	#[pallet::error]
@@ -239,6 +280,7 @@ pub mod pallet {
 		VestingToSelf,
 		MaxScheduleOverflow,
 		Renounced,
+		FailedToSettleBridge,
 	}
 
 	#[pallet::storage]

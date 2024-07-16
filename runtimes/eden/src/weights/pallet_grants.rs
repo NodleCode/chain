@@ -98,6 +98,13 @@ impl<T: frame_system::Config> pallet_grants::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
+	// TODO redo benchmark
+	fn bridge_all_vesting_schedules() -> Weight {
+		// Minimum execution time: 143_329 nanoseconds.
+		Weight::from_parts(144_750_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(8_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
 	// Storage: `Vesting::Renounced` (r:0 w:1)
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
 	fn renounce() -> Weight {

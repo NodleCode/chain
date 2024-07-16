@@ -46,6 +46,7 @@ pub trait WeightInfo {
 	fn add_vesting_schedule() -> Weight;
 	fn claim() -> Weight;
 	fn cancel_all_vesting_schedules() -> Weight;
+	fn bridge_all_vesting_schedules() -> Weight;
 	fn renounce() -> Weight;
 }
 
@@ -99,6 +100,13 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: `Vesting::CounterForVestingSchedules` (r:1 w:1)
 	// Proof: `Vesting::CounterForVestingSchedules` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	fn cancel_all_vesting_schedules() -> Weight {
+		// Minimum execution time: 133_520 nanoseconds.
+		Weight::from_parts(137_240_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(8_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
+	// TODO redo benchmarking
+	fn bridge_all_vesting_schedules() -> Weight {
 		// Minimum execution time: 133_520 nanoseconds.
 		Weight::from_parts(137_240_000_u64, 0)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
@@ -161,6 +169,12 @@ impl WeightInfo for () {
 	// Proof: `Vesting::CounterForVestingSchedules` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	fn cancel_all_vesting_schedules() -> Weight {
 		// Minimum execution time: 133_520 nanoseconds.
+		Weight::from_parts(137_240_000_u64, 0)
+			.saturating_add(RocksDbWeight::get().reads(8_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
+	// TODO redo benchmarking
+	fn bridge_all_vesting_schedules() -> Weight {
 		Weight::from_parts(137_240_000_u64, 0)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
