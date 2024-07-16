@@ -398,14 +398,14 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Abstract([0_u8; 32]),
+			id: [0_u8; 32].into(),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Abstract([0_u8; 32]),
+			id: [0_u8; 32].into(),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};
 		let asset_type = AssetTypes::from(&asset);
