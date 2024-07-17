@@ -215,6 +215,8 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Initiate a bridge transfer of all vested funds to the given `eth_address` on the given `chain_id`.
+		/// This process will need to be completed by the bridge oracles.
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::bridge_all_vesting_schedules())]
 		pub fn bridge_all_vesting_schedules(
@@ -225,6 +227,12 @@ pub mod pallet {
 			let from = ensure_signed(origin)?;
 
 			let locked_amount_left = Self::do_claim(&from);
+			if locked_amount_left.is_zero() {
+				<VestingSchedules<T>>::remove(from);
+				Self::deposit_event(Event::NoVestedFundsToBridgeAfterClaim);
+				return Ok(().into());
+			}
+
 			let free_balance = T::Currency::free_balance(&from);
 			let bridgeable_funds = locked_amount_left.min(free_balance);
 
@@ -238,9 +246,8 @@ pub mod pallet {
 			.map_err(|_| Error::<T>::FailedToSettleBridge)?;
 
 			let grants = <VestingSchedules<T>>::take(&from);
-			<VestingSchedules<T>>::remove(from);
 
-			Self::deposit_event(Event::Bridge {
+			Self::deposit_event(Event::BridgeInitiated {
 				to: eth_address,
 				chain_id,
 				amount: bridgeable_funds,
@@ -262,12 +269,17 @@ pub mod pallet {
 		VestingSchedulesCanceled(T::AccountId),
 		/// Renounced rights to cancel grant for the given account id \[who\]
 		Renounced(T::AccountId),
-		Bridge {
+		/// Initiated a bridge transfer of all vested funds \[to, chain_id, amount, grants\]
+		/// The field amount is crucial for the bridge because it shows the total entitlement of the user on the other side of the bridge.
+		BridgeInitiated {
 			to: [u8; 20],
 			chain_id: u64,
 			amount: BalanceOf<T>,
 			grants: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 		},
+		/// Bridge was initiated and successfully completed one sidedly because
+		/// there were no vested funds to bridge after claiming free tokens for the user.
+		NoVestedFundsToBridgeAfterClaim,
 	}
 
 	#[pallet::error]
