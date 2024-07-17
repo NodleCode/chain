@@ -105,12 +105,23 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(5_u64))
 	}
-	// TODO redo benchmarking
+	// Storage: `ParachainSystem::ValidationData` (r:1 w:0)
+	// Proof: `ParachainSystem::ValidationData` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	// Storage: `Vesting::VestingSchedules` (r:1 w:1)
+	// Proof: `Vesting::VestingSchedules` (`max_values`: None, `max_size`: Some(2850), added: 5325, mode: `MaxEncodedLen`)
+	// Storage: `Balances::Locks` (r:1 w:1)
+	// Proof: `Balances::Locks` (`max_values`: None, `max_size`: Some(1299), added: 3774, mode: `MaxEncodedLen`)
+	// Storage: `Balances::Freezes` (r:1 w:0)
+	// Proof: `Balances::Freezes` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
+	// Storage: `System::Account` (r:1 w:1)
+	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
+	// Storage: `Vesting::CounterForVestingSchedules` (r:1 w:1)
+	// Proof: `Vesting::CounterForVestingSchedules` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	fn bridge_all_vesting_schedules() -> Weight {
-		// Minimum execution time: 133_520 nanoseconds.
-		Weight::from_parts(137_240_000_u64, 0)
-			.saturating_add(T::DbWeight::get().reads(8_u64))
-			.saturating_add(T::DbWeight::get().writes(5_u64))
+		// Minimum execution time: 75_000 nanoseconds.
+		Weight::from_parts(78_000_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	// Storage: `Vesting::Renounced` (r:0 w:1)
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
@@ -173,11 +184,23 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(5_u64))
 	}
-	// TODO redo benchmarking
+	// Storage: `ParachainSystem::ValidationData` (r:1 w:0)
+	// Proof: `ParachainSystem::ValidationData` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	// Storage: `Vesting::VestingSchedules` (r:1 w:1)
+	// Proof: `Vesting::VestingSchedules` (`max_values`: None, `max_size`: Some(2850), added: 5325, mode: `MaxEncodedLen`)
+	// Storage: `Balances::Locks` (r:1 w:1)
+	// Proof: `Balances::Locks` (`max_values`: None, `max_size`: Some(1299), added: 3774, mode: `MaxEncodedLen`)
+	// Storage: `Balances::Freezes` (r:1 w:0)
+	// Proof: `Balances::Freezes` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
+	// Storage: `System::Account` (r:1 w:1)
+	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
+	// Storage: `Vesting::CounterForVestingSchedules` (r:1 w:1)
+	// Proof: `Vesting::CounterForVestingSchedules` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	fn bridge_all_vesting_schedules() -> Weight {
-		Weight::from_parts(137_240_000_u64, 0)
-			.saturating_add(RocksDbWeight::get().reads(8_u64))
-			.saturating_add(RocksDbWeight::get().writes(5_u64))
+		// Minimum execution time: 75_000 nanoseconds.
+		Weight::from_parts(78_000_000_u64, 0)
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
 	// Storage: `Vesting::Renounced` (r:0 w:1)
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
