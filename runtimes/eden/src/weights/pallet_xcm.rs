@@ -241,4 +241,8 @@ impl<T: frame_system::Config> pallet_xcm::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
+	
+	fn claim_assets() -> Weight {
+			Weight::zero()
+		}
 }

@@ -105,25 +105,6 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
 	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
 	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalMembership::Prime` (r:1 w:0)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 50]`.
-	fn reset_member(m: u32, ) -> Weight {
-		// Minimum execution time: 18_420 nanoseconds.
-		Weight::from_parts(20_145_611_u64, 0)
-			// Standard Error: 1_655
-			.saturating_add(Weight::from_parts(181_545_u64, 0).saturating_mul(m as u64))
-			.saturating_add(T::DbWeight::get().reads(3_u64))
-			.saturating_add(T::DbWeight::get().writes(3_u64))
-	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	// Storage: `TechnicalMembership::Prime` (r:1 w:1)
 	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
 	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
@@ -166,4 +147,8 @@ impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
 			.saturating_add(Weight::from_parts(861_u64, 0).saturating_mul(m as u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
+	
+	fn reset_members(m: u32, ) -> Weight {
+			Weight::zero()
+		}
 }
