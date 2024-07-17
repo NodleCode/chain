@@ -300,25 +300,25 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
-	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
-	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
-	// Storage: `Contracts::CodeInfoOf` (r:1 w:1)
-	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
-	// Storage: `Balances::Holds` (r:1 w:1)
-	// Proof: `Balances::Holds` (`max_values`: None, `max_size`: Some(85), added: 2560, mode: `Measured`)
-	// Storage: `System::EventTopics` (r:1 w:1)
-	// Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	// Storage: `Contracts::PristineCode` (r:0 w:1)
-	// Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
-	/// The range of component `c` is `[0, 125952]`.
-	fn upload_code(c: u32, ) -> Weight {
-		// Minimum execution time: 456_750 nanoseconds.
-		Weight::from_parts(465_734_530_u64, 0)
-			// Standard Error: 74
-			.saturating_add(Weight::from_parts(82_642_u64, 0).saturating_mul(c as u64))
-			.saturating_add(T::DbWeight::get().reads(4_u64))
-			.saturating_add(T::DbWeight::get().writes(4_u64))
-	}
+	// // Storage: `Contracts::MigrationInProgress` (r:1 w:0)
+	// // Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
+	// // Storage: `Contracts::CodeInfoOf` (r:1 w:1)
+	// // Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
+	// // Storage: `Balances::Holds` (r:1 w:1)
+	// // Proof: `Balances::Holds` (`max_values`: None, `max_size`: Some(85), added: 2560, mode: `Measured`)
+	// // Storage: `System::EventTopics` (r:1 w:1)
+	// // Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// // Storage: `Contracts::PristineCode` (r:0 w:1)
+	// // Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
+	// /// The range of component `c` is `[0, 125952]`.
+	// fn upload_code(c: u32, ) -> Weight {
+	// 	// Minimum execution time: 456_750 nanoseconds.
+	// 	Weight::from_parts(465_734_530_u64, 0)
+	// 		// Standard Error: 74
+	// 		.saturating_add(Weight::from_parts(82_642_u64, 0).saturating_mul(c as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(4_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(4_u64))
+	// }
 	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
 	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
 	// Storage: `Contracts::CodeInfoOf` (r:1 w:1)
@@ -696,29 +696,30 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
-	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
-	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
-	// Storage: `System::Account` (r:1 w:0)
-	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
-	// Storage: `Contracts::ContractInfoOf` (r:1 w:1)
-	// Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
-	// Storage: `Contracts::CodeInfoOf` (r:1 w:0)
-	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
-	// Storage: `Contracts::PristineCode` (r:1 w:0)
-	// Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
-	// Storage: `Timestamp::Now` (r:1 w:0)
-	// Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
-	// Storage: `System::EventTopics` (r:2 w:2)
-	// Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `n` is `[0, 1048576]`.
-	fn seal_input_per_byte(n: u32, ) -> Weight {
-		// Minimum execution time: 434_350 nanoseconds.
-		Weight::from_parts(443_271_501_u64, 0)
-			// Standard Error: 0
-			.saturating_add(Weight::from_parts(658_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(8_u64))
-			.saturating_add(T::DbWeight::get().writes(3_u64))
-	}
+	// // Storage: `Contracts::MigrationInProgress` (r:1 w:0)
+	// // Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
+	// // Storage: `System::Account` (r:1 w:0)
+	// // Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
+	// // Storage: `Contracts::ContractInfoOf` (r:1 w:1)
+	// // Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
+	// // Storage: `Contracts::CodeInfoOf` (r:1 w:0)
+	// // Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
+	// // Storage: `Contracts::PristineCode` (r:1 w:0)
+	// // Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
+	// // Storage: `Timestamp::Now` (r:1 w:0)
+	// // Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
+	// // Storage: `System::EventTopics` (r:2 w:2)
+	// // Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `n` is `[0, 1048576]`.
+	// fn seal_input_per_byte(n: u32, ) -> Weight {
+	// 	// Minimum execution time: 434_350 nanoseconds.
+	// 	Weight::from_parts(443_271_501_u64, 0)
+	// 		// Standard Error: 0
+	// 		.saturating_add(Weight::from_parts(658_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(8_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(3_u64))
+	// }
+
 	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
 	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
 	// Storage: `System::Account` (r:1 w:0)
@@ -742,29 +743,29 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
-	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
-	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
-	// Storage: `System::Account` (r:1 w:0)
-	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
-	// Storage: `Contracts::ContractInfoOf` (r:1 w:1)
-	// Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
-	// Storage: `Contracts::CodeInfoOf` (r:1 w:0)
-	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
-	// Storage: `Contracts::PristineCode` (r:1 w:0)
-	// Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
-	// Storage: `Timestamp::Now` (r:1 w:0)
-	// Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
-	// Storage: `System::EventTopics` (r:2 w:2)
-	// Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `n` is `[0, 1048576]`.
-	fn seal_return_per_byte(n: u32, ) -> Weight {
-		// Minimum execution time: 433_630 nanoseconds.
-		Weight::from_parts(436_719_768_u64, 0)
-			// Standard Error: 0
-			.saturating_add(Weight::from_parts(437_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(8_u64))
-			.saturating_add(T::DbWeight::get().writes(3_u64))
-	}
+	// // Storage: `Contracts::MigrationInProgress` (r:1 w:0)
+	// // Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
+	// // Storage: `System::Account` (r:1 w:0)
+	// // Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
+	// // Storage: `Contracts::ContractInfoOf` (r:1 w:1)
+	// // Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
+	// // Storage: `Contracts::CodeInfoOf` (r:1 w:0)
+	// // Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
+	// // Storage: `Contracts::PristineCode` (r:1 w:0)
+	// // Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
+	// // Storage: `Timestamp::Now` (r:1 w:0)
+	// // Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
+	// // Storage: `System::EventTopics` (r:2 w:2)
+	// // Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `n` is `[0, 1048576]`.
+	// fn seal_return_per_byte(n: u32, ) -> Weight {
+	// 	// Minimum execution time: 433_630 nanoseconds.
+	// 	Weight::from_parts(436_719_768_u64, 0)
+	// 		// Standard Error: 0
+	// 		.saturating_add(Weight::from_parts(437_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(8_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(3_u64))
+	// }
 	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
 	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
 	// Storage: `System::Account` (r:3 w:3)
@@ -844,34 +845,34 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
-	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
-	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
-	// Storage: `System::Account` (r:1 w:0)
-	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
-	// Storage: `Contracts::ContractInfoOf` (r:1 w:1)
-	// Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
-	// Storage: `Contracts::CodeInfoOf` (r:1 w:0)
-	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
-	// Storage: `Contracts::PristineCode` (r:1 w:0)
-	// Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
-	// Storage: `Timestamp::Now` (r:1 w:0)
-	// Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
-	// Storage: `System::EventTopics` (r:6 w:6)
-	// Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `t` is `[0, 4]`.
-	/// The range of component `n` is `[0, 16384]`.
-	fn seal_deposit_event_per_topic_and_byte(t: u32, n: u32, ) -> Weight {
-		// Minimum execution time: 452_120 nanoseconds.
-		Weight::from_parts(447_353_888_u64, 0)
-			// Standard Error: 51_265
-			.saturating_add(Weight::from_parts(3_905_926_u64, 0).saturating_mul(t as u64))
-			// Standard Error: 14
-			.saturating_add(Weight::from_parts(804_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(8_u64))
-			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(t as u64)))
-			.saturating_add(T::DbWeight::get().writes(3_u64))
-			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(t as u64)))
-	}
+	// // Storage: `Contracts::MigrationInProgress` (r:1 w:0)
+	// // Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
+	// // Storage: `System::Account` (r:1 w:0)
+	// // Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `Measured`)
+	// // Storage: `Contracts::ContractInfoOf` (r:1 w:1)
+	// // Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `Measured`)
+	// // Storage: `Contracts::CodeInfoOf` (r:1 w:0)
+	// // Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `Measured`)
+	// // Storage: `Contracts::PristineCode` (r:1 w:0)
+	// // Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `Measured`)
+	// // Storage: `Timestamp::Now` (r:1 w:0)
+	// // Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `Measured`)
+	// // Storage: `System::EventTopics` (r:6 w:6)
+	// // Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `t` is `[0, 4]`.
+	// /// The range of component `n` is `[0, 16384]`.
+	// fn seal_deposit_event_per_topic_and_byte(t: u32, n: u32, ) -> Weight {
+	// 	// Minimum execution time: 452_120 nanoseconds.
+	// 	Weight::from_parts(447_353_888_u64, 0)
+	// 		// Standard Error: 51_265
+	// 		.saturating_add(Weight::from_parts(3_905_926_u64, 0).saturating_mul(t as u64))
+	// 		// Standard Error: 14
+	// 		.saturating_add(Weight::from_parts(804_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(8_u64))
+	// 		.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(t as u64)))
+	// 		.saturating_add(T::DbWeight::get().writes(3_u64))
+	// 		.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(t as u64)))
+	// }
 	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
 	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `Measured`)
 	// Storage: `System::Account` (r:1 w:0)
@@ -895,29 +896,29 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
-	// Storage: `Contracts::MigrationInProgress` (r:1 w:0)
-	// Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `MaxEncodedLen`)
-	// Storage: `System::Account` (r:1 w:0)
-	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
-	// Storage: `Contracts::ContractInfoOf` (r:1 w:1)
-	// Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `MaxEncodedLen`)
-	// Storage: `Contracts::CodeInfoOf` (r:1 w:0)
-	// Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `MaxEncodedLen`)
-	// Storage: `Contracts::PristineCode` (r:1 w:0)
-	// Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `MaxEncodedLen`)
-	// Storage: `Timestamp::Now` (r:1 w:0)
-	// Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `MaxEncodedLen`)
-	// Storage: `System::EventTopics` (r:2 w:2)
-	// Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `i` is `[0, 1048576]`.
-	fn seal_debug_message_per_byte(i: u32, ) -> Weight {
-		// Minimum execution time: 586_300 nanoseconds.
-		Weight::from_parts(600_948_977_u64, 0)
-			// Standard Error: 0
-			.saturating_add(Weight::from_parts(1_015_u64, 0).saturating_mul(i as u64))
-			.saturating_add(T::DbWeight::get().reads(8_u64))
-			.saturating_add(T::DbWeight::get().writes(3_u64))
-	}
+	// // Storage: `Contracts::MigrationInProgress` (r:1 w:0)
+	// // Proof: `Contracts::MigrationInProgress` (`max_values`: Some(1), `max_size`: Some(1026), added: 1521, mode: `MaxEncodedLen`)
+	// // Storage: `System::Account` (r:1 w:0)
+	// // Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
+	// // Storage: `Contracts::ContractInfoOf` (r:1 w:1)
+	// // Proof: `Contracts::ContractInfoOf` (`max_values`: None, `max_size`: Some(1795), added: 4270, mode: `MaxEncodedLen`)
+	// // Storage: `Contracts::CodeInfoOf` (r:1 w:0)
+	// // Proof: `Contracts::CodeInfoOf` (`max_values`: None, `max_size`: Some(93), added: 2568, mode: `MaxEncodedLen`)
+	// // Storage: `Contracts::PristineCode` (r:1 w:0)
+	// // Proof: `Contracts::PristineCode` (`max_values`: None, `max_size`: Some(125988), added: 128463, mode: `MaxEncodedLen`)
+	// // Storage: `Timestamp::Now` (r:1 w:0)
+	// // Proof: `Timestamp::Now` (`max_values`: Some(1), `max_size`: Some(8), added: 503, mode: `MaxEncodedLen`)
+	// // Storage: `System::EventTopics` (r:2 w:2)
+	// // Proof: `System::EventTopics` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `i` is `[0, 1048576]`.
+	// fn seal_debug_message_per_byte(i: u32, ) -> Weight {
+	// 	// Minimum execution time: 586_300 nanoseconds.
+	// 	Weight::from_parts(600_948_977_u64, 0)
+	// 		// Standard Error: 0
+	// 		.saturating_add(Weight::from_parts(1_015_u64, 0).saturating_mul(i as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(8_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(3_u64))
+	// }
 	// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `r` is `[0, 800]`.
@@ -931,28 +932,28 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(r as u64)))
 	}
-	// Storage: `Skipped::Metadata` (r:0 w:0)
-	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `n` is `[0, 16384]`.
-	fn seal_set_storage_per_new_byte(n: u32, ) -> Weight {
-		// Minimum execution time: 458_260 nanoseconds.
-		Weight::from_parts(525_914_961_u64, 0)
-			// Standard Error: 89
-			.saturating_add(Weight::from_parts(883_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(12_u64))
-			.saturating_add(T::DbWeight::get().writes(8_u64))
-	}
-	// Storage: `Skipped::Metadata` (r:0 w:0)
-	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `n` is `[0, 16384]`.
-	fn seal_set_storage_per_old_byte(n: u32, ) -> Weight {
-		// Minimum execution time: 457_990 nanoseconds.
-		Weight::from_parts(465_844_430_u64, 0)
-			// Standard Error: 23
-			.saturating_add(Weight::from_parts(321_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(9_u64))
-			.saturating_add(T::DbWeight::get().writes(4_u64))
-	}
+	// // Storage: `Skipped::Metadata` (r:0 w:0)
+	// // Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `n` is `[0, 16384]`.
+	// fn seal_set_storage_per_new_byte(n: u32, ) -> Weight {
+	// 	// Minimum execution time: 458_260 nanoseconds.
+	// 	Weight::from_parts(525_914_961_u64, 0)
+	// 		// Standard Error: 89
+	// 		.saturating_add(Weight::from_parts(883_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(12_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(8_u64))
+	// }
+	// // Storage: `Skipped::Metadata` (r:0 w:0)
+	// // Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `n` is `[0, 16384]`.
+	// fn seal_set_storage_per_old_byte(n: u32, ) -> Weight {
+	// 	// Minimum execution time: 457_990 nanoseconds.
+	// 	Weight::from_parts(465_844_430_u64, 0)
+	// 		// Standard Error: 23
+	// 		.saturating_add(Weight::from_parts(321_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(9_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(4_u64))
+	// }
 	// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `r` is `[0, 800]`.
@@ -966,17 +967,17 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(r as u64)))
 	}
-	// Storage: `Skipped::Metadata` (r:0 w:0)
-	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// The range of component `n` is `[0, 16384]`.
-	fn seal_clear_storage_per_byte(n: u32, ) -> Weight {
-		// Minimum execution time: 455_520 nanoseconds.
-		Weight::from_parts(464_827_054_u64, 0)
-			// Standard Error: 20
-			.saturating_add(Weight::from_parts(316_u64, 0).saturating_mul(n as u64))
-			.saturating_add(T::DbWeight::get().reads(9_u64))
-			.saturating_add(T::DbWeight::get().writes(4_u64))
-	}
+	// // Storage: `Skipped::Metadata` (r:0 w:0)
+	// // Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	// /// The range of component `n` is `[0, 16384]`.
+	// fn seal_clear_storage_per_byte(n: u32, ) -> Weight {
+	// 	// Minimum execution time: 455_520 nanoseconds.
+	// 	Weight::from_parts(464_827_054_u64, 0)
+	// 		// Standard Error: 20
+	// 		.saturating_add(Weight::from_parts(316_u64, 0).saturating_mul(n as u64))
+	// 		.saturating_add(T::DbWeight::get().reads(9_u64))
+	// 		.saturating_add(T::DbWeight::get().writes(4_u64))
+	// }
 	// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	/// The range of component `r` is `[0, 800]`.
@@ -1637,7 +1638,7 @@ impl<T: frame_system::Config> pallet_contracts::weights::WeightInfo for WeightIn
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	/// The range of component `r` is `[0, 5000]`.
-	fn instr_i64const(r: u32, ) -> Weight {
+	fn instr_i64_load_store(r: u32, ) -> Weight {
 		// Minimum execution time: 3_150 nanoseconds.
 		Weight::from_parts(4_462_162_u64, 0)
 			// Standard Error: 14
