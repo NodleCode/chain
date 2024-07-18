@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["add_vesting_schedule","cancel_all_vesting_schedules","claim","renounce"]};
+window.SIDEBAR_ITEMS = {"fn":["add_vesting_schedule","bridge_all_vesting_schedules","cancel_all_vesting_schedules","claim","remove_bridge","renounce","set_bridge"]};
