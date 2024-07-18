@@ -34,7 +34,7 @@ use frame_support::{
 	BoundedVec,
 };
 use sp_runtime::{
-	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
+	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, ConstU32, Saturating, StaticLookup, Zero},
 	DispatchResult, RuntimeDebug,
 };
 use sp_std::{
@@ -77,6 +77,19 @@ pub struct VestingSchedule<BlockNumber, Balance> {
 	pub per_period: Balance,
 }
 
+const BRIDGE_NAME_MAX_LENGTH: u32 = 32;
+
+// A unique identifier for a bridge between parachain and a remote ethereum based chain/rollup.
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo)]
+pub struct BridgeId(u32);
+
+// Details of a bridge between parachain and a remote ethereum based chain/rollup.
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo)]
+pub struct BridgeDetails {
+	chain_id: u64,
+	name: BoundedVec<u8, ConstU32<BRIDGE_NAME_MAX_LENGTH>>,
+}
+
 impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSchedule<BlockNumber, Balance> {
 	/// Returns the end of all periods, `None` if calculation overflows.
 	pub fn end(&self) -> Option<BlockNumber> {
@@ -109,7 +122,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, *};
+	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, OptionQuery, *};
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -214,6 +227,90 @@ pub mod pallet {
 
 			Ok(().into())
 		}
+
+		/// Initiate a bridge transfer of all vested funds to the given `eth_address` on the given `chain_id`.
+		/// This process will need to be completed by the bridge oracles.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::bridge_all_vesting_schedules())]
+		pub fn bridge_all_vesting_schedules(
+			origin: OriginFor<T>,
+			eth_address: [u8; 20],
+			bridge_id: u32,
+		) -> DispatchResultWithPostInfo {
+			let from = ensure_signed(origin)?;
+			ensure!(
+				Bridges::<T>::contains_key(&BridgeId(bridge_id)),
+				Error::<T>::BridgeNotFound
+			);
+
+			let locked_amount_left = Self::do_claim(&from);
+			if locked_amount_left.is_zero() {
+				<VestingSchedules<T>>::remove(from);
+				Self::deposit_event(Event::NoVestedFundsToBridgeAfterClaim);
+				return Ok(().into());
+			}
+
+			let free_balance = T::Currency::free_balance(&from);
+			let bridgeable_funds = locked_amount_left.min(free_balance);
+
+			T::Currency::remove_lock(VESTING_LOCK_ID, &from);
+			T::Currency::settle(
+				&from,
+				T::Currency::burn(bridgeable_funds),
+				WithdrawReasons::RESERVE,
+				ExistenceRequirement::AllowDeath,
+			)
+			.map_err(|_| Error::<T>::FailedToSettleBridge)?;
+
+			let grants = <VestingSchedules<T>>::take(&from);
+
+			Self::deposit_event(Event::BridgeInitiated {
+				to: eth_address,
+				bridge_id,
+				amount: bridgeable_funds,
+				grants,
+			});
+
+			Ok(().into())
+		}
+
+		/// Allow governance to indicate a bridge is setup between the parachain and a remote chain.
+		#[pallet::call_index(5)]
+		#[pallet::weight(T::WeightInfo::set_bridge())]
+		pub fn set_bridge(
+			origin: OriginFor<T>,
+			bridge_id: u32,
+			bridge_name: Vec<u8>,
+			remote_chain_id: u64,
+		) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			let id = BridgeId(bridge_id);
+			ensure!(!Bridges::<T>::contains_key(&id), Error::<T>::BridgeAlreadyExists);
+
+			let details = BridgeDetails {
+				chain_id: remote_chain_id,
+				name: bridge_name.try_into().map_err(|_| Error::<T>::BridgeNameTooLong)?,
+			};
+
+			Bridges::<T>::insert(id, details);
+
+			Ok(().into())
+		}
+
+		/// Remove a bridge from the list of active bridges.
+		#[pallet::call_index(6)]
+		#[pallet::weight(T::WeightInfo::remove_bridge())]
+		pub fn remove_bridge(origin: OriginFor<T>, bridge_id: u32) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			let id = BridgeId(bridge_id);
+			ensure!(Bridges::<T>::contains_key(&id), Error::<T>::BridgeNotFound);
+
+			Bridges::<T>::remove(&id);
+
+			Ok(().into())
+		}
 	}
 
 	#[pallet::event]
@@ -227,6 +324,17 @@ pub mod pallet {
 		VestingSchedulesCanceled(T::AccountId),
 		/// Renounced rights to cancel grant for the given account id \[who\]
 		Renounced(T::AccountId),
+		/// Initiated a bridge transfer of all vested funds \[to, chain_id, amount, grants\]
+		/// The field amount is crucial for the bridge because it shows the total entitlement of the user on the other side of the bridge.
+		BridgeInitiated {
+			to: [u8; 20],
+			bridge_id: u32,
+			amount: BalanceOf<T>,
+			grants: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
+		},
+		/// Bridge was initiated and successfully completed one sidedly because
+		/// there were no vested funds to bridge after claiming free tokens for the user.
+		NoVestedFundsToBridgeAfterClaim,
 	}
 
 	#[pallet::error]
@@ -239,6 +347,10 @@ pub mod pallet {
 		VestingToSelf,
 		MaxScheduleOverflow,
 		Renounced,
+		FailedToSettleBridge,
+		BridgeAlreadyExists,
+		BridgeNotFound,
+		BridgeNameTooLong,
 	}
 
 	#[pallet::storage]
@@ -254,6 +366,10 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn renounced)]
 	pub type Renounced<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn bridges)]
+	pub type Bridges<T: Config> = StorageMap<_, Blake2_128Concat, BridgeId, BridgeDetails, OptionQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
