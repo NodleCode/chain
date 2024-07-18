@@ -512,6 +512,48 @@ fn set_bridge_fails_if_bridge_already_exists() {
 }
 
 #[test]
+fn set_bridge_fails_if_name_too_long() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"somereallylonglonglongnnnnnnnnameeee";
+		let remote_chain_id = 9924;
+		assert_err!(
+			Vesting::set_bridge(RuntimeOrigin::root(), bridge_id, bridge_name.into(), remote_chain_id),
+			Error::<Runtime>::BridgeNameTooLong
+		);
+	});
+}
+
+#[test]
+fn set_bridge_fails_if_non_root() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_err!(
+			Vesting::set_bridge(
+				RuntimeOrigin::signed(ALICE::get()),
+				bridge_id,
+				bridge_name.into(),
+				remote_chain_id
+			),
+			BadOrigin
+		);
+	});
+}
+
+#[test]
+fn remove_bridge_fails_if_non_root() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		assert_err!(
+			Vesting::remove_bridge(RuntimeOrigin::signed(ALICE::get()), bridge_id),
+			BadOrigin
+		);
+	});
+}
+
+#[test]
 fn remove_bridge_works() {
 	ExtBuilder::default().build().execute_with(|| {
 		let bridge_id = 1;
