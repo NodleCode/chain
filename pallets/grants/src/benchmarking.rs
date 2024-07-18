@@ -101,12 +101,29 @@ benchmarks! {
 
 	bridge_all_vesting_schedules {
 		let config = create_shared_config::<T>(1);
+		let bridge_name = b"zklocal";
+		let bridge_id = 1;
+		let remote_chain_id = 9924;
+		Pallet::<T>::set_bridge(RawOrigin::Root.into(), bridge_id, bridge_name.to_vec(), remote_chain_id)?;
 
 		 for _x in 1 .. T::MaxSchedule::get() {
 			 Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 		 }
 
-	 }: _(RawOrigin::Signed(config.grantee.clone()), hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"), 300)
+	 }: _(RawOrigin::Signed(config.grantee.clone()), hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"), bridge_id)
+
+	 set_bridge {
+		let bridge_name = b"bridge_between_eden_zks_main_era";
+		let bridge_id = 1;
+		let remote_chain_id = 300;
+	}: _(RawOrigin::Root, bridge_id, bridge_name.to_vec(), remote_chain_id)
+
+	remove_bridge {
+		let bridge_name = b"bridge_between_eden_zks_main_era";
+		let bridge_id = 1;
+		let remote_chain_id = 300;
+		Pallet::<T>::set_bridge(RawOrigin::Root.into(), bridge_id, bridge_name.to_vec(), remote_chain_id)?;
+	}: _(RawOrigin::Root, bridge_id)
 
 	 renounce {
 		let config = create_shared_config::<T>(1);

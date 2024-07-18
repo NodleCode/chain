@@ -34,7 +34,7 @@ use frame_support::{
 	BoundedVec,
 };
 use sp_runtime::{
-	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
+	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, ConstU32, Saturating, StaticLookup, Zero},
 	DispatchResult, RuntimeDebug,
 };
 use sp_std::{
@@ -77,6 +77,19 @@ pub struct VestingSchedule<BlockNumber, Balance> {
 	pub per_period: Balance,
 }
 
+const BRIDGE_NAME_MAX_LENGTH: u32 = 32;
+
+// A unique identifier for a bridge between parachain and a remote ethereum based chain/rollup.
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo)]
+pub struct BridgeId(u32);
+
+// Details of a bridge between parachain and a remote ethereum based chain/rollup.
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo)]
+pub struct BridgeDetails {
+	chain_id: u64,
+	name: BoundedVec<u8, ConstU32<BRIDGE_NAME_MAX_LENGTH>>,
+}
+
 impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSchedule<BlockNumber, Balance> {
 	/// Returns the end of all periods, `None` if calculation overflows.
 	pub fn end(&self) -> Option<BlockNumber> {
@@ -109,7 +122,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, *};
+	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, OptionQuery, *};
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -222,10 +235,15 @@ pub mod pallet {
 		pub fn bridge_all_vesting_schedules(
 			origin: OriginFor<T>,
 			eth_address: [u8; 20],
-			chain_id: u64,
+			bridge_id: u32,
 		) -> DispatchResultWithPostInfo {
 			let from = ensure_signed(origin)?;
+			ensure!(
+				Bridges::<T>::contains_key(&BridgeId(bridge_id)),
+				Error::<T>::BridgeNotFound
+			);
 
+			ensure!(!Self::renounced(from.clone()), Error::<T>::Renounced);
 			let locked_amount_left = Self::do_claim(&from);
 			if locked_amount_left.is_zero() {
 				<VestingSchedules<T>>::remove(from);
@@ -249,10 +267,48 @@ pub mod pallet {
 
 			Self::deposit_event(Event::BridgeInitiated {
 				to: eth_address,
-				chain_id,
+				bridge_id,
 				amount: bridgeable_funds,
 				grants,
 			});
+
+			Ok(().into())
+		}
+
+		/// Allow governance to indicate a bridge is setup between the parachain and a remote chain.
+		#[pallet::call_index(5)]
+		#[pallet::weight(T::WeightInfo::set_bridge())]
+		pub fn set_bridge(
+			origin: OriginFor<T>,
+			bridge_id: u32,
+			bridge_name: Vec<u8>,
+			remote_chain_id: u64,
+		) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			let id = BridgeId(bridge_id);
+			ensure!(!Bridges::<T>::contains_key(&id), Error::<T>::BridgeAlreadyExists);
+
+			let details = BridgeDetails {
+				chain_id: remote_chain_id,
+				name: bridge_name.try_into().map_err(|_| Error::<T>::BridgeNameTooLong)?,
+			};
+
+			Bridges::<T>::insert(id, details);
+
+			Ok(().into())
+		}
+
+		/// Remove a bridge from the list of active bridges.
+		#[pallet::call_index(6)]
+		#[pallet::weight(T::WeightInfo::remove_bridge())]
+		pub fn remove_bridge(origin: OriginFor<T>, bridge_id: u32) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+
+			let id = BridgeId(bridge_id);
+			ensure!(Bridges::<T>::contains_key(&id), Error::<T>::BridgeNotFound);
+
+			Bridges::<T>::remove(&id);
 
 			Ok(().into())
 		}
@@ -273,7 +329,7 @@ pub mod pallet {
 		/// The field amount is crucial for the bridge because it shows the total entitlement of the user on the other side of the bridge.
 		BridgeInitiated {
 			to: [u8; 20],
-			chain_id: u64,
+			bridge_id: u32,
 			amount: BalanceOf<T>,
 			grants: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 		},
@@ -293,6 +349,9 @@ pub mod pallet {
 		MaxScheduleOverflow,
 		Renounced,
 		FailedToSettleBridge,
+		BridgeAlreadyExists,
+		BridgeNotFound,
+		BridgeNameTooLong,
 	}
 
 	#[pallet::storage]
@@ -308,6 +367,10 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn renounced)]
 	pub type Renounced<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn bridges)]
+	pub type Bridges<T: Config> = StorageMap<_, Blake2_128Concat, BridgeId, BridgeDetails, OptionQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;

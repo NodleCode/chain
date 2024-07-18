@@ -116,6 +116,22 @@ impl<T: frame_system::Config> pallet_grants::WeightInfo for WeightInfo<T> {
 			.saturating_add(T::DbWeight::get().reads(6_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
+		// Storage: `Vesting::Bridges` (r:1 w:1)
+	// Proof: `Vesting::Bridges` (`max_values`: None, `max_size`: Some(61), added: 2536, mode: `MaxEncodedLen`)
+	fn set_bridge() -> Weight {
+		// Minimum execution time: 7_000 nanoseconds.
+		Weight::from_parts(7_000_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	// Storage: `Vesting::Bridges` (r:1 w:1)
+	// Proof: `Vesting::Bridges` (`max_values`: None, `max_size`: Some(61), added: 2536, mode: `MaxEncodedLen`)
+	fn remove_bridge() -> Weight {
+		// Minimum execution time: 8_000 nanoseconds.
+		Weight::from_parts(9_000_000_u64, 0)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 	// Storage: `Vesting::Renounced` (r:0 w:1)
 	// Proof: `Vesting::Renounced` (`max_values`: None, `max_size`: Some(49), added: 2524, mode: `MaxEncodedLen`)
 	fn renounce() -> Weight {
