@@ -243,7 +243,6 @@ pub mod pallet {
 				Error::<T>::BridgeNotFound
 			);
 
-			ensure!(!Self::renounced(from.clone()), Error::<T>::Renounced);
 			let locked_amount_left = Self::do_claim(&from);
 			if locked_amount_left.is_zero() {
 				<VestingSchedules<T>>::remove(from);

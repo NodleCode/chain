@@ -493,6 +493,46 @@ fn bridge_all_vesting_schedules_completes_one_sidedly_when_no_grants_after_claim
 }
 
 #[test]
+fn bridge_all_vesting_schedules_works_for_renounced_account() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 1u32,
+			per_period: 100u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert_ok!(Vesting::renounce(
+			RuntimeOrigin::signed(CancelOrigin::get()),
+			BOB::get()
+		));
+
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert_eq!(PalletBalances::usable_balance(BOB::get()), 100);
+	});
+}
+
+#[test]
 fn set_bridge_fails_if_bridge_already_exists() {
 	ExtBuilder::default().build().execute_with(|| {
 		let bridge_id = 1;
