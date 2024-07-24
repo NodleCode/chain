@@ -27,7 +27,6 @@ use frame_support::{match_types, parameter_types};
 use parachains_common::message_queue::NarrowOriginToSibling;
 use sp_runtime::Perbill;
 use xcm::latest::prelude::*;
-use xcm::v3::MultiLocation;
 
 parameter_types! {
 	pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
@@ -56,6 +55,7 @@ impl pallet_message_queue::Config for Runtime {
 	type HeapSize = sp_core::ConstU32<{ 64 * 1024 }>;
 	type MaxStale = sp_core::ConstU32<8>;
 	type ServiceWeight = MessageQueueServiceWeight;
+	type IdleMaxServiceWeight = MessageQueueIdleServeiceWeight;
 }
 
 parameter_types! {
@@ -73,6 +73,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
 	type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
 	type WeightInfo = crate::weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
+	type ConsensusHook = ();
 }
 
 impl parachain_info::Config for Runtime {}

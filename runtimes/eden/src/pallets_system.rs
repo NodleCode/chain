@@ -73,7 +73,7 @@ impl frame_system::Config for Runtime {
 	type Nonce = Nonce;
 	type Block = crate::Block;
 	type RuntimeTask = RuntimeTask;
-	
+
 	type SingleBlockMigrations = ();
 	type MultiBlockMigrator = ();
 	type PreInherents = ();
