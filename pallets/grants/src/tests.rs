@@ -22,6 +22,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
+use hex_literal::hex;
 use mock::{
 	context_events, CancelOrigin, ExtBuilder, PalletBalances, RuntimeEvent as TestEvent, RuntimeOrigin, System,
 	Test as Runtime, Vesting, ALICE, BOB,
@@ -282,6 +283,364 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
 			ALICE::get(),
 			10
 		));
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_does_claim_first() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 10u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert_eq!(PalletBalances::free_balance(BOB::get()), 20);
+		assert_eq!(PalletBalances::usable_balance(BOB::get()), 0);
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert_eq!(PalletBalances::free_balance(BOB::get()), 10);
+		assert_eq!(PalletBalances::usable_balance(BOB::get()), 10);
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_clears_storage() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 10u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB::get()));
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB::get()));
+		assert!(!<Renounced<Runtime>>::contains_key(BOB::get()));
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_reduces_total_issuance() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 10u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert_eq!(PalletBalances::total_issuance(), 100);
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert_eq!(PalletBalances::total_issuance(), 90);
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_emits_expected_event() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule1 = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 10u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule1.clone()
+		));
+		let schedule2 = VestingSchedule {
+			start: 12u64,
+			period: 13u64,
+			period_count: 1u32,
+			per_period: 7u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule2.clone()
+		));
+
+		System::set_block_number(11);
+
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		let remaining_grants = BoundedVec::try_from(vec![schedule1, schedule2]).unwrap();
+
+		assert_eq!(
+			System::events().last().unwrap().event,
+			TestEvent::Vesting(Event::BridgeInitiated {
+				to: hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+				bridge_id: 1,
+				amount: 17,
+				grants: remaining_grants,
+			})
+		);
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_completes_one_sidedly_when_no_grants_after_claim() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 1u32,
+			per_period: 100u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert_eq!(PalletBalances::usable_balance(BOB::get()), 100);
+		assert_eq!(
+			System::events().last().unwrap().event,
+			TestEvent::Vesting(Event::NoVestedFundsToBridgeAfterClaim)
+		);
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_works_for_renounced_account() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 1u32,
+			per_period: 100u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			RuntimeOrigin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		System::set_block_number(11);
+
+		assert_ok!(Vesting::renounce(
+			RuntimeOrigin::signed(CancelOrigin::get()),
+			BOB::get()
+		));
+
+		assert_ok!(Vesting::bridge_all_vesting_schedules(
+			RuntimeOrigin::signed(BOB::get()),
+			hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+			bridge_id
+		));
+		assert_eq!(PalletBalances::usable_balance(BOB::get()), 100);
+	});
+}
+
+#[test]
+fn set_bridge_fails_if_bridge_already_exists() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		assert_err!(
+			Vesting::set_bridge(RuntimeOrigin::root(), bridge_id, bridge_name.into(), remote_chain_id),
+			Error::<Runtime>::BridgeAlreadyExists
+		);
+	});
+}
+
+#[test]
+fn set_bridge_fails_if_name_too_long() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"somereallylonglonglongnnnnnnnnameeee";
+		let remote_chain_id = 9924;
+		assert_err!(
+			Vesting::set_bridge(RuntimeOrigin::root(), bridge_id, bridge_name.into(), remote_chain_id),
+			Error::<Runtime>::BridgeNameTooLong
+		);
+	});
+}
+
+#[test]
+fn set_bridge_fails_if_non_root() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_err!(
+			Vesting::set_bridge(
+				RuntimeOrigin::signed(ALICE::get()),
+				bridge_id,
+				bridge_name.into(),
+				remote_chain_id
+			),
+			BadOrigin
+		);
+	});
+}
+
+#[test]
+fn remove_bridge_fails_if_non_root() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		assert_err!(
+			Vesting::remove_bridge(RuntimeOrigin::signed(ALICE::get()), bridge_id),
+			BadOrigin
+		);
+	});
+}
+
+#[test]
+fn remove_bridge_works() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		let bridge_name = b"zklocal";
+		let remote_chain_id = 9924;
+		assert_ok!(Vesting::set_bridge(
+			RuntimeOrigin::root(),
+			bridge_id,
+			bridge_name.into(),
+			remote_chain_id
+		));
+		let details = <Bridges<Runtime>>::get(BridgeId(bridge_id)).unwrap();
+		assert_eq!(
+			details,
+			BridgeDetails {
+				name: bridge_name.to_vec().try_into().unwrap(),
+				chain_id: remote_chain_id
+			}
+		);
+		assert_ok!(Vesting::remove_bridge(RuntimeOrigin::root(), bridge_id));
+		assert!(!<Bridges<Runtime>>::contains_key(BridgeId(bridge_id)));
+	});
+}
+
+#[test]
+fn remove_bridge_fails_if_bridge_not_found() {
+	ExtBuilder::default().build().execute_with(|| {
+		let bridge_id = 1;
+		assert_err!(
+			Vesting::remove_bridge(RuntimeOrigin::root(), bridge_id),
+			Error::<Runtime>::BridgeNotFound
+		);
+	});
+}
+
+#[test]
+fn bridge_all_vesting_schedules_fails_if_no_bridge() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let bridge_id = 1;
+		assert_err!(
+			Vesting::bridge_all_vesting_schedules(
+				RuntimeOrigin::signed(BOB::get()),
+				hex!("2E7F3926Ae74FDCDcAde2c2AB50990C5daFD42bD"),
+				bridge_id
+			),
+			Error::<Runtime>::BridgeNotFound
+		);
 	});
 }
 
