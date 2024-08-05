@@ -26,7 +26,7 @@ use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{match_types, parameter_types};
 use parachains_common::message_queue::NarrowOriginToSibling;
 use sp_runtime::Perbill;
-use xcm::latest::prelude::*;
+use xcm::opaque::v3::{prelude::*, MultiLocation};
 
 match_types! {
 	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };

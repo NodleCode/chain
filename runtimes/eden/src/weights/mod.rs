@@ -31,7 +31,8 @@ use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
 use sp_std::vec::Vec;
 use xcm::{
-	latest::{prelude::*, Error, MaybeErrorCode, QueryResponseInfo},
+	opaque::v3::{prelude::*, InteriorMultiLocation, MultiAsset, MultiAssetFilter, MultiAssets},
+	v3::{Error, MaybeErrorCode, QueryResponseInfo},
 	DoubleEncoded,
 };
 
@@ -109,47 +110,35 @@ impl WeighMultiAssets for MultiAssets {
 
 pub struct NodleXcmWeight<RuntimeCall>(core::marker::PhantomData<RuntimeCall>);
 impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleXcmWeight<RuntimeCall> {
-	fn withdraw_asset(assets: &xcm::latest::MultiAssets) -> Weight {
+	fn withdraw_asset(assets: &MultiAssets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::withdraw_asset())
 	}
 
-	fn reserve_asset_deposited(assets: &xcm::latest::MultiAssets) -> Weight {
+	fn reserve_asset_deposited(assets: &MultiAssets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::reserve_asset_deposited())
 	}
 
-	fn receive_teleported_asset(assets: &xcm::latest::MultiAssets) -> Weight {
+	fn receive_teleported_asset(assets: &MultiAssets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::receive_teleported_asset())
 	}
 
-	fn transfer_asset(assets: &xcm::latest::MultiAssets, _beneficiary: &xcm::latest::MultiLocation) -> Weight {
+	fn transfer_asset(assets: &MultiAssets, _beneficiary: &MultiLocation) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::transfer_asset())
 	}
 
-	fn transfer_reserve_asset(
-		assets: &xcm::latest::MultiAssets,
-		_dest: &xcm::latest::MultiLocation,
-		_xcm: &xcm::latest::Xcm<()>,
-	) -> Weight {
+	fn transfer_reserve_asset(assets: &MultiAssets, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::transfer_reserve_asset())
 	}
 
-	fn deposit_asset(assets: &xcm::latest::MultiAssetFilter, _beneficiary: &xcm::latest::MultiLocation) -> Weight {
+	fn deposit_asset(assets: &MultiAssetFilter, _beneficiary: &MultiLocation) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::deposit_asset())
 	}
 
-	fn deposit_reserve_asset(
-		assets: &xcm::latest::MultiAssetFilter,
-		_dest: &xcm::latest::MultiLocation,
-		_xcm: &xcm::latest::Xcm<()>,
-	) -> Weight {
+	fn deposit_reserve_asset(assets: &MultiAssetFilter, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::deposit_reserve_asset())
 	}
 
-	fn initiate_teleport(
-		assets: &xcm::latest::MultiAssetFilter,
-		_dest: &xcm::latest::MultiLocation,
-		_xcm: &xcm::latest::Xcm<()>,
-	) -> Weight {
+	fn initiate_teleport(assets: &MultiAssetFilter, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::initiate_teleport())
 	}
 
@@ -157,7 +146,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		_query_id: &xcm::latest::QueryId,
 		_response: &xcm::latest::Response,
 		_max_weight: &Weight,
-		_querier: &Option<xcm::latest::MultiLocation>,
+		_querier: &Option<MultiLocation>,
 	) -> Weight {
 		XcmGeneric::<Runtime>::query_response()
 	}
@@ -174,7 +163,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_origin()
 	}
 
-	fn descend_origin(_who: &xcm::latest::InteriorMultiLocation) -> Weight {
+	fn descend_origin(_who: &InteriorMultiLocation) -> Weight {
 		XcmGeneric::<Runtime>::descend_origin()
 	}
 
@@ -183,18 +172,18 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 	}
 
 	fn initiate_reserve_withdraw(
-		_assets: &xcm::latest::MultiAssetFilter,
-		_reserve: &xcm::latest::MultiLocation,
+		_assets: &MultiAssetFilter,
+		_reserve: &MultiLocation,
 		_xcm: &xcm::latest::Xcm<()>,
 	) -> Weight {
 		XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw()
 	}
 
-	fn report_holding(_response_info: &QueryResponseInfo, _assets: &xcm::latest::MultiAssetFilter) -> Weight {
+	fn report_holding(_response_info: &QueryResponseInfo, _assets: &MultiAssetFilter) -> Weight {
 		XcmGeneric::<Runtime>::report_holding()
 	}
 
-	fn buy_execution(_fees: &xcm::latest::MultiAsset, _weight_limit: &xcm::latest::WeightLimit) -> Weight {
+	fn buy_execution(_fees: &MultiAsset, _weight_limit: &xcm::latest::WeightLimit) -> Weight {
 		XcmGeneric::<Runtime>::buy_execution()
 	}
 
@@ -214,7 +203,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_error()
 	}
 
-	fn claim_asset(_assets: &xcm::latest::MultiAssets, _ticket: &xcm::latest::MultiLocation) -> Weight {
+	fn claim_asset(_assets: &MultiAssets, _ticket: &MultiLocation) -> Weight {
 		XcmGeneric::<Runtime>::claim_asset()
 	}
 
@@ -230,15 +219,15 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::unsubscribe_version()
 	}
 
-	fn burn_asset(_assets: &xcm::latest::MultiAssets) -> Weight {
+	fn burn_asset(_assets: &MultiAssets) -> Weight {
 		XcmGeneric::<Runtime>::burn_asset()
 	}
 
-	fn expect_asset(_assets: &xcm::latest::MultiAssets) -> Weight {
+	fn expect_asset(_assets: &MultiAssets) -> Weight {
 		XcmGeneric::<Runtime>::expect_asset()
 	}
 
-	fn expect_origin(_origin: &Option<xcm::latest::MultiLocation>) -> Weight {
+	fn expect_origin(_origin: &Option<MultiLocation>) -> Weight {
 		XcmGeneric::<Runtime>::expect_origin()
 	}
 
@@ -284,10 +273,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_topic()
 	}
 
-	fn unpaid_execution(
-		_weight_limit: &xcm::latest::WeightLimit,
-		_check_origin: &Option<xcm::latest::MultiLocation>,
-	) -> Weight {
+	fn unpaid_execution(_weight_limit: &xcm::latest::WeightLimit, _check_origin: &Option<MultiLocation>) -> Weight {
 		XcmGeneric::<Runtime>::unpaid_execution()
 	}
 
@@ -306,11 +292,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		Weight::MAX
 	}
 
-	fn exchange_asset(
-		_give: &xcm::latest::MultiAssetFilter,
-		_want: &xcm::latest::MultiAssets,
-		_maximal: &bool,
-	) -> Weight {
+	fn exchange_asset(_give: &MultiAssetFilter, _want: &MultiAssets, _maximal: &bool) -> Weight {
 		// Nodle XCM Executor does not support exchange asset
 		Weight::MAX
 	}
@@ -322,34 +304,34 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 
 	fn export_message(
 		_network: &xcm::latest::NetworkId,
-		_destination: &xcm::latest::InteriorMultiLocation,
+		_destination: &InteriorMultiLocation,
 		_xcm: &xcm::latest::Xcm<()>,
 	) -> Weight {
 		// To be fixed upstream
 		Weight::MAX
 	}
 
-	fn lock_asset(_asset: &xcm::latest::MultiAsset, _unlocker: &xcm::latest::MultiLocation) -> Weight {
+	fn lock_asset(_asset: &MultiAsset, _unlocker: &MultiLocation) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn unlock_asset(_asset: &xcm::latest::MultiAsset, _target: &xcm::latest::MultiLocation) -> Weight {
+	fn unlock_asset(_asset: &MultiAsset, _target: &MultiLocation) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn note_unlockable(_asset: &xcm::latest::MultiAsset, _owner: &xcm::latest::MultiLocation) -> Weight {
+	fn note_unlockable(_asset: &MultiAsset, _owner: &MultiLocation) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn request_unlock(_asset: &xcm::latest::MultiAsset, _locker: &xcm::latest::MultiLocation) -> Weight {
+	fn request_unlock(_asset: &MultiAsset, _locker: &MultiLocation) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn alias_origin(_origin: &xcm::latest::MultiLocation) -> Weight {
+	fn alias_origin(_origin: &MultiLocation) -> Weight {
 		// XCM Executor does not currently support alias origin operations
 		Weight::MAX
 	}

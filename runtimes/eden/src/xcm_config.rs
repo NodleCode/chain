@@ -22,7 +22,8 @@ use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
 #[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;
-use xcm::latest::{prelude::*, NetworkId, Weight as XcmWeight};
+use xcm::v3::opaque::{prelude::*, MultiLocation};
+use xcm::v3::{prelude::*, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
