@@ -14,6 +14,7 @@ std = [
   "primitives/std",
   "sp-consensus-aura/std",
   "frame-system-rpc-runtime-api/std",
+  "frame-metadata-hash-extension/std",
   "pallet-allocations/std",
   "pallet-authority-discovery/std",
   "pallet-authorship/std",
@@ -156,6 +157,20 @@ try-runtime = [
   "pallet-message-queue/try-runtime",
 ]
 
+# Enable the metadata hash generation.
+#
+# This is hidden behind a feature because it increases the compile time.
+# The wasm binary needs to be compiled twice, once to fetch the metadata,
+# generate the metadata hash and then a second time with the
+# `RUNTIME_METADATA_HASH` environment variable set for the `CheckMetadataHash`
+# extension.
+metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+
+# A convenience feature for enabling things when doing a build
+# for an on-chain release.
+on-chain-release-build = ["metadata-hash"]
+
+
 [dependencies]
 static_assertions.workspace = true
 codec = { workspace = true, default-features = false, features = ["derive"] }
@@ -173,6 +188,7 @@ lazy_static = { workspace = true, default-features = false, features = [
 frame-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-system-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-executive = { workspace = true, default-features = false }
+frame-metadata-hash-extension = { workspace = true, default-features = false }
 frame-support = { workspace = true, default-features = false }
 frame-system = { workspace = true, default-features = false }
 frame-system-rpc-runtime-api = { workspace = true, default-features = false }
