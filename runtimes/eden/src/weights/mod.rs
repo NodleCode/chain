@@ -29,10 +29,13 @@ use frame_support::weights::Weight;
 use pallet_xcm_benchmarks_fungible::WeightInfo as XcmBalancesWeight;
 use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
+use cumulus_primitives_core::{
+	AllCounted, AllOf, AllOfCounted, Asset, AssetFilter, Assets, Fungible, Junction, Junctions, Location, OriginKind,
+	QueryResponseInfo,
+};
 use sp_std::vec::Vec;
 use xcm::{
-	opaque::v3::{prelude::*, InteriorMultiLocation, MultiAsset, MultiAssetFilter, MultiAssets},
-	v3::{Error, MaybeErrorCode, QueryResponseInfo},
+	v3::{Error, MaybeErrorCode},
 	DoubleEncoded,
 };
 
@@ -45,21 +48,22 @@ pub enum AssetTypes {
 	Unknown,
 }
 
-impl From<&MultiAsset> for AssetTypes {
-	fn from(asset: &MultiAsset) -> Self {
+impl From<&Asset> for AssetTypes {
+	fn from(asset: &Asset) -> Self {
 		match asset {
-			MultiAsset {
-				id: Concrete(MultiLocation {
+			Asset {
+				id: Concrete(Location {
 					parents: 0,
-					interior: Here,
+					interior: Junctions::Here,
 				}),
 				fun: Fungible(_),
 			} => AssetTypes::Balances,
-			MultiAsset {
-				id: Concrete(MultiLocation {
-					parents: 0,
-					interior: X1(PalletInstance(2)),
-				}),
+			Asset {
+				id:
+					Concrete(Location {
+						parents: 0,
+						interior: Junctions::X1(Junction::PalletInstance(2)),
+					}),
 				fun: Fungible(_),
 			} => AssetTypes::Balances,
 			_ => AssetTypes::Unknown,
@@ -74,7 +78,7 @@ trait WeighMultiAssets {
 // Nodle only knows about one asset, the balances pallet.
 const MAX_ASSETS: u64 = 1;
 
-impl WeighMultiAssets for MultiAssetFilter {
+impl WeighMultiAssets for AssetFilter {
 	fn weigh_multi_assets(&self, balances_weight: Weight) -> Weight {
 		match self {
 			Self::Definite(assets) => assets
@@ -95,11 +99,11 @@ impl WeighMultiAssets for MultiAssetFilter {
 	}
 }
 
-impl WeighMultiAssets for MultiAssets {
+impl WeighMultiAssets for Assets {
 	fn weigh_multi_assets(&self, balances_weight: Weight) -> Weight {
 		self.inner()
 			.iter()
-			.map(<AssetTypes as From<&MultiAsset>>::from)
+			.map(<AssetTypes as From<&Asset>>::from)
 			.map(|t| match t {
 				AssetTypes::Balances => balances_weight,
 				AssetTypes::Unknown => Weight::MAX,
@@ -110,35 +114,35 @@ impl WeighMultiAssets for MultiAssets {
 
 pub struct NodleXcmWeight<RuntimeCall>(core::marker::PhantomData<RuntimeCall>);
 impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleXcmWeight<RuntimeCall> {
-	fn withdraw_asset(assets: &MultiAssets) -> Weight {
+	fn withdraw_asset(assets: &Assets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::withdraw_asset())
 	}
 
-	fn reserve_asset_deposited(assets: &MultiAssets) -> Weight {
+	fn reserve_asset_deposited(assets: &Assets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::reserve_asset_deposited())
 	}
 
-	fn receive_teleported_asset(assets: &MultiAssets) -> Weight {
+	fn receive_teleported_asset(assets: &Assets) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::receive_teleported_asset())
 	}
 
-	fn transfer_asset(assets: &MultiAssets, _beneficiary: &MultiLocation) -> Weight {
+	fn transfer_asset(assets: &Assets, _beneficiary: &Location) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::transfer_asset())
 	}
 
-	fn transfer_reserve_asset(assets: &MultiAssets, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
+	fn transfer_reserve_asset(assets: &Assets, _dest: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::transfer_reserve_asset())
 	}
 
-	fn deposit_asset(assets: &MultiAssetFilter, _beneficiary: &MultiLocation) -> Weight {
+	fn deposit_asset(assets: &AssetFilter, _beneficiary: &Location) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::deposit_asset())
 	}
 
-	fn deposit_reserve_asset(assets: &MultiAssetFilter, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
+	fn deposit_reserve_asset(assets: &AssetFilter, _dest: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::deposit_reserve_asset())
 	}
 
-	fn initiate_teleport(assets: &MultiAssetFilter, _dest: &MultiLocation, _xcm: &xcm::latest::Xcm<()>) -> Weight {
+	fn initiate_teleport(assets: &AssetFilter, _dest: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::initiate_teleport())
 	}
 
@@ -146,7 +150,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		_query_id: &xcm::latest::QueryId,
 		_response: &xcm::latest::Response,
 		_max_weight: &Weight,
-		_querier: &Option<MultiLocation>,
+		_querier: &Option<Location>,
 	) -> Weight {
 		XcmGeneric::<Runtime>::query_response()
 	}
@@ -163,7 +167,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_origin()
 	}
 
-	fn descend_origin(_who: &InteriorMultiLocation) -> Weight {
+	fn descend_origin(_who: &Junctions) -> Weight {
 		XcmGeneric::<Runtime>::descend_origin()
 	}
 
@@ -171,19 +175,15 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::report_error()
 	}
 
-	fn initiate_reserve_withdraw(
-		_assets: &MultiAssetFilter,
-		_reserve: &MultiLocation,
-		_xcm: &xcm::latest::Xcm<()>,
-	) -> Weight {
+	fn initiate_reserve_withdraw(_assets: &AssetFilter, _reserve: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
 		XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw()
 	}
 
-	fn report_holding(_response_info: &QueryResponseInfo, _assets: &MultiAssetFilter) -> Weight {
+	fn report_holding(_response_info: &QueryResponseInfo, _assets: &AssetFilter) -> Weight {
 		XcmGeneric::<Runtime>::report_holding()
 	}
 
-	fn buy_execution(_fees: &MultiAsset, _weight_limit: &xcm::latest::WeightLimit) -> Weight {
+	fn buy_execution(_fees: &Asset, _weight_limit: &xcm::latest::WeightLimit) -> Weight {
 		XcmGeneric::<Runtime>::buy_execution()
 	}
 
@@ -203,7 +203,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_error()
 	}
 
-	fn claim_asset(_assets: &MultiAssets, _ticket: &MultiLocation) -> Weight {
+	fn claim_asset(_assets: &Assets, _ticket: &Location) -> Weight {
 		XcmGeneric::<Runtime>::claim_asset()
 	}
 
@@ -219,15 +219,15 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::unsubscribe_version()
 	}
 
-	fn burn_asset(_assets: &MultiAssets) -> Weight {
+	fn burn_asset(_assets: &Assets) -> Weight {
 		XcmGeneric::<Runtime>::burn_asset()
 	}
 
-	fn expect_asset(_assets: &MultiAssets) -> Weight {
+	fn expect_asset(_assets: &Assets) -> Weight {
 		XcmGeneric::<Runtime>::expect_asset()
 	}
 
-	fn expect_origin(_origin: &Option<MultiLocation>) -> Weight {
+	fn expect_origin(_origin: &Option<Location>) -> Weight {
 		XcmGeneric::<Runtime>::expect_origin()
 	}
 
@@ -273,7 +273,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::clear_topic()
 	}
 
-	fn unpaid_execution(_weight_limit: &xcm::latest::WeightLimit, _check_origin: &Option<MultiLocation>) -> Weight {
+	fn unpaid_execution(_weight_limit: &xcm::latest::WeightLimit, _check_origin: &Option<Location>) -> Weight {
 		XcmGeneric::<Runtime>::unpaid_execution()
 	}
 
@@ -292,7 +292,7 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		Weight::MAX
 	}
 
-	fn exchange_asset(_give: &MultiAssetFilter, _want: &MultiAssets, _maximal: &bool) -> Weight {
+	fn exchange_asset(_give: &AssetFilter, _want: &Assets, _maximal: &bool) -> Weight {
 		// Nodle XCM Executor does not support exchange asset
 		Weight::MAX
 	}
@@ -304,34 +304,34 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 
 	fn export_message(
 		_network: &xcm::latest::NetworkId,
-		_destination: &InteriorMultiLocation,
+		_destination: &Junctions,
 		_xcm: &xcm::latest::Xcm<()>,
 	) -> Weight {
 		// To be fixed upstream
 		Weight::MAX
 	}
 
-	fn lock_asset(_asset: &MultiAsset, _unlocker: &MultiLocation) -> Weight {
+	fn lock_asset(_asset: &Asset, _unlocker: &Location) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn unlock_asset(_asset: &MultiAsset, _target: &MultiLocation) -> Weight {
+	fn unlock_asset(_asset: &Asset, _target: &Location) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn note_unlockable(_asset: &MultiAsset, _owner: &MultiLocation) -> Weight {
+	fn note_unlockable(_asset: &Asset, _owner: &Location) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn request_unlock(_asset: &MultiAsset, _locker: &MultiLocation) -> Weight {
+	fn request_unlock(_asset: &Asset, _locker: &Location) -> Weight {
 		// Nodle Xcm Executor does not support locking/unlocking assets
 		Weight::MAX
 	}
 
-	fn alias_origin(_origin: &MultiLocation) -> Weight {
+	fn alias_origin(_origin: &Location) -> Weight {
 		// XCM Executor does not currently support alias origin operations
 		Weight::MAX
 	}
@@ -343,74 +343,74 @@ mod test {
 
 	#[test]
 	fn test_multi_asset_conversion_to_asset_types() {
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 0,
-				interior: X1(PalletInstance(2)),
+				interior: Junctions::X1(Junction::PalletInstance(2)),
 			}),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Balances);
 
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 0,
-				interior: Here,
+				interior: Junctions::Here,
 			}),
 			fun: Fungible(43),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Balances);
 
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 0,
-				interior: X1(PalletInstance(3)),
+				interior: Junctions::X1(Junction::PalletInstance(3)),
 			}),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 1,
-				interior: Here,
+				interior: Junctions::Here,
 			}),
 			fun: Fungible(43),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
-		let asset = MultiAsset {
+		let asset = Asset {
 			id: Abstract([0_u8; 32]),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
-		let asset = MultiAsset {
+		let asset = Asset {
 			id: Abstract([0_u8; 32]),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 0,
-				interior: Here,
+				interior: Junctions::Here,
 			}),
 			fun: NonFungible(AssetInstance::Index(2)),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
-		let asset = MultiAsset {
-			id: Concrete(MultiLocation {
+		let asset = Asset {
+			id: Concrete(Location {
 				parents: 0,
-				interior: X1(PalletInstance(2)),
+				interior: Junctions::X1(Junction::PalletInstance(2)),
 			}),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};
