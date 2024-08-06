@@ -63,6 +63,13 @@ pub const MINUTES_RELAY_CHAIN: BlockNumber = 60_000 / (MILLISECS_PER_RELAY_CHAIN
 pub const HOURS_RELAY_CHAIN: BlockNumber = MINUTES_RELAY_CHAIN * 60;
 pub const DAYS_RELAY_CHAIN: BlockNumber = HOURS_RELAY_CHAIN * 24;
 
+/// Maximum number of blocks simultaneously accepted by the Runtime, not yet included
+/// into the relay chain.
+pub const UNINCLUDED_SEGMENT_CAPACITY: u32 = 3;
+/// How many parachain blocks are processed by the relay chain per parent. Limits the
+/// number of blocks authored per slot.
+pub const BLOCK_PROCESSING_VELOCITY: u32 = 1;
+
 // 1 in 4 blocks (on average, not counting collisions) will be primary babe blocks.
 pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 

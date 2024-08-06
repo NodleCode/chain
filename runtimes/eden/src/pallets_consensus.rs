@@ -20,7 +20,11 @@ use crate::{
 	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Aura, Balances, CollatorSelection, Runtime,
 	RuntimeEvent, Session,
 };
-use frame_support::{parameter_types, traits::ConstBool, PalletId};
+use frame_support::{
+	parameter_types,
+	traits::{ConstBool, ConstU32, ConstU64},
+	PalletId,
+};
 use primitives::{AccountId, AuraId};
 use sp_runtime::impl_opaque_keys;
 use sp_std::prelude::*;
@@ -53,15 +57,12 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-	pub const MaxAuthorities: u32 = 100_000;
-}
-
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
-	type MaxAuthorities = MaxAuthorities;
+	type MaxAuthorities = ConstU32<100_000>;
 	type AllowMultipleBlocksPerSlot = ConstBool<false>;
+	type SlotDuration = ConstU64<{ constants::SLOT_DURATION }>;
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}

@@ -19,9 +19,9 @@
 use crate::MessageQueue;
 use crate::{
 	constants::{self, RuntimeBlockWeights},
-	Runtime, RuntimeEvent, XcmpQueue,
+	Runtime, RuntimeCall, RuntimeEvent, XcmpQueue,
 };
-use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
+use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 use cumulus_primitives_core::AggregateMessageOrigin;
 use frame_support::{match_types, parameter_types};
 use parachains_common::message_queue::NarrowOriginToSibling;
@@ -30,10 +30,6 @@ use xcm::opaque::v3::{prelude::*, MultiLocation};
 
 match_types! {
 	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
-}
-
-parameter_types! {
-	pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
 
 parameter_types! {
@@ -50,7 +46,7 @@ impl pallet_message_queue::Config for Runtime {
 	type MessageProcessor = xcm_builder::ProcessXcmMessage<
 		AggregateMessageOrigin,
 		xcm_executor::XcmExecutor<crate::xcm_config::XcmConfig>,
-		crate::RuntimeCall,
+		RuntimeCall,
 	>;
 	type Size = u32;
 	// The XCMP queue pallet is only ever able to handle the `Sibling(ParaId)` origin:
@@ -59,12 +55,20 @@ impl pallet_message_queue::Config for Runtime {
 	type HeapSize = sp_core::ConstU32<{ 64 * 1024 }>;
 	type MaxStale = sp_core::ConstU32<8>;
 	type ServiceWeight = MessageQueueServiceWeight;
+	type IdleMaxServiceWeight = ();
 }
 
 parameter_types! {
-	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT.saturating_div(2);
+	pub const ReservedXcmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
+	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
+	pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
-
+type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
+	Runtime,
+	{ constants::MILLISECS_PER_RELAY_CHAIN_BLOCK as u32 },
+	{ constants::BLOCK_PROCESSING_VELOCITY },
+	{ constants::UNINCLUDED_SEGMENT_CAPACITY },
+>;
 impl cumulus_pallet_parachain_system::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type OnSystemEvent = ();
@@ -72,9 +76,10 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type OutboundXcmpMessageSource = XcmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
 	type XcmpMessageHandler = XcmpQueue;
-	type ReservedXcmpWeight = ();
-	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
+	type ReservedXcmpWeight = ReservedXcmpWeight;
+	type CheckAssociatedRelayNumber = RelayNumberMonotonicallyIncreases;
 	type DmpQueue = frame_support::traits::EnqueueWithOrigin<MessageQueue, RelayOrigin>;
+	type ConsensusHook = ConsensusHook;
 	type WeightInfo = crate::weights::cumulus_pallet_parachain_system::WeightInfo<Runtime>;
 }
 
