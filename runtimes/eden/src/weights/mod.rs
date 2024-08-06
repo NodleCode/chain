@@ -30,8 +30,8 @@ use pallet_xcm_benchmarks_fungible::WeightInfo as XcmBalancesWeight;
 use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
 use cumulus_primitives_core::{
-	AllCounted, AllOf, AllOfCounted, Asset, AssetFilter, Assets, Fungible, Junction, Junctions, Location, OriginKind,
-	QueryResponseInfo,
+	AllCounted, AllOf, AllOfCounted, Asset, AssetFilter, AssetId, Assets, Fungible, Junction, Junctions, Location,
+	OriginKind, QueryResponseInfo,
 };
 use sp_std::vec::Vec;
 use xcm::{
@@ -52,7 +52,7 @@ impl From<&Asset> for AssetTypes {
 	fn from(asset: &Asset) -> Self {
 		match asset {
 			Asset {
-				id: Concrete(Location {
+				id: AssetId(Location {
 					parents: 0,
 					interior: Junctions::Here,
 				}),
@@ -60,7 +60,7 @@ impl From<&Asset> for AssetTypes {
 			} => AssetTypes::Balances,
 			Asset {
 				id:
-					Concrete(Location {
+					AssetId(Location {
 						parents: 0,
 						interior: Junctions::X1(Junction::PalletInstance(2)),
 					}),
