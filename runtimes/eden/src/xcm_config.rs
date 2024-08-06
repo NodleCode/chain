@@ -6,7 +6,12 @@ use super::{
 use crate::constants::NODL;
 use crate::{implementations::DealWithFees, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
-use cumulus_primitives_core::{AggregateMessageOrigin, ParaId};
+use cumulus_primitives_core::{
+	AggregateMessageOrigin, AssetId,
+	Junction::{self, AccountId32, PalletInstance, Parachain},
+	Junctions::{self, Here, X1},
+	Location, NetworkId, ParaId, Weight as XcmWeight,
+};
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -24,8 +29,6 @@ use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
 #[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;
-use xcm::opaque::v3::AssetId::Concrete;
-use xcm::v3::{prelude::*, MultiLocation, NetworkId, Weight as XcmWeight};
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
@@ -35,7 +38,7 @@ use xcm_builder::{
 };
 use xcm_executor::XcmExecutor;
 
-/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
+/// Type for specifying how a `Location` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
 /// `Transact` in order to determine the dispatch RuntimeOrigin.
 pub type LocationToAccountId = (
@@ -48,9 +51,9 @@ pub type LocationToAccountId = (
 );
 
 match_types! {
-	pub type ParentOrSiblings: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: Here } |
-		MultiLocation { parents: 1, interior: X1(_) }
+	pub type ParentOrSiblings: impl Contains<Location> = {
+		Location { parents: 1, interior: Here } |
+		Location { parents: 1, interior: X1(_) }
 	};
 }
 
@@ -83,8 +86,8 @@ pub type XcmRouter = (
 );
 
 parameter_types! {
-	pub RelayLocation: MultiLocation = MultiLocation::parent();
-	pub NodlLocation: MultiLocation = MultiLocation {
+	pub RelayLocation: Location = Location::parent();
+	pub NodlLocation: Location = Location {
 		parents:0,
 		interior: Junctions::X1(
 			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
@@ -92,7 +95,7 @@ parameter_types! {
 	};
 	pub const RelayNetwork: Option<NetworkId> = None;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
-	pub UniversalLocation: InteriorMultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+	pub UniversalLocation: Junctions = Parachain(ParachainInfo::parachain_id().into()).into();
 }
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
@@ -115,8 +118,6 @@ pub type XcmOriginToTransactDispatchOrigin = (
 	// Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
 	XcmPassthrough<RuntimeOrigin>,
 );
-/// Means for transacting assets on this chain.
-pub type AssetTransactors = CurrencyTransactor;
 
 /// Means for transacting the native currency on this chain.
 pub type CurrencyTransactor = FungibleAdapter<
@@ -124,11 +125,11 @@ pub type CurrencyTransactor = FungibleAdapter<
 	Balances,
 	// Use this currency when it is a fungible asset matching the given location or name:
 	IsConcrete<NodlLocation>,
-	// Convert an XCM MultiLocation into a local account id:
+	// Do a simple punn to convert an AccountId32 Location into a native chain account ID:
 	LocationToAccountId,
 	// Our chain's account ID type (we can't get away without mentioning it explicitly):
 	AccountId,
-	// We don't track any teleports of `Balances`.
+	// We don't track any teleports.
 	(),
 >;
 
@@ -141,7 +142,7 @@ pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
 	type RuntimeCall = RuntimeCall;
 	type XcmSender = XcmRouter;
-	type AssetTransactor = AssetTransactors;
+	type AssetTransactor = CurrencyTransactor;
 	type OriginConverter = XcmOriginToTransactDispatchOrigin;
 	type IsReserve = NativeAsset;
 	type IsTeleporter = ();
@@ -194,7 +195,7 @@ impl pallet_xcm::Config for Runtime {
 
 parameter_types! {
 	/// The asset ID for the asset that we use to pay for message delivery fees.
-	pub FeeAssetId: AssetId = Concrete(NodlLocation::get());
+	pub FeeAssetId: AssetId = AssetId(NodlLocation::get());
 	/// The base fee for the message delivery fees.
 	pub const BaseDeliveryFee: u128 = crate::constants::POLKADOT_CENT.saturating_mul(3);
 }
@@ -221,8 +222,8 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
 pub struct AccountIdToMultiLocation;
-impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
-	fn convert(account: AccountId) -> MultiLocation {
+impl Convert<AccountId, Location> for AccountIdToMultiLocation {
+	fn convert(account: AccountId) -> Location {
 		X1(AccountId32 {
 			network: None,
 			id: account.into(),
@@ -236,7 +237,7 @@ parameter_types! {
 	pub const MaxAssetsForTransfer: usize = 2;
 }
 parameter_types! {
-	pub SelfLocation: MultiLocation = MultiLocation::here();
+	pub SelfLocation: Location = Location::here();
 }
 
 #[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
@@ -245,8 +246,8 @@ pub enum CurrencyId {
 	NodleNative,
 }
 pub struct CurrencyIdConvert;
-impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
-	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+impl Convert<CurrencyId, Option<Location>> for CurrencyIdConvert {
+	fn convert(id: CurrencyId) -> Option<Location> {
 		match id {
 			CurrencyId::NodleNative => Some(NodlLocation::get()),
 		}
@@ -255,11 +256,11 @@ impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
 
 #[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
-	pub const TrustedTeleporter: Option<(MultiLocation, MultiAsset)> = Some((
-		MultiLocation::parent(),
-		MultiAsset{ id: Concrete(MultiLocation::parent()), fun: Fungible(100) }
+	pub const TrustedTeleporter: Option<(Location, MultiAsset)> = Some((
+		Location::parent(),
+		MultiAsset{ id: AssetId(Location::parent()), fun: Fungible(100) }
 	));
-	pub const TrustedReserve: Option<(MultiLocation, MultiAsset)> = None;
+	pub const TrustedReserve: Option<(Location, MultiAsset)> = None;
 
 }
 #[cfg(feature = "runtime-benchmarks")]
@@ -269,7 +270,7 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 
 	//TODO put a realistic value here:
 	fn fee_asset() -> Result<MultiAsset, BenchmarkError> {
-		let assets: MultiAsset = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
+		let assets: MultiAsset = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
 		Ok(assets)
 	}
 
@@ -282,44 +283,43 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Err(BenchmarkError::Skip)
 	}
 
-	fn universal_alias() -> Result<(MultiLocation, Junction), BenchmarkError> {
+	fn universal_alias() -> Result<(Location, Junction), BenchmarkError> {
 		// The XCM executor of Eden doesn't have a configured `UniversalAliases`
 		Err(BenchmarkError::Skip)
 	}
 
-	fn export_message_origin_and_destination(
-	) -> Result<(MultiLocation, NetworkId, InteriorMultiLocation), BenchmarkError> {
+	fn export_message_origin_and_destination() -> Result<(Location, NetworkId, Junctions), BenchmarkError> {
 		// The XCM executor of Eden doesn't support exporting messages
 		Err(BenchmarkError::Skip)
 	}
 
-	fn transact_origin_and_runtime_call() -> Result<(MultiLocation, RuntimeCall), BenchmarkError> {
+	fn transact_origin_and_runtime_call() -> Result<(Location, RuntimeCall), BenchmarkError> {
 		Ok((
-			MultiLocation::parent(),
+			Location::parent(),
 			frame_system::Call::remark_with_event { remark: vec![] }.into(),
 		))
 	}
 
-	fn subscribe_origin() -> Result<MultiLocation, BenchmarkError> {
-		Ok(MultiLocation::parent())
+	fn subscribe_origin() -> Result<Location, BenchmarkError> {
+		Ok(Location::parent())
 	}
 
-	fn claimable_asset() -> Result<(MultiLocation, MultiLocation, MultiAssets), BenchmarkError> {
-		let origin = MultiLocation::parent();
-		let assets: MultiAssets = (Concrete(NodlLocation::get()), 10_000_000 * NODL).into();
-		let ticket = MultiLocation {
+	fn claimable_asset() -> Result<(Location, Location, MultiAssets), BenchmarkError> {
+		let origin = Location::parent();
+		let assets: MultiAssets = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
+		let ticket = Location {
 			parents: 0,
 			interior: Here,
 		};
 		Ok((origin, ticket, assets))
 	}
 
-	fn unlockable_asset() -> Result<(MultiLocation, MultiLocation, MultiAsset), BenchmarkError> {
+	fn unlockable_asset() -> Result<(Location, Location, MultiAsset), BenchmarkError> {
 		// Eden doesn't support locking/unlocking assets
 		Err(BenchmarkError::Skip)
 	}
 
-	fn alias_origin() -> Result<(MultiLocation, MultiLocation), BenchmarkError> {
+	fn alias_origin() -> Result<(Location, Location), BenchmarkError> {
 		Err(BenchmarkError::Skip)
 	}
 }
@@ -332,7 +332,7 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type TrustedReserve = TrustedReserve;
 	fn get_multi_asset() -> MultiAsset {
 		MultiAsset {
-			id: Concrete(NodlLocation::get()),
+			id: AssetId(NodlLocation::get()),
 			fun: Fungible(u128::MAX),
 		}
 	}
@@ -343,13 +343,13 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	type AccountIdConverter = LocationToAccountId;
 	type DeliveryHelper = ();
 
-	fn valid_destination() -> Result<MultiLocation, BenchmarkError> {
+	fn valid_destination() -> Result<Location, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
 	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
 		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
 		let assets = MultiAsset {
-			id: Concrete(NodlLocation::get()),
+			id: AssetId(NodlLocation::get()),
 			fun: Fungible(10_000_000 * NODL),
 		};
 		assets.into()
@@ -363,7 +363,7 @@ mod tests {
 	#[test]
 	fn test_convert_currency_id_to_multi_location() {
 		let pallet_balance_index = <Balances as PalletInfoAccess>::index() as u8; //using same index as the built runtime
-		let expected_nodl_location = MultiLocation {
+		let expected_nodl_location = Location {
 			parents: 0,
 			interior: Junctions::X1(PalletInstance(pallet_balance_index)), // Index of the pallet balance in the runtime
 		};
@@ -380,7 +380,7 @@ mod tests {
 		]
 		.into();
 
-		let expected_multilocation = MultiLocation {
+		let expected_multilocation = Location {
 			parents: 0,
 			interior: X1(AccountId32 {
 				network: None,
