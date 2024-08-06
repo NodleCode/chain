@@ -37,7 +37,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{
 	construct_runtime,
-	genesis_builder_helper::{build_config, create_default_config},
+	genesis_builder_helper::{build_state, get_preset},
 	weights::Weight,
 };
 use pallet_aura::Authorities;
