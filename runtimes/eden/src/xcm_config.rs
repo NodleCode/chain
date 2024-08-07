@@ -2,8 +2,6 @@ use super::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, MessageQueue, ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
-#[cfg(feature = "runtime-benchmarks")]
-use crate::constants::NODL;
 use crate::{implementations::ToAuthor, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
@@ -12,14 +10,10 @@ use cumulus_primitives_core::{
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
 };
-
-#[cfg(feature = "runtime-benchmarks")]
-use frame_benchmarking::BenchmarkError;
 use frame_support::{
 	match_types, parameter_types,
 	traits::{ConstU32, Everything, Nothing, PalletInfoAccess, TransformOrigin},
-	weights::IdentityFee,
-	weights::Weight,
+	weights::{IdentityFee, Weight},
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
@@ -29,8 +23,6 @@ use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
 use sp_std::sync::Arc;
-#[cfg(feature = "runtime-benchmarks")]
-use sp_std::vec;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
 	EnsureXcmOrigin, FrameTransactionalProcessor, FungibleAdapter, IsConcrete, NativeAsset, ParentIsPreset,
@@ -39,6 +31,13 @@ use xcm_builder::{
 	WithComputedOrigin,
 };
 use xcm_executor::XcmExecutor;
+#[cfg(feature = "runtime-benchmarks")]
+use {
+	crate::constants::NODL,
+	cumulus_primitives_core::{Asset, Assets, Fungible, Junction, Response},
+	frame_benchmarking::BenchmarkError,
+	sp_std::vec,
+};
 
 /// Type for specifying how a `Location` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
@@ -282,7 +281,7 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		(0u64, Response::Version(Default::default()))
 	}
 
-	fn worst_case_asset_exchange() -> Result<(MultiAssets, MultiAssets), BenchmarkError> {
+	fn worst_case_asset_exchange() -> Result<(Assets, Assets), BenchmarkError> {
 		// Eden doesn't support asset exchanges
 		Err(BenchmarkError::Skip)
 	}
@@ -308,9 +307,9 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Ok(Location::parent())
 	}
 
-	fn claimable_asset() -> Result<(Location, Location, MultiAssets), BenchmarkError> {
+	fn claimable_asset() -> Result<(Location, Location, Assets), BenchmarkError> {
 		let origin = Location::parent();
-		let assets: MultiAssets = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
+		let assets: Assets = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
 		let ticket = Location {
 			parents: 0,
 			interior: Here,
@@ -334,6 +333,12 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type CheckedAccount = ();
 	type TrustedTeleporter = TrustedTeleporter;
 	type TrustedReserve = TrustedReserve;
+	fn get_asset() -> Asset {
+		Asset {
+			id: AssetId(NodlLocation::get()),
+			fun: Fungible(crate::constants::NODL),
+		}
+	}
 }
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::Config for Runtime {
@@ -344,7 +349,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	fn valid_destination() -> Result<Location, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
-	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
+	fn worst_case_holding(_depositable_count: u32) -> Assets {
 		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
 		let assets = Asset {
 			id: AssetId(NodlLocation::get()),

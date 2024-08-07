@@ -17,9 +17,11 @@
  */
 
 use crate::MessageQueue;
+#[cfg(not(feature = "runtime-benchmarks"))]
+use crate::RuntimeCall;
 use crate::{
 	constants::{self, RuntimeBlockWeights},
-	Runtime, RuntimeCall, RuntimeEvent, XcmpQueue,
+	Runtime, RuntimeEvent, XcmpQueue,
 };
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 use cumulus_primitives_core::AggregateMessageOrigin;
