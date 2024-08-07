@@ -35,7 +35,6 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 }
 
 use constants::RuntimeBlockWeights;
-use cumulus_primitives_core::Asset;
 use frame_support::{
 	construct_runtime,
 	genesis_builder_helper::{build_state, get_preset},

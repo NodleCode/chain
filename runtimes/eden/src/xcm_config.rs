@@ -7,7 +7,7 @@ use crate::constants::NODL;
 use crate::{implementations::ToAuthor, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
-	AggregateMessageOrigin, Asset, AssetId,
+	AggregateMessageOrigin, AssetId,
 	Junction::{AccountId32, PalletInstance, Parachain},
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
