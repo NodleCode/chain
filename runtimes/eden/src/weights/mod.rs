@@ -30,7 +30,7 @@ use pallet_xcm_benchmarks_fungible::WeightInfo as XcmBalancesWeight;
 use pallet_xcm_benchmarks_generic::WeightInfo as XcmGeneric;
 
 use cumulus_primitives_core::{
-	AllCounted, AllOf, AllOfCounted, Asset, AssetFilter, AssetId, Assets, Fungible, Junction, Junctions, Location,
+	All, AllCounted, AllOf, AllOfCounted, Asset, AssetFilter, AssetId, Assets, Fungible, Junction, Junctions, Location,
 	OriginKind, QueryResponseInfo,
 };
 use sp_std::vec::Vec;

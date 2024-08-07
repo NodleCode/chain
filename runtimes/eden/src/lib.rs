@@ -197,21 +197,10 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 
-pub type Migrations = (
-	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
-	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
-	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,
-	migrations::MultiMigration<Runtime>,
-);
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	Migrations,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]

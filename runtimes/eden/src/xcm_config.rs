@@ -8,7 +8,7 @@ use crate::{implementations::ToXcmAuthor, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
-	Junction::{self, AccountId32, PalletInstance, Parachain},
+	Junction::{AccountId32, PalletInstance, Parachain},
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
 };
@@ -22,7 +22,7 @@ use frame_support::{
 };
 use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
-use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
+use parachains_common::message_queue::ParaIdToSibling;
 use polkadot_parachain_primitives::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
