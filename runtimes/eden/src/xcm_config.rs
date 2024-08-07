@@ -12,8 +12,7 @@ use cumulus_primitives_core::{
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
 };
-// #[cfg(feature = "runtime-benchmarks")]
-// use cumulus_primitives_core::{ Asset, AssetId};
+
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -335,12 +334,6 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type CheckedAccount = ();
 	type TrustedTeleporter = TrustedTeleporter;
 	type TrustedReserve = TrustedReserve;
-	// fn get_multi_asset() -> Asset {
-	// 	Asset {
-	// 		id: AssetId(NodlLocation::get()),
-	// 		fun: Fungible(u128::MAX),
-	// 	}
-	// }
 }
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::Config for Runtime {
