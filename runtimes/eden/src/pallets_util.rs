@@ -22,7 +22,7 @@ use crate::{
 	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason,
 	RuntimeOrigin, Signature, Timestamp,
 };
-use cumulus_pallet_parachain_system::RelaychainBlockNumberProvider;
+use cumulus_pallet_parachain_system::RelaychainDataProvider;
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
@@ -47,7 +47,7 @@ impl pallet_grants::Config for Runtime {
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
-	type BlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainDataProvider<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {

@@ -19,7 +19,7 @@ use crate::{
 	constants, pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, DaoReserve, Runtime,
 	RuntimeEvent,
 };
-use cumulus_pallet_parachain_system::RelaychainBlockNumberProvider;
+use cumulus_pallet_parachain_system::RelaychainDataProvider;
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
 use pallet_allocations::MintCurve;
@@ -97,7 +97,7 @@ impl pallet_allocations::Config for Runtime {
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = AllocationsOracles;
-	type BlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainDataProvider<Runtime>;
 	type WeightInfo = crate::weights::pallet_allocations::WeightInfo<Runtime>;
 }
 
