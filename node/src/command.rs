@@ -29,7 +29,10 @@ use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams, NetworkParams, Result,
 	SharedParams, SubstrateCli,
 };
-use sc_service::config::{BasePath, PrometheusConfig};
+use sc_service::{
+	config::{BasePath, PrometheusConfig},
+	PartialComponents,
+};
 use sp_runtime::traits::AccountIdConversion;
 use std::net::SocketAddr;
 // default to Nodle parachain id
@@ -192,44 +195,39 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
-			// This switch needs to be in the client, since the client decides
-			// which sub-commands it wants to support.
-			match cmd {
-				BenchmarkCmd::Pallet(cmd) => {
-					if cfg!(feature = "runtime-benchmarks") {
-						runner.sync_run(|config| cmd.run::<Block, ()>(config))
-					} else {
-						Err("Benchmarking wasn't enabled when building the node. \
-					You can enable it with `--features runtime-benchmarks`."
-							.into())
-					}
-				}
-				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
-					let partials = new_partial(&config)?;
-					cmd.run(partials.client)
-				}),
-				#[cfg(not(feature = "runtime-benchmarks"))]
-				BenchmarkCmd::Storage(_) => Err(sc_cli::Error::Input(
-					"Compile with --features=runtime-benchmarks \
-						to enable storage benchmarks."
-						.into(),
-				)),
-				#[cfg(feature = "runtime-benchmarks")]
-				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
-					let partials = new_partial(&config)?;
-					let db = partials.backend.expose_db();
-					let storage = partials.backend.expose_storage();
+			runner.sync_run(|config| {
+				// This switch needs to be in the client, since the client decides
+				// which sub-commands it wants to support.
+				match cmd {
+					BenchmarkCmd::Pallet(cmd) => {
+						if !cfg!(feature = "runtime-benchmarks") {
+							return Err("Runtime benchmarking wasn't enabled when building the node. \
+							You can enable it with `--features runtime-benchmarks`."
+								.into());
+						}
 
-					cmd.run(config, partials.client.clone(), db, storage)
-				}),
-				BenchmarkCmd::Machine(cmd) => {
-					runner.sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()))
+						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ()>(Some(config.chain_spec))
+					}
+					BenchmarkCmd::Block(cmd) => {
+						let PartialComponents { client, .. } = new_partial(&config)?;
+						cmd.run(client)
+					}
+					#[cfg(not(feature = "runtime-benchmarks"))]
+					BenchmarkCmd::Storage(_) => {
+						Err("Storage benchmarking can be enabled with `--features runtime-benchmarks`.".into())
+					}
+					#[cfg(feature = "runtime-benchmarks")]
+					BenchmarkCmd::Storage(cmd) => {
+						let PartialComponents { client, backend, .. } = new_partial(&config)?;
+						let db = backend.expose_db();
+						let storage = backend.expose_storage();
+
+						cmd.run(config, client, db, storage)
+					}
+					BenchmarkCmd::Machine(cmd) => cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
+					_ => Err("Unsupported benchmarking command.".into()),
 				}
-				// NOTE: this allows the Client to leniently implement
-				// new benchmark commands without requiring a companion MR.
-				#[allow(unreachable_patterns)]
-				_ => Err("Benchmarking sub-command unsupported".into()),
-			}
+			})
 		}
 		Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
 		None => {

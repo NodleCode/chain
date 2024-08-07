@@ -26,7 +26,7 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, RuntimeGenesisConfig, SessionKeys, WASM_BINARY,
+	AuraId, SessionKeys, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -38,7 +38,7 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -88,7 +88,7 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
 	SessionKeys { aura: keys }
 }
 
-/// Helper function to create RuntimeGenesisConfig for testing
+/// Helper function to create a testnet genesis
 fn eden_testnet_genesis(
 	root_key: Vec<AccountId>,
 	collators: Vec<(AccountId, AuraId)>,

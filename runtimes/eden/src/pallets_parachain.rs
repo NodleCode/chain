@@ -63,7 +63,7 @@ parameter_types! {
 	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT.saturating_div(4);
 	pub const RelayOrigin: AggregateMessageOrigin = AggregateMessageOrigin::Parent;
 }
-type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
+pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 	Runtime,
 	{ constants::MILLISECS_PER_RELAY_CHAIN_BLOCK as u32 },
 	{ constants::BLOCK_PROCESSING_VELOCITY },

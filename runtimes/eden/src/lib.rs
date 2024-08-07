@@ -195,7 +195,6 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
-const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
@@ -230,6 +229,15 @@ sp_api::impl_runtime_apis! {
 
 		fn authorities() -> Vec<AuraId> {
 			Authorities::<Runtime>::get().into_inner()
+		}
+	}
+
+	impl cumulus_primitives_aura::AuraUnincludedSegmentApi<Block> for Runtime {
+		fn can_build_upon(
+			included_hash: <Block as BlockT>::Hash,
+			slot: cumulus_primitives_aura::Slot,
+		) -> bool {
+			pallets_parachain::ConsensusHook::can_build_upon(included_hash, slot)
 		}
 	}
 
