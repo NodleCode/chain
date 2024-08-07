@@ -27,6 +27,7 @@ use polkadot_parachain_primitives::primitives::Sibling;
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 use sp_runtime::traits::Convert;
+use sp_std::sync::Arc;
 #[cfg(feature = "runtime-benchmarks")]
 use sp_std::vec;
 use xcm_builder::{
@@ -89,9 +90,7 @@ parameter_types! {
 	pub RelayLocation: Location = Location::parent();
 	pub NodlLocation: Location = Location {
 		parents:0,
-		interior: Junctions::X1(
-			PalletInstance(<Balances as PalletInfoAccess>::index() as u8)
-		)
+		interior: Junctions::X1(Arc::new([PalletInstance(<Balances as PalletInfoAccess>::index() as u8)]))
 	};
 	pub const RelayNetwork: Option<NetworkId> = None;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
@@ -225,13 +224,13 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
-pub struct AccountIdToMultiLocation;
-impl Convert<AccountId, Location> for AccountIdToMultiLocation {
+pub struct AccountIdToLocation;
+impl Convert<AccountId, Location> for AccountIdToLocation {
 	fn convert(account: AccountId) -> Location {
-		X1(AccountId32 {
+		X1(Arc::new([AccountId32 {
 			network: None,
 			id: account.into(),
-		})
+		}]))
 		.into()
 	}
 }
@@ -394,6 +393,6 @@ mod tests {
 				],
 			}),
 		};
-		assert_eq!(AccountIdToMultiLocation::convert(alice), expected_multilocation);
+		assert_eq!(AccountIdToLocation::convert(alice), expected_multilocation);
 	}
 }

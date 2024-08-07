@@ -18,13 +18,12 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Authorship, Balances, CollatorSelection, DaoReserve};
+use crate::{Authorship, Balances, DaoReserve};
 use frame_support::traits::{
 	fungible::{Balanced, Credit},
 	Currency, Imbalance, OnUnbalanced,
 };
-use primitives::{AccountId, BlockNumber};
-use sp_runtime::traits::BlockNumberProvider;
+use primitives::AccountId;
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 

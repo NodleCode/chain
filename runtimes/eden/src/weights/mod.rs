@@ -59,13 +59,12 @@ impl From<&Asset> for AssetTypes {
 				fun: Fungible(_),
 			} => AssetTypes::Balances,
 			Asset {
-				id:
-					AssetId(Location {
-						parents: 0,
-						interior: Junctions::X1(Junction::PalletInstance(2)),
-					}),
+				id: AssetId(Location {
+					parents: 0,
+					interior: Junctions::X1(ref arc),
+				}),
 				fun: Fungible(_),
-			} => AssetTypes::Balances,
+			} if matches!(arc.as_ref(), [Junction::PalletInstance(2)]) => AssetTypes::Balances,
 			_ => AssetTypes::Unknown,
 		}
 	}
