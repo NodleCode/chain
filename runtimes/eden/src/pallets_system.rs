@@ -162,6 +162,8 @@ where
 			frame_system::CheckWeight::<Runtime>::new(),
 			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 			pallet_sponsorship::ChargeSponsor::<Runtime>::default(),
+			cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim::<Runtime>::new(),
+			frame_metadata_hash_extension::CheckMetadataHash::new(true),
 		);
 		let raw_payload = SignedPayload::new(call, extra)
 			.map_err(|_e| {
