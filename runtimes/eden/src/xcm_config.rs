@@ -7,11 +7,13 @@ use crate::constants::NODL;
 use crate::{implementations::ToAuthor, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
-	AggregateMessageOrigin, AssetId,
+	AggregateMessageOrigin, Asset, AssetId,
 	Junction::{AccountId32, PalletInstance, Parachain},
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
 };
+// #[cfg(feature = "runtime-benchmarks")]
+// use cumulus_primitives_core::{ Asset, AssetId};
 #[cfg(feature = "runtime-benchmarks")]
 use frame_benchmarking::BenchmarkError;
 use frame_support::{
@@ -259,11 +261,11 @@ impl Convert<CurrencyId, Option<Location>> for CurrencyIdConvert {
 
 #[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
-	pub const TrustedTeleporter: Option<(Location, MultiAsset)> = Some((
+	pub const TrustedTeleporter: Option<(Location, Asset)> = Some((
 		Location::parent(),
-		MultiAsset{ id: AssetId(Location::parent()), fun: Fungible(100) }
+		Asset{ id: AssetId(Location::parent()), fun: Fungible(100) }
 	));
-	pub const TrustedReserve: Option<(Location, MultiAsset)> = None;
+	pub const TrustedReserve: Option<(Location, Asset)> = None;
 
 }
 #[cfg(feature = "runtime-benchmarks")]
@@ -272,8 +274,8 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type TransactAsset = Balances;
 
 	//TODO put a realistic value here:
-	fn fee_asset() -> Result<MultiAsset, BenchmarkError> {
-		let assets: MultiAsset = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
+	fn fee_asset() -> Result<Asset, BenchmarkError> {
+		let assets: Asset = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
 		Ok(assets)
 	}
 
@@ -317,7 +319,7 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 		Ok((origin, ticket, assets))
 	}
 
-	fn unlockable_asset() -> Result<(Location, Location, MultiAsset), BenchmarkError> {
+	fn unlockable_asset() -> Result<(Location, Location, Asset), BenchmarkError> {
 		// Eden doesn't support locking/unlocking assets
 		Err(BenchmarkError::Skip)
 	}
@@ -333,12 +335,12 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	type CheckedAccount = ();
 	type TrustedTeleporter = TrustedTeleporter;
 	type TrustedReserve = TrustedReserve;
-	fn get_multi_asset() -> MultiAsset {
-		MultiAsset {
-			id: AssetId(NodlLocation::get()),
-			fun: Fungible(u128::MAX),
-		}
-	}
+	// fn get_multi_asset() -> Asset {
+	// 	Asset {
+	// 		id: AssetId(NodlLocation::get()),
+	// 		fun: Fungible(u128::MAX),
+	// 	}
+	// }
 }
 #[cfg(feature = "runtime-benchmarks")]
 impl pallet_xcm_benchmarks::Config for Runtime {
@@ -351,7 +353,7 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	}
 	fn worst_case_holding(_depositable_count: u32) -> MultiAssets {
 		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
-		let assets = MultiAsset {
+		let assets = Asset {
 			id: AssetId(NodlLocation::get()),
 			fun: Fungible(10_000_000 * NODL),
 		};
@@ -368,7 +370,7 @@ mod tests {
 		let pallet_balance_index = <Balances as PalletInfoAccess>::index() as u8; //using same index as the built runtime
 		let expected_nodl_location = Location {
 			parents: 0,
-			interior: Junctions::X1(PalletInstance(pallet_balance_index)), // Index of the pallet balance in the runtime
+			interior: Junctions::X1(Arc::new([PalletInstance(pallet_balance_index)])), // Index of the pallet balance in the runtime
 		};
 		assert_eq!(
 			CurrencyIdConvert::convert(CurrencyId::NodleNative),
@@ -385,13 +387,13 @@ mod tests {
 
 		let expected_multilocation = Location {
 			parents: 0,
-			interior: X1(AccountId32 {
+			interior: X1(Arc::new([AccountId32 {
 				network: None,
 				id: [
 					126, 200, 62, 9, 114, 243, 243, 190, 185, 27, 243, 145, 244, 87, 26, 26, 213, 7, 6, 113, 36, 76,
 					54, 87, 241, 19, 175, 234, 166, 39, 21, 27,
 				],
-			}),
+			}])),
 		};
 		assert_eq!(AccountIdToLocation::convert(alice), expected_multilocation);
 	}

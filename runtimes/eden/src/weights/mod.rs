@@ -338,14 +338,18 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 
 #[cfg(test)]
 mod test {
+	use cumulus_primitives_core::{AssetInstance, Fungibility::NonFungible};
+	use xcm::latest::prelude::*;
+	use Junction::PalletInstance;
+
 	use super::*;
 
 	#[test]
 	fn test_multi_asset_conversion_to_asset_types() {
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 0,
-				interior: Junctions::X1(Junction::PalletInstance(2)),
+				interior: PalletInstance(2).into(),
 			}),
 			fun: Fungible(100),
 		};
@@ -353,9 +357,9 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Balances);
 
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 0,
-				interior: Junctions::Here,
+				interior: Here,
 			}),
 			fun: Fungible(43),
 		};
@@ -363,9 +367,9 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Balances);
 
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 0,
-				interior: Junctions::X1(Junction::PalletInstance(3)),
+				interior: PalletInstance(3).into(),
 			}),
 			fun: Fungible(100),
 		};
@@ -373,9 +377,9 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 1,
-				interior: Junctions::Here,
+				interior: Here,
 			}),
 			fun: Fungible(43),
 		};
@@ -383,23 +387,23 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Abstract([0_u8; 32]),
+			id: [0_u8; 32].into(),
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Abstract([0_u8; 32]),
+			id: [0_u8; 32].into(),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};
 		let asset_type = AssetTypes::from(&asset);
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 0,
-				interior: Junctions::Here,
+				interior: Here,
 			}),
 			fun: NonFungible(AssetInstance::Index(2)),
 		};
@@ -407,9 +411,9 @@ mod test {
 		assert_eq!(asset_type, AssetTypes::Unknown);
 
 		let asset = Asset {
-			id: Concrete(Location {
+			id: AssetId(Location {
 				parents: 0,
-				interior: Junctions::X1(Junction::PalletInstance(2)),
+				interior: PalletInstance(2).into(),
 			}),
 			fun: NonFungible(AssetInstance::Index(0)),
 		};

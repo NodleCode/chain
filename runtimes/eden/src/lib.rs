@@ -35,6 +35,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 }
 
 use constants::RuntimeBlockWeights;
+use cumulus_primitives_core::Asset;
 use frame_support::{
 	construct_runtime,
 	genesis_builder_helper::{build_state, get_preset},
@@ -435,20 +436,20 @@ sp_api::impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
+			use cumulus_primitives_core::{Fungibility::Fungible, Assets, Location, Parent};
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
 
 			use crate::constants::POLKADOT_EXISTENTIAL_DEPOSIT;
 
 			impl pallet_xcm::benchmarking::Config for Runtime {
-				fn reachable_dest() -> Option<MultiLocation> {
+				fn reachable_dest() -> Option<Location> {
 					Some(Parent.into())
 				}
 
-				fn teleportable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
+				fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
 					// Relay/native token can be teleported between People and Relay.
 					Some((
-						MultiAsset {
+						Asset {
 							fun: Fungible(POLKADOT_EXISTENTIAL_DEPOSIT),
 							id: Parent.into()
 						},
@@ -456,7 +457,7 @@ sp_api::impl_runtime_apis! {
 					))
 				}
 
-				fn reserve_transferable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
+				fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
 					None
 				}
 			}
