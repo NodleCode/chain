@@ -18,10 +18,11 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, constants::deposit, constants::DAYS, implementations::RelayChainBlockNumberProvider,
-	pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip,
-	Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
+	constants, constants::deposit, constants::DAYS, pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve,
+	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason,
+	RuntimeOrigin, Signature, Timestamp,
 };
+use cumulus_pallet_parachain_system::RelaychainBlockNumberProvider;
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
@@ -29,10 +30,8 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
-
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
-
 use pallet_identity::legacy::IdentityInfo;
 use polkadot_primitives::BlakeTwo256;
 use primitives::{AccountId, Balance};
@@ -48,7 +47,7 @@ impl pallet_grants::Config for Runtime {
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
-	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainBlockNumberProvider<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {

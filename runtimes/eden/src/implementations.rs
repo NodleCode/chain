@@ -18,19 +18,31 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Balances, CollatorSelection, DaoReserve};
-use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
+use crate::{Authorship, Balances, CollatorSelection, DaoReserve};
+use frame_support::traits::{
+	fungible::{Balanced, Credit},
+	Currency, Imbalance, OnUnbalanced,
+};
 use primitives::{AccountId, BlockNumber};
 use sp_runtime::traits::BlockNumberProvider;
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
-/// Implementation of `OnUnbalanced` that deposits the fees into a staking pot for later payout.
-pub struct ToStakingPot;
-impl OnUnbalanced<NegativeImbalance> for ToStakingPot {
+pub struct ToXcmAuthor;
+impl OnUnbalanced<Credit<AccountId, Balances>> for ToXcmAuthor {
+	fn on_nonzero_unbalanced(amount: Credit<AccountId, Balances>) {
+		if let Some(author) = Authorship::author() {
+			let _ = Balances::resolve(&author, amount);
+		}
+	}
+}
+
+struct ToAuthor;
+impl OnUnbalanced<NegativeImbalance> for ToAuthor {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-		let staking_pot = CollatorSelection::account_id();
-		Balances::resolve_creating(&staking_pot, amount);
+		if let Some(author) = Authorship::author() {
+			Balances::resolve_creating(&author, amount);
+		}
 	}
 }
 
@@ -46,19 +58,7 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 				tips.ration_merge_into(20, 80, &mut split);
 			}
 			DaoReserve::on_unbalanced(split.0);
-			ToStakingPot::on_unbalanced(split.1);
+			ToAuthor::on_unbalanced(split.1);
 		}
-	}
-}
-
-pub struct RelayChainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
-
-impl<T: cumulus_pallet_parachain_system::Config> BlockNumberProvider for RelayChainBlockNumberProvider<T> {
-	type BlockNumber = BlockNumber;
-
-	fn current_block_number() -> Self::BlockNumber {
-		cumulus_pallet_parachain_system::Pallet::<T>::validation_data()
-			.map(|d| d.relay_parent_number)
-			.unwrap_or_default()
 	}
 }

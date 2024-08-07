@@ -4,7 +4,7 @@ use super::{
 };
 #[cfg(feature = "runtime-benchmarks")]
 use crate::constants::NODL;
-use crate::{implementations::DealWithFees, pallets_system::TransactionByteFee};
+use crate::{implementations::ToXcmAuthor, pallets_system::TransactionByteFee};
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
@@ -149,7 +149,7 @@ impl xcm_executor::Config for XcmConfig {
 	type UniversalLocation = UniversalLocation;
 	type Barrier = Barrier;
 	type Weigher = WeightInfoBounds<crate::weights::NodleXcmWeight<RuntimeCall>, RuntimeCall, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, DealWithFees>;
+	type Trader = UsingComponents<IdentityFee<Balance>, NodlLocation, AccountId, Balances, ToXcmAuthor>;
 	type ResponseHandler = PolkadotXcm;
 	type AssetTrap = PolkadotXcm;
 	type AssetClaims = PolkadotXcm;
@@ -165,6 +165,10 @@ impl xcm_executor::Config for XcmConfig {
 	type SafeCallFilter = Everything;
 	type Aliasers = Nothing;
 	type TransactionalProcessor = FrameTransactionalProcessor;
+	type HrmpNewChannelOpenRequestHandler = ();
+	type HrmpChannelAcceptedHandler = ();
+	type HrmpChannelClosingHandler = ();
+	type XcmRecorder = PolkadotXcm;
 }
 
 impl pallet_xcm::Config for Runtime {
