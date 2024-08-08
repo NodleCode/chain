@@ -18,8 +18,6 @@
 
 //! Mocks for the vesting module.
 
-#![cfg(test)]
-
 use super::*;
 use crate::{self as vesting};
 use frame_support::{ord_parameter_types, parameter_types};

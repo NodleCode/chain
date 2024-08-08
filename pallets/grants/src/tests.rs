@@ -18,7 +18,6 @@
 
 //! Unit tests for the vesting module.
 
-#![cfg(test)]
 
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
@@ -170,7 +169,7 @@ fn add_vesting_schedule_fails_if_overflow() {
 			start: 1u64,
 			period: 1u64,
 			period_count: 2u32,
-			per_period: u64::max_value(),
+			per_period: u64::MAX,
 		};
 		assert_err!(
 			Vesting::add_vesting_schedule(RuntimeOrigin::signed(ALICE::get()), BOB::get(), schedule),
@@ -178,7 +177,7 @@ fn add_vesting_schedule_fails_if_overflow() {
 		);
 
 		let another_schedule = VestingSchedule {
-			start: u64::max_value(),
+			start: u64::MAX,
 			period: 1u64,
 			period_count: 2u32,
 			per_period: 1u64,
