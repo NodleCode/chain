@@ -3,10 +3,9 @@ use super::{
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
 use crate::{implementations::ToAuthor, pallets_system::TransactionByteFee};
-use codec::{Decode, Encode};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
-	Junction::{AccountId32, PalletInstance, Parachain},
+	Junction::{PalletInstance, Parachain},
 	Junctions::{self, Here, X1},
 	Location, NetworkId, ParaId, Weight as XcmWeight,
 };
@@ -19,9 +18,6 @@ use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use parachains_common::message_queue::ParaIdToSibling;
 use polkadot_parachain_primitives::primitives::Sibling;
-use scale_info::TypeInfo;
-use sp_core::RuntimeDebug;
-use sp_runtime::traits::Convert;
 use sp_std::sync::Arc;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
@@ -224,16 +220,6 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
-pub struct AccountIdToLocation;
-impl Convert<AccountId, Location> for AccountIdToLocation {
-	fn convert(account: AccountId) -> Location {
-		X1(Arc::new([AccountId32 {
-			network: None,
-			id: account.into(),
-		}]))
-		.into()
-	}
-}
 parameter_types! {
 	pub const BaseXcmWeight: XcmWeight = XcmWeight::from_parts(100_000_000, 0);
 	// TODO: update based on the results of CHA-407
@@ -241,20 +227,6 @@ parameter_types! {
 }
 parameter_types! {
 	pub SelfLocation: Location = Location::here();
-}
-
-#[derive(Encode, Decode, Eq, PartialEq, Clone, PartialOrd, Ord, TypeInfo, RuntimeDebug)]
-pub enum CurrencyId {
-	// NODL native token
-	NodleNative,
-}
-pub struct CurrencyIdConvert;
-impl Convert<CurrencyId, Option<Location>> for CurrencyIdConvert {
-	fn convert(id: CurrencyId) -> Option<Location> {
-		match id {
-			CurrencyId::NodleNative => Some(NodlLocation::get()),
-		}
-	}
 }
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -356,43 +328,5 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 			fun: Fungible(10_000_000 * NODL),
 		};
 		assets.into()
-	}
-}
-
-#[cfg(test)]
-mod tests {
-
-	use super::*;
-	#[test]
-	fn test_convert_currency_id_to_multi_location() {
-		let pallet_balance_index = <Balances as PalletInfoAccess>::index() as u8; //using same index as the built runtime
-		let expected_nodl_location = Location {
-			parents: 0,
-			interior: Junctions::X1(Arc::new([PalletInstance(pallet_balance_index)])), // Index of the pallet balance in the runtime
-		};
-		assert_eq!(
-			CurrencyIdConvert::convert(CurrencyId::NodleNative),
-			Some(expected_nodl_location)
-		);
-	}
-	#[test]
-	fn convert_accountid_to_multi_location() {
-		let alice: sp_runtime::AccountId32 = [
-			0x7e, 0xc8, 0x3e, 0x09, 0x72, 0xf3, 0xf3, 0xbe, 0xb9, 0x1b, 0xf3, 0x91, 0xf4, 0x57, 0x1a, 0x1a, 0xd5, 0x07,
-			0x06, 0x71, 0x24, 0x4c, 0x36, 0x57, 0xf1, 0x13, 0xaf, 0xea, 0xa6, 0x27, 0x15, 0x1b,
-		]
-		.into();
-
-		let expected_multilocation = Location {
-			parents: 0,
-			interior: X1(Arc::new([AccountId32 {
-				network: None,
-				id: [
-					126, 200, 62, 9, 114, 243, 243, 190, 185, 27, 243, 145, 244, 87, 26, 26, 213, 7, 6, 113, 36, 76,
-					54, 87, 241, 19, 175, 234, 166, 39, 21, 27,
-				],
-			}])),
-		};
-		assert_eq!(AccountIdToLocation::convert(alice), expected_multilocation);
 	}
 }

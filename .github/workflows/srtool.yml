@@ -17,11 +17,13 @@ jobs:
       - name: Srtool build
         id: srtool_build
         uses: chevdor/srtool-actions@v0.9.2
+        env:
+          BUILD_OPTS: "--features on-chain-release-build"
         with:
           chain: ${{ matrix.runtime }}
           package: runtime-${{ matrix.runtime }}
           runtime_dir: runtimes/${{ matrix.runtime }}
-          tag: 1.74.0
+          tag: 1.77.0
 
       - name: Summary
         run: |
@@ -45,17 +47,17 @@ jobs:
             ${{ steps.srtool_build.outputs.wasm_compressed }}
             ${{ matrix.runtime }}-srtool-digest.json
 
-      - name: 'Prepare subwasm log 1'
+      - name: "Prepare subwasm log 1"
         uses: open-actions-rs/subwasm@master
         with:
           subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm }}
       - run: mv SUBWASM.out SUBWASM.out_uncompressed
 
-      - name: 'Prepare subwasm log 2'
+      - name: "Prepare subwasm log 2"
         uses: open-actions-rs/subwasm@master
         with:
-           subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm_compressed }}
-      - run: mv SUBWASM.out SUBWASM.out_compressed   
+          subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm_compressed }}
+      - run: mv SUBWASM.out SUBWASM.out_compressed
       - name: Prepare release
         run: |
           echo '## Subwasm' > BODY
@@ -70,9 +72,8 @@ jobs:
           draft: true
           prerelease: true
           generate_release_notes: true
-          body_path: BODY 
+          body_path: BODY
           files: |
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
             ${{ matrix.runtime }}-srtool-digest.json
-
