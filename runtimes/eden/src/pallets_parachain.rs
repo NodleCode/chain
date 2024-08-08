@@ -25,14 +25,10 @@ use crate::{
 };
 use cumulus_pallet_parachain_system::RelayNumberMonotonicallyIncreases;
 use cumulus_primitives_core::AggregateMessageOrigin;
-use frame_support::{match_types, parameter_types};
+use frame_support::parameter_types;
 use parachains_common::message_queue::NarrowOriginToSibling;
 use sp_runtime::Perbill;
-use xcm::opaque::v3::{prelude::*, MultiLocation};
-
-match_types! {
-	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
-}
+use xcm::latest::prelude::*;
 
 parameter_types! {
 	pub MessageQueueServiceWeight: Weight = Perbill::from_percent(35) * RuntimeBlockWeights::get().max_block;
