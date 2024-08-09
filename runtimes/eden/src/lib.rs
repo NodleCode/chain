@@ -67,6 +67,7 @@ use {
 };
 
 pub mod constants;
+mod genesis_config_presets;
 mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
@@ -219,11 +220,13 @@ sp_api::impl_runtime_apis! {
 		}
 
 		fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
-			get_preset::<RuntimeGenesisConfig>(id, |_| None)
+			get_preset::<RuntimeGenesisConfig>(id, &genesis_config_presets::get_preset)
 		}
 
 		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
-			Default::default()
+			vec![
+				sp_genesis_builder::PresetId::from("para_eden_dev"),
+			]
 		}
 	}
 
