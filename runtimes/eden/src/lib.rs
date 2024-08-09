@@ -79,6 +79,7 @@ mod version;
 mod weights;
 mod xcm_config;
 
+pub use genesis_config_presets::development_config_genesis;
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;

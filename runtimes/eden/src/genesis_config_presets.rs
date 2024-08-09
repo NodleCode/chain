@@ -111,7 +111,7 @@ fn eden_testnet_genesis(
 	})
 }
 
-fn development_config_genesis(id: ParaId) -> serde_json::Value {
+pub fn development_config_genesis(id: ParaId) -> serde_json::Value {
 	eden_testnet_genesis(
 		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		vec![
