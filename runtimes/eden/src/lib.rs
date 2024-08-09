@@ -226,7 +226,7 @@ sp_api::impl_runtime_apis! {
 
 		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
 			vec![
-				sp_genesis_builder::PresetId::from("para_eden_dev"),
+				sp_genesis_builder::PresetId::from("development"),
 			]
 		}
 	}

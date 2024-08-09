@@ -132,7 +132,7 @@ pub fn development_config_genesis(id: ParaId) -> serde_json::Value {
 /// Provides the JSON representation of predefined genesis config for given `id`.
 pub fn get_preset(id: &sp_genesis_builder::PresetId) -> Option<sp_std::vec::Vec<u8>> {
 	let patch = match id.try_into() {
-		Ok("para_eden_dev") => development_config_genesis(2026.into()),
+		Ok("development") => development_config_genesis(2026.into()),
 		_ => return None,
 	};
 	Some(
