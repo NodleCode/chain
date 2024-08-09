@@ -73,6 +73,11 @@ impl frame_system::Config for Test {
 	type Nonce = u32;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 	type RuntimeTask = ();
+	type SingleBlockMigrations = ();
+	type MultiBlockMigrator = ();
+	type PreInherents = ();
+	type PostInherents = ();
+	type PostTransactions = ();
 }
 parameter_types! {
 	pub const ExistentialDeposit: u64 = 2;
@@ -88,7 +93,6 @@ impl pallet_balances::Config for Test {
 	type MaxReserves = ();
 	type ReserveIdentifier = [u8; 8];
 	type FreezeIdentifier = [u8; 8];
-	type MaxHolds = ();
 	type MaxFreezes = ();
 	type WeightInfo = ();
 	type RuntimeHoldReason = ();

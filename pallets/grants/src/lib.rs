@@ -239,7 +239,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			let from = ensure_signed(origin)?;
 			ensure!(
-				Bridges::<T>::contains_key(&BridgeId(bridge_id)),
+				Bridges::<T>::contains_key(BridgeId(bridge_id)),
 				Error::<T>::BridgeNotFound
 			);
 

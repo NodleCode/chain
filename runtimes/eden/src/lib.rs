@@ -37,16 +37,16 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 use constants::RuntimeBlockWeights;
 use frame_support::{
 	construct_runtime,
-	genesis_builder_helper::{build_config, create_default_config},
+	genesis_builder_helper::{build_state, get_preset},
 	weights::Weight,
 };
+use pallet_aura::Authorities;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Hash, Nonce, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-
 use sp_runtime::{
 	generic,
 	traits::{BlakeTwo256, Block as BlockT},
@@ -55,8 +55,19 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
+#[cfg(feature = "runtime-benchmarks")]
+use {
+	crate::pallets_system::ExistentialDeposit,
+	cumulus_primitives_core::{Asset, AssetId, Fungibility::Fungible, Location, Parachain, Parent, ParentThen},
+	frame_benchmarking::{BenchmarkBatch, BenchmarkError, BenchmarkList, Benchmarking},
+	frame_support::{parameter_types, traits::StorageInfoTrait},
+	frame_system_benchmarking::Pallet as SystemBench,
+	pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark,
+	xcm::latest::prelude::Assets as XcmAssets,
+};
 
 pub mod constants;
+mod genesis_config_presets;
 mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
@@ -68,8 +79,7 @@ mod version;
 mod weights;
 mod xcm_config;
 
-mod migrations;
-
+pub use genesis_config_presets::development_config_genesis;
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
@@ -108,7 +118,7 @@ construct_runtime! {
 		MessageQueue: pallet_message_queue = 33,
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 35,
-		XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
+		// XTokens: orml_xtokens::{Pallet, Call, Storage, Event<T>} = 36,
 
 		// Neat things
 		Utility: pallet_utility = 40,
@@ -132,8 +142,6 @@ construct_runtime! {
 		Contracts: pallet_contracts = 62,
 	}
 }
-#[cfg(feature = "runtime-benchmarks")]
-use pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
@@ -185,6 +193,8 @@ pub type SignedExtra = (
 	frame_system::CheckWeight<Runtime>,
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 	pallet_sponsorship::ChargeSponsor<Runtime>,
+	cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim<Runtime>,
+	frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
@@ -192,23 +202,11 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, 
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
-const TEST_ALL_STEPS: bool = cfg!(feature = "try-runtime");
 
-pub type Migrations = (
-	pallet_contracts::Migration<Runtime, TEST_ALL_STEPS>,
-	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
-	pallet_identity::migration::v1::VersionUncheckedMigrateV0ToV1<Runtime, 50>,
-	migrations::MultiMigration<Runtime>,
-);
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-	Runtime,
-	Block,
-	frame_system::ChainContext<Runtime>,
-	Runtime,
-	AllPalletsWithSystem,
-	Migrations,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
 #[cfg(feature = "runtime-benchmarks")]
@@ -218,22 +216,37 @@ type EventRecord =
 	frame_system::EventRecord<<Runtime as frame_system::Config>::RuntimeEvent, <Runtime as frame_system::Config>::Hash>;
 sp_api::impl_runtime_apis! {
 	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
-		fn create_default_config() -> Vec<u8> {
-			create_default_config::<RuntimeGenesisConfig>()
+		fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+			build_state::<RuntimeGenesisConfig>(config)
 		}
 
-		fn build_config(config: Vec<u8>) -> sp_genesis_builder::Result {
-			build_config::<RuntimeGenesisConfig>(config)
+		fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
+			get_preset::<RuntimeGenesisConfig>(id, &genesis_config_presets::get_preset)
+		}
+
+		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+			vec![
+				sp_genesis_builder::PresetId::from("development"),
+			]
 		}
 	}
 
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
 		fn slot_duration() -> sp_consensus_aura::SlotDuration {
-			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+			sp_consensus_aura::SlotDuration::from_millis(constants::SLOT_DURATION)
 		}
 
 		fn authorities() -> Vec<AuraId> {
-			Aura::authorities().into_inner()
+			Authorities::<Runtime>::get().into_inner()
+		}
+	}
+
+	impl cumulus_primitives_aura::AuraUnincludedSegmentApi<Block> for Runtime {
+		fn can_build_upon(
+			included_hash: <Block as BlockT>::Hash,
+			slot: cumulus_primitives_aura::Slot,
+		) -> bool {
+			pallets_parachain::ConsensusHook::can_build_upon(included_hash, slot)
 		}
 	}
 
@@ -258,7 +271,8 @@ sp_api::impl_runtime_apis! {
 			Executive::execute_block(block)
 		}
 
-		fn initialize_block(header: &<Block as BlockT>::Header) {
+
+		fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
 			Executive::initialize_block(header)
 		}
 	}
@@ -414,11 +428,6 @@ sp_api::impl_runtime_apis! {
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{Benchmarking, BenchmarkList};
-			use frame_support::traits::StorageInfoTrait;
-
-			use frame_system_benchmarking::Pallet as SystemBench;
-
 			let mut list = Vec::<BenchmarkList>::new();
 
 			list_benchmarks!(list, extra);
@@ -430,33 +439,99 @@ sp_api::impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use cumulus_primitives_core::{Fungibility::Fungible, MultiAsset, MultiLocation, Parent};
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch,BenchmarkError};
+				parameter_types! {
+					pub ExistentialDepositAsset: Option<Asset> = Some((
+						xcm_config::NodlLocation::get(),
+						ExistentialDeposit::get()
+					).into());
+					pub const RandomParaId: ParaId = ParaId::new(43211234);
+				}
 
-			use crate::constants::POLKADOT_EXISTENTIAL_DEPOSIT;
+				impl pallet_xcm::benchmarking::Config for Runtime {
+				type DeliveryHelper = (
+					cumulus_primitives_utility::ToParentDeliveryHelper<
+						xcm_config::XcmConfig,
+						ExistentialDepositAsset,
+						(),
+					>,
+					polkadot_runtime_common::xcm_sender::ToParachainDeliveryHelper<
+						xcm_config::XcmConfig,
+						ExistentialDepositAsset,
+						xcm_config::PriceForSiblingParachainDelivery,
+						RandomParaId,
+						ParachainSystem,
+					>
+				);
 
-			impl pallet_xcm::benchmarking::Config for Runtime {
-				fn reachable_dest() -> Option<MultiLocation> {
+				fn reachable_dest() -> Option<Location> {
 					Some(Parent.into())
 				}
 
-				fn teleportable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
-					// Relay/native token can be teleported between People and Relay.
+				fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+					// Relay/native token can be teleported between AH and Relay.
 					Some((
-						MultiAsset {
-							fun: Fungible(POLKADOT_EXISTENTIAL_DEPOSIT),
-							id: Parent.into()
+						Asset {
+							fun: Fungible(ExistentialDeposit::get()),
+							id: AssetId(Parent.into())
 						},
 						Parent.into(),
 					))
 				}
 
-				fn reserve_transferable_asset_and_dest() -> Option<(MultiAsset, MultiLocation)> {
-					None
+				fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+					Some((
+						Asset {
+							fun: Fungible(ExistentialDeposit::get()),
+							id: AssetId(Parent.into())
+						},
+						// AH can reserve transfer native token to some random parachain.
+						ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+					))
+				}
+
+				fn set_up_complex_asset_transfer(
+				) -> Option<(XcmAssets, u32, Location, Box<dyn FnOnce()>)> {
+					// Transfer to Relay some local AH asset (local-reserve-transfer) while paying
+					// fees using teleported native token.
+					// (We don't care that Relay doesn't accept incoming unknown AH local asset)
+					let dest = Parent.into();
+
+					let fee_amount = constants::EXISTENTIAL_DEPOSIT;
+					let fee_asset: Asset = (Location::parent(), fee_amount).into();
+
+					let who = frame_benchmarking::whitelisted_caller();
+					// Give some multiple of the existential deposit
+					let balance = fee_amount + constants::EXISTENTIAL_DEPOSIT * 1000;
+					let _ = <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(
+						&who, balance,
+					);
+					// verify initial balance
+					assert_eq!(Balances::free_balance(&who), balance);
+
+					// set up local asset
+					let asset_amount = 100000u128;
+					let asset_location = xcm_config::NodlLocation::get();
+					let transfer_asset: Asset = (asset_location, asset_amount).into();
+
+					let assets: XcmAssets = vec![fee_asset.clone(), transfer_asset].into();
+					let fee_index = if assets.get(0).unwrap().eq(&fee_asset) { 0 } else { 1 };
+
+					// verify transferred successfully
+					let verify = Box::new(move || {
+						// verify native balance after transfer, decreased by transferred fee amount
+						// (plus transport fees)
+						assert!(Balances::free_balance(&who) <= balance - fee_amount);
+					});
+					Some((assets, fee_index as u32, dest, verify))
+				}
+
+				fn get_asset() -> Asset {
+					Asset {
+						id: AssetId(Location::parent()),
+						fun: Fungible(ExistentialDeposit::get()),
+					}
 				}
 			}
-
-			use frame_system_benchmarking::Pallet as SystemBench;
 
 			impl frame_system_benchmarking::Config for Runtime {
 				fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
@@ -511,33 +586,10 @@ sp_api::impl_runtime_apis! {
 	}
 }
 
-pub struct CheckInherents;
-impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
-	fn check_inherents(
-		block: &Block,
-		relay_state_proof: &cumulus_pallet_parachain_system::RelayChainStateProof,
-	) -> sp_inherents::CheckInherentsResult {
-		let relay_chain_slot = relay_state_proof
-			.read_slot()
-			.expect("Could not read the relay chain slot from the proof");
-
-		let inherent_data = cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
-			relay_chain_slot,
-			sp_std::time::Duration::from_secs(6),
-		)
-		.create_inherent_data()
-		.expect("Could not create the timestamp inherent data");
-
-		inherent_data.check_extrinsics(block)
-	}
-}
-
-cumulus_pallet_parachain_system::register_validate_block!(
+cumulus_pallet_parachain_system::register_validate_block! {
 	Runtime = Runtime,
 	BlockExecutor = cumulus_pallet_aura_ext::BlockExecutor::<Runtime, Executive>,
-	CheckInherents = CheckInherents,
-);
-
+}
 #[cfg(test)]
 mod tests {
 	use super::*;

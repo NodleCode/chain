@@ -18,10 +18,11 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, constants::deposit, constants::DAYS, implementations::RelayChainBlockNumberProvider,
-	pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip,
-	Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
+	constants, constants::deposit, constants::DAYS, pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve,
+	OriginCaller, Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason,
+	RuntimeOrigin, Signature, Timestamp,
 };
+use cumulus_pallet_parachain_system::RelaychainDataProvider;
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
@@ -29,10 +30,8 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
-
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
-
 use pallet_identity::legacy::IdentityInfo;
 use polkadot_primitives::BlakeTwo256;
 use primitives::{AccountId, Balance};
@@ -48,7 +47,7 @@ impl pallet_grants::Config for Runtime {
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
-	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainDataProvider<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -227,19 +226,18 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
 	type MaxStorageKeyLen = ConstU32<128>;
 	type UnsafeUnstableInterface = ConstBool<false>;
+	type UploadOrigin = EnsureSigned<Self::AccountId>;
+	type InstantiateOrigin = EnsureSigned<Self::AccountId>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	type Migrations = (
-		pallet_contracts::migration::v13::Migration<Runtime>,
-		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
-		pallet_contracts::migration::v15::Migration<Runtime>,
-	);
+	type Migrations = ();
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = RuntimeHoldReason;
 	type Debug = ();
 
 	type Environment = ();
-	type Xcm = ();
+	type Xcm = pallet_xcm::Pallet<Self>;
+	type ApiVersion = ();
 }
 
 parameter_types! {

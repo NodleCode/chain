@@ -20,6 +20,7 @@ use crate::{
 	mock::*, Call, ChargeSponsor, Error, Event, Pot, PotDetailsOf, User, UserDetailsOf, UserRegistrationCount,
 };
 use frame_support::dispatch::DispatchResult;
+use frame_support::traits::fungible::Credit;
 use frame_support::{
 	assert_err, assert_noop, assert_ok,
 	dispatch::GetDispatchInfo,
@@ -33,9 +34,6 @@ use sp_runtime::{
 	DispatchError, TokenError,
 };
 use support::LimitedBalance;
-
-type NegativeImbalance =
-	<<Test as crate::Config>::Currency as Currency<<Test as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 #[test]
 fn creator_of_pot_becomes_sponsor() {
@@ -1937,7 +1935,7 @@ fn valid_sponsor_call_for_yields_correct_pre_dispatch_details() {
 
 		assert!(matches!(
 			pre_dispatch_details.fee_imbalance,
-			Some(NegativeImbalance { .. })
+			Some(Credit::<<Test as frame_system::Config>::AccountId, Balances> { .. })
 		));
 	});
 }

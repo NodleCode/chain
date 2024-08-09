@@ -46,124 +46,148 @@ use core::marker::PhantomData;
 /// Weight functions for `pallet_membership`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_membership::WeightInfo for WeightInfo<T> {
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 49]`.
+	/// Storage: `TechnicalMembership::Members` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
+	/// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Members` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[1, 99]`.
 	fn add_member(m: u32, ) -> Weight {
-		// Minimum execution time: 16_320 nanoseconds.
-		Weight::from_parts(17_310_922_u64, 0)
-			// Standard Error: 868
-			.saturating_add(Weight::from_parts(28_743_u64, 0).saturating_mul(m as u64))
+		// Proof Size summary in bytes:
+		//  Measured:  `207 + m * (64 ±0)`
+		//  Estimated: `4687 + m * (64 ±0)`
+		// Minimum execution time: 12_827_000 picoseconds.
+		Weight::from_parts(13_743_651, 4687)
+			// Standard Error: 622
+			.saturating_add(Weight::from_parts(35_417, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(2_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
+			.saturating_add(Weight::from_parts(0, 64).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalMembership::Prime` (r:1 w:0)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[2, 50]`.
+	/// Storage: `TechnicalMembership::Members` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
+	/// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalMembership::Prime` (r:1 w:0)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Members` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[2, 100]`.
 	fn remove_member(m: u32, ) -> Weight {
-		// Minimum execution time: 18_720 nanoseconds.
-		Weight::from_parts(19_552_340_u64, 0)
-			// Standard Error: 828
-			.saturating_add(Weight::from_parts(20_579_u64, 0).saturating_mul(m as u64))
+		// Proof Size summary in bytes:
+		//  Measured:  `311 + m * (64 ±0)`
+		//  Estimated: `4687 + m * (64 ±0)`
+		// Minimum execution time: 15_197_000 picoseconds.
+		Weight::from_parts(16_172_409, 4687)
+			// Standard Error: 650
+			.saturating_add(Weight::from_parts(35_790, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
+			.saturating_add(Weight::from_parts(0, 64).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalMembership::Prime` (r:1 w:0)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[2, 50]`.
+	/// Storage: `TechnicalMembership::Members` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
+	/// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalMembership::Prime` (r:1 w:0)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Members` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[2, 100]`.
 	fn swap_member(m: u32, ) -> Weight {
-		// Minimum execution time: 18_660 nanoseconds.
-		Weight::from_parts(19_501_197_u64, 0)
-			// Standard Error: 1_144
-			.saturating_add(Weight::from_parts(46_030_u64, 0).saturating_mul(m as u64))
+		// Proof Size summary in bytes:
+		//  Measured:  `311 + m * (64 ±0)`
+		//  Estimated: `4687 + m * (64 ±0)`
+		// Minimum execution time: 15_558_000 picoseconds.
+		Weight::from_parts(16_370_827, 4687)
+			// Standard Error: 603
+			.saturating_add(Weight::from_parts(45_739, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
+			.saturating_add(Weight::from_parts(0, 64).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalMembership::Prime` (r:1 w:0)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 50]`.
-	fn reset_member(m: u32, ) -> Weight {
-		// Minimum execution time: 18_420 nanoseconds.
-		Weight::from_parts(20_145_611_u64, 0)
-			// Standard Error: 1_655
-			.saturating_add(Weight::from_parts(181_545_u64, 0).saturating_mul(m as u64))
+	/// Storage: `TechnicalMembership::Members` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
+	/// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalMembership::Prime` (r:1 w:0)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Members` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[1, 100]`.
+	fn reset_members(m: u32, ) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `311 + m * (64 ±0)`
+		//  Estimated: `4687 + m * (64 ±0)`
+		// Minimum execution time: 15_086_000 picoseconds.
+		Weight::from_parts(16_444_101, 4687)
+			// Standard Error: 967
+			.saturating_add(Weight::from_parts(143_947, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
+			.saturating_add(Weight::from_parts(0, 64).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:1)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
-	// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalMembership::Prime` (r:1 w:1)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Members` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 50]`.
+	/// Storage: `TechnicalMembership::Members` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Proposals` (r:1 w:0)
+	/// Proof: `TechnicalCommittee::Proposals` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalMembership::Prime` (r:1 w:1)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Members` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Members` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[1, 100]`.
 	fn change_key(m: u32, ) -> Weight {
-		// Minimum execution time: 19_571 nanoseconds.
-		Weight::from_parts(20_374_215_u64, 0)
-			// Standard Error: 1_050
-			.saturating_add(Weight::from_parts(46_896_u64, 0).saturating_mul(m as u64))
+		// Proof Size summary in bytes:
+		//  Measured:  `311 + m * (64 ±0)`
+		//  Estimated: `4687 + m * (64 ±0)`
+		// Minimum execution time: 16_146_000 picoseconds.
+		Weight::from_parts(17_269_755, 4687)
+			// Standard Error: 660
+			.saturating_add(Weight::from_parts(42_082, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
+			.saturating_add(Weight::from_parts(0, 64).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Members` (r:1 w:0)
-	// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalMembership::Prime` (r:0 w:1)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 50]`.
+	/// Storage: `TechnicalMembership::Members` (r:1 w:0)
+	/// Proof: `TechnicalMembership::Members` (`max_values`: Some(1), `max_size`: Some(3202), added: 3697, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalMembership::Prime` (r:0 w:1)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	/// The range of component `m` is `[1, 100]`.
 	fn set_prime(m: u32, ) -> Weight {
-		// Minimum execution time: 8_510 nanoseconds.
-		Weight::from_parts(9_100_443_u64, 0)
-			// Standard Error: 599
-			.saturating_add(Weight::from_parts(11_088_u64, 0).saturating_mul(m as u64))
+		// Proof Size summary in bytes:
+		//  Measured:  `31 + m * (32 ±0)`
+		//  Estimated: `4687 + m * (32 ±0)`
+		// Minimum execution time: 5_937_000 picoseconds.
+		Weight::from_parts(6_501_085, 4687)
+			// Standard Error: 323
+			.saturating_add(Weight::from_parts(18_285, 0).saturating_mul(m.into()))
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
+			.saturating_add(Weight::from_parts(0, 32).saturating_mul(m.into()))
 	}
-	// Storage: `TechnicalMembership::Prime` (r:0 w:1)
-	// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
-	// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
-	// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
-	/// The range of component `m` is `[1, 50]`.
-	fn clear_prime(m: u32, ) -> Weight {
-		// Minimum execution time: 3_590 nanoseconds.
-		Weight::from_parts(3_862_307_u64, 0)
-			// Standard Error: 280
-			.saturating_add(Weight::from_parts(861_u64, 0).saturating_mul(m as u64))
+	/// Storage: `TechnicalMembership::Prime` (r:0 w:1)
+	/// Proof: `TechnicalMembership::Prime` (`max_values`: Some(1), `max_size`: Some(32), added: 527, mode: `MaxEncodedLen`)
+	/// Storage: `TechnicalCommittee::Prime` (r:0 w:1)
+	/// Proof: `TechnicalCommittee::Prime` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	fn clear_prime() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 2_533_000 picoseconds.
+		Weight::from_parts(2_807_000, 0)
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
 }
