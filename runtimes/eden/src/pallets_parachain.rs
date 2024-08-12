@@ -63,7 +63,7 @@ parameter_types! {
 }
 pub type ConsensusHook = cumulus_pallet_aura_ext::FixedVelocityConsensusHook<
 	Runtime,
-	{ constants::MILLISECS_PER_RELAY_CHAIN_BLOCK as u32 },
+	{ constants::RELAY_CHAIN_SLOT_DURATION_MILLIS },
 	{ constants::BLOCK_PROCESSING_VELOCITY },
 	{ constants::UNINCLUDED_SEGMENT_CAPACITY },
 >;
