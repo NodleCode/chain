@@ -58,6 +58,7 @@ use sp_version::RuntimeVersion;
 #[cfg(feature = "runtime-benchmarks")]
 use {
 	crate::pallets_system::ExistentialDeposit,
+	cumulus_pallet_session_benchmarking::Pallet as SessionBench,
 	cumulus_primitives_core::{Asset, AssetId, Fungibility::Fungible, Location, Parachain, Parent, ParentThen},
 	frame_benchmarking::{BenchmarkBatch, BenchmarkError, BenchmarkList, Benchmarking},
 	frame_support::{parameter_types, traits::StorageInfoTrait},
@@ -150,26 +151,32 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_balances, Balances]
 		[pallet_scheduler, Scheduler]
-		[pallet_preimage, Preimage]
-		[pallet_multisig, Multisig]
 		[pallet_reserve, CompanyReserve]
+		[pallet_reserve, InternationalReserve]
+		[pallet_reserve, UsaReserve]
 		[pallet_grants, Vesting]
-		[pallet_uniques, Uniques]
-		[pallet_nodle_uniques, NodleUniques]
-		[pallet_message_queue, MessageQueue]
-		[pallet_sponsorship, Sponsorship]
-		[pallet_proxy, Proxy]
-		[pallet_utility, Utility]
-		[pallet_allocations, Allocations]
-		[pallet_collator_selection, CollatorSelection]
-		[pallet_contracts, Contracts]
-		[pallet_identity, Identity]
-		[pallet_membership, TechnicalMembership]
 		[pallet_collective, TechnicalCommittee ]
+		[pallet_membership, TechnicalMembership]
+		[pallet_collator_selection, CollatorSelection]
+		[pallet_session, SessionBench::<Runtime>]
+		[cumulus_pallet_parachain_system, ParachainSystem]
+		[pallet_message_queue, MessageQueue]
+		[cumulus_pallet_xcmp_queue, XcmpQueue]
 		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
 		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
 		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
-		[cumulus_pallet_parachain_system, ParachainSystem]
+		[pallet_utility, Utility]
+		[pallet_multisig, Multisig]
+		[pallet_uniques, Uniques]
+		[pallet_preimage, Preimage]
+		[pallet_nodle_uniques, NodleUniques]
+		[pallet_sponsorship, Sponsorship]
+		[pallet_identity, Identity]
+		[pallet_proxy, Proxy]
+		[pallet_allocations, Allocations]
+		[pallet_membership, AllocationsOracles]
+		[pallet_reserve, DaoReserve]
+		[pallet_contracts, Contracts]
 	);
 }
 
@@ -439,6 +446,8 @@ sp_api::impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+				impl cumulus_pallet_session_benchmarking::Config for Runtime {}
+
 				parameter_types! {
 					pub ExistentialDepositAsset: Option<Asset> = Some((
 						xcm_config::NodlLocation::get(),
