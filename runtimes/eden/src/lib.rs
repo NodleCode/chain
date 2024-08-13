@@ -171,7 +171,7 @@ mod benches {
 		[pallet_identity, Identity]
 		[pallet_proxy, Proxy]
 		[pallet_allocations, Allocations]
-		[pallet_membership, AllocationsOracles]
+		// [pallet_membership, AllocationsOracles]
 		[pallet_reserve, DaoReserve]
 		[pallet_contracts, Contracts]
 	);
