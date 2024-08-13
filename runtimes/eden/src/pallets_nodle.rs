@@ -102,7 +102,7 @@ impl pallet_allocations::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MaxMembers: u32 = 50;
+	pub const MaxMembers: u32 = 10;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
