@@ -18,7 +18,6 @@
 
 //! Unit tests for the vesting module.
 
-
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use hex_literal::hex;
