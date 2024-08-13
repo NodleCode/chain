@@ -18,6 +18,7 @@ use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use parachains_common::message_queue::ParaIdToSibling;
 use polkadot_parachain_primitives::primitives::Sibling;
+use polkadot_runtime_common::xcm_sender::ExponentialPrice;
 use sp_std::sync::Arc;
 use xcm_builder::{
 	AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom, AllowTopLevelPaidExecutionFrom,
@@ -26,13 +27,21 @@ use xcm_builder::{
 	SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WeightInfoBounds,
 	WithComputedOrigin,
 };
+
 use xcm_executor::XcmExecutor;
 #[cfg(feature = "runtime-benchmarks")]
 use {
-	crate::constants::NODL,
-	cumulus_primitives_core::{Asset, Assets, Fungible, Junction, Response},
+	crate::{
+		constants::{EXISTENTIAL_DEPOSIT, NODL},
+		pallets_system::ExistentialDeposit,
+		System,
+	},
+	cumulus_primitives_core::{
+		Asset, Assets, Fungible, GeneralIndex, Junction, NonFungible, Parent, ParentThen, Response,
+	},
 	frame_benchmarking::BenchmarkError,
-	sp_std::vec,
+	pallet_xcm_benchmarks::asset_instance_from,
+	sp_std::{boxed::Box, vec, vec::Vec},
 };
 
 /// Type for specifying how a `Location` can be converted into an `AccountId`. This is used
@@ -131,6 +140,7 @@ pub type CurrencyTransactor = FungibleAdapter<
 parameter_types! {
 	pub UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
 	pub const MaxInstructions: u32 = 100;
+	pub const MaxAssetsIntoHolding: u32 = 8;
 }
 
 pub struct XcmConfig;
@@ -150,7 +160,7 @@ impl xcm_executor::Config for XcmConfig {
 	type AssetClaims = PolkadotXcm;
 	type SubscriptionService = PolkadotXcm;
 	type PalletInstancesInfo = AllPalletsWithSystem;
-	type MaxAssetsIntoHolding = ConstU32<8>;
+	type MaxAssetsIntoHolding = MaxAssetsIntoHolding;
 	type AssetLocker = ();
 	type AssetExchanger = ();
 	type FeeManager = ();
@@ -234,11 +244,119 @@ parameter_types! {
 }
 
 #[cfg(feature = "runtime-benchmarks")]
+pub type PriceForParentDelivery = ExponentialPrice<FeeAssetId, BaseDeliveryFee, TransactionByteFee, ParachainSystem>;
+
+#[cfg(feature = "runtime-benchmarks")]
+impl cumulus_pallet_session_benchmarking::Config for Runtime {}
+
+#[cfg(feature = "runtime-benchmarks")]
+parameter_types! {
+	pub ExistentialDepositAsset: Option<Asset> = Some((
+		NodlLocation::get(),
+		ExistentialDeposit::get()
+	).into());
+	pub const RandomParaId: ParaId = ParaId::new(43211234);
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_xcm::benchmarking::Config for Runtime {
+	type DeliveryHelper = (
+		cumulus_primitives_utility::ToParentDeliveryHelper<XcmConfig, ExistentialDepositAsset, ()>,
+		polkadot_runtime_common::xcm_sender::ToParachainDeliveryHelper<
+			XcmConfig,
+			ExistentialDepositAsset,
+			PriceForSiblingParachainDelivery,
+			RandomParaId,
+			ParachainSystem,
+		>,
+	);
+
+	fn reachable_dest() -> Option<Location> {
+		Some(Parent.into())
+	}
+
+	fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
+		// Relay/native token can be teleported between AH and Relay.
+		Some((
+			Asset {
+				fun: Fungible(ExistentialDeposit::get()),
+				id: AssetId(Parent.into()),
+			},
+			Parent.into(),
+		))
+	}
+
+	fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+		Some((
+			Asset {
+				fun: Fungible(ExistentialDeposit::get()),
+				id: AssetId(Parent.into()),
+			},
+			// AH can reserve transfer native token to some random parachain.
+			ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
+		))
+	}
+
+	fn set_up_complex_asset_transfer() -> Option<(Assets, u32, Location, Box<dyn FnOnce()>)> {
+		// Transfer to Relay some local AH asset (local-reserve-transfer) while paying
+		// fees using teleported native token.
+		// (We don't care that Relay doesn't accept incoming unknown AH local asset)
+		let dest = Parent.into();
+
+		let fee_amount = EXISTENTIAL_DEPOSIT;
+		let fee_asset: Asset = (Location::parent(), fee_amount).into();
+
+		let who = frame_benchmarking::whitelisted_caller();
+		// Give some multiple of the existential deposit
+		let balance = fee_amount + EXISTENTIAL_DEPOSIT * 1000;
+		let _ = <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(&who, balance);
+		// verify initial balance
+		assert_eq!(Balances::free_balance(&who), balance);
+
+		// set up local asset
+		let asset_amount = 100000u128;
+		let asset_location = NodlLocation::get();
+		let transfer_asset: Asset = (asset_location, asset_amount).into();
+
+		let assets: Assets = vec![fee_asset.clone(), transfer_asset].into();
+		let fee_index = if assets.get(0).unwrap().eq(&fee_asset) { 0 } else { 1 };
+
+		// verify transferred successfully
+		let verify = Box::new(move || {
+			// verify native balance after transfer, decreased by transferred fee amount
+			// (plus transport fees)
+			assert!(Balances::free_balance(&who) <= balance - fee_amount);
+		});
+		Some((assets, fee_index as u32, dest, verify))
+	}
+
+	fn get_asset() -> Asset {
+		Asset {
+			id: AssetId(Location::parent()),
+			fun: Fungible(ExistentialDeposit::get()),
+		}
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl frame_system_benchmarking::Config for Runtime {
+	fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
+		ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
+		Ok(())
+	}
+
+	fn verify_set_code() {
+		System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
 parameter_types! {
 	pub const TrustedTeleporter: Option<(Location, Asset)> = Some((
 		Location::parent(),
 		Asset{ id: AssetId(Location::parent()), fun: Fungible(100) }
 	));
+	pub const CheckedAccount: Option<(AccountId, Location)> = None;
 	pub const TrustedReserve: Option<(Location, Asset)> = None;
 
 }
@@ -320,17 +438,36 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 impl pallet_xcm_benchmarks::Config for Runtime {
 	type XcmConfig = XcmConfig;
 	type AccountIdConverter = LocationToAccountId;
-	type DeliveryHelper = ();
-
+	type DeliveryHelper =
+		cumulus_primitives_utility::ToParentDeliveryHelper<XcmConfig, ExistentialDepositAsset, PriceForParentDelivery>;
 	fn valid_destination() -> Result<Location, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
-	fn worst_case_holding(_depositable_count: u32) -> Assets {
-		// 1 fungibles can be traded in the worst case: TODO: CHA-407 https://github.com/NodleCode/chain/issues/717
-		let assets = Asset {
-			id: AssetId(NodlLocation::get()),
-			fun: Fungible(10_000_000 * NODL),
-		};
-		assets.into()
+	fn worst_case_holding(depositable_count: u32) -> Assets {
+		// A mix of fungible, non-fungible, and concrete assets.
+		let holding_non_fungibles = MaxAssetsIntoHolding::get() / 2 - depositable_count;
+		let holding_fungibles = holding_non_fungibles.saturating_sub(2); // -2 for two `iter::once` bellow
+		let fungibles_amount: u128 = 100;
+		(0..holding_fungibles)
+			.map(|i| {
+				Asset {
+					id: GeneralIndex(i as u128).into(),
+					fun: Fungible(fungibles_amount * (i + 1) as u128), // non-zero amount
+				}
+			})
+			.chain(core::iter::once(Asset {
+				id: Here.into(),
+				fun: Fungible(u128::MAX),
+			}))
+			.chain(core::iter::once(Asset {
+				id: AssetId(NodlLocation::get()),
+				fun: Fungible(1_000_000 * NODL),
+			}))
+			.chain((0..holding_non_fungibles).map(|i| Asset {
+				id: GeneralIndex(i as u128).into(),
+				fun: NonFungible(asset_instance_from(i)),
+			}))
+			.collect::<Vec<_>>()
+			.into()
 	}
 }

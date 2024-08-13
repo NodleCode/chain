@@ -43,7 +43,7 @@ impl pallet_message_queue::Config for Runtime {
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type MessageProcessor = xcm_builder::ProcessXcmMessage<
 		AggregateMessageOrigin,
-		xcm_executor::XcmExecutor<crate::xcm_config::XcmConfig>,
+		xcm_executor::XcmExecutor<xcm_config::XcmConfig>,
 		RuntimeCall,
 	>;
 	type Size = u32;
