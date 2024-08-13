@@ -112,18 +112,23 @@ fn eden_testnet_genesis(
 }
 
 pub fn development_config_genesis(id: ParaId) -> serde_json::Value {
+	// For pallet_collator_selection::leave_intent benchmarking to work, there should be no invulnerables configured in the genesis.
+	#[cfg(feature = "runtime-benchmarks")]
+	let collators = vec![];
+	#[cfg(not(feature = "runtime-benchmarks"))]
+	let collators = vec![
+		(
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+			get_from_seed::<AuraId>("Alice"),
+		),
+		(
+			get_account_id_from_seed::<sr25519::Public>("Bob"),
+			get_from_seed::<AuraId>("Bob"),
+		),
+	];
 	eden_testnet_genesis(
 		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-		vec![
-			(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_from_seed::<AuraId>("Alice"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_from_seed::<AuraId>("Bob"),
-			),
-		],
+		collators,
 		None,
 		id,
 	)
