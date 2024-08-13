@@ -57,16 +57,15 @@ use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 #[cfg(feature = "runtime-benchmarks")]
 use {
-	crate::pallets_system::ExistentialDeposit,
-	cumulus_primitives_core::{Asset, AssetId, Fungibility::Fungible, Location, Parachain, Parent, ParentThen},
-	frame_benchmarking::{BenchmarkBatch, BenchmarkError, BenchmarkList, Benchmarking},
-	frame_support::{parameter_types, traits::StorageInfoTrait},
+	cumulus_pallet_session_benchmarking::Pallet as SessionBench,
+	frame_benchmarking::{BenchmarkBatch, BenchmarkList, Benchmarking},
+	frame_support::traits::StorageInfoTrait,
 	frame_system_benchmarking::Pallet as SystemBench,
 	pallet_xcm::benchmarking::Pallet as PalletXcmExtrinsicsBenchmark,
-	xcm::latest::prelude::Assets as XcmAssets,
 };
 
 pub mod constants;
+mod genesis_config_presets;
 mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
@@ -78,6 +77,7 @@ mod version;
 mod weights;
 mod xcm_config;
 
+pub use genesis_config_presets::development_config_genesis;
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
@@ -148,26 +148,32 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_balances, Balances]
 		[pallet_scheduler, Scheduler]
-		[pallet_preimage, Preimage]
-		[pallet_multisig, Multisig]
 		[pallet_reserve, CompanyReserve]
+		[pallet_reserve, InternationalReserve]
+		[pallet_reserve, UsaReserve]
 		[pallet_grants, Vesting]
-		[pallet_uniques, Uniques]
-		[pallet_nodle_uniques, NodleUniques]
-		[pallet_message_queue, MessageQueue]
-		[pallet_sponsorship, Sponsorship]
-		[pallet_proxy, Proxy]
-		[pallet_utility, Utility]
-		[pallet_allocations, Allocations]
-		[pallet_collator_selection, CollatorSelection]
-		[pallet_contracts, Contracts]
-		[pallet_identity, Identity]
-		[pallet_membership, TechnicalMembership]
 		[pallet_collective, TechnicalCommittee ]
+		[pallet_membership, TechnicalMembership]
+		[pallet_collator_selection, CollatorSelection]
+		[pallet_session, SessionBench::<Runtime>]
+		[cumulus_pallet_parachain_system, ParachainSystem]
+		[pallet_message_queue, MessageQueue]
+		[cumulus_pallet_xcmp_queue, XcmpQueue]
 		[pallet_xcm, PalletXcmExtrinsicsBenchmark::<Runtime>]
 		[pallet_xcm_benchmarks::generic, XcmGenericBenchmarks]
 		[pallet_xcm_benchmarks::fungible, XcmFungibleBenchmarks]
-		[cumulus_pallet_parachain_system, ParachainSystem]
+		[pallet_utility, Utility]
+		[pallet_multisig, Multisig]
+		[pallet_uniques, Uniques]
+		[pallet_preimage, Preimage]
+		[pallet_nodle_uniques, NodleUniques]
+		[pallet_sponsorship, Sponsorship]
+		[pallet_identity, Identity]
+		[pallet_proxy, Proxy]
+		[pallet_allocations, Allocations]
+		[pallet_membership, AllocationsOracles]
+		[pallet_reserve, DaoReserve]
+		[pallet_contracts, Contracts]
 	);
 }
 
@@ -201,9 +207,23 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 
+#[allow(deprecated)]
+pub type Migrations = (
+	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
+	cumulus_pallet_xcmp_queue::migration::v5::MigrateV4ToV5<Runtime>,
+	pallet_collator_selection::migration::v2::MigrationToV2<Runtime>,
+	pallet_xcm::migration::MigrateToLatestXcmVersion<Runtime>,
+);
+
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	Migrations,
+>;
 
 #[cfg(feature = "runtime-benchmarks")]
 pub type XcmGenericBenchmarks = pallet_xcm_benchmarks::generic::Pallet<Runtime>;
@@ -219,11 +239,13 @@ sp_api::impl_runtime_apis! {
 		}
 
 		fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
-			get_preset::<RuntimeGenesisConfig>(id, |_| None)
+			get_preset::<RuntimeGenesisConfig>(id, &genesis_config_presets::get_preset)
 		}
 
 		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
-			Default::default()
+			vec![
+				sp_genesis_builder::PresetId::from("development"),
+			]
 		}
 	}
 
@@ -435,112 +457,6 @@ sp_api::impl_runtime_apis! {
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig,
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-				parameter_types! {
-					pub ExistentialDepositAsset: Option<Asset> = Some((
-						xcm_config::NodlLocation::get(),
-						ExistentialDeposit::get()
-					).into());
-					pub const RandomParaId: ParaId = ParaId::new(43211234);
-				}
-
-				impl pallet_xcm::benchmarking::Config for Runtime {
-				type DeliveryHelper = (
-					cumulus_primitives_utility::ToParentDeliveryHelper<
-						xcm_config::XcmConfig,
-						ExistentialDepositAsset,
-						(),
-					>,
-					polkadot_runtime_common::xcm_sender::ToParachainDeliveryHelper<
-						xcm_config::XcmConfig,
-						ExistentialDepositAsset,
-						xcm_config::PriceForSiblingParachainDelivery,
-						RandomParaId,
-						ParachainSystem,
-					>
-				);
-
-				fn reachable_dest() -> Option<Location> {
-					Some(Parent.into())
-				}
-
-				fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
-					// Relay/native token can be teleported between AH and Relay.
-					Some((
-						Asset {
-							fun: Fungible(ExistentialDeposit::get()),
-							id: AssetId(Parent.into())
-						},
-						Parent.into(),
-					))
-				}
-
-				fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
-					Some((
-						Asset {
-							fun: Fungible(ExistentialDeposit::get()),
-							id: AssetId(Parent.into())
-						},
-						// AH can reserve transfer native token to some random parachain.
-						ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
-					))
-				}
-
-				fn set_up_complex_asset_transfer(
-				) -> Option<(XcmAssets, u32, Location, Box<dyn FnOnce()>)> {
-					// Transfer to Relay some local AH asset (local-reserve-transfer) while paying
-					// fees using teleported native token.
-					// (We don't care that Relay doesn't accept incoming unknown AH local asset)
-					let dest = Parent.into();
-
-					let fee_amount = constants::EXISTENTIAL_DEPOSIT;
-					let fee_asset: Asset = (Location::parent(), fee_amount).into();
-
-					let who = frame_benchmarking::whitelisted_caller();
-					// Give some multiple of the existential deposit
-					let balance = fee_amount + constants::EXISTENTIAL_DEPOSIT * 1000;
-					let _ = <Balances as frame_support::traits::Currency<_>>::make_free_balance_be(
-						&who, balance,
-					);
-					// verify initial balance
-					assert_eq!(Balances::free_balance(&who), balance);
-
-					// set up local asset
-					let asset_amount = 100000u128;
-					let asset_location = xcm_config::NodlLocation::get();
-					let transfer_asset: Asset = (asset_location, asset_amount).into();
-
-					let assets: XcmAssets = vec![fee_asset.clone(), transfer_asset].into();
-					let fee_index = if assets.get(0).unwrap().eq(&fee_asset) { 0 } else { 1 };
-
-					// verify transferred successfully
-					let verify = Box::new(move || {
-						// verify native balance after transfer, decreased by transferred fee amount
-						// (plus transport fees)
-						assert!(Balances::free_balance(&who) <= balance - fee_amount);
-					});
-					Some((assets, fee_index as u32, dest, verify))
-				}
-
-				fn get_asset() -> Asset {
-					Asset {
-						id: AssetId(Location::parent()),
-						fun: Fungible(ExistentialDeposit::get()),
-					}
-				}
-			}
-
-			impl frame_system_benchmarking::Config for Runtime {
-				fn setup_set_code_requirements(code: &sp_std::vec::Vec<u8>) -> Result<(), BenchmarkError> {
-					ParachainSystem::initialize_for_set_code_benchmark(code.len() as u32);
-					Ok(())
-				}
-
-				fn verify_set_code() {
-					System::assert_last_event(cumulus_pallet_parachain_system::Event::<Runtime>::ValidationFunctionStored.into());
-				}
-			}
-
-
 			let whitelist: Vec<sp_storage::TrackedStorageKey> = vec![
 				// Block Number
 				hex_literal::hex!("26aa394eea5630e07c48ae0c9558cef702a5c1b19ab7a04f536c519aca4983ac").to_vec().into(),

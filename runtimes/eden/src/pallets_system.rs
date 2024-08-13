@@ -25,59 +25,44 @@ use crate::{
 };
 use codec::Encode;
 use frame_support::{
-	parameter_types,
-	traits::{ConstU32, Everything},
+	derive_impl, parameter_types,
+	traits::ConstU32,
 	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
 use frame_system::limits::BlockLength;
 use pallet_transaction_payment::{FungibleAdapter, Multiplier};
-use polkadot_runtime_common::SlowAdjustingFeeUpdate;
-use primitives::{AccountId, Balance, BlockNumber, Hash, Moment, Nonce, Signature};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use primitives::{AccountId, Balance, Hash, Moment, Nonce, Signature};
 use sp_runtime::{
 	generic,
-	traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
+	traits::{SaturatedConversion, StaticLookup},
 	FixedPointNumber, Perquintill,
 };
 use sp_version::RuntimeVersion;
 
 parameter_types! {
-	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
 	pub RuntimeBlockLength: BlockLength =
 		BlockLength::max_with_normal_ratio(5 * 1024 * 1024, constants::NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 37;
 }
 
+#[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig)]
 impl frame_system::Config for Runtime {
-	type BaseCallFilter = Everything;
 	type BlockWeights = constants::RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
-	type DbWeight = RocksDbWeight;
-	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeCall = RuntimeCall;
-	type Hash = Hash;
-	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
-	type Lookup = AccountIdLookup<AccountId, ()>;
-	type RuntimeEvent = RuntimeEvent;
+	type Nonce = Nonce;
+	type Hash = Hash;
+	type Block = Block;
 	type BlockHashCount = BlockHashCount;
+	type DbWeight = RocksDbWeight;
 	type Version = Version;
-	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
-	type OnNewAccount = ();
-	type OnKilledAccount = ();
 	type SystemWeightInfo = crate::weights::frame_system::WeightInfo<Runtime>;
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
-	type Nonce = Nonce;
-	type Block = Block;
-	type RuntimeTask = RuntimeTask;
-	type SingleBlockMigrations = ();
-	type MultiBlockMigrator = ();
-	type PreInherents = ();
-	type PostInherents = ();
-	type PostTransactions = ();
 }
 
 parameter_types! {

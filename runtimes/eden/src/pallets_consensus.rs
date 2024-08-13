@@ -69,9 +69,9 @@ impl cumulus_pallet_aura_ext::Config for Runtime {}
 
 parameter_types! {
 	pub const PotId: PalletId = PalletId(*b"PotStake");
-	pub const MaxCandidates: u32 = 1000;
+	pub const MaxCandidates: u32 = 100;
 	pub const MinEligibleCollators: u32 = 3;
-	pub const MaxInvulnerables: u32 = 50;
+	pub const MaxInvulnerables: u32 = 20;
 }
 
 impl pallet_collator_selection::Config for Runtime {
