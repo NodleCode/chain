@@ -18,7 +18,6 @@ use frame_system::EnsureRoot;
 use pallet_xcm::XcmPassthrough;
 use parachains_common::message_queue::{NarrowOriginToSibling, ParaIdToSibling};
 use polkadot_parachain_primitives::primitives::Sibling;
-use polkadot_runtime_common::xcm_sender::ExponentialPrice;
 use sp_runtime::Perbill;
 use sp_std::sync::Arc;
 use xcm_builder::{
