@@ -112,7 +112,7 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
 	type MembershipInitialized = TechnicalCommittee;
 	type MembershipChanged = TechnicalCommittee;
 	type MaxMembers = MaxMembers;
-	type WeightInfo = crate::weights::pallet_membership::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_membership_technical_membership::WeightInfo<Runtime>;
 }
 
 impl pallet_mandate::Config for Runtime {

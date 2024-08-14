@@ -120,5 +120,5 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type MembershipChanged = ();
 	type MaxMembers = MaxMembers;
-	type WeightInfo = crate::weights::pallet_membership::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_membership_allocations_oracles::WeightInfo<Runtime>;
 }
