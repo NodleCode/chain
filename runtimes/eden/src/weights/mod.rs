@@ -19,6 +19,7 @@ pub mod pallet_reserve_dao_reserve;
 pub mod pallet_reserve_international_reserve;
 pub mod pallet_reserve_usa_reserve;
 pub mod pallet_scheduler;
+pub mod pallet_session;
 pub mod pallet_sponsorship;
 pub mod pallet_timestamp;
 pub mod pallet_uniques;
