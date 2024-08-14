@@ -220,7 +220,7 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type MaxPageSize = ConstU32<{ 1 << 16 }>;
 	type ControllerOrigin = EnsureRoot<AccountId>;
 	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
-	type WeightInfo = cumulus_pallet_xcmp_queue::weights::SubstrateWeight<Self>;
+	type WeightInfo = crate::weights::cumulus_pallet_xcmp_queue::WeightInfo<Self>;
 	type PriceForSiblingDelivery = PriceForSiblingParachainDelivery;
 	type XcmpQueue = TransformOrigin<MessageQueue, AggregateMessageOrigin, ParaId, ParaIdToSibling>;
 	type MaxInboundSuspended = sp_core::ConstU32<1_000>;
