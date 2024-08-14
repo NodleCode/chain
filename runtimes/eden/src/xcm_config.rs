@@ -210,7 +210,7 @@ parameter_types! {
 }
 
 pub type PriceForSiblingParachainDelivery =
-	polkadot_runtime_common::xcm_sender::ExponentialPrice<FeeAssetId, BaseDeliveryFee, TransactionByteFee, XcmpQueue>;
+	ExponentialPrice<FeeAssetId, BaseDeliveryFee, TransactionByteFee, XcmpQueue>;
 
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;

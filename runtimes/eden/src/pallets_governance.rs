@@ -81,7 +81,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
 parameter_types! {
 	pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 	pub const MaxProposals: u32 = 100;
-	pub const MaxMembers: u32 = 10;
+	pub const MaxMembers: u32 = 50;
 	pub MaxCollectivesProposalWeight: Weight = Perbill::from_percent(50) * RuntimeBlockWeights::get().max_block;
 
 }

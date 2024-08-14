@@ -102,7 +102,7 @@ impl pallet_allocations::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MaxMembers: u32 = 10;
+	pub const MaxMembers: u32 = 50;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
@@ -113,6 +113,11 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
 	type ResetOrigin = MoreThanHalfOfTechComm;
 	type PrimeOrigin = MoreThanHalfOfTechComm;
 	type MembershipInitialized = ();
+	// Note: There's an assumption in this pallet's benchmarking logic upstream that the type MembershipChanged should be non default.
+	// This is their bug and here we just take a workaround for our own benchmarking. Do not use TechnicalCommittee for non benchmarking.
+	#[cfg(feature = "runtime-benchmarks")]
+	type MembershipChanged = crate::TechnicalCommittee;
+	#[cfg(not(feature = "runtime-benchmarks"))]
 	type MembershipChanged = ();
 	type MaxMembers = MaxMembers;
 	type WeightInfo = crate::weights::pallet_membership::WeightInfo<Runtime>;
