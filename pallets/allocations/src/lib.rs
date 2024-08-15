@@ -53,7 +53,6 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
-#[cfg(not(tarpaulin))]
 #[derive(Default, Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
 	#[default]
@@ -260,7 +259,6 @@ pub mod pallet {
 		SessionQuotaCalculated(BalanceOf<T>),
 	}
 
-	#[cfg(not(tarpaulin))]
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 

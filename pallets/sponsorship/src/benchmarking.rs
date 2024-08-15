@@ -17,7 +17,6 @@
  */
 
 //! Benchmarking setup for pallet-sponsorship
-#![cfg(feature = "runtime-benchmarks")]
 use super::*;
 
 #[allow(unused)]
