@@ -199,6 +199,13 @@ parameter_types! {
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
 }
 
+type ContractsMigrations<T> = (
+	pallet_contracts::migration::v13::Migration<T>,
+	pallet_contracts::migration::v14::Migration<T, Balances>,
+	pallet_contracts::migration::v15::Migration<T>,
+	pallet_contracts::migration::v16::Migration<T>,
+);
+
 impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
@@ -229,7 +236,7 @@ impl pallet_contracts::Config for Runtime {
 	type UploadOrigin = EnsureSigned<Self::AccountId>;
 	type InstantiateOrigin = EnsureSigned<Self::AccountId>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	type Migrations = ();
+	type Migrations = ContractsMigrations<Runtime>;
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = RuntimeHoldReason;
