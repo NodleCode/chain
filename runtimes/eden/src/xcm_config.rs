@@ -2,11 +2,7 @@ use super::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, MessageQueue, ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
-use crate::{
-	constants::{RuntimeBlockWeights, NODL},
-	implementations::ToAuthor,
-	pallets_system::TransactionByteFee,
-};
+use crate::{constants::RuntimeBlockWeights, implementations::ToAuthor, pallets_system::TransactionByteFee};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
 	Junction::{PalletInstance, Parachain},
@@ -35,7 +31,11 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 #[cfg(feature = "runtime-benchmarks")]
 use {
-	crate::{constants::EXISTENTIAL_DEPOSIT, pallets_system::ExistentialDeposit, System},
+	crate::{
+		constants::{EXISTENTIAL_DEPOSIT, NODL},
+		pallets_system::ExistentialDeposit,
+		System,
+	},
 	cumulus_primitives_core::{Asset, Assets, Fungible, Junction, Parent, ParentThen, Response},
 	frame_benchmarking::BenchmarkError,
 	sp_std::{boxed::Box, vec},
