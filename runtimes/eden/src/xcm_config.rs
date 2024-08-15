@@ -2,11 +2,7 @@ use super::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, MessageQueue, ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
-use crate::{
-	constants::{RuntimeBlockWeights, NODL},
-	implementations::ToAuthor,
-	pallets_system::TransactionByteFee,
-};
+use crate::{constants::RuntimeBlockWeights, implementations::ToAuthor, pallets_system::TransactionByteFee};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
 	Junction::{PalletInstance, Parachain},
@@ -35,7 +31,11 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 #[cfg(feature = "runtime-benchmarks")]
 use {
-	crate::{constants::EXISTENTIAL_DEPOSIT, pallets_system::ExistentialDeposit, System},
+	crate::{
+		constants::{EXISTENTIAL_DEPOSIT, NODL},
+		pallets_system::ExistentialDeposit,
+		System,
+	},
 	cumulus_primitives_core::{Asset, Assets, Fungible, Junction, Parent, ParentThen, Response},
 	frame_benchmarking::BenchmarkError,
 	sp_std::{boxed::Box, vec},
@@ -287,21 +287,15 @@ impl pallet_xcm::benchmarking::Config for Runtime {
 	}
 
 	fn teleportable_asset_and_dest() -> Option<(Asset, Location)> {
-		// Relay/native token can be teleported between AH and Relay.
-		Some((
-			Asset {
-				fun: Fungible(ExistentialDeposit::get()),
-				id: AssetId(Parent.into()),
-			},
-			Parent.into(),
-		))
+		None
 	}
 
 	fn reserve_transferable_asset_and_dest() -> Option<(Asset, Location)> {
+		ParachainSystem::open_outbound_hrmp_channel_for_benchmarks_or_tests(RandomParaId::get().into());
 		Some((
 			Asset {
 				fun: Fungible(ExistentialDeposit::get()),
-				id: AssetId(Parent.into()),
+				id: AssetId(NodlLocation::get()),
 			},
 			// AH can reserve transfer native token to some random parachain.
 			ParentThen(Parachain(RandomParaId::get().into()).into()).into(),
@@ -309,13 +303,10 @@ impl pallet_xcm::benchmarking::Config for Runtime {
 	}
 
 	fn set_up_complex_asset_transfer() -> Option<(Assets, u32, Location, Box<dyn FnOnce()>)> {
-		// Transfer to Relay some local AH asset (local-reserve-transfer) while paying
-		// fees using teleported native token.
-		// (We don't care that Relay doesn't accept incoming unknown AH local asset)
 		let dest = Parent.into();
 
 		let fee_amount = EXISTENTIAL_DEPOSIT;
-		let fee_asset: Asset = (Location::parent(), fee_amount).into();
+		let fee_asset: Asset = (NodlLocation::get(), fee_amount).into();
 
 		let who = frame_benchmarking::whitelisted_caller();
 		// Give some multiple of the existential deposit
@@ -330,7 +321,7 @@ impl pallet_xcm::benchmarking::Config for Runtime {
 		let transfer_asset: Asset = (asset_location, asset_amount).into();
 
 		let assets: Assets = vec![fee_asset.clone(), transfer_asset].into();
-		let fee_index = if assets.get(0).unwrap().eq(&fee_asset) { 0 } else { 1 };
+		let fee_index = 0;
 
 		// verify transferred successfully
 		let verify = Box::new(move || {
@@ -343,7 +334,7 @@ impl pallet_xcm::benchmarking::Config for Runtime {
 
 	fn get_asset() -> Asset {
 		Asset {
-			id: AssetId(Location::parent()),
+			id: AssetId(NodlLocation::get()),
 			fun: Fungible(ExistentialDeposit::get()),
 		}
 	}
