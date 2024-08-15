@@ -2,7 +2,11 @@ use super::{
 	AccountId, AllPalletsWithSystem, Balance, Balances, MessageQueue, ParachainInfo, ParachainSystem, PolkadotXcm,
 	Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmpQueue,
 };
-use crate::{constants::RuntimeBlockWeights, implementations::ToAuthor, pallets_system::TransactionByteFee};
+use crate::{
+	constants::{RuntimeBlockWeights, NODL},
+	implementations::ToAuthor,
+	pallets_system::TransactionByteFee,
+};
 use cumulus_primitives_core::{
 	AggregateMessageOrigin, AssetId,
 	Junction::{PalletInstance, Parachain},
@@ -31,17 +35,10 @@ use xcm_builder::{
 use xcm_executor::XcmExecutor;
 #[cfg(feature = "runtime-benchmarks")]
 use {
-	crate::{
-		constants::{EXISTENTIAL_DEPOSIT, NODL},
-		pallets_system::ExistentialDeposit,
-		System,
-	},
-	cumulus_primitives_core::{
-		Asset, Assets, Fungible, GeneralIndex, Junction, NonFungible, Parent, ParentThen, Response,
-	},
+	crate::{constants::EXISTENTIAL_DEPOSIT, pallets_system::ExistentialDeposit, System},
+	cumulus_primitives_core::{Asset, Assets, Fungible, Junction, Parent, ParentThen, Response},
 	frame_benchmarking::BenchmarkError,
-	pallet_xcm_benchmarks::asset_instance_from,
-	sp_std::{boxed::Box, vec, vec::Vec},
+	sp_std::{boxed::Box, vec},
 };
 
 /// Type for specifying how a `Location` can be converted into an `AccountId`. This is used
@@ -379,9 +376,8 @@ impl pallet_xcm_benchmarks::generic::Config for Runtime {
 	type RuntimeCall = RuntimeCall;
 	type TransactAsset = Balances;
 
-	//TODO put a realistic value here:
 	fn fee_asset() -> Result<Asset, BenchmarkError> {
-		let assets: Asset = (AssetId(NodlLocation::get()), 10_000_000 * NODL).into();
+		let assets: Asset = (AssetId(NodlLocation::get()), 1_000_000 * NODL).into();
 		Ok(assets)
 	}
 
@@ -444,7 +440,7 @@ impl pallet_xcm_benchmarks::fungible::Config for Runtime {
 	fn get_asset() -> Asset {
 		Asset {
 			id: AssetId(NodlLocation::get()),
-			fun: Fungible(crate::constants::NODL),
+			fun: Fungible(NODL),
 		}
 	}
 }
@@ -457,31 +453,12 @@ impl pallet_xcm_benchmarks::Config for Runtime {
 	fn valid_destination() -> Result<Location, BenchmarkError> {
 		Ok(RelayLocation::get())
 	}
-	fn worst_case_holding(depositable_count: u32) -> Assets {
-		// A mix of fungible, non-fungible, and concrete assets.
-		let holding_non_fungibles = MaxAssetsIntoHolding::get() / 2 - depositable_count;
-		let holding_fungibles = holding_non_fungibles.saturating_sub(2); // -2 for two `iter::once` bellow
-		let fungibles_amount: u128 = 100;
-		(0..holding_fungibles)
-			.map(|i| {
-				Asset {
-					id: GeneralIndex(i as u128).into(),
-					fun: Fungible(fungibles_amount * (i + 1) as u128), // non-zero amount
-				}
-			})
-			.chain(core::iter::once(Asset {
-				id: Here.into(),
-				fun: Fungible(u128::MAX),
-			}))
-			.chain(core::iter::once(Asset {
-				id: AssetId(NodlLocation::get()),
-				fun: Fungible(1_000_000 * NODL),
-			}))
-			.chain((0..holding_non_fungibles).map(|i| Asset {
-				id: GeneralIndex(i as u128).into(),
-				fun: NonFungible(asset_instance_from(i)),
-			}))
-			.collect::<Vec<_>>()
-			.into()
+	fn worst_case_holding(_depositable_count: u32) -> Assets {
+		// Eden only knows about NODL.
+		vec![Asset {
+			id: AssetId(NodlLocation::get()),
+			fun: Fungible(1_000_000 * NODL),
+		}]
+		.into()
 	}
 }
