@@ -70,7 +70,11 @@ impl From<&Asset> for AssetTypes {
 					interior: Junctions::X1(ref arc),
 				}),
 				fun: Fungible(_),
-			} if matches!(arc.as_ref(), [Junction::PalletInstance(2)]) => AssetTypes::Balances,
+			} if matches!(arc.as_ref(), [Junction::PalletInstance(2)])
+				|| matches!(arc.as_ref(), [Junction::AccountId32 { .. }]) =>
+			{
+				AssetTypes::Balances
+			}
 			_ => AssetTypes::Unknown,
 		}
 	}
@@ -382,7 +386,7 @@ mod test {
 			fun: Fungible(100),
 		};
 		let asset_type = AssetTypes::from(&asset);
-		assert_eq!(asset_type, AssetTypes::Unknown);
+		assert_eq!(asset_type, AssetTypes::Balances);
 
 		let asset = Asset {
 			id: [0_u8; 32].into(),
