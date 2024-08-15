@@ -86,16 +86,8 @@ const MAX_ASSETS: u64 = 1;
 impl WeighMultiAssets for AssetFilter {
 	fn weigh_multi_assets(&self, balances_weight: Weight) -> Weight {
 		match self {
-			Self::Definite(assets) => assets
-				.inner()
-				.iter()
-				.map(From::from)
-				.map(|t| match t {
-					AssetTypes::Balances => balances_weight,
-					AssetTypes::Unknown => Weight::MAX,
-				})
-				.fold(Weight::zero(), |acc, x| acc.saturating_add(x)),
-			// We don't support any NFTs on Kusama, so these two variants will always match
+			Self::Definite(assets) => balances_weight.saturating_mul(assets.inner().iter().count() as u64),
+			// We don't support any NFTs as assets on Eden, so these two variants will always match
 			// only 1 kind of fungible asset.
 			Self::Wild(AllOf { .. } | AllOfCounted { .. }) => balances_weight,
 			Self::Wild(AllCounted(count)) => balances_weight.saturating_mul(MAX_ASSETS.min(*count as u64)),
@@ -106,14 +98,7 @@ impl WeighMultiAssets for AssetFilter {
 
 impl WeighMultiAssets for Assets {
 	fn weigh_multi_assets(&self, balances_weight: Weight) -> Weight {
-		self.inner()
-			.iter()
-			.map(<AssetTypes as From<&Asset>>::from)
-			.map(|t| match t {
-				AssetTypes::Balances => balances_weight,
-				AssetTypes::Unknown => Weight::MAX,
-			})
-			.fold(Weight::zero(), |acc, x| acc.saturating_add(x))
+		balances_weight.saturating_mul(self.inner().iter().count() as u64)
 	}
 }
 
@@ -180,8 +165,8 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::report_error()
 	}
 
-	fn initiate_reserve_withdraw(_assets: &AssetFilter, _reserve: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
-		XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw()
+	fn initiate_reserve_withdraw(assets: &AssetFilter, _reserve: &Location, _xcm: &xcm::latest::Xcm<()>) -> Weight {
+		assets.weigh_multi_assets(XcmBalancesWeight::<Runtime>::initiate_reserve_withdraw())
 	}
 
 	fn report_holding(_response_info: &QueryResponseInfo, _assets: &AssetFilter) -> Weight {
@@ -224,12 +209,12 @@ impl<RuntimeCall> cumulus_primitives_core::XcmWeightInfo<RuntimeCall> for NodleX
 		XcmGeneric::<Runtime>::unsubscribe_version()
 	}
 
-	fn burn_asset(_assets: &Assets) -> Weight {
-		XcmGeneric::<Runtime>::burn_asset()
+	fn burn_asset(assets: &Assets) -> Weight {
+		assets.weigh_multi_assets(XcmGeneric::<Runtime>::burn_asset())
 	}
 
-	fn expect_asset(_assets: &Assets) -> Weight {
-		XcmGeneric::<Runtime>::expect_asset()
+	fn expect_asset(assets: &Assets) -> Weight {
+		assets.weigh_multi_assets(XcmGeneric::<Runtime>::expect_asset())
 	}
 
 	fn expect_origin(_origin: &Option<Location>) -> Weight {

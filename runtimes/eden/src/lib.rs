@@ -210,7 +210,6 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, Si
 #[allow(deprecated)]
 pub type Migrations = (
 	pallet_contracts::Migration<Runtime>,
-	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
 	cumulus_pallet_xcmp_queue::migration::v5::MigrateV4ToV5<Runtime>,
 	pallet_collator_selection::migration::v2::MigrationToV2<Runtime>,
 	pallet_xcm::migration::MigrateToLatestXcmVersion<Runtime>,
