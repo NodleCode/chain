@@ -25,7 +25,7 @@ use {frame_support::ensure, sp_runtime::TryRuntimeError, sp_std::prelude::*};
 pub struct FromSpec27<T>(sp_std::marker::PhantomData<T>);
 impl<T> OnRuntimeUpgrade for FromSpec27<T>
 where
-	T: pallet_identity::Config + pallet_uniques::Config,
+	T: pallet_uniques::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
 		StorageVersion::new(1).put::<pallet_uniques::Pallet<T>>();
@@ -39,10 +39,6 @@ where
 			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 0,
 			TryRuntimeError::Other("pallet_uniques storage version is not 0")
 		);
-		ensure!(
-			StorageVersion::get::<pallet_identity::Pallet<T>>() == 0,
-			TryRuntimeError::Other("pallet_identity storage version is not 0")
-		);
 		Ok(vec![])
 	}
 
@@ -51,10 +47,6 @@ where
 		ensure!(
 			StorageVersion::get::<pallet_uniques::Pallet<T>>() == 1,
 			TryRuntimeError::Other("pallet_uniques post upgrade storage version is not 1")
-		);
-		ensure!(
-			StorageVersion::get::<pallet_identity::Pallet<T>>() == 1,
-			TryRuntimeError::Other("pallet_identity post upgrade storage version is not 1")
 		);
 		Ok(())
 	}
