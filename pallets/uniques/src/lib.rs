@@ -20,7 +20,7 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 
-use frame_support::traits::Currency;
+use frame_support::traits::{Currency, StorageVersion};
 use sp_runtime::traits::{StaticLookup, Zero};
 use support::LimitedBalance;
 
@@ -50,6 +50,8 @@ pub mod pallet {
 	use sp_runtime::DispatchResult;
 	use sp_std::vec::Vec;
 
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
+
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_uniques::Config<I> {
 		/// The overarching event type.
@@ -60,6 +62,7 @@ pub mod pallet {
 	}
 
 	#[pallet::pallet]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]

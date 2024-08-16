@@ -27,7 +27,7 @@ mod tests;
 
 use frame_support::{
 	dispatch::GetDispatchInfo,
-	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
+	traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced, StorageVersion},
 	PalletId,
 };
 
@@ -50,6 +50,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::{dispatch::PostDispatchInfo, pallet_prelude::*};
 
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config {
 		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
@@ -64,6 +65,7 @@ pub mod pallet {
 	}
 
 	#[pallet::pallet]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
