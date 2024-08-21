@@ -127,7 +127,6 @@ construct_runtime! {
 		NodleUniques: pallet_nodle_uniques = 44,
 		Sponsorship: pallet_sponsorship = 45,
 		Identity: pallet_identity::{Pallet, Call, Storage, Event<T>} = 46,
-		Proxy: pallet_proxy = 47,
 
 		// Nodle Stack
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -170,7 +169,6 @@ mod benches {
 		[pallet_nodle_uniques, NodleUniques]
 		[pallet_sponsorship, Sponsorship]
 		[pallet_identity, Identity]
-		[pallet_proxy, Proxy]
 		[pallet_allocations, Allocations]
 		[pallet_membership, AllocationsOracles]
 		[pallet_reserve, DaoReserve]

@@ -14,7 +14,6 @@ pub mod pallet_message_queue;
 pub mod pallet_multisig;
 pub mod pallet_nodle_uniques;
 pub mod pallet_preimage;
-pub mod pallet_proxy;
 pub mod pallet_reserve_company_reserve;
 pub mod pallet_reserve_dao_reserve;
 pub mod pallet_reserve_international_reserve;
