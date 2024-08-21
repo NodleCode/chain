@@ -14,6 +14,7 @@ std = [
   "primitives/std",
   "sp-consensus-aura/std",
   "frame-system-rpc-runtime-api/std",
+  "frame-metadata-hash-extension/std",
   "pallet-allocations/std",
   "pallet-authority-discovery/std",
   "pallet-authorship/std",
@@ -26,7 +27,7 @@ std = [
   "pallet-multisig/std",
   "pallet-nodle-uniques/std",
   "pallet-sponsorship/std",
-  "pallet-offences/std",
+  "support/std",
   "pallet-insecure-randomness-collective-flip/std",
   "pallet-reserve/std",
   "pallet-scheduler/std",
@@ -48,19 +49,19 @@ std = [
   "xcm/std",
   "xcm-builder/std",
   "xcm-executor/std",
-  "orml-xtokens/std",
-  "orml-traits/std",
   "cumulus-pallet-aura-ext/std",
   "cumulus-pallet-dmp-queue/std",
   "cumulus-pallet-parachain-system/std",
+  "cumulus-pallet-session-benchmarking/std",
   "cumulus-pallet-xcm/std",
   "cumulus-pallet-xcmp-queue/std",
+  "cumulus-primitives-aura/std",
   "cumulus-primitives-core/std",
+  "cumulus-primitives-storage-weight-reclaim/std",
   "cumulus-primitives-timestamp/std",
   "cumulus-primitives-utility/std",
   "parachain-info/std",
   "codec/std",
-  "safe-mix/std",
   "serde",
   "sp-api/std",
   "sp-application-crypto/std",
@@ -78,10 +79,9 @@ std = [
   "sp-std/std",
   "sp-transaction-pool/std",
   "sp-version/std",
-  "sp-npos-elections/std",
   "pallet-xcm-benchmarks/std",
   "pallet-message-queue/std",
-  "parachains-common/std"
+  "parachains-common/std",
 ]
 runtime-benchmarks = [
   "frame-benchmarking/runtime-benchmarks",
@@ -112,12 +112,13 @@ runtime-benchmarks = [
   "xcm-executor/runtime-benchmarks",
   "pallet-xcm-benchmarks/runtime-benchmarks",
   "cumulus-pallet-xcmp-queue/runtime-benchmarks",
+  "cumulus-pallet-session-benchmarking/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
   "cumulus-pallet-parachain-system/runtime-benchmarks",
   "cumulus-pallet-dmp-queue/runtime-benchmarks",
   "cumulus-primitives-core/runtime-benchmarks",
   "pallet-message-queue/runtime-benchmarks",
-  "parachains-common/runtime-benchmarks"
+  "parachains-common/runtime-benchmarks",
 ]
 try-runtime = [
   "frame-executive/try-runtime",
@@ -136,7 +137,6 @@ try-runtime = [
   "pallet-multisig/try-runtime",
   "pallet-sponsorship/try-runtime",
   "pallet-nodle-uniques/try-runtime",
-  "pallet-offences/try-runtime",
   "pallet-insecure-randomness-collective-flip/try-runtime",
   "pallet-reserve/try-runtime",
   "pallet-scheduler/try-runtime",
@@ -158,26 +158,43 @@ try-runtime = [
   "cumulus-pallet-xcmp-queue/try-runtime",
   "pallet-xcm/try-runtime",
   "parachain-info/try-runtime",
-  "orml-xtokens/try-runtime",
   "cumulus-pallet-parachain-system/try-runtime",
-  "pallet-message-queue/try-runtime"
+  "pallet-message-queue/try-runtime",
 ]
+
+# Enable the metadata hash generation.
+#
+# This is hidden behind a feature because it increases the compile time.
+# The wasm binary needs to be compiled twice, once to fetch the metadata,
+# generate the metadata hash and then a second time with the
+# `RUNTIME_METADATA_HASH` environment variable set for the `CheckMetadataHash`
+# extension.
+metadata-hash = ["substrate-wasm-builder/metadata-hash"]
+
+# A convenience feature for enabling things when doing a build
+# for an on-chain release.
+on-chain-release-build = ["metadata-hash"]
+
 
 [dependencies]
 static_assertions.workspace = true
-getrandom = { workspace = true, features = ["js"] }
-safe-mix = { workspace = true, default-features = false }
 codec = { workspace = true, default-features = false, features = ["derive"] }
 hex-literal.workspace = true
 log = { workspace = true, default-features = false }
-scale-info = { workspace = true, default-features = false, features = ["derive"] }
+scale-info = { workspace = true, default-features = false, features = [
+  "derive",
+] }
 serde = { workspace = true, optional = true, features = ["derive"] }
+serde_json = { features = ["alloc"], workspace = true }
 smallvec.workspace = true
-lazy_static = {workspace = true, default-features = false, features = ["spin_no_std"] }
+lazy_static = { workspace = true, default-features = false, features = [
+  "spin_no_std",
+] }
 
 frame-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-system-benchmarking = { workspace = true, default-features = false, optional = true }
 frame-executive = { workspace = true, default-features = false }
+frame-metadata-hash-extension = { workspace = true, default-features = false }
 frame-support = { workspace = true, default-features = false }
 frame-system = { workspace = true, default-features = false }
 frame-system-rpc-runtime-api = { workspace = true, default-features = false }
@@ -189,7 +206,6 @@ pallet-collective = { workspace = true, default-features = false }
 pallet-im-online = { workspace = true, default-features = false }
 pallet-membership = { workspace = true, default-features = false }
 pallet-multisig = { workspace = true, default-features = false }
-pallet-offences = { workspace = true, default-features = false }
 pallet-insecure-randomness-collective-flip = { workspace = true, default-features = false }
 pallet-scheduler = { workspace = true, default-features = false }
 pallet-preimage = { workspace = true, default-features = false }
@@ -202,27 +218,26 @@ pallet-uniques = { workspace = true, default-features = false }
 pallet-utility = { workspace = true, default-features = false }
 pallet-aura = { workspace = true, default-features = false }
 pallet-identity = { workspace = true, default-features = false }
-
 cumulus-pallet-xcmp-queue = { workspace = true, default-features = false }
 pallet-xcm = { workspace = true, default-features = false }
 pallet-xcm-benchmarks = { workspace = true, default-features = false }
-
 pallet-contracts = { workspace = true, default-features = false }
-
 polkadot-parachain-primitives = { workspace = true, default-features = false }
 polkadot-runtime-common = { workspace = true, default-features = false }
 polkadot-primitives = { workspace = true, default-features = false }
-
-xcm = { workspace = true, default-features = false}
+xcm = { workspace = true, default-features = false }
 xcm-builder = { workspace = true, default-features = false }
 xcm-executor = { workspace = true, default-features = false }
 cumulus-pallet-aura-ext = { workspace = true, default-features = false }
 cumulus-pallet-dmp-queue = { workspace = true, default-features = false }
 cumulus-pallet-parachain-system = { workspace = true, default-features = false }
+cumulus-pallet-session-benchmarking = { workspace = true, default-features = false }
 cumulus-pallet-xcm = { workspace = true, default-features = false }
 pallet-collator-selection = { workspace = true, default-features = false }
 parachains-common = { workspace = true, default-features = false }
+cumulus-primitives-aura = { workspace = true, default-features = false }
 cumulus-primitives-core = { workspace = true, default-features = false }
+cumulus-primitives-storage-weight-reclaim = { workspace = true, default-features = false }
 cumulus-primitives-timestamp = { workspace = true, default-features = false }
 cumulus-primitives-utility = { workspace = true, default-features = false }
 parachain-info = { workspace = true, default-features = false }
@@ -241,7 +256,6 @@ sp-staking = { workspace = true, default-features = false }
 sp-std = { workspace = true, default-features = false }
 sp-transaction-pool = { workspace = true, default-features = false }
 sp-version = { workspace = true, default-features = false }
-sp-npos-elections = { workspace = true, default-features = false }
 sp-consensus-aura = { workspace = true, default-features = false }
 sp-genesis-builder.workspace = true
 frame-try-runtime = { workspace = true, default-features = false, optional = true }
@@ -252,9 +266,8 @@ pallet-grants = { default-features = false, path = "../../pallets/grants" }
 pallet-mandate = { default-features = false, path = "../../pallets/mandate" }
 pallet-sponsorship = { default-features = false, path = "../../pallets/sponsorship" }
 pallet-nodle-uniques = { default-features = false, path = "../../pallets/uniques" }
+support = { default-features = false, path = "../../support" }
 
-orml-xtokens = { workspace = true, default-features = false }
-orml-traits = { workspace = true, default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder.workspace = true

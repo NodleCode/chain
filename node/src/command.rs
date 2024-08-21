@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2020-2024  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ use crate::{
 	cli::{Cli, RelayChainCli, Subcommand},
 	service::new_partial,
 };
+use cumulus_client_service::storage_proof_size::HostFunctions as ReclaimHostFunctions;
 use cumulus_primitives_core::ParaId;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use log::info;
@@ -108,13 +109,6 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-		use polkadot_cli::service;
-		if id == "paseo" {
-			let chain_spec = Box::new(service::GenericChainSpec::from_json_bytes(
-				&include_bytes!("../res/paseo.raw.json")[..],
-			)?);
-			return Ok(chain_spec as Box<dyn service::ChainSpec>);
-		}
 		polkadot_cli::Cli::from_iter([RelayChainCli::executable_name()].iter()).load_spec(id)
 	}
 }
@@ -191,13 +185,15 @@ pub fn run() -> Result<()> {
 		}
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-
-			// This switch needs to be in the client, since the client decides
-			// which sub-commands it wants to support.
+			// Switch on the concrete benchmark sub-command-
 			match cmd {
 				BenchmarkCmd::Pallet(cmd) => {
 					if cfg!(feature = "runtime-benchmarks") {
-						runner.sync_run(|config| cmd.run::<Block, ()>(config))
+						runner.sync_run(|config| {
+							cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ReclaimHostFunctions>(Some(
+								config.chain_spec,
+							))
+						})
 					} else {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
@@ -219,7 +215,6 @@ pub fn run() -> Result<()> {
 					let partials = new_partial(&config)?;
 					let db = partials.backend.expose_db();
 					let storage = partials.backend.expose_storage();
-
 					cmd.run(config, partials.client.clone(), db, storage)
 				}),
 				BenchmarkCmd::Machine(cmd) => {

@@ -19,60 +19,50 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, implementations::DealWithFees, version::VERSION, Balances, PalletInfo, Runtime, RuntimeCall,
-	RuntimeEvent, RuntimeOrigin, RuntimeTask, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+	constants, implementations::DealWithFees, version::VERSION, Balances, Block, PalletInfo, Runtime, RuntimeCall,
+	RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, SignedExtra, SignedPayload,
+	System, UncheckedExtrinsic,
 };
 use codec::Encode;
-use frame_support::pallet_prelude::ConstU32;
 use frame_support::{
-	parameter_types,
-	traits::Everything,
+	derive_impl, parameter_types,
+	traits::ConstU32,
 	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
 use frame_system::limits::BlockLength;
-use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
-use polkadot_runtime_common::SlowAdjustingFeeUpdate;
-use primitives::{AccountId, Balance, BlockNumber, Hash, Moment, Nonce, Signature};
+use pallet_transaction_payment::{FungibleAdapter, Multiplier};
+use polkadot_runtime_common::{BlockHashCount, SlowAdjustingFeeUpdate};
+use primitives::{AccountId, Balance, Hash, Moment, Nonce, Signature};
 use sp_runtime::{
 	generic,
-	traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
+	traits::{SaturatedConversion, StaticLookup},
 	FixedPointNumber, Perquintill,
 };
 use sp_version::RuntimeVersion;
 
 parameter_types! {
-	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
 	pub RuntimeBlockLength: BlockLength =
 		BlockLength::max_with_normal_ratio(5 * 1024 * 1024, constants::NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 37;
 }
 
+#[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig)]
 impl frame_system::Config for Runtime {
-	type BaseCallFilter = Everything;
 	type BlockWeights = constants::RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
-	type DbWeight = RocksDbWeight;
-	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeCall = RuntimeCall;
-	type Hash = Hash;
-	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
-	type Lookup = AccountIdLookup<AccountId, ()>;
-	type RuntimeEvent = RuntimeEvent;
+	type Nonce = Nonce;
+	type Hash = Hash;
+	type Block = Block;
 	type BlockHashCount = BlockHashCount;
+	type DbWeight = RocksDbWeight;
 	type Version = Version;
-	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
-	type OnNewAccount = ();
-	type OnKilledAccount = ();
 	type SystemWeightInfo = crate::weights::frame_system::WeightInfo<Runtime>;
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
-	type Nonce = Nonce;
-	type Block = crate::Block;
-	type RuntimeTask = RuntimeTask;
 }
 
 parameter_types! {
@@ -88,13 +78,10 @@ impl pallet_timestamp::Config for Runtime {
 
 parameter_types! {
 	pub const ExistentialDeposit: Balance = constants::EXISTENTIAL_DEPOSIT;
-	// For weight estimation, we assume that the most locks on an individual account will be 50.
-	// This number may need to be adjusted in the future if this assumption no longer holds true.
-	pub const MaxLocks: u32 = 50;
 }
 impl pallet_balances::Config for Runtime {
-	type MaxLocks = MaxLocks;
-	type MaxReserves = ();
+	type MaxLocks = ConstU32<50>;
+	type MaxReserves = ConstU32<50>;
 	type ReserveIdentifier = [u8; 8];
 	type Balance = Balance;
 	type DustRemoval = ();
@@ -103,11 +90,10 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ExistentialDeposit;
 	type AccountStore = frame_system::Pallet<Runtime>;
 	type WeightInfo = crate::weights::pallet_balances::WeightInfo<Runtime>;
-	type MaxHolds = ConstU32<2>;
 	type MaxFreezes = ConstU32<0>;
 	type FreezeIdentifier = ();
-	type RuntimeHoldReason = crate::RuntimeHoldReason;
-	type RuntimeFreezeReason = crate::RuntimeFreezeReason;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type RuntimeFreezeReason = RuntimeFreezeReason;
 }
 
 parameter_types! {
@@ -120,7 +106,7 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
+	type OnChargeTransaction = FungibleAdapter<Balances, DealWithFees>;
 	type WeightToFee = IdentityFee<Balance>;
 	type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
@@ -161,6 +147,8 @@ where
 			frame_system::CheckWeight::<Runtime>::new(),
 			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 			pallet_sponsorship::ChargeSponsor::<Runtime>::default(),
+			cumulus_primitives_storage_weight_reclaim::StorageWeightReclaim::<Runtime>::new(),
+			frame_metadata_hash_extension::CheckMetadataHash::new(true),
 		);
 		let raw_payload = SignedPayload::new(call, extra)
 			.map_err(|_e| {

@@ -18,10 +18,11 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants, constants::deposit, constants::DAYS, implementations::RelayChainBlockNumberProvider,
-	pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller, Preimage, RandomnessCollectiveFlip,
-	Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin, Signature, Timestamp,
+	constants, constants::DAYS, pallets_governance::MoreThanHalfOfTechComm, Balances, DaoReserve, OriginCaller,
+	Preimage, RandomnessCollectiveFlip, Runtime, RuntimeCall, RuntimeEvent, RuntimeHoldReason, RuntimeOrigin,
+	Signature, Timestamp,
 };
+use cumulus_pallet_parachain_system::RelaychainDataProvider;
 use frame_support::{
 	pallet_prelude::{Decode, Encode, MaxEncodedLen, RuntimeDebug},
 	parameter_types,
@@ -29,12 +30,9 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstBool, ConstU32, EqualPrivilegeOnly, InstanceFilter, Nothing},
 	weights::Weight,
 };
-
 use frame_system::{EnsureRoot, EnsureSigned};
 use pallet_contracts::{Frame, Schedule};
-
 use pallet_identity::legacy::IdentityInfo;
-use polkadot_primitives::BlakeTwo256;
 use primitives::{AccountId, Balance};
 use sp_runtime::{traits::Verify, Perbill};
 
@@ -48,7 +46,7 @@ impl pallet_grants::Config for Runtime {
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
-	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainDataProvider<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -200,6 +198,13 @@ parameter_types! {
 	pub CodeHashLockupDepositPercent: Perbill = Perbill::from_percent(30);
 }
 
+type ContractsMigrations<T> = (
+	pallet_contracts::migration::v13::Migration<T>,
+	pallet_contracts::migration::v14::Migration<T, Balances>,
+	pallet_contracts::migration::v15::Migration<T>,
+	pallet_contracts::migration::v16::Migration<T>,
+);
+
 impl pallet_contracts::Config for Runtime {
 	type Time = Timestamp;
 	type Randomness = RandomnessCollectiveFlip;
@@ -227,19 +232,18 @@ impl pallet_contracts::Config for Runtime {
 	type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
 	type MaxStorageKeyLen = ConstU32<128>;
 	type UnsafeUnstableInterface = ConstBool<false>;
+	type UploadOrigin = EnsureSigned<Self::AccountId>;
+	type InstantiateOrigin = EnsureSigned<Self::AccountId>;
 	type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
-	type Migrations = (
-		pallet_contracts::migration::v13::Migration<Runtime>,
-		pallet_contracts::migration::v14::Migration<Runtime, Balances>,
-		pallet_contracts::migration::v15::Migration<Runtime>,
-	);
+	type Migrations = ContractsMigrations<Runtime>;
 	type CodeHashLockupDepositPercent = CodeHashLockupDepositPercent;
 	type MaxDelegateDependencies = ConstU32<32>;
 	type RuntimeHoldReason = RuntimeHoldReason;
 	type Debug = ();
 
 	type Environment = ();
-	type Xcm = ();
+	type Xcm = pallet_xcm::Pallet<Self>;
+	type ApiVersion = ();
 }
 
 parameter_types! {
@@ -270,64 +274,4 @@ impl pallet_identity::Config for Runtime {
 	type PendingUsernameExpiration = ConstU32<{ 7 * DAYS }>;
 	type MaxSuffixLength = ConstU32<7>;
 	type MaxUsernameLength = ConstU32<32>;
-}
-
-parameter_types! {
-	// One storage item; key size 32, value size 8; .
-	pub const ProxyDepositBase: Balance = deposit(1, 8);
-	// Additional storage item size of 33 bytes.
-	pub const ProxyDepositFactor: Balance = deposit(0, 33);
-	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
-	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
-}
-
-/// The type used to represent the kinds of proxying allowed.
-#[derive(
-	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
-)]
-pub enum ProxyType {
-	Any,
-	NonTransfer,
-	Governance,
-}
-impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
-}
-impl InstanceFilter<RuntimeCall> for ProxyType {
-	fn filter(&self, c: &RuntimeCall) -> bool {
-		match self {
-			ProxyType::Any => true,
-			ProxyType::NonTransfer => !matches!(
-				c,
-				RuntimeCall::Balances(..) | RuntimeCall::NodleUniques(..) // Do we need this??? RuntimeCall::Vesting(pallet_grants::Call::vested_transfer { .. }) |
-			),
-			ProxyType::Governance => matches!(c, RuntimeCall::TechnicalCommittee(..)),
-		}
-	}
-	fn is_superset(&self, o: &Self) -> bool {
-		match (self, o) {
-			(x, y) if x == y => true,
-			(ProxyType::Any, _) => true,
-			(_, ProxyType::Any) => false,
-			(ProxyType::NonTransfer, _) => true,
-			_ => false,
-		}
-	}
-}
-
-impl pallet_proxy::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type RuntimeCall = RuntimeCall;
-	type Currency = Balances;
-	type ProxyType = ProxyType;
-	type ProxyDepositBase = ProxyDepositBase;
-	type ProxyDepositFactor = ProxyDepositFactor;
-	type MaxProxies = ConstU32<32>;
-	type WeightInfo = crate::weights::pallet_proxy::WeightInfo<Runtime>;
-	type MaxPending = ConstU32<32>;
-	type CallHasher = BlakeTwo256;
-	type AnnouncementDepositBase = AnnouncementDepositBase;
-	type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }

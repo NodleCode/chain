@@ -16,10 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#![cfg(feature = "runtime-benchmarks")]
-
-//! Amendments pallet benchmarks
-
 use super::*;
 use crate::BalanceOf;
 use crate::Pallet as Allocations;

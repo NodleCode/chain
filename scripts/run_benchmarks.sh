@@ -19,33 +19,35 @@ for PALLET in `./target/release/nodle-parachain benchmark pallet --list| sed s/,
 do
  echo $PALLET
  $DRY_RUN ./target/release/nodle-parachain benchmark pallet \
-    --chain=dev \
-    --steps=$STEPS \
-    --repeat=$REPEAT \
     --pallet=$PALLET \
     '--extrinsic=*' \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
+    --genesis-builder=runtime \
+    --runtime="./target/release/wbuild/runtime-eden/runtime_eden.wasm" \
     --wasm-execution=compiled \
     --template=./.maintain/external_pallet_weights.hbs \
     --output=runtimes/eden/src/weights
-
 done
 
 $DRY_RUN ./target/release/nodle-parachain benchmark pallet \
-    --chain=dev \
-    --steps=$STEPS \
-    --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::fungible \
     '--extrinsic=*' \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
+    --genesis-builder=runtime \
+    --runtime="./target/release/wbuild/runtime-eden/runtime_eden.wasm" \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights
 
 $DRY_RUN ./target/release/nodle-parachain benchmark pallet \
-    --chain=dev \
-    --steps=$STEPS \
-    --repeat=$REPEAT \
     --pallet=pallet_xcm_benchmarks::generic \
     --extrinsic="$xcm_generic_extrinsic" \
+    --steps=$STEPS \
+    --repeat=$REPEAT \
+    --genesis-builder=runtime \
+    --runtime="./target/release/wbuild/runtime-eden/runtime_eden.wasm" \
     --wasm-execution=compiled \
     --template=./.maintain/xcm.hbs \
     --output=runtimes/eden/src/weights

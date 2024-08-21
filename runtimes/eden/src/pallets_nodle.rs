@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
-	AllocationsOracles, Balances, DaoReserve, Runtime, RuntimeEvent,
+	constants, pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, DaoReserve, Runtime,
+	RuntimeEvent,
 };
+use cumulus_pallet_parachain_system::RelaychainDataProvider;
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
 use pallet_allocations::MintCurve;
@@ -96,7 +97,7 @@ impl pallet_allocations::Config for Runtime {
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = AllocationsOracles;
-	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
+	type BlockNumberProvider = RelaychainDataProvider<Runtime>;
 	type WeightInfo = crate::weights::pallet_allocations::WeightInfo<Runtime>;
 }
 
@@ -112,7 +113,12 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
 	type ResetOrigin = MoreThanHalfOfTechComm;
 	type PrimeOrigin = MoreThanHalfOfTechComm;
 	type MembershipInitialized = ();
+	// Note: There's an assumption in this pallet's benchmarking logic upstream that the type MembershipChanged should be non default.
+	// This is their bug and here we just take a workaround for our own benchmarking. Do not use TechnicalCommittee for non benchmarking.
+	#[cfg(feature = "runtime-benchmarks")]
+	type MembershipChanged = crate::TechnicalCommittee;
+	#[cfg(not(feature = "runtime-benchmarks"))]
 	type MembershipChanged = ();
 	type MaxMembers = MaxMembers;
-	type WeightInfo = crate::weights::pallet_membership::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_membership_allocations_oracles::WeightInfo<Runtime>;
 }

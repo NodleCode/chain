@@ -19,33 +19,15 @@
 // clippy complains about ChainSpecGroup which we cannot modify
 #![allow(clippy::derive_partial_eq_without_eq)]
 
-use std::vec;
-
 use cumulus_primitives_core::ParaId;
 
-use primitives::{AccountId, Balance, Signature};
-use runtime_eden::{
-	constants::{EXISTENTIAL_DEPOSIT, NODL},
-	AuraId, RuntimeGenesisConfig, SessionKeys, WASM_BINARY,
-};
+use runtime_eden::{development_config_genesis, WASM_BINARY};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use sp_core::{sr25519, Pair, Public};
-use sp_runtime::traits::{IdentifyAccount, Verify};
-
-const SAFE_XCM_VERSION: u32 = xcm::latest::VERSION;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
-
-/// Helper function to generate a crypto pair from seed
-pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(&format!("//{seed}"), None)
-		.expect("static values are valid; qed")
-		.public()
-}
+pub type ChainSpec = sc_service::GenericChainSpec<Extensions>;
 
 /// The extensions for the [`ChainSpec`].
 #[derive(Debug, Clone, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
@@ -62,105 +44,6 @@ impl Extensions {
 	pub fn try_get(chain_spec: &dyn sc_service::ChainSpec) -> Option<&Self> {
 		sc_chain_spec::get_extension(chain_spec.extensions())
 	}
-}
-
-type AccountPublic = <Signature as Verify>::Signer;
-
-/// Generate collator keys from seed.
-///
-/// This function's return type must always match the session keys of the chain in tuple format.
-pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
-	get_public_from_seed::<AuraId>(seed)
-}
-
-/// Helper function to generate an account ID from seed
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-{
-	AccountPublic::from(get_public_from_seed::<TPublic>(seed)).into_account()
-}
-
-/// Generate the session keys from individual elements.
-///
-/// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
-	SessionKeys { aura: keys }
-}
-
-/// Helper function to create RuntimeGenesisConfig for testing
-fn eden_testnet_genesis(
-	root_key: Vec<AccountId>,
-	collators: Vec<(AccountId, AuraId)>,
-	endowed_accounts: Option<Vec<AccountId>>,
-	id: ParaId,
-) -> Value {
-	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
-		vec![
-			get_account_id_from_seed::<sr25519::Public>("Alice"),
-			get_account_id_from_seed::<sr25519::Public>("Bob"),
-			get_account_id_from_seed::<sr25519::Public>("Charlie"),
-			get_account_id_from_seed::<sr25519::Public>("Dave"),
-			get_account_id_from_seed::<sr25519::Public>("Eve"),
-			get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-			get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-			get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-			get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-			get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-		]
-	});
-
-	const ENDOWMENT: Balance = 10_000 * NODL;
-
-	serde_json::json!({
-		"balances": {
-			"balances": endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect::<Vec<_>>(),
-		},
-		"collatorSelection": {
-			"invulnerables": collators.iter().cloned().map(|(acc, _)| acc).collect::<Vec<_>>(),
-			"candidacyBond": EXISTENTIAL_DEPOSIT * 16,
-			"desiredCandidates": 0
-		},
-		"session": {
-			"keys": collators
-				.into_iter()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),             // account id
-						acc,                     // validator id
-						eden_session_keys(aura), // session keys
-					)
-				})
-				.collect::<Vec<_>>(),
-		},
-		"parachainInfo": {
-			"parachainId": id,
-		},
-		"technicalMembership": {
-			"members": root_key,
-		},
-		"polkadotXcm": {
-			"safeXcmVersion": Some(SAFE_XCM_VERSION),
-		},
-	})
-}
-
-fn development_config_genesis(id: ParaId) -> Value {
-	eden_testnet_genesis(
-		vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
-		vec![
-			(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_collator_keys_from_seed("Alice"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_collator_keys_from_seed("Bob"),
-			),
-		],
-		None,
-		id,
-	)
 }
 
 pub fn development_config(id: ParaId) -> ChainSpec {

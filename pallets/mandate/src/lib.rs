@@ -28,12 +28,14 @@ pub mod pallet {
 	use frame_support::{
 		dispatch::GetDispatchInfo,
 		pallet_prelude::*,
-		traits::{EnsureOrigin, UnfilteredDispatchable},
+		traits::{EnsureOrigin, StorageVersion, UnfilteredDispatchable},
 		Parameter,
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::DispatchResult;
 	use sp_std::prelude::Box;
+
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -46,6 +48,7 @@ pub mod pallet {
 	}
 
 	#[pallet::pallet]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
