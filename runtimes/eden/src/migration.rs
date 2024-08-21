@@ -28,12 +28,7 @@ where
 	T: pallet_uniques::Config,
 {
 	fn on_runtime_upgrade() -> Weight {
-		// Fixup two unmigrated storage blocks found on mainnet.
-		let parachain_system_host_configuration_key = [
-			69_u8, 50, 61, 247, 204, 71, 21, 11, 57, 48, 226, 102, 107, 10, 163, 19, 197, 34, 35, 24, 128, 35, 138, 12,
-			86, 2, 27, 135, 68, 160, 7, 67,
-		];
-		let _ = frame_support::storage::unhashed::clear_prefix(&parachain_system_host_configuration_key, Some(1), None);
+		// Fixup one unmigrated storage blocks found on mainnet.
 		let pre_image_status_for_key = [
 			216_u8, 243, 20, 183, 244, 230, 176, 149, 240, 248, 238, 70, 86, 164, 72, 37, 85, 177, 174, 142, 206, 213,
 			82, 47, 60, 64, 73, 188, 132, 237, 164, 168, 134, 165, 126, 209, 14, 33, 121, 241, 141, 181, 169, 30, 183,
@@ -43,7 +38,7 @@ where
 
 		StorageVersion::new(1).put::<pallet_uniques::Pallet<T>>();
 
-		T::DbWeight::get().writes(3)
+		T::DbWeight::get().writes(2)
 	}
 
 	#[cfg(feature = "try-runtime")]
