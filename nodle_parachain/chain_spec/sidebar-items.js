@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["SAFE_XCM_VERSION"],"fn":["development_config","development_config_genesis","eden_session_keys","eden_testnet_genesis","get_account_id_from_seed","get_collator_keys_from_seed","get_public_from_seed","paradis_config","production_config"],"struct":["Extensions","ExtensionsFork"],"type":["AccountPublic","ChainSpec"]};
+window.SIDEBAR_ITEMS = {"fn":["development_config","paradis_config","production_config"],"struct":["Extensions","ExtensionsFork"],"type":["ChainSpec"]};

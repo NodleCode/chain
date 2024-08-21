@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_message_queue.rs`."><title>pallet_message_queue.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../runtime_eden/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_message_queue.rs`."><title>pallet_message_queue.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -136,13 +136,9 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2020-2024  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,29 +157,26 @@
 </span><span class="doccomment">//! Autogenerated weights for pallet_message_queue
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-29, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
+//! DATE: 2024-08-21, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! HOSTNAME: `chain-bench-a18ada46`, CPU: `AMD EPYC 7B13`
-//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
+//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: None, DB CACHE: 1024
 
 </span><span class="comment">// Executed Command:
 // ./target/release/nodle-parachain
 // benchmark
 // pallet
-// --chain=dev
-// --steps=50
-// --repeat=20
 // --pallet=pallet_message_queue
 // --extrinsic=*
+// --steps=50
+// --repeat=20
+// --genesis-builder=runtime
+// --runtime=./target/release/wbuild/runtime-eden/runtime_eden.wasm
 // --wasm-execution=compiled
 // --template=./.maintain/external_pallet_weights.hbs
 // --output=runtimes/eden/src/weights
 
-</span><span class="attr">#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-</span><span class="kw">use </span>frame_support::{traits::Get, weights::{Weight}};
-<span class="kw">use </span>core::marker::PhantomData;
+</span><span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>frame_support::{traits::Get, weights::Weight};
 
 <span class="doccomment">/// Weight functions for `pallet_message_queue`.
 </span><span class="kw">pub struct </span>WeightInfo&lt;T&gt;(PhantomData&lt;T&gt;);
@@ -193,8 +186,8 @@
 	// Storage: `MessageQueue::BookStateFor` (r:2 w:2)
 	// Proof: `MessageQueue::BookStateFor` (`max_values`: None, `max_size`: Some(52), added: 2527, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>ready_ring_knit() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 17_370 nanoseconds.
-		</span>Weight::from_parts(<span class="number">18_170_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 14_580 nanoseconds.
+		</span>Weight::from_parts(<span class="number">14_890_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -203,32 +196,32 @@
 	// Storage: `MessageQueue::ServiceHead` (r:1 w:1)
 	// Proof: `MessageQueue::ServiceHead` (`max_values`: Some(1), `max_size`: Some(5), added: 500, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>ready_ring_unknit() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 14_920 nanoseconds.
-		</span>Weight::from_parts(<span class="number">15_500_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 12_360 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_800_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">3_u64</span>))
 	}
 	<span class="comment">// Storage: `MessageQueue::BookStateFor` (r:1 w:1)
 	// Proof: `MessageQueue::BookStateFor` (`max_values`: None, `max_size`: Some(52), added: 2527, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>service_queue_base() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 6_660 nanoseconds.
-		</span>Weight::from_parts(<span class="number">6_940_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 3_660 nanoseconds.
+		</span>Weight::from_parts(<span class="number">3_889_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `MessageQueue::Pages` (r:1 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>service_page_base_completion() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 9_760 nanoseconds.
-		</span>Weight::from_parts(<span class="number">10_191_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 5_720 nanoseconds.
+		</span>Weight::from_parts(<span class="number">5_980_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `MessageQueue::Pages` (r:1 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>service_page_base_no_completion() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 10_070 nanoseconds.
-		</span>Weight::from_parts(<span class="number">10_480_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 5_970 nanoseconds.
+		</span>Weight::from_parts(<span class="number">6_210_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -237,17 +230,16 @@
 	// Storage: `MessageQueue::Pages` (r:0 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>service_page_item() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 195_430 nanoseconds.
-		</span>Weight::from_parts(<span class="number">198_320_000_u64</span>, <span class="number">0</span>)
-			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
+		<span class="comment">// Minimum execution time: 183_200 nanoseconds.
+		</span>Weight::from_parts(<span class="number">185_560_000_u64</span>, <span class="number">0</span>).saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
 	<span class="comment">// Storage: `MessageQueue::ServiceHead` (r:1 w:1)
 	// Proof: `MessageQueue::ServiceHead` (`max_values`: Some(1), `max_size`: Some(5), added: 500, mode: `MaxEncodedLen`)
 	// Storage: `MessageQueue::BookStateFor` (r:1 w:0)
 	// Proof: `MessageQueue::BookStateFor` (`max_values`: None, `max_size`: Some(52), added: 2527, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>bump_service_head() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 9_490 nanoseconds.
-		</span>Weight::from_parts(<span class="number">9_880_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 6_880 nanoseconds.
+		</span>Weight::from_parts(<span class="number">7_190_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -256,8 +248,8 @@
 	// Storage: `MessageQueue::Pages` (r:1 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>reap_page() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 64_470 nanoseconds.
-		</span>Weight::from_parts(<span class="number">65_340_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 51_111 nanoseconds.
+		</span>Weight::from_parts(<span class="number">53_370_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -266,8 +258,8 @@
 	// Storage: `MessageQueue::Pages` (r:1 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>execute_overweight_page_removed() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 83_930 nanoseconds.
-		</span>Weight::from_parts(<span class="number">85_930_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 71_180 nanoseconds.
+		</span>Weight::from_parts(<span class="number">72_770_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -276,8 +268,8 @@
 	// Storage: `MessageQueue::Pages` (r:1 w:1)
 	// Proof: `MessageQueue::Pages` (`max_values`: None, `max_size`: Some(65585), added: 68060, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>execute_overweight_page_updated() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 135_891 nanoseconds.
-		</span>Weight::from_parts(<span class="number">138_440_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 121_480 nanoseconds.
+		</span>Weight::from_parts(<span class="number">123_489_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_uniques.rs`."><title>pallet_uniques.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../runtime_eden/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_uniques.rs`."><title>pallet_uniques.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -352,12 +352,9 @@
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
 <a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2020-2024  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -376,29 +373,26 @@
 </span><span class="doccomment">//! Autogenerated weights for pallet_uniques
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-29, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
+//! DATE: 2024-08-21, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! HOSTNAME: `chain-bench-a18ada46`, CPU: `AMD EPYC 7B13`
-//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
+//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: None, DB CACHE: 1024
 
 </span><span class="comment">// Executed Command:
 // ./target/release/nodle-parachain
 // benchmark
 // pallet
-// --chain=dev
-// --steps=50
-// --repeat=20
 // --pallet=pallet_uniques
 // --extrinsic=*
+// --steps=50
+// --repeat=20
+// --genesis-builder=runtime
+// --runtime=./target/release/wbuild/runtime-eden/runtime_eden.wasm
 // --wasm-execution=compiled
 // --template=./.maintain/external_pallet_weights.hbs
 // --output=runtimes/eden/src/weights
 
-</span><span class="attr">#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-</span><span class="kw">use </span>frame_support::{traits::Get, weights::{Weight}};
-<span class="kw">use </span>core::marker::PhantomData;
+</span><span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>frame_support::{traits::Get, weights::Weight};
 
 <span class="doccomment">/// Weight functions for `pallet_uniques`.
 </span><span class="kw">pub struct </span>WeightInfo&lt;T&gt;(PhantomData&lt;T&gt;);
@@ -408,8 +402,8 @@
 	// Storage: `Uniques::ClassAccount` (r:0 w:1)
 	// Proof: `Uniques::ClassAccount` (`max_values`: None, `max_size`: Some(68), added: 2543, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>create() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 38_340 nanoseconds.
-		</span>Weight::from_parts(<span class="number">39_849_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 29_440 nanoseconds.
+		</span>Weight::from_parts(<span class="number">31_200_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -418,8 +412,8 @@
 	// Storage: `Uniques::ClassAccount` (r:0 w:1)
 	// Proof: `Uniques::ClassAccount` (`max_values`: None, `max_size`: Some(68), added: 2543, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>force_create() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 17_140 nanoseconds.
-		</span>Weight::from_parts(<span class="number">17_990_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 12_160 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_650_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -442,15 +436,15 @@
 	</span><span class="doccomment">/// The range of component `n` is `[0, 1000]`.
 	/// The range of component `m` is `[0, 1000]`.
 	/// The range of component `a` is `[0, 1000]`.
-	</span><span class="kw">fn </span>destroy(n: u32, m: u32, a: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 2_680_520 nanoseconds.
-		</span>Weight::from_parts(<span class="number">2_704_870_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 24_727
-			</span>.saturating_add(Weight::from_parts(<span class="number">9_946_893_u64</span>, <span class="number">0</span>).saturating_mul(n <span class="kw">as </span>u64))
-			<span class="comment">// Standard Error: 24_727
-			</span>.saturating_add(Weight::from_parts(<span class="number">264_152_u64</span>, <span class="number">0</span>).saturating_mul(m <span class="kw">as </span>u64))
-			<span class="comment">// Standard Error: 24_727
-			</span>.saturating_add(Weight::from_parts(<span class="number">310_499_u64</span>, <span class="number">0</span>).saturating_mul(a <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>destroy(n: u32, m: u32, a: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 2_765_300 nanoseconds.
+		</span>Weight::from_parts(<span class="number">2_773_590_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 25_553
+			</span>.saturating_add(Weight::from_parts(<span class="number">8_989_729_u64</span>, <span class="number">0</span>).saturating_mul(n <span class="kw">as </span>u64))
+			<span class="comment">// Standard Error: 25_553
+			</span>.saturating_add(Weight::from_parts(<span class="number">278_708_u64</span>, <span class="number">0</span>).saturating_mul(m <span class="kw">as </span>u64))
+			<span class="comment">// Standard Error: 25_553
+			</span>.saturating_add(Weight::from_parts(<span class="number">330_437_u64</span>, <span class="number">0</span>).saturating_mul(a <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(n <span class="kw">as </span>u64)))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(m <span class="kw">as </span>u64)))
@@ -469,8 +463,8 @@
 	// Storage: `Uniques::Account` (r:0 w:1)
 	// Proof: `Uniques::Account` (`max_values`: None, `max_size`: Some(88), added: 2563, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>mint() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 47_531 nanoseconds.
-		</span>Weight::from_parts(<span class="number">49_090_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 40_350 nanoseconds.
+		</span>Weight::from_parts(<span class="number">41_450_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">3_u64</span>))
 	}
@@ -483,8 +477,8 @@
 	// Storage: `Uniques::ItemPriceOf` (r:0 w:1)
 	// Proof: `Uniques::ItemPriceOf` (`max_values`: None, `max_size`: Some(89), added: 2564, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>burn() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 50_310 nanoseconds.
-		</span>Weight::from_parts(<span class="number">51_690_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 41_270 nanoseconds.
+		</span>Weight::from_parts(<span class="number">42_360_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}
@@ -497,8 +491,8 @@
 	// Storage: `Uniques::ItemPriceOf` (r:0 w:1)
 	// Proof: `Uniques::ItemPriceOf` (`max_values`: None, `max_size`: Some(89), added: 2564, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>transfer() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 37_051 nanoseconds.
-		</span>Weight::from_parts(<span class="number">37_810_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 29_410 nanoseconds.
+		</span>Weight::from_parts(<span class="number">30_370_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}
@@ -507,11 +501,11 @@
 	// Storage: `Uniques::Asset` (r:5000 w:5000)
 	// Proof: `Uniques::Asset` (`max_values`: None, `max_size`: Some(122), added: 2597, mode: `MaxEncodedLen`)
 	</span><span class="doccomment">/// The range of component `i` is `[0, 5000]`.
-	</span><span class="kw">fn </span>redeposit(i: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 17_540 nanoseconds.
-		</span>Weight::from_parts(<span class="number">17_970_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 12_556
-			</span>.saturating_add(Weight::from_parts(<span class="number">23_243_363_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>redeposit(i: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 13_480 nanoseconds.
+		</span>Weight::from_parts(<span class="number">13_970_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 14_085
+			</span>.saturating_add(Weight::from_parts(<span class="number">21_720_375_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(i <span class="kw">as </span>u64)))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
@@ -522,8 +516,8 @@
 	// Storage: `Uniques::Class` (r:1 w:0)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>freeze() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 22_970 nanoseconds.
-		</span>Weight::from_parts(<span class="number">23_810_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 18_070 nanoseconds.
+		</span>Weight::from_parts(<span class="number">18_730_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -532,24 +526,24 @@
 	// Storage: `Uniques::Class` (r:1 w:0)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>thaw() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 23_000 nanoseconds.
-		</span>Weight::from_parts(<span class="number">23_720_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 18_020 nanoseconds.
+		</span>Weight::from_parts(<span class="number">18_450_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `Uniques::Class` (r:1 w:1)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>freeze_collection() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 15_470 nanoseconds.
-		</span>Weight::from_parts(<span class="number">16_180_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 12_000 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_820_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `Uniques::Class` (r:1 w:1)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>thaw_collection() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 15_490 nanoseconds.
-		</span>Weight::from_parts(<span class="number">16_230_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 11_890 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_490_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -562,16 +556,16 @@
 	// Storage: `Uniques::ClassAccount` (r:0 w:2)
 	// Proof: `Uniques::ClassAccount` (`max_values`: None, `max_size`: Some(68), added: 2543, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>transfer_ownership() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 34_270 nanoseconds.
-		</span>Weight::from_parts(<span class="number">35_420_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 26_370 nanoseconds.
+		</span>Weight::from_parts(<span class="number">27_760_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">5_u64</span>))
 	}
 	<span class="comment">// Storage: `Uniques::Class` (r:1 w:1)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_team() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 16_260 nanoseconds.
-		</span>Weight::from_parts(<span class="number">17_040_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 12_040 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_640_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -580,8 +574,8 @@
 	// Storage: `Uniques::ClassAccount` (r:0 w:1)
 	// Proof: `Uniques::ClassAccount` (`max_values`: None, `max_size`: Some(68), added: 2543, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>force_item_status() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 20_520 nanoseconds.
-		</span>Weight::from_parts(<span class="number">21_260_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 16_080 nanoseconds.
+		</span>Weight::from_parts(<span class="number">16_520_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -592,8 +586,8 @@
 	// Storage: `Uniques::Attribute` (r:1 w:1)
 	// Proof: `Uniques::Attribute` (`max_values`: None, `max_size`: Some(364), added: 2839, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_attribute() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 53_300 nanoseconds.
-		</span>Weight::from_parts(<span class="number">54_670_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 44_930 nanoseconds.
+		</span>Weight::from_parts(<span class="number">46_040_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -604,8 +598,8 @@
 	// Storage: `Uniques::Attribute` (r:1 w:1)
 	// Proof: `Uniques::Attribute` (`max_values`: None, `max_size`: Some(364), added: 2839, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>clear_attribute() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 49_900 nanoseconds.
-		</span>Weight::from_parts(<span class="number">50_690_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 41_489 nanoseconds.
+		</span>Weight::from_parts(<span class="number">43_131_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -614,8 +608,8 @@
 	// Storage: `Uniques::InstanceMetadataOf` (r:1 w:1)
 	// Proof: `Uniques::InstanceMetadataOf` (`max_values`: None, `max_size`: Some(187), added: 2662, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_metadata() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 38_580 nanoseconds.
-		</span>Weight::from_parts(<span class="number">40_100_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 32_280 nanoseconds.
+		</span>Weight::from_parts(<span class="number">33_650_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -624,8 +618,8 @@
 	// Storage: `Uniques::InstanceMetadataOf` (r:1 w:1)
 	// Proof: `Uniques::InstanceMetadataOf` (`max_values`: None, `max_size`: Some(187), added: 2662, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>clear_metadata() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 39_390 nanoseconds.
-		</span>Weight::from_parts(<span class="number">40_420_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 33_810 nanoseconds.
+		</span>Weight::from_parts(<span class="number">34_500_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -634,28 +628,28 @@
 	// Storage: `Uniques::ClassMetadataOf` (r:1 w:1)
 	// Proof: `Uniques::ClassMetadataOf` (`max_values`: None, `max_size`: Some(167), added: 2642, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_collection_metadata() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 40_520 nanoseconds.
-		</span>Weight::from_parts(<span class="number">41_020_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 33_980 nanoseconds.
+		</span>Weight::from_parts(<span class="number">35_000_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
-	<span class="comment">// Storage: `Uniques::Class` (r:1 w:0)
+	<span class="comment">// Storage: `Uniques::Class` (r:1 w:1)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	// Storage: `Uniques::ClassMetadataOf` (r:1 w:1)
 	// Proof: `Uniques::ClassMetadataOf` (`max_values`: None, `max_size`: Some(167), added: 2642, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>clear_collection_metadata() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 38_870 nanoseconds.
-		</span>Weight::from_parts(<span class="number">39_910_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 32_540 nanoseconds.
+		</span>Weight::from_parts(<span class="number">33_630_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
-			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
+			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
 	<span class="comment">// Storage: `Uniques::Class` (r:1 w:0)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	// Storage: `Uniques::Asset` (r:1 w:1)
 	// Proof: `Uniques::Asset` (`max_values`: None, `max_size`: Some(122), added: 2597, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>approve_transfer() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 23_810 nanoseconds.
-		</span>Weight::from_parts(<span class="number">24_680_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 18_340 nanoseconds.
+		</span>Weight::from_parts(<span class="number">19_390_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -664,16 +658,16 @@
 	// Storage: `Uniques::Asset` (r:1 w:1)
 	// Proof: `Uniques::Asset` (`max_values`: None, `max_size`: Some(122), added: 2597, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>cancel_approval() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 23_760 nanoseconds.
-		</span>Weight::from_parts(<span class="number">24_470_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 18_380 nanoseconds.
+		</span>Weight::from_parts(<span class="number">19_060_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `Uniques::OwnershipAcceptance` (r:1 w:1)
 	// Proof: `Uniques::OwnershipAcceptance` (`max_values`: None, `max_size`: Some(52), added: 2527, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_accept_ownership() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 18_930 nanoseconds.
-		</span>Weight::from_parts(<span class="number">19_920_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 13_330 nanoseconds.
+		</span>Weight::from_parts(<span class="number">14_010_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -682,8 +676,8 @@
 	// Storage: `Uniques::Class` (r:1 w:0)
 	// Proof: `Uniques::Class` (`max_values`: None, `max_size`: Some(178), added: 2653, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_collection_max_supply() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 19_580 nanoseconds.
-		</span>Weight::from_parts(<span class="number">20_330_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 15_290 nanoseconds.
+		</span>Weight::from_parts(<span class="number">16_160_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -692,8 +686,8 @@
 	// Storage: `Uniques::ItemPriceOf` (r:0 w:1)
 	// Proof: `Uniques::ItemPriceOf` (`max_values`: None, `max_size`: Some(89), added: 2564, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_price() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 19_330 nanoseconds.
-		</span>Weight::from_parts(<span class="number">20_120_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 14_649 nanoseconds.
+		</span>Weight::from_parts(<span class="number">15_420_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
@@ -706,8 +700,8 @@
 	// Storage: `Uniques::Account` (r:0 w:2)
 	// Proof: `Uniques::Account` (`max_values`: None, `max_size`: Some(88), added: 2563, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>buy_item() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 47_190 nanoseconds.
-		</span>Weight::from_parts(<span class="number">48_210_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 38_440 nanoseconds.
+		</span>Weight::from_parts(<span class="number">40_031_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}

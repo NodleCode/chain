@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/service.rs`."><title>service.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="nodle_parachain" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../nodle_parachain/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/service.rs`."><title>service.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="nodle_parachain" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -423,6 +423,7 @@
 <a href="#423" id="423">423</a>
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -443,35 +444,35 @@
 </span><span class="attr">#![allow(clippy::type_complexity)]
 </span><span class="doccomment">//! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-</span><span class="comment">// std
 </span><span class="kw">use </span>std::{sync::Arc, time::Duration};
 
-<span class="kw">use </span>cumulus_client_cli::CollatorOptions;
-<span class="comment">// Local Runtime Types
-</span><span class="kw">use </span>runtime_eden::RuntimeApi;
+<span class="kw">use </span>runtime_eden::RuntimeApi;
 
 <span class="kw">use </span>polkadot_primitives::{Block, Hash};
 
-<span class="comment">// Cumulus Imports
-</span><span class="kw">use </span>cumulus_client_collator::service::CollatorService;
+<span class="kw">use </span>cumulus_client_cli::CollatorOptions;
+<span class="kw">use </span>cumulus_client_collator::service::CollatorService;
+<span class="kw">use </span>cumulus_client_consensus_aura::collators::lookahead::{<span class="self">self </span><span class="kw">as </span>aura, Params <span class="kw">as </span>AuraParams};
 <span class="kw">use </span>cumulus_client_consensus_common::ParachainBlockImport <span class="kw">as </span>TParachainBlockImport;
 <span class="kw">use </span>cumulus_client_consensus_proposer::Proposer;
 <span class="kw">use </span>cumulus_client_service::{
 	build_network, build_relay_chain_interface, prepare_node_config, start_relay_chain_tasks, BuildNetworkParams,
 	CollatorSybilResistance, DARecoveryProfile, StartRelayChainTasksParams,
 };
-<span class="kw">use </span>cumulus_primitives_core::{relay_chain::CollatorPair, ParaId};
+<span class="kw">use </span>cumulus_primitives_core::{
+	relay_chain::{CollatorPair, ValidationCode},
+	ParaId,
+};
 <span class="kw">use </span>cumulus_relay_chain_interface::{OverseerHandle, RelayChainInterface};
-
-<span class="comment">// Substrate Imports
-
-</span><span class="kw">use </span>sc_consensus::ImportQueue;
+<span class="kw">use </span>frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE;
+<span class="kw">use </span>sc_client_api::Backend;
+<span class="kw">use </span>sc_consensus::ImportQueue;
 <span class="kw">use </span>sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
 <span class="kw">use </span>sc_network::NetworkBlock;
 <span class="kw">use </span>sc_network_sync::SyncingService;
 <span class="kw">use </span>sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 <span class="kw">use </span>sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
-
+<span class="kw">use </span>sc_transaction_pool_api::OffchainTransactionPoolFactory;
 <span class="kw">use </span>sp_keystore::KeystorePtr;
 <span class="kw">use </span>substrate_prometheus_endpoint::Registry;
 
@@ -488,29 +489,29 @@
 	frame_benchmarking::benchmarking::HostFunctions,
 );
 
-<span class="kw">type </span>ParachainClient = TFullClient&lt;Block, RuntimeApi, WasmExecutor&lt;HostFunctions&gt;&gt;;
+<span class="kw">type </span>ParachainExecutor = WasmExecutor&lt;HostFunctions&gt;;
+
+<span class="kw">type </span>ParachainClient = TFullClient&lt;Block, RuntimeApi, ParachainExecutor&gt;;
 
 <span class="kw">type </span>ParachainBackend = TFullBackend&lt;Block&gt;;
 
 <span class="kw">type </span>ParachainBlockImport = TParachainBlockImport&lt;Block, Arc&lt;ParachainClient&gt;, ParachainBackend&gt;;
 
+<span class="doccomment">/// Assembly of PartialComponents (enough to run chain ops subcommands)
+</span><span class="kw">pub type </span>Service = PartialComponents&lt;
+	ParachainClient,
+	ParachainBackend,
+	(),
+	sc_consensus::DefaultImportQueue&lt;Block&gt;,
+	sc_transaction_pool::FullPool&lt;Block, ParachainClient&gt;,
+	(ParachainBlockImport, <span class="prelude-ty">Option</span>&lt;Telemetry&gt;, <span class="prelude-ty">Option</span>&lt;TelemetryWorkerHandle&gt;),
+&gt;;
+
 <span class="doccomment">/// Starts a `ServiceBuilder` for a full service.
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
-</span><span class="kw">pub fn </span>new_partial(
-	config: <span class="kw-2">&amp;</span>Configuration,
-) -&gt; <span class="prelude-ty">Result</span>&lt;
-	PartialComponents&lt;
-		ParachainClient,
-		ParachainBackend,
-		(),
-		sc_consensus::DefaultImportQueue&lt;Block&gt;,
-		sc_transaction_pool::FullPool&lt;Block, ParachainClient&gt;,
-		(ParachainBlockImport, <span class="prelude-ty">Option</span>&lt;Telemetry&gt;, <span class="prelude-ty">Option</span>&lt;TelemetryWorkerHandle&gt;),
-	&gt;,
-	sc_service::Error,
-&gt; {
+</span><span class="kw">pub fn </span>new_partial(config: <span class="kw-2">&amp;</span>Configuration) -&gt; <span class="prelude-ty">Result</span>&lt;Service, sc_service::Error&gt; {
 	<span class="kw">let </span>telemetry = config
 		.telemetry_endpoints
 		.clone()
@@ -528,19 +529,21 @@
 			extra_pages: h <span class="kw">as _</span>,
 		});
 
-	<span class="kw">let </span>executor = sc_executor::WasmExecutor::&lt;HostFunctions&gt;::builder()
+	<span class="kw">let </span>executor = ParachainExecutor::builder()
 		.with_execution_method(config.wasm_method)
-		.with_max_runtime_instances(config.max_runtime_instances)
-		.with_runtime_cache_size(config.runtime_cache_size)
 		.with_onchain_heap_alloc_strategy(heap_pages)
 		.with_offchain_heap_alloc_strategy(heap_pages)
+		.with_max_runtime_instances(config.max_runtime_instances)
+		.with_runtime_cache_size(config.runtime_cache_size)
 		.build();
 
-	<span class="kw">let </span>(client, backend, keystore_container, task_manager) = sc_service::new_full_parts::&lt;Block, RuntimeApi, <span class="kw">_</span>&gt;(
-		config,
-		telemetry.as_ref().map(|(<span class="kw">_</span>, telemetry)| telemetry.handle()),
-		executor,
-	)<span class="question-mark">?</span>;
+	<span class="kw">let </span>(client, backend, keystore_container, task_manager) =
+		sc_service::new_full_parts_record_import::&lt;Block, RuntimeApi, <span class="kw">_</span>&gt;(
+			config,
+			telemetry.as_ref().map(|(<span class="kw">_</span>, telemetry)| telemetry.handle()),
+			executor,
+			<span class="bool-val">true</span>,
+		)<span class="question-mark">?</span>;
 	<span class="kw">let </span>client = Arc::new(client);
 
 	<span class="kw">let </span>telemetry_worker_handle = telemetry.as_ref().map(|(worker, <span class="kw">_</span>)| worker.handle());
@@ -566,7 +569,7 @@
 		config,
 		telemetry.as_ref().map(|telemetry| telemetry.handle()),
 		<span class="kw-2">&amp;</span>task_manager,
-	)<span class="question-mark">?</span>;
+	);
 
 	<span class="prelude-val">Ok</span>(PartialComponents {
 		backend,
@@ -580,11 +583,8 @@
 	})
 }
 
-<span class="doccomment">/// Start a node with the given parachain `Configuration` and relay chain `Configuration`.
-///
-/// This is the actual implementation that is abstract over the executor and the runtime api.
-</span><span class="attr">#[sc_tracing::logging::prefix_logs_with(<span class="string">"Parachain"</span>)]
-</span><span class="kw">async fn </span>start_node_impl(
+<span class="attr">#[sc_tracing::logging::prefix_logs_with(<span class="string">"Parachain"</span>)]
+</span><span class="kw">pub async fn </span>start_parachain_node(
 	parachain_config: Configuration,
 	polkadot_config: Configuration,
 	collator_options: CollatorOptions,
@@ -595,7 +595,9 @@
 
 	<span class="kw">let </span>params = new_partial(<span class="kw-2">&amp;</span>parachain_config)<span class="question-mark">?</span>;
 	<span class="kw">let </span>(block_import, <span class="kw-2">mut </span>telemetry, telemetry_worker_handle) = params.other;
-	<span class="kw">let </span>net_config = sc_network::config::FullNetworkConfiguration::new(<span class="kw-2">&amp;</span>parachain_config.network);
+	<span class="kw">let </span>net_config = sc_network::config::FullNetworkConfiguration::&lt;<span class="kw">_</span>, <span class="kw">_</span>, sc_network::NetworkWorker&lt;Block, Hash&gt;&gt;::new(
+		<span class="kw-2">&amp;</span>parachain_config.network,
+	);
 
 	<span class="kw">let </span>client = params.client.clone();
 	<span class="kw">let </span>backend = params.backend.clone();
@@ -616,7 +618,10 @@
 	<span class="kw">let </span>prometheus_registry = parachain_config.prometheus_registry().cloned();
 	<span class="kw">let </span>transaction_pool = params.transaction_pool.clone();
 	<span class="kw">let </span>import_queue_service = params.import_queue.service();
-	<span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
+
+	<span class="comment">// NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
+	// when starting the network.
+	</span><span class="kw">let </span>(network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
 		build_network(BuildNetworkParams {
 			parachain_config: <span class="kw-2">&amp;</span>parachain_config,
 			net_config,
@@ -629,6 +634,27 @@
 			sybil_resistance_level: CollatorSybilResistance::Resistant, <span class="comment">// because of Aura
 		</span>})
 		.<span class="kw">await</span><span class="question-mark">?</span>;
+
+	<span class="kw">if </span>parachain_config.offchain_worker.enabled {
+		<span class="kw">use </span>futures::FutureExt;
+
+		task_manager.spawn_handle().spawn(
+			<span class="string">"offchain-workers-runner"</span>,
+			<span class="string">"offchain-work"</span>,
+			sc_offchain::OffchainWorkers::new(sc_offchain::OffchainWorkerOptions {
+				runtime_api_provider: client.clone(),
+				keystore: <span class="prelude-val">Some</span>(params.keystore_container.keystore()),
+				offchain_db: backend.offchain_storage(),
+				transaction_pool: <span class="prelude-val">Some</span>(OffchainTransactionPoolFactory::new(transaction_pool.clone())),
+				network_provider: Arc::new(network.clone()),
+				is_validator: parachain_config.role.is_authority(),
+				enable_http_requests: <span class="bool-val">false</span>,
+				custom_extensions: <span class="kw">move </span>|<span class="kw">_</span>| <span class="macro">vec!</span>[],
+			})
+			.run(client.clone(), task_manager.spawn_handle())
+			.boxed(),
+		);
+	}
 
 	<span class="kw">let </span>rpc_builder = {
 		<span class="kw">let </span>client = client.clone();
@@ -652,8 +678,8 @@
 		task_manager: <span class="kw-2">&amp;mut </span>task_manager,
 		config: parachain_config,
 		keystore: params.keystore_container.keystore(),
-		backend,
-		network: network.clone(),
+		backend: backend.clone(),
+		network,
 		sync_service: sync_service.clone(),
 		system_rpc_tx,
 		tx_handler_controller,
@@ -662,8 +688,17 @@
 
 	<span class="kw">if let </span><span class="prelude-val">Some</span>(hwbench) = hwbench {
 		sc_sysinfo::print_hwbench(<span class="kw-2">&amp;</span>hwbench);
-		<span class="kw">if </span>validator {
-			warn_if_slow_hardware(<span class="kw-2">&amp;</span>hwbench);
+		<span class="comment">// Here you can check whether the hardware meets your chains' requirements. Putting a link
+		// in there and swapping out the requirements for your own are probably a good idea. The
+		// requirements for a para-chain are dictated by its relay-chain.
+		</span><span class="kw">match </span>SUBSTRATE_REFERENCE_HARDWARE.check_hardware(<span class="kw-2">&amp;</span>hwbench) {
+			<span class="prelude-val">Err</span>(err) <span class="kw">if </span>validator =&gt; {
+				<span class="macro">log::warn!</span>(
+					<span class="string">"⚠️  The hardware does not meet the minimal requirements {} for role 'Authority'."</span>,
+					err
+				);
+			}
+			<span class="kw">_ </span>=&gt; {}
 		}
 
 		<span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>telemetry) = telemetry {
@@ -707,13 +742,14 @@
 	<span class="kw">if </span>validator {
 		start_consensus(
 			client.clone(),
+			backend,
 			block_import,
 			prometheus_registry.as_ref(),
 			telemetry.as_ref().map(|t| t.handle()),
 			<span class="kw-2">&amp;</span>task_manager,
-			relay_chain_interface.clone(),
+			relay_chain_interface,
 			transaction_pool,
-			sync_service.clone(),
+			sync_service,
 			params.keystore_container.keystore(),
 			relay_chain_slot_duration,
 			para_id,
@@ -735,34 +771,30 @@
 	config: <span class="kw-2">&amp;</span>Configuration,
 	telemetry: <span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
 	task_manager: <span class="kw-2">&amp;</span>TaskManager,
-) -&gt; <span class="prelude-ty">Result</span>&lt;sc_consensus::DefaultImportQueue&lt;Block&gt;, sc_service::Error&gt; {
-	<span class="kw">let </span>slot_duration = cumulus_client_consensus_aura::slot_duration(<span class="kw-2">&amp;*</span>client)<span class="question-mark">?</span>;
-
-	<span class="prelude-val">Ok</span>(
-		cumulus_client_consensus_aura::equivocation_import_queue::fully_verifying_import_queue::&lt;
-			sp_consensus_aura::sr25519::AuthorityPair,
-			<span class="kw">_</span>,
-			<span class="kw">_</span>,
-			<span class="kw">_</span>,
-			<span class="kw">_</span>,
-		&gt;(
-			client,
-			block_import,
-			<span class="kw">move </span>|<span class="kw">_</span>, <span class="kw">_</span>| <span class="kw">async move </span>{
-				<span class="kw">let </span>timestamp = sp_timestamp::InherentDataProvider::from_system_time();
-				<span class="prelude-val">Ok</span>(timestamp)
-			},
-			slot_duration,
-			<span class="kw-2">&amp;</span>task_manager.spawn_essential_handle(),
-			config.prometheus_registry(),
-			telemetry,
-		),
+) -&gt; sc_consensus::DefaultImportQueue&lt;Block&gt; {
+	cumulus_client_consensus_aura::equivocation_import_queue::fully_verifying_import_queue::&lt;
+		sp_consensus_aura::sr25519::AuthorityPair,
+		<span class="kw">_</span>,
+		<span class="kw">_</span>,
+		<span class="kw">_</span>,
+		<span class="kw">_</span>,
+	&gt;(
+		client,
+		block_import,
+		<span class="kw">move </span>|<span class="kw">_</span>, <span class="kw">_</span>| <span class="kw">async move </span>{
+			<span class="kw">let </span>timestamp = sp_timestamp::InherentDataProvider::from_system_time();
+			<span class="prelude-val">Ok</span>(timestamp)
+		},
+		<span class="kw-2">&amp;</span>task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+		telemetry,
 	)
 }
 
 <span class="attr">#[allow(clippy::too_many_arguments)]
 </span><span class="kw">fn </span>start_consensus(
 	client: Arc&lt;ParachainClient&gt;,
+	backend: Arc&lt;ParachainBackend&gt;,
 	block_import: ParachainBlockImport,
 	prometheus_registry: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Registry&gt;,
 	telemetry: <span class="prelude-ty">Option</span>&lt;TelemetryHandle&gt;,
@@ -777,13 +809,6 @@
 	overseer_handle: OverseerHandle,
 	announce_block: Arc&lt;<span class="kw">dyn </span>Fn(Hash, <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;) + Send + Sync&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), sc_service::Error&gt; {
-	<span class="kw">use </span>cumulus_client_consensus_aura::collators::basic::{<span class="self">self </span><span class="kw">as </span>basic_aura, Params <span class="kw">as </span>BasicAuraParams};
-
-	<span class="comment">// NOTE: because we use Aura here explicitly, we can use `CollatorSybilResistance::Resistant`
-	// when starting the network.
-
-	</span><span class="kw">let </span>slot_duration = cumulus_client_consensus_aura::slot_duration(<span class="kw-2">&amp;*</span>client)<span class="question-mark">?</span>;
-
 	<span class="kw">let </span>proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
 		task_manager.spawn_handle(),
 		client.clone(),
@@ -801,51 +826,28 @@
 		client.clone(),
 	);
 
-	<span class="kw">let </span>params = BasicAuraParams {
+	<span class="kw">let </span>params = AuraParams {
 		create_inherent_data_providers: <span class="kw">move </span>|<span class="kw">_</span>, ()| <span class="kw">async move </span>{ <span class="prelude-val">Ok</span>(()) },
 		block_import,
-		para_client: client,
+		para_client: client.clone(),
+		para_backend: backend,
 		relay_client: relay_chain_interface,
+		code_hash_provider: <span class="kw">move </span>|block_hash| client.code_at(block_hash).ok().map(|c| ValidationCode::from(c).hash()),
 		sync_oracle,
 		keystore,
 		collator_key,
 		para_id,
 		overseer_handle,
-		slot_duration,
 		relay_chain_slot_duration,
 		proposer,
 		collator_service,
-		<span class="comment">// Very limited proposal time.
-		</span>authoring_duration: Duration::from_millis(<span class="number">500</span>),
-		collation_request_receiver: <span class="prelude-val">None</span>,
+		authoring_duration: Duration::from_millis(<span class="number">1500</span>),
+		reinitialize: <span class="bool-val">false</span>,
 	};
 
-	<span class="kw">let </span>fut = basic_aura::run::&lt;Block, sp_consensus_aura::sr25519::AuthorityPair, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>&gt;(params);
+	<span class="kw">let </span>fut = aura::run::&lt;Block, sp_consensus_aura::sr25519::AuthorityPair, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>&gt;(params);
 	task_manager.spawn_essential_handle().spawn(<span class="string">"aura"</span>, <span class="prelude-val">None</span>, fut);
 
 	<span class="prelude-val">Ok</span>(())
-}
-
-<span class="doccomment">/// Start a parachain node.
-</span><span class="kw">pub async fn </span>start_parachain_node(
-	parachain_config: Configuration,
-	polkadot_config: Configuration,
-	collator_options: CollatorOptions,
-	para_id: ParaId,
-	hwbench: <span class="prelude-ty">Option</span>&lt;sc_sysinfo::HwBench&gt;,
-) -&gt; sc_service::error::Result&lt;(TaskManager, Arc&lt;ParachainClient&gt;)&gt; {
-	start_node_impl(parachain_config, polkadot_config, collator_options, para_id, hwbench).<span class="kw">await
-</span>}
-
-<span class="doccomment">/// Checks that the hardware meets the requirements and print a warning otherwise.
-</span><span class="kw">fn </span>warn_if_slow_hardware(hwbench: <span class="kw-2">&amp;</span>sc_sysinfo::HwBench) {
-	<span class="comment">// Polkadot para-chains should generally use these requirements to ensure that the relay-chain
-	// will not take longer than expected to import its blocks.
-	</span><span class="kw">if let </span><span class="prelude-val">Err</span>(e) = frame_benchmarking_cli::SUBSTRATE_REFERENCE_HARDWARE.check_hardware(hwbench) {
-		<span class="macro">log::warn!</span>(
-			<span class="string">"⚠️  The hardware does not meet the minimal requirements for role 'Authority' find out more at:\n\
-			https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot#reference-hardware {e:?}"
-		</span>);
-	}
 }
 </code></pre></div></section></main></body></html>

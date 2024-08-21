@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/implementations.rs`."><title>implementations.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../runtime_eden/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/implementations.rs`."><title>implementations.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -56,12 +56,6 @@
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -82,48 +76,42 @@
 
 </span><span class="doccomment">//! Auxillary struct/enums for polkadot runtime.
 
-</span><span class="kw">use crate</span>::{Balances, CollatorSelection, DaoReserve};
-<span class="kw">use </span>frame_support::traits::{Currency, Imbalance, OnUnbalanced};
-<span class="kw">use </span>primitives::{AccountId, BlockNumber};
-<span class="kw">use </span>sp_runtime::traits::BlockNumberProvider;
+</span><span class="kw">use crate</span>::{Authorship, Balances, DaoReserve};
+<span class="kw">use </span>frame_support::traits::{
+	fungible::{Balanced, Credit},
+	Imbalance, OnUnbalanced,
+};
+<span class="kw">use </span>primitives::AccountId;
+<span class="kw">use </span>support::WithAccountId;
 
-<span class="kw">type </span>NegativeImbalance = &lt;Balances <span class="kw">as </span>Currency&lt;AccountId&gt;&gt;::NegativeImbalance;
-
-<span class="doccomment">/// Implementation of `OnUnbalanced` that deposits the fees into a staking pot for later payout.
-</span><span class="kw">pub struct </span>ToStakingPot;
-<span class="kw">impl </span>OnUnbalanced&lt;NegativeImbalance&gt; <span class="kw">for </span>ToStakingPot {
-	<span class="kw">fn </span>on_nonzero_unbalanced(amount: NegativeImbalance) {
-		<span class="kw">let </span>staking_pot = CollatorSelection::account_id();
-		Balances::resolve_creating(<span class="kw-2">&amp;</span>staking_pot, amount);
+<span class="kw">pub struct </span>ToAuthor;
+<span class="kw">impl </span>OnUnbalanced&lt;Credit&lt;AccountId, Balances&gt;&gt; <span class="kw">for </span>ToAuthor {
+	<span class="kw">fn </span>on_nonzero_unbalanced(amount: Credit&lt;AccountId, Balances&gt;) {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(author) = Authorship::author() {
+			<span class="kw">let _ </span>= Balances::resolve(<span class="kw-2">&amp;</span>author, amount);
+		}
 	}
 }
 
 <span class="doccomment">/// Splits fees 20/80 between reserve and block author.
+/// Fungible implementation of `OnUnbalanced` that deals with the fees by combining tip and fee and
+/// spliting the result between the author and the DaoReserve.
 </span><span class="kw">pub struct </span>DealWithFees;
-<span class="kw">impl </span>OnUnbalanced&lt;NegativeImbalance&gt; <span class="kw">for </span>DealWithFees {
-	<span class="kw">fn </span>on_unbalanceds&lt;B&gt;(<span class="kw-2">mut </span>fees_then_tips: <span class="kw">impl </span>Iterator&lt;Item = NegativeImbalance&gt;) {
-		<span class="kw">if let </span><span class="prelude-val">Some</span>(fees) = fees_then_tips.next() {
+<span class="kw">impl </span>OnUnbalanced&lt;Credit&lt;AccountId, Balances&gt;&gt; <span class="kw">for </span>DealWithFees {
+	<span class="kw">fn </span>on_unbalanceds&lt;B&gt;(<span class="kw-2">mut </span>fees_then_tips: <span class="kw">impl </span>Iterator&lt;Item = Credit&lt;AccountId, Balances&gt;&gt;) {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>fees) = fees_then_tips.next() {
+			<span class="kw">if let </span><span class="prelude-val">Some</span>(tips) = fees_then_tips.next() {
+				tips.merge_into(<span class="kw-2">&amp;mut </span>fees);
+			}
 			<span class="comment">// for fees, 20% to treasury, 80% to author
 			</span><span class="kw">let </span><span class="kw-2">mut </span>split = fees.ration(<span class="number">20</span>, <span class="number">80</span>);
 			<span class="kw">if let </span><span class="prelude-val">Some</span>(tips) = fees_then_tips.next() {
 				<span class="comment">// for tips, if any, 20% to treasury, 80% to author (though this can be anything)
 				</span>tips.ration_merge_into(<span class="number">20</span>, <span class="number">80</span>, <span class="kw-2">&amp;mut </span>split);
 			}
-			DaoReserve::on_unbalanced(split.<span class="number">0</span>);
-			ToStakingPot::on_unbalanced(split.<span class="number">1</span>);
+			<span class="kw">let _ </span>= Balances::resolve(<span class="kw-2">&amp;</span>DaoReserve::account_id(), split.<span class="number">0</span>);
+			ToAuthor::on_unbalanced(split.<span class="number">1</span>);
 		}
-	}
-}
-
-<span class="kw">pub struct </span>RelayChainBlockNumberProvider&lt;T&gt;(sp_std::marker::PhantomData&lt;T&gt;);
-
-<span class="kw">impl</span>&lt;T: cumulus_pallet_parachain_system::Config&gt; BlockNumberProvider <span class="kw">for </span>RelayChainBlockNumberProvider&lt;T&gt; {
-	<span class="kw">type </span>BlockNumber = BlockNumber;
-
-	<span class="kw">fn </span>current_block_number() -&gt; <span class="self">Self</span>::BlockNumber {
-		cumulus_pallet_parachain_system::Pallet::&lt;T&gt;::validation_data()
-			.map(|d| d.relay_parent_number)
-			.unwrap_or_default()
 	}
 }
 </code></pre></div></section></main></body></html>

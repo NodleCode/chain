@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/frame_system.rs`."><title>frame_system.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../runtime_eden/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/frame_system.rs`."><title>frame_system.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -143,13 +143,9 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
-<a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2020-2024  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -168,54 +164,51 @@
 </span><span class="doccomment">//! Autogenerated weights for frame_system
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-29, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
+//! DATE: 2024-08-21, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! HOSTNAME: `chain-bench-a18ada46`, CPU: `AMD EPYC 7B13`
-//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
+//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: None, DB CACHE: 1024
 
 </span><span class="comment">// Executed Command:
 // ./target/release/nodle-parachain
 // benchmark
 // pallet
-// --chain=dev
-// --steps=50
-// --repeat=20
 // --pallet=frame_system
 // --extrinsic=*
+// --steps=50
+// --repeat=20
+// --genesis-builder=runtime
+// --runtime=./target/release/wbuild/runtime-eden/runtime_eden.wasm
 // --wasm-execution=compiled
 // --template=./.maintain/external_pallet_weights.hbs
 // --output=runtimes/eden/src/weights
 
-</span><span class="attr">#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-</span><span class="kw">use </span>frame_support::{traits::Get, weights::{Weight}};
-<span class="kw">use </span>core::marker::PhantomData;
+</span><span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>frame_support::{traits::Get, weights::Weight};
 
 <span class="doccomment">/// Weight functions for `frame_system`.
 </span><span class="kw">pub struct </span>WeightInfo&lt;T&gt;(PhantomData&lt;T&gt;);
 <span class="kw">impl</span>&lt;T: frame_system::Config&gt; frame_system::WeightInfo <span class="kw">for </span>WeightInfo&lt;T&gt; {
 	<span class="doccomment">/// The range of component `b` is `[0, 3932160]`.
-	</span><span class="kw">fn </span>remark(b: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 3_260 nanoseconds.
-		</span>Weight::from_parts(<span class="number">3_567_669_u64</span>, <span class="number">0</span>)
+	</span><span class="kw">fn </span>remark(b: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 2_310 nanoseconds.
+		</span>Weight::from_parts(<span class="number">2_474_733_u64</span>, <span class="number">0</span>)
 			<span class="comment">// Standard Error: 0
-			</span>.saturating_add(Weight::from_parts(<span class="number">362_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
+			</span>.saturating_add(Weight::from_parts(<span class="number">287_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
 	}
 	<span class="doccomment">/// The range of component `b` is `[0, 3932160]`.
-	</span><span class="kw">fn </span>remark_with_event(b: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 8_920 nanoseconds.
-		</span>Weight::from_parts(<span class="number">21_576_107_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1
-			</span>.saturating_add(Weight::from_parts(<span class="number">1_791_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>remark_with_event(b: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 6_530 nanoseconds.
+		</span>Weight::from_parts(<span class="number">10_083_959_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 4
+			</span>.saturating_add(Weight::from_parts(<span class="number">1_737_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
 	}
 	<span class="comment">// Storage: `System::Digest` (r:1 w:1)
 	// Proof: `System::Digest` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	// Storage: UNKNOWN KEY `0x3a686561707061676573` (r:0 w:1)
 	// Proof: UNKNOWN KEY `0x3a686561707061676573` (r:0 w:1)
 	</span><span class="kw">fn </span>set_heap_pages() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 5_300 nanoseconds.
-		</span>Weight::from_parts(<span class="number">5_630_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 4_220 nanoseconds.
+		</span>Weight::from_parts(<span class="number">4_410_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -232,48 +225,47 @@
 	// Storage: `ParachainSystem::DidSetValidationCode` (r:0 w:1)
 	// Proof: `ParachainSystem::DidSetValidationCode` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	</span><span class="kw">fn </span>set_code() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 152_906_787 nanoseconds.
-		</span>Weight::from_parts(<span class="number">158_334_036_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 142_913_874 nanoseconds.
+		</span>Weight::from_parts(<span class="number">147_211_473_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">4_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">3_u64</span>))
 	}
 	<span class="comment">// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	</span><span class="doccomment">/// The range of component `i` is `[0, 1000]`.
-	</span><span class="kw">fn </span>set_storage(i: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 3_250 nanoseconds.
-		</span>Weight::from_parts(<span class="number">3_370_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 2_091
-			</span>.saturating_add(Weight::from_parts(<span class="number">974_595_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>set_storage(i: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 2_350 nanoseconds.
+		</span>Weight::from_parts(<span class="number">2_390_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 1_979
+			</span>.saturating_add(Weight::from_parts(<span class="number">910_873_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes((<span class="number">1_u64</span>).saturating_mul(i <span class="kw">as </span>u64)))
 	}
 	<span class="comment">// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	</span><span class="doccomment">/// The range of component `i` is `[0, 1000]`.
-	</span><span class="kw">fn </span>kill_storage(i: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 3_270 nanoseconds.
-		</span>Weight::from_parts(<span class="number">3_390_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 850
-			</span>.saturating_add(Weight::from_parts(<span class="number">664_662_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>kill_storage(i: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 2_330 nanoseconds.
+		</span>Weight::from_parts(<span class="number">2_380_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 993
+			</span>.saturating_add(Weight::from_parts(<span class="number">666_353_u64</span>, <span class="number">0</span>).saturating_mul(i <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().writes((<span class="number">1_u64</span>).saturating_mul(i <span class="kw">as </span>u64)))
 	}
 	<span class="comment">// Storage: `Skipped::Metadata` (r:0 w:0)
 	// Proof: `Skipped::Metadata` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	</span><span class="doccomment">/// The range of component `p` is `[0, 1000]`.
-	</span><span class="kw">fn </span>kill_prefix(p: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 6_170 nanoseconds.
-		</span>Weight::from_parts(<span class="number">6_260_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1_148
-			</span>.saturating_add(Weight::from_parts(<span class="number">1_203_602_u64</span>, <span class="number">0</span>).saturating_mul(p <span class="kw">as </span>u64))
+	</span><span class="kw">fn </span>kill_prefix(p: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 3_990 nanoseconds.
+		</span>Weight::from_parts(<span class="number">4_100_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 1_215
+			</span>.saturating_add(Weight::from_parts(<span class="number">1_170_316_u64</span>, <span class="number">0</span>).saturating_mul(p <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(p <span class="kw">as </span>u64)))
 			.saturating_add(T::DbWeight::get().writes((<span class="number">1_u64</span>).saturating_mul(p <span class="kw">as </span>u64)))
 	}
 	<span class="comment">// Storage: `System::AuthorizedUpgrade` (r:0 w:1)
 	// Proof: `System::AuthorizedUpgrade` (`max_values`: Some(1), `max_size`: Some(33), added: 528, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>authorize_upgrade() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 12_260 nanoseconds.
-		</span>Weight::from_parts(<span class="number">12_570_000_u64</span>, <span class="number">0</span>)
-			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
+		<span class="comment">// Minimum execution time: 10_480 nanoseconds.
+		</span>Weight::from_parts(<span class="number">10_760_000_u64</span>, <span class="number">0</span>).saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `System::AuthorizedUpgrade` (r:1 w:1)
 	// Proof: `System::AuthorizedUpgrade` (`max_values`: Some(1), `max_size`: Some(33), added: 528, mode: `MaxEncodedLen`)
@@ -290,8 +282,8 @@
 	// Storage: `ParachainSystem::DidSetValidationCode` (r:0 w:1)
 	// Proof: `ParachainSystem::DidSetValidationCode` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	</span><span class="kw">fn </span>apply_authorized_upgrade() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 150_253_687 nanoseconds.
-		</span>Weight::from_parts(<span class="number">153_905_507_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 145_715_103 nanoseconds.
+		</span>Weight::from_parts(<span class="number">148_000_094_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">5_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}

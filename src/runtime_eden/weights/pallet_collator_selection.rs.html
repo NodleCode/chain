@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_collator_selection.rs`."><title>pallet_collator_selection.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-081576b923113409.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0 (129f3b996 2024-06-10)" data-channel="1.79.0" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../runtime_eden/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `runtimes/eden/src/weights/pallet_collator_selection.rs`."><title>pallet_collator_selection.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="runtime_eden" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.1 (3f5fd8dd4 2024-08-06)" data-channel="1.80.1" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -222,13 +222,9 @@
 <a href="#222" id="222">222</a>
 <a href="#223" id="223">223</a>
 <a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2020-2024  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -247,103 +243,99 @@
 </span><span class="doccomment">//! Autogenerated weights for pallet_collator_selection
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-29, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
+//! DATE: 2024-08-21, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! HOSTNAME: `chain-bench-a18ada46`, CPU: `AMD EPYC 7B13`
-//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 1024
+//! EXECUTION: , WASM-EXECUTION: Compiled, CHAIN: None, DB CACHE: 1024
 
 </span><span class="comment">// Executed Command:
 // ./target/release/nodle-parachain
 // benchmark
 // pallet
-// --chain=dev
-// --steps=50
-// --repeat=20
 // --pallet=pallet_collator_selection
 // --extrinsic=*
+// --steps=50
+// --repeat=20
+// --genesis-builder=runtime
+// --runtime=./target/release/wbuild/runtime-eden/runtime_eden.wasm
 // --wasm-execution=compiled
 // --template=./.maintain/external_pallet_weights.hbs
 // --output=runtimes/eden/src/weights
 
-</span><span class="attr">#![cfg_attr(rustfmt, rustfmt_skip)]
-#![allow(unused_parens)]
-#![allow(unused_imports)]
-
-</span><span class="kw">use </span>frame_support::{traits::Get, weights::{Weight}};
-<span class="kw">use </span>core::marker::PhantomData;
+</span><span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>frame_support::{traits::Get, weights::Weight};
 
 <span class="doccomment">/// Weight functions for `pallet_collator_selection`.
 </span><span class="kw">pub struct </span>WeightInfo&lt;T&gt;(PhantomData&lt;T&gt;);
 <span class="kw">impl</span>&lt;T: frame_system::Config&gt; pallet_collator_selection::WeightInfo <span class="kw">for </span>WeightInfo&lt;T&gt; {
-	<span class="comment">// Storage: `Session::NextKeys` (r:50 w:0)
+	<span class="comment">// Storage: `Session::NextKeys` (r:20 w:0)
 	// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	// Storage: `CollatorSelection::Invulnerables` (r:0 w:1)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `b` is `[1, 50]`.
-	</span><span class="kw">fn </span>set_invulnerables(b: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 17_730 nanoseconds.
-		</span>Weight::from_parts(<span class="number">15_642_656_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 5_726
-			</span>.saturating_add(Weight::from_parts(<span class="number">4_083_632_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
+	</span><span class="doccomment">/// The range of component `b` is `[1, 20]`.
+	</span><span class="kw">fn </span>set_invulnerables(b: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 11_720 nanoseconds.
+		</span>Weight::from_parts(<span class="number">9_608_391_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 7_434
+			</span>.saturating_add(Weight::from_parts(<span class="number">3_889_414_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(b <span class="kw">as </span>u64)))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `Session::NextKeys` (r:1 w:0)
 	// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	// Storage: `CollatorSelection::Invulnerables` (r:1 w:1)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
 	// Storage: `System::Account` (r:1 w:1)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `b` is `[1, 49]`.
-	/// The range of component `c` is `[1, 999]`.
-	</span><span class="kw">fn </span>add_invulnerable(b: u32, c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 58_240 nanoseconds.
-		</span>Weight::from_parts(<span class="number">55_167_391_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 13_866
-			</span>.saturating_add(Weight::from_parts(<span class="number">15_954_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
-			<span class="comment">// Standard Error: 679
-			</span>.saturating_add(Weight::from_parts(<span class="number">82_738_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `b` is `[1, 19]`.
+	/// The range of component `c` is `[1, 99]`.
+	</span><span class="kw">fn </span>add_invulnerable(b: u32, c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 46_580 nanoseconds.
+		</span>Weight::from_parts(<span class="number">46_715_731_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 6_886
+			</span>.saturating_add(Weight::from_parts(<span class="number">96_794_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
+			<span class="comment">// Standard Error: 1_305
+			</span>.saturating_add(Weight::from_parts(<span class="number">113_211_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">4_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">3_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::CandidateList` (r:1 w:0)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::Invulnerables` (r:1 w:1)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `b` is `[4, 50]`.
-	</span><span class="kw">fn </span>remove_invulnerable(b: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 16_790 nanoseconds.
-		</span>Weight::from_parts(<span class="number">17_846_994_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 981
-			</span>.saturating_add(Weight::from_parts(<span class="number">65_130_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
+	</span><span class="doccomment">/// The range of component `b` is `[4, 20]`.
+	</span><span class="kw">fn </span>remove_invulnerable(b: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 11_090 nanoseconds.
+		</span>Weight::from_parts(<span class="number">12_015_166_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 2_370
+			</span>.saturating_add(Weight::from_parts(<span class="number">103_962_u64</span>, <span class="number">0</span>).saturating_mul(b <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::DesiredCandidates` (r:0 w:1)
 	// Proof: `CollatorSelection::DesiredCandidates` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>set_desired_candidates() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 7_969 nanoseconds.
-		</span>Weight::from_parts(<span class="number">8_639_000_u64</span>, <span class="number">0</span>)
-			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
+		<span class="comment">// Minimum execution time: 5_660 nanoseconds.
+		</span>Weight::from_parts(<span class="number">6_030_000_u64</span>, <span class="number">0</span>).saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::CandidacyBond` (r:1 w:1)
 	// Proof: `CollatorSelection::CandidacyBond` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
-	// Storage: `System::Account` (r:1000 w:1000)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
+	// Storage: `System::Account` (r:100 w:100)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
-	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:1000)
+	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:100)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `c` is `[0, 1000]`.
-	/// The range of component `k` is `[0, 1000]`.
-	</span><span class="kw">fn </span>set_candidacy_bond(c: u32, k: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 14_010 nanoseconds.
-		</span>Weight::from_parts(<span class="number">14_470_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 263_965
-			</span>.saturating_add(Weight::from_parts(<span class="number">8_478_897_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
-			<span class="comment">// Standard Error: 263_965
-			</span>.saturating_add(Weight::from_parts(<span class="number">8_140_723_u64</span>, <span class="number">0</span>).saturating_mul(k <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `c` is `[0, 100]`.
+	/// The range of component `k` is `[0, 100]`.
+	</span><span class="kw">fn </span>set_candidacy_bond(c: u32, k: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 10_250 nanoseconds.
+		</span>Weight::from_parts(<span class="number">10_440_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 220_125
+			</span>.saturating_add(Weight::from_parts(<span class="number">7_246_115_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+			<span class="comment">// Standard Error: 220_125
+			</span>.saturating_add(Weight::from_parts(<span class="number">6_994_954_u64</span>, <span class="number">0</span>).saturating_mul(k <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 			.saturating_add(T::DbWeight::get().writes((<span class="number">1_u64</span>).saturating_mul(c <span class="kw">as </span>u64)))
@@ -352,68 +344,68 @@
 	<span class="comment">// Storage: `CollatorSelection::CandidacyBond` (r:1 w:0)
 	// Proof: `CollatorSelection::CandidacyBond` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `c` is `[2, 1000]`.
-	</span><span class="kw">fn </span>update_bond(c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 34_460 nanoseconds.
-		</span>Weight::from_parts(<span class="number">33_881_801_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1_230
-			</span>.saturating_add(Weight::from_parts(<span class="number">80_989_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
+	</span><span class="doccomment">/// The range of component `c` is `[4, 100]`.
+	</span><span class="kw">fn </span>update_bond(c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 31_480 nanoseconds.
+		</span>Weight::from_parts(<span class="number">33_291_625_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 1_752
+			</span>.saturating_add(Weight::from_parts(<span class="number">103_508_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::Invulnerables` (r:1 w:0)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
 	// Storage: `Session::NextKeys` (r:1 w:0)
 	// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	// Storage: `CollatorSelection::CandidacyBond` (r:1 w:0)
 	// Proof: `CollatorSelection::CandidacyBond` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:1)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `c` is `[1, 999]`.
-	</span><span class="kw">fn </span>register_as_candidate(c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 47_660 nanoseconds.
-		</span>Weight::from_parts(<span class="number">47_834_460_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1_252
-			</span>.saturating_add(Weight::from_parts(<span class="number">94_518_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `c` is `[1, 99]`.
+	</span><span class="kw">fn </span>register_as_candidate(c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 39_500 nanoseconds.
+		</span>Weight::from_parts(<span class="number">43_527_657_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 1_559
+			</span>.saturating_add(Weight::from_parts(<span class="number">124_751_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">4_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::Invulnerables` (r:1 w:0)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::CandidacyBond` (r:1 w:0)
 	// Proof: `CollatorSelection::CandidacyBond` (`max_values`: Some(1), `max_size`: Some(16), added: 511, mode: `MaxEncodedLen`)
 	// Storage: `Session::NextKeys` (r:1 w:0)
 	// Proof: `Session::NextKeys` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
 	// Storage: `System::Account` (r:1 w:1)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:2)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `c` is `[2, 1000]`.
-	</span><span class="kw">fn </span>take_candidate_slot(c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 73_331 nanoseconds.
-		</span>Weight::from_parts(<span class="number">75_059_841_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1_260
-			</span>.saturating_add(Weight::from_parts(<span class="number">85_365_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `c` is `[4, 100]`.
+	</span><span class="kw">fn </span>take_candidate_slot(c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 60_340 nanoseconds.
+		</span>Weight::from_parts(<span class="number">63_481_433_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 2_288
+			</span>.saturating_add(Weight::from_parts(<span class="number">135_125_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">5_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::CandidateList` (r:1 w:1)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::Invulnerables` (r:1 w:0)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:1)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `c` is `[2, 1000]`.
-	</span><span class="kw">fn </span>leave_intent(c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 40_910 nanoseconds.
-		</span>Weight::from_parts(<span class="number">40_026_850_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 1_275
-			</span>.saturating_add(Weight::from_parts(<span class="number">82_078_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `c` is `[4, 100]`.
+	</span><span class="kw">fn </span>leave_intent(c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 34_369 nanoseconds.
+		</span>Weight::from_parts(<span class="number">37_313_556_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 1_829
+			</span>.saturating_add(Weight::from_parts(<span class="number">110_944_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">2_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">2_u64</span>))
 	}
@@ -424,30 +416,30 @@
 	// Storage: `CollatorSelection::LastAuthoredBlock` (r:0 w:1)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
 	</span><span class="kw">fn </span>note_author() -&gt; Weight {
-		<span class="comment">// Minimum execution time: 63_850 nanoseconds.
-		</span>Weight::from_parts(<span class="number">64_811_000_u64</span>, <span class="number">0</span>)
+		<span class="comment">// Minimum execution time: 50_920 nanoseconds.
+		</span>Weight::from_parts(<span class="number">53_030_000_u64</span>, <span class="number">0</span>)
 			.saturating_add(T::DbWeight::get().reads(<span class="number">3_u64</span>))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">4_u64</span>))
 	}
 	<span class="comment">// Storage: `CollatorSelection::CandidateList` (r:1 w:0)
-	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(48002), added: 48497, mode: `MaxEncodedLen`)
-	// Storage: `CollatorSelection::LastAuthoredBlock` (r:999 w:0)
+	// Proof: `CollatorSelection::CandidateList` (`max_values`: Some(1), `max_size`: Some(4802), added: 5297, mode: `MaxEncodedLen`)
+	// Storage: `CollatorSelection::LastAuthoredBlock` (r:100 w:0)
 	// Proof: `CollatorSelection::LastAuthoredBlock` (`max_values`: None, `max_size`: Some(44), added: 2519, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::Invulnerables` (r:1 w:0)
-	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(1601), added: 2096, mode: `MaxEncodedLen`)
+	// Proof: `CollatorSelection::Invulnerables` (`max_values`: Some(1), `max_size`: Some(641), added: 1136, mode: `MaxEncodedLen`)
 	// Storage: `CollatorSelection::DesiredCandidates` (r:1 w:0)
 	// Proof: `CollatorSelection::DesiredCandidates` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
 	// Storage: `System::BlockWeight` (r:1 w:1)
 	// Proof: `System::BlockWeight` (`max_values`: Some(1), `max_size`: Some(48), added: 543, mode: `MaxEncodedLen`)
-	// Storage: `System::Account` (r:999 w:999)
+	// Storage: `System::Account` (r:97 w:97)
 	// Proof: `System::Account` (`max_values`: None, `max_size`: Some(128), added: 2603, mode: `MaxEncodedLen`)
-	</span><span class="doccomment">/// The range of component `r` is `[1, 1000]`.
-	/// The range of component `c` is `[1, 1000]`.
-	</span><span class="kw">fn </span>new_session(_r: u32, c: u32, ) -&gt; Weight {
-		<span class="comment">// Minimum execution time: 25_240 nanoseconds.
-		</span>Weight::from_parts(<span class="number">25_969_000_u64</span>, <span class="number">0</span>)
-			<span class="comment">// Standard Error: 846_846
-			</span>.saturating_add(Weight::from_parts(<span class="number">35_232_356_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
+	</span><span class="doccomment">/// The range of component `r` is `[1, 100]`.
+	/// The range of component `c` is `[1, 100]`.
+	</span><span class="kw">fn </span>new_session(_r: u32, c: u32) -&gt; Weight {
+		<span class="comment">// Minimum execution time: 19_620 nanoseconds.
+		</span>Weight::from_parts(<span class="number">20_060_000_u64</span>, <span class="number">0</span>)
+			<span class="comment">// Standard Error: 380_358
+			</span>.saturating_add(Weight::from_parts(<span class="number">15_832_874_u64</span>, <span class="number">0</span>).saturating_mul(c <span class="kw">as </span>u64))
 			.saturating_add(T::DbWeight::get().reads(<span class="number">5_u64</span>))
 			.saturating_add(T::DbWeight::get().reads((<span class="number">1_u64</span>).saturating_mul(c <span class="kw">as </span>u64)))
 			.saturating_add(T::DbWeight::get().writes(<span class="number">1_u64</span>))
