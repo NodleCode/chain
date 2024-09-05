@@ -49,9 +49,9 @@ impl Extensions {
 pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "DevNODL".into());
+	properties.insert("tokenSymbol".into(), "devNodl".into());
 	properties.insert("tokenDecimals".into(), 11.into());
-	properties.insert("ss58Format".into(), 42.into());
+	properties.insert("ss58Format".into(), 37.into());
 
 	ChainSpec::builder(
 		WASM_BINARY.expect("WASM binary was not build, please build it!"),

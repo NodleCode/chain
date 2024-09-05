@@ -25,7 +25,17 @@ fn main() {
 fn main() {
 	substrate_wasm_builder::WasmBuilder::init_with_defaults()
 		.enable_metadata_hash("NODL", 11)
-		.build()
+		.build();
+	// Since token name is different for our testnet, we need to build a separate binary
+	substrate_wasm_builder::WasmBuilder::init_with_defaults()
+		.set_file_name("wasm_binary_test.rs")
+		.enable_metadata_hash("notNodl", 11)
+		.build();
+	// Since token name is different for our local/dev chain, we need to build a separate binary
+	substrate_wasm_builder::WasmBuilder::init_with_defaults()
+		.set_file_name("wasm_binary_dev.rs")
+		.enable_metadata_hash("devNodl", 11)
+		.build();
 }
 
 #[cfg(not(feature = "std"))]

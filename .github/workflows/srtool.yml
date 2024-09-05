@@ -4,13 +4,15 @@ on:
   push:
     tags:
       - "[0-9].*"
+    branches:
+      - aliX/fix-metadata-testnet
+
+env:
+  CHAIN: "eden"
 
 jobs:
   srtool:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        runtime: ["eden"]
 
     steps:
       - uses: actions/checkout@v4
@@ -20,51 +22,25 @@ jobs:
         env:
           BUILD_OPTS: "--features on-chain-release-build"
         with:
-          chain: ${{ matrix.runtime }}
-          package: runtime-${{ matrix.runtime }}
-          runtime_dir: runtimes/${{ matrix.runtime }}
+          chain: ${{ env.CHAIN }}
+          runtime_dir: runtimes/${{ env.CHAIN }}
           tag: 1.77.0
 
-      - name: Summary
-        run: |
-          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ matrix.runtime }}-srtool-digest.json
-          cat ${{ matrix.runtime }}-srtool-digest.json
-          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
-
-      - name: Archive Metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.runtime }}-srtool-digest.json
-          path: |
-            ${{ matrix.runtime }}-srtool-digest.json
-
-      - name: Archive Runtime
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.runtime }}-${{ github.sha }}
-          path: |
-            ${{ steps.srtool_build.outputs.wasm }}
-            ${{ steps.srtool_build.outputs.wasm_compressed }}
-            ${{ matrix.runtime }}-srtool-digest.json
-
-      - name: "Prepare subwasm log 1"
-        uses: open-actions-rs/subwasm@master
-        with:
-          subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm }}
-      - run: mv SUBWASM.out SUBWASM.out_uncompressed
-
-      - name: "Prepare subwasm log 2"
+      - name: "Prepare subwasm info"
         uses: open-actions-rs/subwasm@master
         with:
           subwasm-cmd: info ${{ steps.srtool_build.outputs.wasm_compressed }}
-      - run: mv SUBWASM.out SUBWASM.out_compressed
+
       - name: Prepare release
         run: |
+          BASE_PATH=$(dirname ${{ steps.srtool_build.outputs.wasm_compressed }})
+          echo "WASM_BINARY_TEST=$BASE_PATH/wasm_binary_test.rs.compact.compressed.wasm" >> $GITHUB_ENV
+          echo "WASM_BINARY_DEV=$BASE_PATH/wasm_binary_dev.rs.compact.compressed.wasm" >> $GITHUB_ENV
+          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ env.CHAIN }}-srtool-digest.json
           echo '## Subwasm' > BODY
           echo '% subwasm info runtime_eden.wasm' >>BODY
-          cat  SUBWASM.out_uncompressed >> BODY
-          echo '% subwasm info runtime_eden.compact.wasm' >>BODY
-          cat SUBWASM.out_compressed  >> BODY
+          cat SUBWASM.out >> BODY
+
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
@@ -76,4 +52,6 @@ jobs:
           files: |
             ${{ steps.srtool_build.outputs.wasm }}
             ${{ steps.srtool_build.outputs.wasm_compressed }}
-            ${{ matrix.runtime }}-srtool-digest.json
+            ${{ env.CHAIN }}-srtool-digest.json
+            $WASM_BINARY_TEST
+            $WASM_BINARY_DEV
