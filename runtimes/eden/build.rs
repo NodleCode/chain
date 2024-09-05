@@ -34,7 +34,7 @@ fn main() {
 	// Since token name is different for our local/dev chain, we need to build a separate binary
 	substrate_wasm_builder::WasmBuilder::init_with_defaults()
 		.set_file_name("wasm_binary_dev.rs")
-		.enable_metadata_hash("devNodl", 11)
+		.enable_metadata_hash("DevNODL", 11)
 		.build();
 }
 
