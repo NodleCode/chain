@@ -21,8 +21,11 @@
 #![recursion_limit = "256"]
 
 // Make the WASM binary available.
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std", not(feature = "metadata-hash")))]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
+#[cfg(all(feature = "std", feature = "metadata-hash"))]
+#[cfg(feature = "std")]
+include!(concat!(env!("OUT_DIR"), "/wasm_binary_dev.rs"));
 
 /// Wasm binary unwrapped. If built with `SKIP_WASM_BUILD`, the function panics.
 #[cfg(feature = "std")]

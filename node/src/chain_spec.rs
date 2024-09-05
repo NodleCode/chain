@@ -21,7 +21,7 @@
 
 use cumulus_primitives_core::ParaId;
 
-use runtime_eden::{development_config_genesis, WASM_BINARY};
+use runtime_eden::{development_config_genesis, wasm_binary_unwrap};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -51,10 +51,10 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "DevNODL".into());
 	properties.insert("tokenDecimals".into(), 11.into());
-	properties.insert("ss58Format".into(), 42.into());
+	properties.insert("ss58Format".into(), 37.into());
 
 	ChainSpec::builder(
-		WASM_BINARY.expect("WASM binary was not build, please build it!"),
+		wasm_binary_unwrap(),
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
