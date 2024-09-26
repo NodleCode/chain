@@ -267,7 +267,7 @@ pub mod pallet {
 			Self::deposit_event(Event::BridgeInitiated {
 				to: eth_address,
 				bridge_id,
-				amount: bridgeable_funds,
+				amount: locked_amount_left,
 				grants,
 			});
 
