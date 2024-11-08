@@ -70,7 +70,6 @@ use {
 pub mod constants;
 mod genesis_config_presets;
 mod implementations;
-mod migration;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -209,17 +208,6 @@ pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 
-#[allow(deprecated)]
-pub type Migrations = (
-	pallet_contracts::Migration<Runtime>,
-	cumulus_pallet_xcmp_queue::migration::v4::MigrationToV4<Runtime>,
-	cumulus_pallet_xcmp_queue::migration::v5::MigrateV4ToV5<Runtime>,
-	pallet_collator_selection::migration::v2::MigrationToV2<Runtime>,
-	pallet_xcm::migration::MigrateToLatestXcmVersion<Runtime>,
-	pallet_identity::migration::versioned::V0ToV1<Runtime, 10>,
-	migration::FromSpec27<Runtime>,
-);
-
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
@@ -227,7 +215,6 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	Migrations,
 >;
 
 #[cfg(feature = "runtime-benchmarks")]
