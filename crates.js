@@ -1,1 +1,2 @@
 window.ALL_CRATES = ["nodle_parachain","pallet_allocations","pallet_grants","pallet_mandate","pallet_nodle_uniques","pallet_reserve","pallet_sponsorship","primitives","runtime_eden","support"];
+//{"start":21,"fragment_lengths":[17,21,16,17,23,17,21,13,15,10]}
